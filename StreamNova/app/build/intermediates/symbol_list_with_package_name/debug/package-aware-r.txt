@@ -2996,9 +2996,12 @@ drawable design_password_eye
 drawable design_snackbar_background
 drawable dot_inactive
 drawable dot_indicator
+drawable glass_bottom_sheet_premium
 drawable glass_button_outline
 drawable glass_modal_bg
+drawable glass_modal_premium
 drawable glass_stat_bg
+drawable glass_stat_premium
 drawable gradient_anime
 drawable gradient_dorama
 drawable gradient_hero
@@ -3103,8 +3106,12 @@ drawable notification_template_icon_low_bg
 drawable notification_tile_bg
 drawable notify_panel_notification_icon_bg
 drawable orange_glow_line
+drawable picker_bg
 drawable play_button_bg
 drawable search_background
+drawable server_chip
+drawable server_chip_active
+drawable sheet_handle
 drawable splash_glow
 drawable test_level_drawable
 drawable tooltip_frame_dark
@@ -3221,6 +3228,8 @@ id bounceEnd
 id bounceStart
 id btnBack
 id btnClose
+id btnEpMinus
+id btnEpPlus
 id btnFavorite
 id btnInfo
 id btnLater
@@ -3228,6 +3237,12 @@ id btnMarkAll
 id btnModalList
 id btnModalPlay
 id btnPlay
+id btnPlayerBack
+id btnSeasonMinus
+id btnSeasonPlus
+id btnServer1
+id btnServer2
+id btnServer3
 id btnSignOut
 id btnUpdate
 id buttonPanel
@@ -3320,6 +3335,7 @@ id end
 id endToStart
 id enterAlways
 id enterAlwaysCollapsed
+id episodeSection
 id exitUntilCollapsed
 id expand_activities_button
 id expanded_menu
@@ -3343,6 +3359,7 @@ id forever
 id fragmentContainer
 id fragment_container_view_tag
 id frost
+id fullscreenContainer
 id fullscreen_header
 id genreText
 id ghost_view
@@ -3511,6 +3528,10 @@ id pathRelative
 id peekHeight
 id percent
 id pin
+id playerProgress
+id playerTitle
+id playerTitleEnd
+id playerWebView
 id pooling_container_listener_holder_tag
 id position
 id postLayout
@@ -3581,6 +3602,7 @@ id seeAll
 id select_dialog_listview
 id selected
 id selection_type
+id serverDialogTitle
 id sharedValueSet
 id sharedValueUnset
 id shortcut
@@ -3675,10 +3697,12 @@ id transition_scene_layoutid_cache
 id transition_transform
 id triangle
 id tvChangelog
+id tvEpisode
 id tvFavCount
 id tvListCount
 id tvProgress
 id tvResultCount
+id tvSeason
 id tvUpdateBadge
 id tvUpdateTitle
 id tvUpdateVersion
@@ -3697,6 +3721,7 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id webviewContainer
 id west
 id withText
 id with_icon
@@ -3820,6 +3845,7 @@ layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_main
+layout activity_player
 layout activity_search
 layout activity_splash
 layout bottom_sheet_my_list
@@ -3842,6 +3868,7 @@ layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_content_detail
+layout dialog_server_select
 layout dialog_update
 layout fragment_content
 layout fragment_home
@@ -4397,6 +4424,8 @@ style Base_Widget_MaterialComponents_TextView
 style CardView
 style CardView_Dark
 style CardView_Light
+style GlassBottomSheetStyle
+style GlassBottomSheetTheme
 style MaterialAlertDialog_Material3
 style MaterialAlertDialog_Material3_Animation
 style MaterialAlertDialog_Material3_Body_Text

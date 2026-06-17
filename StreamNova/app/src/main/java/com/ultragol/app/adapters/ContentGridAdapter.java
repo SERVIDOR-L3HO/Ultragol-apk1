@@ -22,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.R;
+import com.ultragol.app.ServerSelectDialog;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
@@ -89,15 +90,6 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
         holder.itemView.setOnClickListener(v -> showDetailDialog(item, idx));
     }
 
-    private void openStream(ContentItem item) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            Toast.makeText(context, "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void showDetailDialog(ContentItem item, int gradIdx) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_content_detail, null);
@@ -153,7 +145,7 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            openStream(item);
+            ServerSelectDialog.show(context, item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v ->
             Toast.makeText(context, "+ Añadido a Mi Lista", Toast.LENGTH_SHORT).show());

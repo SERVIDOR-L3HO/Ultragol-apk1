@@ -31,6 +31,7 @@ import com.bumptech.glide.Glide;
 import com.ultragol.app.models.ContentData;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
+import com.ultragol.app.ServerSelectDialog;
 import java.util.ArrayList;
 import java.util.List;
 import android.os.Handler;
@@ -208,14 +209,6 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    private void openStream(ContentItem item) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
-            startActivity(intent);
-        } catch (Exception e) {
-            Toast.makeText(this, "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void showDetail(ContentItem item, int idx) {
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_content_detail, null);
@@ -264,7 +257,7 @@ public class SearchActivity extends AppCompatActivity {
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            openStream(item);
+            ServerSelectDialog.show(this, item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             boolean added = FavoritesManager.get(this).toggle(item.getTitle());

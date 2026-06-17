@@ -24,6 +24,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.ultragol.app.ServerSelectDialog;
 import com.ultragol.app.models.ContentData;
 import com.ultragol.app.models.ContentItem;
 import java.util.ArrayList;
@@ -132,13 +133,7 @@ public class MyListBottomSheet extends BottomSheetDialogFragment {
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            try {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                requireContext().startActivity(intent);
-            } catch (Exception e) {
-                Toast.makeText(requireContext(), "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-            }
+            ServerSelectDialog.show(requireContext(), item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             FavoritesManager.get(requireContext()).toggle(item.getTitle());

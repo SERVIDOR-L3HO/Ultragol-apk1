@@ -97,6 +97,15 @@
     <string name="series_title">Series</string>
     <string name="splash_loading">Cargando Ultragol…</string>
     <string name="sports_title">Deportes</string>
+    <style name="GlassBottomSheetStyle" parent="Widget.MaterialComponents.BottomSheet">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+    <style name="GlassBottomSheetTheme" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:backgroundDimAmount">0.70</item>
+        <item name="bottomSheetStyle">@style/GlassBottomSheetStyle</item>
+    </style>
     <style name="Theme.StreamNova" parent="Theme.Ultragol"/>
     <style name="Theme.StreamNova.Splash" parent="Theme.Ultragol.Splash"/>
     <style name="Theme.Ultragol" parent="Theme.MaterialComponents.DayNight.NoActionBar">

@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.FavoritesManager;
 import com.ultragol.app.R;
+import com.ultragol.app.ServerSelectDialog;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
@@ -116,15 +117,6 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
             .start();
     }
 
-    private void openStream(ContentItem item) {
-        try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        } catch (Exception e) {
-            Toast.makeText(context, "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void showDetailDialog(ContentItem item, int gradIdx) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_content_detail, null);
@@ -176,7 +168,7 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            openStream(item);
+            ServerSelectDialog.show(context, item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             boolean added = FavoritesManager.get(context).toggle(item.getTitle());
