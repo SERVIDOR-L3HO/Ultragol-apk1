@@ -38,7 +38,6 @@ import android.os.Looper;
 
 public class SearchActivity extends AppCompatActivity {
 
-    private static final String STREAM_URL = "https://unlimplay.com/";
 
     private EditText searchInput;
     private RecyclerView resultsRv;
@@ -209,12 +208,12 @@ public class SearchActivity extends AppCompatActivity {
         }
     }
 
-    private void openStream(String title) {
+    private void openStream(ContentItem item) {
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(STREAM_URL));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
             startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(this, "Reproduciendo: " + title, Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -265,7 +264,7 @@ public class SearchActivity extends AppCompatActivity {
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            openStream(item.getTitle());
+            openStream(item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             boolean added = FavoritesManager.get(this).toggle(item.getTitle());

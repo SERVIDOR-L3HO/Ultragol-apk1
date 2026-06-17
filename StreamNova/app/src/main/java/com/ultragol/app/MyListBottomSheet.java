@@ -32,7 +32,6 @@ import java.util.Set;
 
 public class MyListBottomSheet extends BottomSheetDialogFragment {
 
-    private static final String STREAM_URL = "https://unlimplay.com/";
 
     private static final int[][] GRADIENTS = {
         {0xFF200A00, 0xFF080810}, {0xFF1A0A20, 0xFF080810},
@@ -134,7 +133,7 @@ public class MyListBottomSheet extends BottomSheetDialogFragment {
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
             try {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(STREAM_URL));
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 requireContext().startActivity(intent);
             } catch (Exception e) {

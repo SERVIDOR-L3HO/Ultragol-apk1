@@ -12,9 +12,10 @@ import java.util.List;
 
 public class TmdbApi {
 
-    private static final String BASE_URL = "https://api.themoviedb.org/3";
-    public static final String IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
-    private static final String BEARER = "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NmQ5YTgzNGQ0NDEzNzAwYjQ5MWNjMjY4OTIxNDdhYSIsIm5iZiI6MTc1MjQ1NjQ4My4zNDUsInN1YiI6IjY4NzQ1ZDIzNjIwNzU1OWUwNDVhZTRjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Mm-GBMnPS_WUAslIwTiewd6khCIFIqR4XDBqTlT9Yx0";
+    private static final String BASE_URL  = "https://api.themoviedb.org/3";
+    public  static final String IMAGE_BASE = "https://image.tmdb.org/t/p/w342";
+    private static final String BEARER    =
+        "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4NmQ5YTgzNGQ0NDEzNzAwYjQ5MWNjMjY4OTIxNDdhYSIsIm5iZiI6MTc1MjQ1NjQ4My4zNDUsInN1YiI6IjY4NzQ1ZDIzNjIwNzU1OWUwNDVhZTRjMiIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Mm-GBMnPS_WUAslIwTiewd6khCIFIqR4XDBqTlT9Yx0";
 
     private static String fetch(String path) throws Exception {
         URL url = new URL(BASE_URL + path);
@@ -77,18 +78,19 @@ public class TmdbApi {
                 boolean isMovie = o.has("title");
                 String title = isMovie ? o.optString("title") : o.optString("name");
                 if (title == null || title.isEmpty()) continue;
+                int tmdbId   = o.optInt("id", 0);
                 String genre = genreName(o.optJSONArray("genre_ids"));
                 String dateField = isMovie ? "release_date" : "first_air_date";
-                String yr = year(o.optString(dateField));
-                String rat = rating(o.optDouble("vote_average", 7.0));
+                String yr    = year(o.optString(dateField));
+                String rat   = rating(o.optDouble("vote_average", 7.0));
                 String posterUrl = poster(o.optString("poster_path"));
-                String overview = o.optString("overview", "");
+                String overview  = o.optString("overview", "");
                 boolean isNew = false;
-                try {
-                    int y = Integer.parseInt(yr);
-                    isNew = y >= 2024;
-                } catch (NumberFormatException ignored) {}
-                list.add(new ContentItem(title, genre, yr, rat, posterUrl, overview, type, isNew, false));
+                try { isNew = Integer.parseInt(yr) >= 2024; }
+                catch (NumberFormatException ignored) {}
+                ContentItem item = new ContentItem(title, genre, yr, rat, posterUrl, overview, type, isNew, false);
+                item.setTmdbId(tmdbId);
+                list.add(item);
             } catch (Exception ignored) {}
         }
         return list;
@@ -127,19 +129,22 @@ public class TmdbApi {
                 JSONObject o = results.getJSONObject(i);
                 String mediaType = o.optString("media_type", "movie");
                 if (mediaType.equals("person")) continue;
-                boolean isMovie = mediaType.equals("movie");
-                String title = isMovie ? o.optString("title") : o.optString("name");
+                boolean isMovie  = mediaType.equals("movie");
+                String title     = isMovie ? o.optString("title") : o.optString("name");
                 if (title == null || title.isEmpty()) continue;
-                String genre = genreName(o.optJSONArray("genre_ids"));
+                int tmdbId       = o.optInt("id", 0);
+                String genre     = genreName(o.optJSONArray("genre_ids"));
                 String dateField = isMovie ? "release_date" : "first_air_date";
-                String yr = year(o.optString(dateField));
-                String rat = rating(o.optDouble("vote_average", 7.0));
+                String yr        = year(o.optString(dateField));
+                String rat       = rating(o.optDouble("vote_average", 7.0));
                 String posterUrl = poster(o.optString("poster_path"));
-                String overview = o.optString("overview", "");
-                int type = isMovie ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
-                boolean isNew = false;
+                String overview  = o.optString("overview", "");
+                int type         = isMovie ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
+                boolean isNew    = false;
                 try { isNew = Integer.parseInt(yr) >= 2024; } catch (Exception ignored) {}
-                list.add(new ContentItem(title, genre, yr, rat, posterUrl, overview, type, isNew, false));
+                ContentItem item = new ContentItem(title, genre, yr, rat, posterUrl, overview, type, isNew, false);
+                item.setTmdbId(tmdbId);
+                list.add(item);
             } catch (Exception ignored) {}
         }
         return list;
@@ -147,7 +152,7 @@ public class TmdbApi {
 
     public static List<ContentItem> searchMulti(String query) throws Exception {
         String encoded = java.net.URLEncoder.encode(query, "UTF-8");
-        String json = fetch("/search/multi?query=" + encoded + "&language=es-MX&page=1");
+        String json    = fetch("/search/multi?query=" + encoded + "&language=es-MX&page=1");
         JSONArray results = new JSONObject(json).getJSONArray("results");
         List<ContentItem> list = new ArrayList<>();
         for (int i = 0; i < results.length(); i++) {
@@ -155,17 +160,20 @@ public class TmdbApi {
                 JSONObject o = results.getJSONObject(i);
                 String mediaType = o.optString("media_type", "movie");
                 if (mediaType.equals("person")) continue;
-                boolean isMovie = mediaType.equals("movie");
-                String title = isMovie ? o.optString("title") : o.optString("name");
+                boolean isMovie  = mediaType.equals("movie");
+                String title     = isMovie ? o.optString("title") : o.optString("name");
                 if (title == null || title.isEmpty()) continue;
-                String genre = genreName(o.optJSONArray("genre_ids"));
+                int tmdbId       = o.optInt("id", 0);
+                String genre     = genreName(o.optJSONArray("genre_ids"));
                 String dateField = isMovie ? "release_date" : "first_air_date";
-                String yr = year(o.optString(dateField));
-                String rat = rating(o.optDouble("vote_average", 7.0));
+                String yr        = year(o.optString(dateField));
+                String rat       = rating(o.optDouble("vote_average", 7.0));
                 String posterUrl = poster(o.optString("poster_path"));
-                String overview = o.optString("overview", "");
-                int type = isMovie ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
-                list.add(new ContentItem(title, genre, yr, rat, posterUrl, overview, type, false, false));
+                String overview  = o.optString("overview", "");
+                int type         = isMovie ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
+                ContentItem item = new ContentItem(title, genre, yr, rat, posterUrl, overview, type, false, false);
+                item.setTmdbId(tmdbId);
+                list.add(item);
             } catch (Exception ignored) {}
         }
         return list;

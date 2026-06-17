@@ -28,7 +28,6 @@ import java.util.List;
 
 public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.ViewHolder> {
 
-    private static final String STREAM_URL = "https://unlimplay.com/";
 
     private final Context context;
     private final List<ContentItem> items;
@@ -117,13 +116,13 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
             .start();
     }
 
-    private void openStream(String title) {
+    private void openStream(ContentItem item) {
         try {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(STREAM_URL));
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(item.getStreamUrl()));
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(intent);
         } catch (Exception e) {
-            Toast.makeText(context, "Reproduciendo: " + title, Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -177,7 +176,7 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            openStream(item.getTitle());
+            openStream(item);
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             boolean added = FavoritesManager.get(context).toggle(item.getTitle());
