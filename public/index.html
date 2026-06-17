@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ultragol — Panel de Actualizaciones</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #0a0a0f;
+    color: #fff;
+    font-family: 'Segoe UI', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .card {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 520px;
+    backdrop-filter: blur(12px);
+  }
+  .logo { font-size: 28px; font-weight: 800; color: #ff6b00; margin-bottom: 6px; }
+  .subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 32px; }
+  .status-box {
+    background: rgba(255,107,0,0.08);
+    border: 1px solid rgba(255,107,0,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 28px;
+    font-size: 13px;
+  }
+  .status-box .label { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .status-box .value { color: #ff6b00; font-weight: 700; font-size: 20px; }
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+  label { display: block; color: rgba(255,255,255,0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  input, textarea {
+    width: 100%;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px;
+    color: #fff;
+    padding: 12px 14px;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { border-color: #ff6b00; }
+  textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+  .field { margin-bottom: 18px; }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+  .checkbox-row input { width: auto; }
+  .checkbox-row span { color: rgba(255,255,255,0.7); font-size: 14px; }
+  .file-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px dashed rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: rgba(255,255,255,0.6);
+    transition: border-color 0.2s, background 0.2s;
+    margin-bottom: 18px;
+  }
+  .file-label:hover { border-color: #ff6b00; background: rgba(255,107,0,0.06); }
+  .file-label input[type=file] { display: none; }
+  #fileName { color: #ff6b00; font-weight: 600; }
+  .btn {
+    width: 100%;
+    background: #ff6b00;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+  .btn:hover { background: #e05d00; }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { background: #555; cursor: not-allowed; }
+  .msg {
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: none;
+  }
+  .msg.success { background: rgba(0,200,80,0.12); border: 1px solid rgba(0,200,80,0.3); color: #4dff99; }
+  .msg.error   { background: rgba(255,0,0,0.1);   border: 1px solid rgba(255,0,0,0.3);   color: #ff6b6b; }
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }
+  .key-field { display: flex; gap: 10px; margin-bottom: 24px; }
+  .key-field input { flex: 1; }
+  .key-btn {
+    background: rgba(255,107,0,0.15);
+    border: 1px solid #ff6b00;
+    color: #ff6b00;
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.2s;
+  }
+  .key-btn:hover { background: rgba(255,107,0,0.25); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">⚽ Ultragol</div>
+  <div class="subtitle">Panel de Control — Actualizaciones APK</div>
+
+  <div id="currentVersion" class="status-grid" style="display:none">
+    <div class="status-box">
+      <div class="label">Versión Actual</div>
+      <div class="value" id="cvName">—</div>
+    </div>
+    <div class="status-box">
+      <div class="label">APK en Servidor</div>
+      <div class="value" id="cvApk">—</div>
+    </div>
+  </div>
+
+  <div class="field">
+    <label>Clave de administrador</label>
+    <div class="key-field">
+      <input type="password" id="adminKey" placeholder="Ingresa tu clave secreta" />
+      <button class="key-btn" onclick="loadStatus()">Verificar</button>
+    </div>
+  </div>
+
+  <hr>
+
+  <div class="field">
+    <label>Número de versión (versionCode)</label>
+    <input type="number" id="versionCode" placeholder="Ej: 3" min="1" />
+  </div>
+
+  <div class="field">
+    <label>Nombre de versión</label>
+    <input type="text" id="versionName" placeholder="Ej: 3.0" />
+  </div>
+
+  <div class="field">
+    <label>Novedades (changelog)</label>
+    <textarea id="changelog" placeholder="- Nuevo diseño&#10;- Mejoras de rendimiento&#10;- Corrección de errores"></textarea>
+  </div>
+
+  <div class="checkbox-row">
+    <input type="checkbox" id="forceUpdate" />
+    <span>Actualización obligatoria (el usuario no puede cerrar el modal)</span>
+  </div>
+
+  <label>Archivo APK <span style="color:rgba(255,255,255,0.4);font-weight:400;font-size:11px">(opcional — sólo si cambió el APK)</span></label>
+  <label class="file-label">
+    <span>📦</span>
+    <span id="fileName">Seleccionar archivo .apk</span>
+    <input type="file" id="apkFile" accept=".apk" onchange="onFileChange(this)" />
+  </label>
+
+  <button class="btn" id="submitBtn" onclick="submitUpdate()">🚀 Publicar Actualización</button>
+  <div class="msg" id="msg"></div>
+</div>
+
+<script>
+  async function loadStatus() {
+    const key = document.getElementById('adminKey').value.trim();
+    if (!key) return showMsg('Ingresa la clave de administrador', 'error');
+    try {
+      const r = await fetch('/admin/info', { headers: { 'x-admin-key': key } });
+      if (!r.ok) return showMsg('Clave incorrecta', 'error');
+      const d = await r.json();
+      document.getElementById('cvName').textContent = `v${d.version.versionName} (${d.version.versionCode})`;
+      document.getElementById('cvApk').textContent = d.apkExists ? (d.apkSize || 'Sí') : 'No subido';
+      document.getElementById('currentVersion').style.display = 'grid';
+      document.getElementById('versionCode').value = d.version.versionCode;
+      document.getElementById('versionName').value = d.version.versionName;
+      document.getElementById('changelog').value = d.version.changelog;
+      document.getElementById('forceUpdate').checked = d.version.forceUpdate;
+      showMsg('Conexión exitosa ✓', 'success');
+    } catch { showMsg('Error de conexión', 'error'); }
+  }
+
+  function onFileChange(input) {
+    const name = input.files[0]?.name || 'Seleccionar archivo .apk';
+    document.getElementById('fileName').textContent = name;
+  }
+
+  async function submitUpdate() {
+    const key = document.getElementById('adminKey').value.trim();
+    if (!key) return showMsg('Ingresa la clave de administrador', 'error');
+
+    const versionCode = document.getElementById('versionCode').value;
+    const versionName = document.getElementById('versionName').value.trim();
+    if (!versionCode || !versionName) return showMsg('Completa versionCode y versionName', 'error');
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Publicando…';
+
+    const form = new FormData();
+    form.append('versionCode', versionCode);
+    form.append('versionName', versionName);
+    form.append('changelog', document.getElementById('changelog').value);
+    form.append('forceUpdate', document.getElementById('forceUpdate').checked);
+    const apk = document.getElementById('apkFile').files[0];
+    if (apk) form.append('apk', apk);
+
+    try {
+      const r = await fetch('/admin/update', { method: 'POST', headers: { 'x-admin-key': key }, body: form });
+      const d = await r.json();
+      if (!r.ok) return showMsg(d.error || 'Error al publicar', 'error');
+      showMsg(`✅ Actualización publicada: v${d.version.versionName} (${d.version.versionCode})`, 'success');
+      await loadStatus();
+    } catch { showMsg('Error de red', 'error'); }
+
+    btn.disabled = false;
+    btn.textContent = '🚀 Publicar Actualización';
+  }
+
+  function showMsg(text, type) {
+    const el = document.getElementById('msg');
+    el.textContent = text;
+    el.className = `msg ${type}`;
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 4000);
+  }
+</script>
+</body>
+</html>
