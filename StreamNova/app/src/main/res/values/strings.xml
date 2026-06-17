@@ -8,12 +8,12 @@
     <string name="nav_sports">Deportes</string>
     <string name="nav_live">En Vivo</string>
 
-    <string name="section_trending">🔥 Tendencias</string>
-    <string name="section_new">✨ Nuevos Estrenos</string>
-    <string name="section_recommended">🎬 Recomendados</string>
-    <string name="section_anime">⚡ Anime</string>
-    <string name="section_sports">⚽ Deportes en Vivo</string>
-    <string name="section_doramas">🌸 Doramas</string>
+    <string name="section_trending">Tendencias</string>
+    <string name="section_new">Nuevos Estrenos</string>
+    <string name="section_recommended">Recomendados</string>
+    <string name="section_anime">Anime</string>
+    <string name="section_sports">Deportes en Vivo</string>
+    <string name="section_doramas">Doramas</string>
 
     <string name="see_all">Ver todo ›</string>
     <string name="search_hint">Buscar películas, series, deportes…</string>
@@ -25,16 +25,16 @@
     <string name="sports_title">Deportes</string>
     <string name="live_tv_title">TV en Vivo</string>
 
-    <string name="btn_play">▶  REPRODUCIR</string>
-    <string name="btn_add_list">＋  MI LISTA</string>
-    <string name="btn_close">✕</string>
+    <string name="btn_play">&#9654;  REPRODUCIR</string>
+    <string name="btn_add_list">+  MI LISTA</string>
+    <string name="btn_close">X</string>
 
     <string name="badge_live">EN VIVO</string>
     <string name="badge_new">NUEVO</string>
     <string name="badge_hd">HD</string>
 
     <string name="splash_loading">Cargando Ultragol…</string>
-    <string name="modal_rating_label">⭐ RATING</string>
+    <string name="modal_rating_label">RATING</string>
     <string name="modal_genre_label">GÉNERO</string>
     <string name="modal_year_label">AÑO</string>
 </resources>

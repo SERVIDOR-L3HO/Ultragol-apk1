@@ -13,15 +13,13 @@
         android:layout_height="195dp"
         android:background="@drawable/gradient_movie">
 
-        <TextView
-            android:id="@+id/thumbnailEmoji"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="&#127916;"
-            android:textSize="38sp"/>
+        <ImageView
+            android:id="@+id/thumbnailImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"/>
 
-        <!-- Badge top-left -->
         <TextView
             android:id="@+id/badgeView"
             android:layout_width="wrap_content"
@@ -40,7 +38,6 @@
             android:paddingBottom="2dp"
             android:visibility="gone"/>
 
-        <!-- Favorite button top-right -->
         <TextView
             android:id="@+id/favoriteBtn"
             android:layout_width="28dp"
@@ -49,14 +46,13 @@
             android:layout_alignParentEnd="true"
             android:layout_margin="5dp"
             android:gravity="center"
-            android:text="&#10084;"
+            android:text="&#9829;"
             android:textColor="#55FF6B8A"
             android:textSize="13sp"
             android:background="@drawable/icon_button_small_bg"
             android:clickable="true"
             android:focusable="true"/>
 
-        <!-- Bottom glass rating bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="34dp"
@@ -70,7 +66,7 @@
                 android:id="@+id/ratingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="&#11088; 8.5"
+                android:text="&#9733; 8.5"
                 android:textColor="@color/star_gold"
                 android:textSize="10sp"
                 android:textStyle="bold"/>
@@ -91,7 +87,6 @@
         </LinearLayout>
     </RelativeLayout>
 
-    <!-- Title -->
     <TextView
         android:id="@+id/titleText"
         android:layout_width="match_parent"

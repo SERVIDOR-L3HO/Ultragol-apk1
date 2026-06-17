@@ -109,7 +109,7 @@ id badgeView
 id bannerBadge
 id bannerBg
 id bannerDescription
-id bannerEmoji
+id bannerImage
 id bannerIndicators
 id bannerRating
 id bannerTitle
@@ -150,9 +150,10 @@ id menuHistory
 id menuMyList
 id menuSettings
 id modalBadge
-id modalEmoji
 id modalGenre
 id modalHeroBg
+id modalImage
+id modalOverview
 id modalRating
 id modalTitle
 id modalYear
@@ -186,12 +187,12 @@ id sectionTitle
 id seeAll
 id sortIcon
 id srBadge
-id srEmoji
 id srGenreYear
+id srImage
 id srRating
 id srTitle
 id thumbnailContainer
-id thumbnailEmoji
+id thumbnailImage
 id titleText
 id tvChangelog
 id tvFavCount

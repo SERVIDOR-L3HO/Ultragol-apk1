@@ -9,7 +9,6 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Thumbnail emoji -->
     <RelativeLayout
         android:layout_width="54dp"
         android:layout_height="54dp"
@@ -17,16 +16,14 @@
         android:layout_marginEnd="12dp"
         android:background="@drawable/card_background">
 
-        <TextView
-            android:id="@+id/srEmoji"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:text="&#127916;"
-            android:textSize="26sp"/>
+        <ImageView
+            android:id="@+id/srImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@null"/>
     </RelativeLayout>
 
-    <!-- Info -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -54,7 +51,6 @@
             android:layout_marginTop="3dp"/>
     </LinearLayout>
 
-    <!-- Rating + Badge -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -66,7 +62,7 @@
             android:id="@+id/srRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="&#11088; 8.5"
+            android:text="&#9733; 8.5"
             android:textColor="@color/star_gold"
             android:textSize="11sp"
             android:textStyle="bold"/>

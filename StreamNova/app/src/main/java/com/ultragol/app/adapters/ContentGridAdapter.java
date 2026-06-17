@@ -2,25 +2,32 @@ package com.ultragol.app.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.R;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
 public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.ViewHolder> {
+
+    private static final String STREAM_URL = "https://unlimplay.com/";
 
     private final Context context;
     private final List<ContentItem> items;
@@ -57,10 +64,19 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
         gradient.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.card_corner_radius));
         holder.thumbnailContainer.setBackground(gradient);
 
+        if (item.getPosterUrl() != null && !item.getPosterUrl().isEmpty()) {
+            Glide.with(context)
+                .load(item.getPosterUrl())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop()
+                .into(holder.thumbnailImage);
+        } else {
+            holder.thumbnailImage.setImageDrawable(null);
+        }
+
         holder.titleText.setText(item.getTitle());
         holder.genreText.setText(item.getGenreYear());
         holder.ratingText.setText(item.getRatingDisplay());
-        holder.thumbnailEmoji.setText(item.getEmoji());
         holder.badgeView.setText(item.getBadge());
 
         if (item.isLive()) {
@@ -74,6 +90,16 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
         holder.itemView.setOnClickListener(v -> showDetailDialog(item, idx));
     }
 
+    private void openStream(String title) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(STREAM_URL));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(context, "Reproduciendo: " + title, Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void showDetailDialog(ContentItem item, int gradIdx) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_content_detail, null);
 
@@ -85,11 +111,21 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
         gradient.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.card_corner_radius_large));
         heroBg.setBackground(gradient);
 
-        ((TextView) dialogView.findViewById(R.id.modalEmoji)).setText(item.getEmoji());
+        ImageView modalImage = dialogView.findViewById(R.id.modalImage);
+        if (item.getPosterUrl() != null && !item.getPosterUrl().isEmpty()) {
+            Glide.with(context).load(item.getPosterUrl()).centerCrop().into(modalImage);
+        }
+
         ((TextView) dialogView.findViewById(R.id.modalTitle)).setText(item.getTitle());
         ((TextView) dialogView.findViewById(R.id.modalRating)).setText(item.getRating());
         ((TextView) dialogView.findViewById(R.id.modalGenre)).setText(item.getGenre());
         ((TextView) dialogView.findViewById(R.id.modalYear)).setText(item.getYear());
+
+        TextView overview = dialogView.findViewById(R.id.modalOverview);
+        if (item.getOverview() != null && !item.getOverview().isEmpty()) {
+            overview.setText(item.getOverview());
+            overview.setVisibility(View.VISIBLE);
+        }
 
         TextView modalBadge = dialogView.findViewById(R.id.modalBadge);
         modalBadge.setText(item.getBadge());
@@ -101,10 +137,7 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
             modalBadge.setBackgroundResource(R.drawable.badge_background);
         }
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create();
-
+        AlertDialog dialog = new AlertDialog.Builder(context).setView(dialogView).create();
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -114,26 +147,17 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             window.setAttributes(lp);
         }
-
-        dialogView.setScaleX(0.85f);
-        dialogView.setScaleY(0.85f);
-        dialogView.setAlpha(0f);
-
+        dialogView.setScaleX(0.85f); dialogView.setScaleY(0.85f); dialogView.setAlpha(0f);
         dialog.show();
-
-        dialogView.animate()
-            .scaleX(1f).scaleY(1f).alpha(1f)
-            .setDuration(220)
-            .setInterpolator(new DecelerateInterpolator(1.5f))
-            .start();
-
+        dialogView.animate().scaleX(1f).scaleY(1f).alpha(1f)
+            .setDuration(220).setInterpolator(new DecelerateInterpolator(1.5f)).start();
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            Toast.makeText(context, "▶ Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+            openStream(item.getTitle());
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v ->
-            Toast.makeText(context, "＋ Añadido a Mi Lista", Toast.LENGTH_SHORT).show());
+            Toast.makeText(context, "+ Añadido a Mi Lista", Toast.LENGTH_SHORT).show());
     }
 
     @Override
@@ -141,16 +165,17 @@ public class ContentGridAdapter extends RecyclerView.Adapter<ContentGridAdapter.
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout thumbnailContainer;
-        TextView thumbnailEmoji, titleText, genreText, ratingText, badgeView;
+        ImageView thumbnailImage;
+        TextView titleText, genreText, ratingText, badgeView;
 
         ViewHolder(View itemView) {
             super(itemView);
             thumbnailContainer = itemView.findViewById(R.id.thumbnailContainer);
-            thumbnailEmoji = itemView.findViewById(R.id.thumbnailEmoji);
-            titleText = itemView.findViewById(R.id.titleText);
-            genreText = itemView.findViewById(R.id.genreText);
-            ratingText = itemView.findViewById(R.id.ratingText);
-            badgeView = itemView.findViewById(R.id.badgeView);
+            thumbnailImage     = itemView.findViewById(R.id.thumbnailImage);
+            titleText          = itemView.findViewById(R.id.titleText);
+            genreText          = itemView.findViewById(R.id.genreText);
+            ratingText         = itemView.findViewById(R.id.ratingText);
+            badgeView          = itemView.findViewById(R.id.badgeView);
         }
     }
 }

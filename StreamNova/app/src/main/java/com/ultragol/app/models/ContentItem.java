@@ -12,19 +12,22 @@ public class ContentItem {
     private String genre;
     private String year;
     private String rating;
-    private String emoji;
+    private String posterUrl;
+    private String overview;
     private int contentType;
     private boolean isNew;
     private boolean isLive;
     private String badge;
 
     public ContentItem(String title, String genre, String year, String rating,
-                       String emoji, int contentType, boolean isNew, boolean isLive) {
+                       String posterUrl, String overview,
+                       int contentType, boolean isNew, boolean isLive) {
         this.title = title;
         this.genre = genre;
         this.year = year;
         this.rating = rating;
-        this.emoji = emoji;
+        this.posterUrl = posterUrl != null ? posterUrl : "";
+        this.overview = overview != null ? overview : "";
         this.contentType = contentType;
         this.isNew = isNew;
         this.isLive = isLive;
@@ -37,11 +40,13 @@ public class ContentItem {
     public String getGenre() { return genre; }
     public String getYear() { return year; }
     public String getRating() { return rating; }
-    public String getEmoji() { return emoji; }
+    public String getPosterUrl() { return posterUrl; }
+    public String getOverview() { return overview; }
     public int getContentType() { return contentType; }
     public boolean isNew() { return isNew; }
     public boolean isLive() { return isLive; }
     public String getBadge() { return badge; }
-    public String getGenreYear() { return genre + " • " + year; }
-    public String getRatingDisplay() { return "\u2B50 " + rating; }
+    public String getGenreYear() { return genre + " \u2022 " + year; }
+    public String getRatingDisplay() { return "\u2605 " + rating; }
+    public String getEmoji() { return ""; }
 }

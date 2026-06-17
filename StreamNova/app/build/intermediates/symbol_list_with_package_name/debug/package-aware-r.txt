@@ -3202,7 +3202,7 @@ id badgeView
 id bannerBadge
 id bannerBg
 id bannerDescription
-id bannerEmoji
+id bannerImage
 id bannerIndicators
 id bannerRating
 id bannerTitle
@@ -3347,6 +3347,7 @@ id fullscreen_header
 id genreText
 id ghost_view
 id ghost_view_holder
+id glide_custom_view_target_tag
 id glowCircle
 id gone
 id graph
@@ -3424,9 +3425,10 @@ id message
 id middle
 id mini
 id modalBadge
-id modalEmoji
 id modalGenre
 id modalHeroBg
+id modalImage
+id modalOverview
 id modalRating
 id modalTitle
 id modalYear
@@ -3604,8 +3606,8 @@ id spread_inside
 id spring
 id square
 id srBadge
-id srEmoji
 id srGenreYear
+id srImage
 id srRating
 id srTitle
 id src_atop
@@ -3654,7 +3656,7 @@ id textinput_placeholder
 id textinput_prefix_text
 id textinput_suffix_text
 id thumbnailContainer
-id thumbnailEmoji
+id thumbnailImage
 id time
 id title
 id titleDividerNoCustom

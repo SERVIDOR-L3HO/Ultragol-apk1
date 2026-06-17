@@ -1,9 +1,7 @@
 package com.ultragol.app.fragments;
 
 import android.content.Intent;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,15 +23,19 @@ import com.ultragol.app.adapters.BannerAdapter;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentData;
 import com.ultragol.app.models.ContentItem;
+import java.util.ArrayList;
 import java.util.List;
+import android.os.Handler;
 
 public class HomeFragment extends Fragment {
 
     private ViewPager2 heroBanner;
     private LinearLayout bannerIndicators;
-    private Handler autoScrollHandler = new Handler();
+    private final Handler autoScrollHandler = new Handler();
     private int currentBannerPage = 0;
     private int bannerCount = 0;
+    private BannerAdapter bannerAdapter;
+    private final List<ContentItem> bannerItems = new ArrayList<>();
 
     private View rowTrending, rowNew, rowRecommended, rowAnime, rowSports;
 
@@ -53,6 +55,37 @@ public class HomeFragment extends Fragment {
         setupRows(view);
         setupTopIcons(view);
         setupChips(view);
+        loadAllData();
+    }
+
+    private void loadAllData() {
+        if (!isAdded()) return;
+        ContentData.fetchBanners(items -> {
+            if (!isAdded()) return;
+            bannerItems.clear();
+            bannerItems.addAll(items);
+            bannerAdapter.notifyDataSetChanged();
+            bannerCount = bannerItems.size();
+            setupIndicators();
+        });
+        ContentData.fetchTrending(items -> {
+            if (!isAdded() || rowTrending == null) return;
+            refreshRow(rowTrending, getString(R.string.section_trending), items);
+        });
+        ContentData.fetchNewReleases(items -> {
+            if (!isAdded() || rowNew == null) return;
+            refreshRow(rowNew, getString(R.string.section_new), items);
+        });
+        ContentData.fetchMovies(items -> {
+            if (!isAdded() || rowRecommended == null) return;
+            refreshRow(rowRecommended, getString(R.string.section_recommended), items);
+        });
+        ContentData.fetchAnime(items -> {
+            if (!isAdded() || rowAnime == null) return;
+            refreshRow(rowAnime, getString(R.string.section_anime), items);
+        });
+        List<ContentItem> sports = ContentData.getSports();
+        refreshRow(rowSports, getString(R.string.section_sports), sports);
     }
 
     private void setupTopIcons(View view) {
@@ -60,13 +93,11 @@ public class HomeFragment extends Fragment {
             animatePulse(v);
             startActivity(new Intent(requireContext(), SearchActivity.class));
         });
-
         view.findViewById(R.id.notifIcon).setOnClickListener(v -> {
             animatePulse(v);
             NotificationBottomSheet.newInstance()
                     .show(requireActivity().getSupportFragmentManager(), "notifs");
         });
-
         view.findViewById(R.id.profileIcon).setOnClickListener(v -> {
             animatePulse(v);
             new ProfileBottomSheet()
@@ -105,38 +136,43 @@ public class HomeFragment extends Fragment {
         chip.setBackgroundResource(R.drawable.chip_active);
         chip.setTextColor(0xFFFFFFFF);
         activeChip = chip;
-        applyFilter(filter, root);
+        applyFilter(filter);
     }
 
-    private void applyFilter(String filter, View root) {
+    private void applyFilter(String filter) {
+        if (!isAdded()) return;
         switch (filter) {
             case "sports":
                 showRows(false, false, false, false, true);
-                refreshRow(rowSports, "⚽ Deportes en Vivo", ContentData.getSports());
+                refreshRow(rowSports, "Deportes en Vivo", ContentData.getSports());
                 break;
             case "movies":
                 showRows(false, false, true, false, false);
-                refreshRow(rowRecommended, "🎬 Películas", ContentData.getMovies());
+                ContentData.fetchMovies(items -> {
+                    if (isAdded()) refreshRow(rowRecommended, "Peliculas", items);
+                });
                 break;
             case "series":
                 showRows(false, true, false, false, false);
-                refreshRow(rowNew, "📺 Series", ContentData.getSeries());
+                ContentData.fetchSeries(items -> {
+                    if (isAdded()) refreshRow(rowNew, "Series", items);
+                });
                 break;
             case "anime":
                 showRows(false, false, false, true, false);
-                refreshRow(rowAnime, "⚡ Anime", ContentData.getAnime());
+                ContentData.fetchAnime(items -> {
+                    if (isAdded()) refreshRow(rowAnime, "Anime", items);
+                });
                 break;
             case "doramas":
                 showRows(false, false, false, true, false);
-                refreshRow(rowAnime, "🌸 Doramas", ContentData.getDoramas());
+                ContentData.fetchDoramas(items -> {
+                    if (isAdded()) refreshRow(rowAnime, "Doramas", items);
+                });
                 break;
             default:
                 showRows(true, true, true, true, true);
-                refreshRow(rowTrending,   getString(R.string.section_trending),     ContentData.getTrending());
-                refreshRow(rowNew,        getString(R.string.section_new),          ContentData.getNewReleases());
-                refreshRow(rowRecommended,getString(R.string.section_recommended),  ContentData.getMovies());
-                refreshRow(rowAnime,      getString(R.string.section_anime),        ContentData.getAnime());
-                refreshRow(rowSports,     getString(R.string.section_sports),       ContentData.getSports());
+                loadAllData();
                 break;
         }
     }
@@ -167,26 +203,21 @@ public class HomeFragment extends Fragment {
         TextView sectionTitle = rowView.findViewById(R.id.sectionTitle);
         RecyclerView rv = rowView.findViewById(R.id.rowRecyclerView);
         if (sectionTitle != null) sectionTitle.setText(title);
-        if (rv != null) {
-            rv.setAdapter(new ContentRowAdapter(requireContext(), items));
-        }
+        if (rv != null) rv.setAdapter(new ContentRowAdapter(requireContext(), items));
     }
 
     private void setupBanner(View view) {
         heroBanner = view.findViewById(R.id.heroBanner);
         bannerIndicators = view.findViewById(R.id.bannerIndicators);
 
-        BannerAdapter bannerAdapter = new BannerAdapter(requireContext(), ContentData.getHeroBanners());
+        bannerAdapter = new BannerAdapter(requireContext(), bannerItems);
         heroBanner.setAdapter(bannerAdapter);
-        bannerCount = ContentData.getHeroBanners().size();
 
         heroBanner.setPageTransformer((page, position) -> {
             float absPos = Math.abs(position);
             page.setAlpha(1 - absPos * 0.3f);
             page.setScaleY(1 - absPos * 0.05f);
         });
-
-        setupIndicators();
 
         heroBanner.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -200,6 +231,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupIndicators() {
+        if (bannerIndicators == null) return;
         bannerIndicators.removeAllViews();
         for (int i = 0; i < bannerCount; i++) {
             View dot = new View(requireContext());
@@ -239,17 +271,17 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupRows(View view) {
-        rowTrending   = view.findViewById(R.id.rowTrending);
-        rowNew        = view.findViewById(R.id.rowNew);
-        rowRecommended= view.findViewById(R.id.rowRecommended);
-        rowAnime      = view.findViewById(R.id.rowAnime);
-        rowSports     = view.findViewById(R.id.rowSports);
+        rowTrending    = view.findViewById(R.id.rowTrending);
+        rowNew         = view.findViewById(R.id.rowNew);
+        rowRecommended = view.findViewById(R.id.rowRecommended);
+        rowAnime       = view.findViewById(R.id.rowAnime);
+        rowSports      = view.findViewById(R.id.rowSports);
 
-        setupRow(rowTrending,   getString(R.string.section_trending),    ContentData.getTrending());
-        setupRow(rowNew,        getString(R.string.section_new),         ContentData.getNewReleases());
-        setupRow(rowRecommended,getString(R.string.section_recommended), ContentData.getMovies());
-        setupRow(rowAnime,      getString(R.string.section_anime),       ContentData.getAnime());
-        setupRow(rowSports,     getString(R.string.section_sports),      ContentData.getSports());
+        setupRow(rowTrending,    getString(R.string.section_trending),    new ArrayList<>());
+        setupRow(rowNew,         getString(R.string.section_new),         new ArrayList<>());
+        setupRow(rowRecommended, getString(R.string.section_recommended), new ArrayList<>());
+        setupRow(rowAnime,       getString(R.string.section_anime),       new ArrayList<>());
+        setupRow(rowSports,      getString(R.string.section_sports),      ContentData.getSports());
     }
 
     private void setupRow(View rowView, String title, List<ContentItem> items) {

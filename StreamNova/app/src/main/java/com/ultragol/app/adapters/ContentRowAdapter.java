@@ -2,26 +2,33 @@ package com.ultragol.app.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.FavoritesManager;
 import com.ultragol.app.R;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
 public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.ViewHolder> {
+
+    private static final String STREAM_URL = "https://unlimplay.com/";
 
     private final Context context;
     private final List<ContentItem> items;
@@ -57,10 +64,19 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         gradient.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.card_corner_radius));
         holder.thumbnailContainer.setBackground(gradient);
 
+        if (item.getPosterUrl() != null && !item.getPosterUrl().isEmpty()) {
+            Glide.with(context)
+                .load(item.getPosterUrl())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop()
+                .into(holder.thumbnailImage);
+        } else {
+            holder.thumbnailImage.setImageDrawable(null);
+        }
+
         holder.titleText.setText(item.getTitle());
         holder.genreText.setText(item.getGenreYear());
-        holder.ratingText.setText("\u2B50 " + item.getRating());
-        holder.thumbnailEmoji.setText(item.getEmoji());
+        holder.ratingText.setText("\u2605 " + item.getRating());
         holder.badgeView.setText(item.getBadge());
 
         if (item.isLive())       holder.badgeView.setBackgroundResource(R.drawable.badge_live);
@@ -74,7 +90,6 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         }
 
         updateFavBtn(holder, item.getTitle());
-
         holder.itemView.setOnClickListener(v -> showDetailDialog(item, idx));
 
         if (holder.favoriteBtn != null) {
@@ -83,7 +98,7 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
                 updateFavBtn(holder, item.getTitle());
                 animateHeart(holder.favoriteBtn);
                 Toast.makeText(context,
-                        added ? "❤ Añadido" : "💔 Eliminado",
+                        added ? "Añadido" : "Eliminado",
                         Toast.LENGTH_SHORT).show();
             });
         }
@@ -93,13 +108,23 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         if (holder.favoriteBtn == null) return;
         boolean isFav = FavoritesManager.get(context).isFavorite(title);
         holder.favoriteBtn.setTextColor(isFav ? 0xFFFF4466 : 0x44FF6B8A);
-        holder.favoriteBtn.setText(isFav ? "❤" : "🤍");
+        holder.favoriteBtn.setText(isFav ? "\u2665" : "\u2661");
     }
 
     private void animateHeart(View view) {
         view.animate().scaleX(1.5f).scaleY(1.5f).setDuration(120)
             .withEndAction(() -> view.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
             .start();
+    }
+
+    private void openStream(String title) {
+        try {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(STREAM_URL));
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Toast.makeText(context, "Reproduciendo: " + title, Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void showDetailDialog(ContentItem item, int gradIdx) {
@@ -113,11 +138,22 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         gradient.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.card_corner_radius_large));
         heroBg.setBackground(gradient);
 
-        ((TextView) dialogView.findViewById(R.id.modalEmoji)).setText(item.getEmoji());
+        ImageView modalImage = dialogView.findViewById(R.id.modalImage);
+        if (item.getPosterUrl() != null && !item.getPosterUrl().isEmpty()) {
+            Glide.with(context).load(item.getPosterUrl()).centerCrop().into(modalImage);
+        }
+
         ((TextView) dialogView.findViewById(R.id.modalTitle)).setText(item.getTitle());
         ((TextView) dialogView.findViewById(R.id.modalRating)).setText(item.getRating());
         ((TextView) dialogView.findViewById(R.id.modalGenre)).setText(item.getGenre());
         ((TextView) dialogView.findViewById(R.id.modalYear)).setText(item.getYear());
+
+        TextView overview = dialogView.findViewById(R.id.modalOverview);
+        if (item.getOverview() != null && !item.getOverview().isEmpty()) {
+            overview.setText(item.getOverview());
+            overview.setVisibility(View.VISIBLE);
+        }
+
         TextView modalBadge = dialogView.findViewById(R.id.modalBadge);
         modalBadge.setText(item.getBadge());
         if (item.isLive())     modalBadge.setBackgroundResource(R.drawable.badge_live);
@@ -141,11 +177,11 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
-            Toast.makeText(context, "▶ Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
+            openStream(item.getTitle());
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
             boolean added = FavoritesManager.get(context).toggle(item.getTitle());
-            Toast.makeText(context, added ? "❤ Añadido a Mi Lista" : "Eliminado de Mi Lista",
+            Toast.makeText(context, added ? "Añadido a Mi Lista" : "Eliminado de Mi Lista",
                     Toast.LENGTH_SHORT).show();
         });
     }
@@ -154,12 +190,13 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout thumbnailContainer;
-        TextView thumbnailEmoji, titleText, genreText, ratingText, badgeView, qualityTag, favoriteBtn;
+        ImageView thumbnailImage;
+        TextView titleText, genreText, ratingText, badgeView, qualityTag, favoriteBtn;
 
         ViewHolder(View itemView) {
             super(itemView);
             thumbnailContainer = itemView.findViewById(R.id.thumbnailContainer);
-            thumbnailEmoji     = itemView.findViewById(R.id.thumbnailEmoji);
+            thumbnailImage     = itemView.findViewById(R.id.thumbnailImage);
             titleText          = itemView.findViewById(R.id.titleText);
             genreText          = itemView.findViewById(R.id.genreText);
             ratingText         = itemView.findViewById(R.id.ratingText);
