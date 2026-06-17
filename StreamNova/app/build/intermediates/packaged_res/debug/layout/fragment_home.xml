@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_primary">
+
+    <!-- Top bar with glass effect -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/topbar_height"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
+        android:background="@drawable/topbar_glass_bg">
+
+        <!-- Ultragol text logo -->
+        <ImageView
+            android:layout_width="0dp"
+            android:layout_height="28dp"
+            android:layout_weight="1"
+            android:src="@drawable/ultragol_logo"
+            android:scaleType="fitStart"
+            android:adjustViewBounds="true"/>
+
+        <!-- Search icon -->
+        <TextView
+            android:id="@+id/searchIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="&#128269;"
+            android:textSize="19sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/icon_button_bg"/>
+
+        <!-- Notification icon -->
+        <TextView
+            android:id="@+id/notifIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="&#128276;"
+            android:textSize="19sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/icon_button_bg"
+            android:layout_marginStart="4dp"/>
+
+        <!-- Profile icon -->
+        <TextView
+            android:id="@+id/profileIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:text="&#128100;"
+            android:textSize="19sp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="@drawable/icon_button_bg"
+            android:layout_marginStart="4dp"/>
+    </LinearLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingBottom="16dp">
+
+            <!-- Hero banner – taller for portrait -->
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/heroBanner"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/banner_height"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Dot indicators -->
+            <LinearLayout
+                android:id="@+id/bannerIndicators"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center"/>
+
+            <!-- Category chips row -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none"
+                android:layout_marginTop="14dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:clipToPadding="false">
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="Todo"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        android:background="@drawable/chip_active"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="&#9917; Deportes"
+                        android:textColor="#B0B0CC"
+                        android:textSize="12sp"
+                        android:background="@drawable/chip_inactive"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="&#127916; Películas"
+                        android:textColor="#B0B0CC"
+                        android:textSize="12sp"
+                        android:background="@drawable/chip_inactive"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="&#127911; Series"
+                        android:textColor="#B0B0CC"
+                        android:textSize="12sp"
+                        android:background="@drawable/chip_inactive"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="&#9889; Anime"
+                        android:textColor="#B0B0CC"
+                        android:textSize="12sp"
+                        android:background="@drawable/chip_inactive"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="34dp"
+                        android:gravity="center"
+                        android:text="&#127802; Doramas"
+                        android:textColor="#B0B0CC"
+                        android:textSize="12sp"
+                        android:background="@drawable/chip_inactive"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:layout_marginStart="8dp"/>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Trending section -->
+            <include layout="@layout/section_row"
+                android:id="@+id/rowTrending"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"/>
+
+            <!-- New releases -->
+            <include layout="@layout/section_row"
+                android:id="@+id/rowNew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Recommended -->
+            <include layout="@layout/section_row"
+                android:id="@+id/rowRecommended"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Anime -->
+            <include layout="@layout/section_row"
+                android:id="@+id/rowAnime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
+
+            <!-- Sports Live -->
+            <include layout="@layout/section_row"
+                android:id="@+id/rowSports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"/>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+</LinearLayout>

@@ -105,8 +105,26 @@ public class SplashActivity extends AppCompatActivity {
         }, 2600);
     }
 
+    private int getVersionCode() {
+        try {
+            return getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionCode;
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+
+    private String getVersionName() {
+        try {
+            return getPackageManager()
+                    .getPackageInfo(getPackageName(), 0).versionName;
+        } catch (Exception e) {
+            return "?";
+        }
+    }
+
     private void startUpdateCheck() {
-        int currentVersion = BuildConfig.VERSION_CODE;
+        int currentVersion = getVersionCode();
         UpdateChecker.check(currentVersion, new UpdateChecker.Callback() {
             @Override
             public void onUpdateAvailable(int newVersionCode, String newVersionName,
@@ -159,7 +177,7 @@ public class SplashActivity extends AppCompatActivity {
         Button btnUpdate = dialog.findViewById(R.id.btnUpdate);
         Button btnLater  = dialog.findViewById(R.id.btnLater);
 
-        tvVersion.setText("v" + pendingVersionName + "  ←  v" + BuildConfig.VERSION_NAME);
+        tvVersion.setText("v" + pendingVersionName + "  ←  v" + getVersionName());
         tvChangelog.setText(pendingChangelog.isEmpty() ? "Correcciones y mejoras generales." : pendingChangelog);
 
         if (pendingForce) {

@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "ziGmvtdleyYiarqTeN-VS"
+uri = "file://StreamNova/app/build/outputs/apk/debug/ultragol_v2.0.zip"
+type = "unspecified"
+title = "Ultragol v2.0 — APK (debug)"
