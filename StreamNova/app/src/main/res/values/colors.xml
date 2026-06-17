@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Backgrounds -->
+    <color name="bg_primary">#0A0A0A</color>
+    <color name="bg_surface">#111111</color>
+    <color name="bg_card">#181818</color>
+    <color name="bg_glass">#D9141414</color>
+
+    <!-- Brand Red -->
+    <color name="color_primary">#E50914</color>
+    <color name="color_primary_dark">#9B0000</color>
+    <color name="color_red_bright">#FF1744</color>
+    <color name="color_red_glow">#FF4444</color>
+
+    <!-- Grays -->
+    <color name="color_gray_dark">#1C1C1C</color>
+    <color name="color_gray_mid">#2A2A2A</color>
+    <color name="color_gray_light">#555555</color>
+    <color name="color_gray_border">#333333</color>
+
+    <!-- Text -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AAAAAA</color>
+    <color name="text_hint">#666666</color>
+
+    <!-- Navigation -->
+    <color name="nav_active">#E50914</color>
+    <color name="nav_inactive">#666666</color>
+    <color name="nav_background">#0F0F0F</color>
+
+    <!-- Glass effect borders -->
+    <color name="glass_border">#33FFFFFF</color>
+    <color name="glass_border_bright">#55FFFFFF</color>
+    <color name="glass_highlight">#0DFFFFFF</color>
+
+    <!-- Content gradients - Red/Dark palette -->
+    <color name="grad_movie_start">#3D0000</color>
+    <color name="grad_movie_end">#0A0000</color>
+    <color name="grad_series_start">#1A1A1A</color>
+    <color name="grad_series_end">#050505</color>
+    <color name="grad_anime_start">#3D0A0A</color>
+    <color name="grad_anime_end">#1A0000</color>
+    <color name="grad_dorama_start">#1A1010</color>
+    <color name="grad_dorama_end">#0A0505</color>
+    <color name="grad_sport_start">#5C0000</color>
+    <color name="grad_sport_end">#200000</color>
+    <color name="grad_tv_start">#200000</color>
+    <color name="grad_tv_end">#0A0000</color>
+
+    <!-- Misc -->
+    <color name="transparent">#00000000</color>
+    <color name="scrim">#CC000000</color>
+    <color name="scrim_light">#99000000</color>
+    <color name="live_indicator">#E50914</color>
+    <color name="star_gold">#FFD700</color>
+    <color name="divider">#1E1E1E</color>
+</resources>
