@@ -6,3 +6,9 @@ id = "ziGmvtdleyYiarqTeN-VS"
 uri = "file://StreamNova/app/build/outputs/apk/debug/ultragol_v2.0.zip"
 type = "unspecified"
 title = "Ultragol v2.0 — APK (debug)"
+
+[[outputs]]
+id = "IXQQk40o4Jm5erqk9jSwt"
+uri = "file://StreamNova/app/build/outputs/apk/debug/ultragol_v2.0_fixed.zip"
+type = "unspecified"
+title = "Ultragol v2.0 — APK corregida (con nuevo ícono)"

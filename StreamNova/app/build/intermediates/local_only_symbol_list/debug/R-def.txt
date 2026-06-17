@@ -92,6 +92,7 @@ drawable gradient_series
 drawable gradient_sport
 drawable gradient_tv
 drawable ic_launcher_background
+drawable ic_launcher_foreground
 drawable icon_button_bg
 drawable icon_button_small_bg
 drawable info_button_bg
