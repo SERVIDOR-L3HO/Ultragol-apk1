@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.ultragol.app.FavoritesManager;
 import com.ultragol.app.R;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
@@ -37,8 +38,7 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         this.items = items;
     }
 
-    @NonNull
-    @Override
+    @NonNull @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_content_card, parent, false);
         return new ViewHolder(view);
@@ -59,20 +59,47 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
 
         holder.titleText.setText(item.getTitle());
         holder.genreText.setText(item.getGenreYear());
-        holder.ratingText.setText(item.getRatingDisplay());
+        holder.ratingText.setText("\u2B50 " + item.getRating());
         holder.thumbnailEmoji.setText(item.getEmoji());
         holder.badgeView.setText(item.getBadge());
 
-        if (item.isLive()) {
-            holder.badgeView.setBackgroundResource(R.drawable.badge_live);
-        } else if (item.isNew()) {
-            holder.badgeView.setBackgroundResource(R.drawable.badge_new);
-        } else {
-            holder.badgeView.setBackgroundResource(R.drawable.badge_background);
-        }
+        if (item.isLive())       holder.badgeView.setBackgroundResource(R.drawable.badge_live);
+        else if (item.isNew())   holder.badgeView.setBackgroundResource(R.drawable.badge_new);
+        else                     holder.badgeView.setBackgroundResource(R.drawable.badge_background);
         holder.badgeView.setVisibility(View.VISIBLE);
 
+        if (holder.qualityTag != null) {
+            holder.qualityTag.setText(item.isLive() ? "EN VIVO" : "4K");
+            holder.qualityTag.setTextColor(item.isLive() ? 0xFFFF3B00 : 0xFFFF6B00);
+        }
+
+        updateFavBtn(holder, item.getTitle());
+
         holder.itemView.setOnClickListener(v -> showDetailDialog(item, idx));
+
+        if (holder.favoriteBtn != null) {
+            holder.favoriteBtn.setOnClickListener(v -> {
+                boolean added = FavoritesManager.get(context).toggle(item.getTitle());
+                updateFavBtn(holder, item.getTitle());
+                animateHeart(holder.favoriteBtn);
+                Toast.makeText(context,
+                        added ? "❤ Añadido" : "💔 Eliminado",
+                        Toast.LENGTH_SHORT).show();
+            });
+        }
+    }
+
+    private void updateFavBtn(ViewHolder holder, String title) {
+        if (holder.favoriteBtn == null) return;
+        boolean isFav = FavoritesManager.get(context).isFavorite(title);
+        holder.favoriteBtn.setTextColor(isFav ? 0xFFFF4466 : 0x44FF6B8A);
+        holder.favoriteBtn.setText(isFav ? "❤" : "🤍");
+    }
+
+    private void animateHeart(View view) {
+        view.animate().scaleX(1.5f).scaleY(1.5f).setDuration(120)
+            .withEndAction(() -> view.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
+            .start();
     }
 
     private void showDetailDialog(ContentItem item, int gradIdx) {
@@ -91,21 +118,13 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
         ((TextView) dialogView.findViewById(R.id.modalRating)).setText(item.getRating());
         ((TextView) dialogView.findViewById(R.id.modalGenre)).setText(item.getGenre());
         ((TextView) dialogView.findViewById(R.id.modalYear)).setText(item.getYear());
-
         TextView modalBadge = dialogView.findViewById(R.id.modalBadge);
         modalBadge.setText(item.getBadge());
-        if (item.isLive()) {
-            modalBadge.setBackgroundResource(R.drawable.badge_live);
-        } else if (item.isNew()) {
-            modalBadge.setBackgroundResource(R.drawable.badge_new);
-        } else {
-            modalBadge.setBackgroundResource(R.drawable.badge_background);
-        }
+        if (item.isLive())     modalBadge.setBackgroundResource(R.drawable.badge_live);
+        else if (item.isNew()) modalBadge.setBackgroundResource(R.drawable.badge_new);
+        else                   modalBadge.setBackgroundResource(R.drawable.badge_background);
 
-        AlertDialog dialog = new AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create();
-
+        AlertDialog dialog = new AlertDialog.Builder(context).setView(dialogView).create();
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -115,43 +134,38 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             window.setAttributes(lp);
         }
-
-        dialogView.setScaleX(0.85f);
-        dialogView.setScaleY(0.85f);
-        dialogView.setAlpha(0f);
-
+        dialogView.setScaleX(0.85f); dialogView.setScaleY(0.85f); dialogView.setAlpha(0f);
         dialog.show();
-
-        dialogView.animate()
-            .scaleX(1f).scaleY(1f).alpha(1f)
-            .setDuration(220)
-            .setInterpolator(new DecelerateInterpolator(1.5f))
-            .start();
-
+        dialogView.animate().scaleX(1f).scaleY(1f).alpha(1f)
+            .setDuration(220).setInterpolator(new DecelerateInterpolator(1.5f)).start();
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
             Toast.makeText(context, "▶ Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
         });
-        dialogView.findViewById(R.id.btnModalList).setOnClickListener(v ->
-            Toast.makeText(context, "＋ Añadido a Mi Lista", Toast.LENGTH_SHORT).show());
+        dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
+            boolean added = FavoritesManager.get(context).toggle(item.getTitle());
+            Toast.makeText(context, added ? "❤ Añadido a Mi Lista" : "Eliminado de Mi Lista",
+                    Toast.LENGTH_SHORT).show();
+        });
     }
 
-    @Override
-    public int getItemCount() { return items.size(); }
+    @Override public int getItemCount() { return items.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout thumbnailContainer;
-        TextView thumbnailEmoji, titleText, genreText, ratingText, badgeView;
+        TextView thumbnailEmoji, titleText, genreText, ratingText, badgeView, qualityTag, favoriteBtn;
 
         ViewHolder(View itemView) {
             super(itemView);
             thumbnailContainer = itemView.findViewById(R.id.thumbnailContainer);
-            thumbnailEmoji = itemView.findViewById(R.id.thumbnailEmoji);
-            titleText = itemView.findViewById(R.id.titleText);
-            genreText = itemView.findViewById(R.id.genreText);
-            ratingText = itemView.findViewById(R.id.ratingText);
-            badgeView = itemView.findViewById(R.id.badgeView);
+            thumbnailEmoji     = itemView.findViewById(R.id.thumbnailEmoji);
+            titleText          = itemView.findViewById(R.id.titleText);
+            genreText          = itemView.findViewById(R.id.genreText);
+            ratingText         = itemView.findViewById(R.id.ratingText);
+            badgeView          = itemView.findViewById(R.id.badgeView);
+            qualityTag         = itemView.findViewById(R.id.qualityTag);
+            favoriteBtn        = itemView.findViewById(R.id.favoriteBtn);
         }
     }
 }

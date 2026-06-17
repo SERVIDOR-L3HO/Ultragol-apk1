@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+import com.ultragol.app.FavoritesManager;
 import com.ultragol.app.R;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
@@ -26,11 +27,11 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
     private final List<ContentItem> items;
 
     private static final int[][] GRADIENTS = {
-        {0xFF200A00, 0xFF080810},  // sport orange
-        {0xFF1A0A20, 0xFF080810},  // movie purple
-        {0xFF0A1020, 0xFF080810},  // series blue
-        {0xFF200A10, 0xFF080810},  // anime crimson
-        {0xFF0A1818, 0xFF080810}   // dorama teal
+        {0xFF200A00, 0xFF080810},
+        {0xFF1A0A20, 0xFF080810},
+        {0xFF0A1020, 0xFF080810},
+        {0xFF200A10, 0xFF080810},
+        {0xFF0A1818, 0xFF080810}
     };
 
     public BannerAdapter(Context context, List<ContentItem> items) {
@@ -38,8 +39,7 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
         this.items = items;
     }
 
-    @NonNull
-    @Override
+    @NonNull @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.item_banner, parent, false);
         return new ViewHolder(view);
@@ -60,6 +60,8 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
         holder.bannerTitle.setText(item.getTitle());
         holder.bannerDescription.setText(item.getGenre());
         holder.bannerEmoji.setText(item.getEmoji());
+        if (holder.bannerYear != null) holder.bannerYear.setText(item.getYear());
+        if (holder.bannerRating != null) holder.bannerRating.setText("⭐ " + item.getRating());
 
         if (item.isLive()) {
             holder.bannerBadge.setText("EN VIVO");
@@ -72,18 +74,36 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
             holder.bannerBadge.setBackgroundResource(R.drawable.badge_background);
         }
 
+        updateFavBtn(holder, item.getTitle());
+
         holder.btnPlay.setOnClickListener(v ->
             Toast.makeText(context, "▶ Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show());
-        holder.btnInfo.setOnClickListener(v ->
-            showDetailDialog(item, idx));
-        holder.bannerBg.setOnClickListener(v ->
-            showDetailDialog(item, idx));
+        holder.btnInfo.setOnClickListener(v -> showDetailDialog(item, idx));
+        holder.bannerBg.setOnClickListener(v -> showDetailDialog(item, idx));
+        holder.btnFavorite.setOnClickListener(v -> {
+            boolean added = FavoritesManager.get(context).toggle(item.getTitle());
+            updateFavBtn(holder, item.getTitle());
+            animateHeart(holder.btnFavorite);
+            Toast.makeText(context, added ? "❤ Añadido a Mi Lista" : "💔 Eliminado de Mi Lista",
+                    Toast.LENGTH_SHORT).show();
+        });
+    }
+
+    private void updateFavBtn(ViewHolder holder, String title) {
+        boolean isFav = FavoritesManager.get(context).isFavorite(title);
+        holder.btnFavorite.setTextColor(isFav ? 0xFFFF4466 : 0x55FF6B8A);
+        holder.btnFavorite.setText(isFav ? "❤" : "🤍");
+    }
+
+    private void animateHeart(View view) {
+        view.animate().scaleX(1.4f).scaleY(1.4f).setDuration(120)
+            .withEndAction(() -> view.animate().scaleX(1f).scaleY(1f).setDuration(100).start())
+            .start();
     }
 
     private void showDetailDialog(ContentItem item, int gradIdx) {
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_content_detail, null);
 
-        // Hero background
         RelativeLayout heroBg = dialogView.findViewById(R.id.modalHeroBg);
         int safeIdx = gradIdx % GRADIENTS.length;
         GradientDrawable gradient = new GradientDrawable(
@@ -93,33 +113,18 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
         gradient.setCornerRadius(context.getResources().getDimensionPixelSize(R.dimen.card_corner_radius_large));
         heroBg.setBackground(gradient);
 
-        // Populate views
-        TextView modalEmoji = dialogView.findViewById(R.id.modalEmoji);
-        TextView modalTitle = dialogView.findViewById(R.id.modalTitle);
-        TextView modalRating = dialogView.findViewById(R.id.modalRating);
-        TextView modalGenre = dialogView.findViewById(R.id.modalGenre);
-        TextView modalYear = dialogView.findViewById(R.id.modalYear);
+        ((TextView) dialogView.findViewById(R.id.modalEmoji)).setText(item.getEmoji());
+        ((TextView) dialogView.findViewById(R.id.modalTitle)).setText(item.getTitle());
+        ((TextView) dialogView.findViewById(R.id.modalRating)).setText(item.getRating());
+        ((TextView) dialogView.findViewById(R.id.modalGenre)).setText(item.getGenre());
+        ((TextView) dialogView.findViewById(R.id.modalYear)).setText(item.getYear());
         TextView modalBadge = dialogView.findViewById(R.id.modalBadge);
-
-        modalEmoji.setText(item.getEmoji());
-        modalTitle.setText(item.getTitle());
-        modalRating.setText(item.getRating());
-        modalGenre.setText(item.getGenre());
-        modalYear.setText(item.getYear());
         modalBadge.setText(item.getBadge());
+        if (item.isLive())      modalBadge.setBackgroundResource(R.drawable.badge_live);
+        else if (item.isNew())  modalBadge.setBackgroundResource(R.drawable.badge_new);
+        else                    modalBadge.setBackgroundResource(R.drawable.badge_background);
 
-        if (item.isLive()) {
-            modalBadge.setBackgroundResource(R.drawable.badge_live);
-        } else if (item.isNew()) {
-            modalBadge.setBackgroundResource(R.drawable.badge_new);
-        } else {
-            modalBadge.setBackgroundResource(R.drawable.badge_background);
-        }
-
-        AlertDialog dialog = new AlertDialog.Builder(context)
-            .setView(dialogView)
-            .create();
-
+        AlertDialog dialog = new AlertDialog.Builder(context).setView(dialogView).create();
         Window window = dialog.getWindow();
         if (window != null) {
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
@@ -129,45 +134,41 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             window.setAttributes(lp);
         }
-
-        dialogView.setScaleX(0.85f);
-        dialogView.setScaleY(0.85f);
-        dialogView.setAlpha(0f);
-
+        dialogView.setScaleX(0.85f); dialogView.setScaleY(0.85f); dialogView.setAlpha(0f);
         dialog.show();
-
-        dialogView.animate()
-            .scaleX(1f).scaleY(1f).alpha(1f)
-            .setDuration(220)
-            .setInterpolator(new DecelerateInterpolator(1.5f))
-            .start();
-
+        dialogView.animate().scaleX(1f).scaleY(1f).alpha(1f)
+            .setDuration(220).setInterpolator(new DecelerateInterpolator(1.5f)).start();
         dialogView.findViewById(R.id.btnClose).setOnClickListener(v -> dialog.dismiss());
         dialogView.findViewById(R.id.btnModalPlay).setOnClickListener(v -> {
             dialog.dismiss();
             Toast.makeText(context, "▶ Reproduciendo: " + item.getTitle(), Toast.LENGTH_SHORT).show();
         });
         dialogView.findViewById(R.id.btnModalList).setOnClickListener(v -> {
-            Toast.makeText(context, "＋ Añadido a Mi Lista", Toast.LENGTH_SHORT).show();
+            boolean added = FavoritesManager.get(context).toggle(item.getTitle());
+            Toast.makeText(context, added ? "❤ Añadido a Mi Lista" : "Eliminado de Mi Lista",
+                    Toast.LENGTH_SHORT).show();
         });
     }
 
-    @Override
-    public int getItemCount() { return items.size(); }
+    @Override public int getItemCount() { return items.size(); }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RelativeLayout bannerBg;
-        TextView bannerTitle, bannerDescription, bannerEmoji, bannerBadge, btnPlay, btnInfo;
+        TextView bannerTitle, bannerDescription, bannerEmoji, bannerBadge;
+        TextView bannerYear, bannerRating, btnPlay, btnInfo, btnFavorite;
 
         ViewHolder(View itemView) {
             super(itemView);
-            bannerBg = itemView.findViewById(R.id.bannerBg);
-            bannerTitle = itemView.findViewById(R.id.bannerTitle);
+            bannerBg          = itemView.findViewById(R.id.bannerBg);
+            bannerTitle       = itemView.findViewById(R.id.bannerTitle);
             bannerDescription = itemView.findViewById(R.id.bannerDescription);
-            bannerEmoji = itemView.findViewById(R.id.bannerEmoji);
-            bannerBadge = itemView.findViewById(R.id.bannerBadge);
-            btnPlay = itemView.findViewById(R.id.btnPlay);
-            btnInfo = itemView.findViewById(R.id.btnInfo);
+            bannerEmoji       = itemView.findViewById(R.id.bannerEmoji);
+            bannerBadge       = itemView.findViewById(R.id.bannerBadge);
+            bannerYear        = itemView.findViewById(R.id.bannerYear);
+            bannerRating      = itemView.findViewById(R.id.bannerRating);
+            btnPlay           = itemView.findViewById(R.id.btnPlay);
+            btnInfo           = itemView.findViewById(R.id.btnInfo);
+            btnFavorite       = itemView.findViewById(R.id.btnFavorite);
         }
     }
 }

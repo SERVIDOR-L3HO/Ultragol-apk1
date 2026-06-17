@@ -76,7 +76,7 @@
             android:orientation="vertical"
             android:paddingBottom="16dp">
 
-            <!-- Hero banner – taller for portrait -->
+            <!-- Hero banner -->
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/heroBanner"
                 android:layout_width="match_parent"
@@ -109,6 +109,7 @@
                     android:gravity="center_vertical">
 
                     <TextView
+                        android:id="@+id/chipAll"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -118,9 +119,12 @@
                         android:textStyle="bold"
                         android:background="@drawable/chip_active"
                         android:paddingStart="16dp"
-                        android:paddingEnd="16dp"/>
+                        android:paddingEnd="16dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/chipSports"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -130,9 +134,12 @@
                         android:background="@drawable/chip_inactive"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
-                        android:layout_marginStart="8dp"/>
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/chipMovies"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -142,9 +149,12 @@
                         android:background="@drawable/chip_inactive"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
-                        android:layout_marginStart="8dp"/>
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/chipSeries"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -154,9 +164,12 @@
                         android:background="@drawable/chip_inactive"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
-                        android:layout_marginStart="8dp"/>
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/chipAnime"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -166,9 +179,12 @@
                         android:background="@drawable/chip_inactive"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
-                        android:layout_marginStart="8dp"/>
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                     <TextView
+                        android:id="@+id/chipDoramas"
                         android:layout_width="wrap_content"
                         android:layout_height="34dp"
                         android:gravity="center"
@@ -178,7 +194,9 @@
                         android:background="@drawable/chip_inactive"
                         android:paddingStart="14dp"
                         android:paddingEnd="14dp"
-                        android:layout_marginStart="8dp"/>
+                        android:layout_marginStart="8dp"
+                        android:clickable="true"
+                        android:focusable="true"/>
 
                 </LinearLayout>
             </HorizontalScrollView>
@@ -197,14 +215,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"/>
 
-            <!-- Recommended -->
+            <!-- Recommended / Movies / Filter -->
             <include layout="@layout/section_row"
                 android:id="@+id/rowRecommended"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"/>
 
-            <!-- Anime -->
+            <!-- Anime / Doramas -->
             <include layout="@layout/section_row"
                 android:id="@+id/rowAnime"
                 android:layout_width="match_parent"
