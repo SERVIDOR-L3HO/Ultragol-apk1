@@ -1,4 +1,4 @@
-package com.streamnova.app;
+package com.ultragol.app;
 
 import android.os.Bundle;
 import android.view.View;
@@ -6,8 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigationrail.NavigationRailView;
-import com.streamnova.app.fragments.ContentFragment;
-import com.streamnova.app.fragments.HomeFragment;
+import com.ultragol.app.fragments.ContentFragment;
+import com.ultragol.app.fragments.HomeFragment;
 
 public class MainActivity extends AppCompatActivity {
 

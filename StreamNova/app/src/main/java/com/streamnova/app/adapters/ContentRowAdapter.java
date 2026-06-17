@@ -1,4 +1,4 @@
-package com.streamnova.app.adapters;
+package com.ultragol.app.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -16,8 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.streamnova.app.R;
-import com.streamnova.app.models.ContentItem;
+import com.ultragol.app.R;
+import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
 public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.ViewHolder> {
@@ -26,10 +26,10 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
     private final List<ContentItem> items;
 
     private static final int[] GRADIENT_STARTS = {
-        0xFF3D0000, 0xFF1A1A1A, 0xFF3D0A0A, 0xFF2A1010, 0xFF5C0000, 0xFF200000
+        0xFF1A0A20, 0xFF0A1020, 0xFF200A10, 0xFF0A1818, 0xFF200A00, 0xFF0A1020
     };
     private static final int[] GRADIENT_ENDS = {
-        0xFF0A0000, 0xFF050505, 0xFF1A0000, 0xFF0A0505, 0xFF200000, 0xFF0A0A0A
+        0xFF080810, 0xFF080810, 0xFF080810, 0xFF080810, 0xFF080810, 0xFF080810
     };
 
     public ContentRowAdapter(Context context, List<ContentItem> items) {
@@ -111,7 +111,7 @@ public class ContentRowAdapter extends RecyclerView.Adapter<ContentRowAdapter.Vi
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             window.setDimAmount(0.75f);
             WindowManager.LayoutParams lp = window.getAttributes();
-            lp.width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.70f);
+            lp.width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.88f);
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             window.setAttributes(lp);
         }

@@ -1,4 +1,4 @@
-package com.streamnova.app.fragments;
+package com.ultragol.app.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -10,10 +10,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.streamnova.app.R;
-import com.streamnova.app.adapters.ContentGridAdapter;
-import com.streamnova.app.models.ContentData;
-import com.streamnova.app.models.ContentItem;
+import com.ultragol.app.R;
+import com.ultragol.app.adapters.ContentGridAdapter;
+import com.ultragol.app.models.ContentData;
+import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
 public class ContentFragment extends Fragment {
@@ -71,8 +71,10 @@ public class ContentFragment extends Fragment {
             spanCount = 5; // large tablet
         } else if (screenWidthDp >= 600) {
             spanCount = 4; // tablet
+        } else if (screenWidthDp >= 400) {
+            spanCount = 3; // phone portrait large
         } else {
-            spanCount = 3; // phone landscape
+            spanCount = 2; // phone portrait small
         }
 
         switch (contentType) {

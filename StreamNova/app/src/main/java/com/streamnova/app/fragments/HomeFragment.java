@@ -1,4 +1,4 @@
-package com.streamnova.app.fragments;
+package com.ultragol.app.fragments;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,10 +14,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
-import com.streamnova.app.R;
-import com.streamnova.app.adapters.BannerAdapter;
-import com.streamnova.app.adapters.ContentRowAdapter;
-import com.streamnova.app.models.ContentData;
+import com.ultragol.app.R;
+import com.ultragol.app.adapters.BannerAdapter;
+import com.ultragol.app.adapters.ContentRowAdapter;
+import com.ultragol.app.models.ContentData;
 
 public class HomeFragment extends Fragment {
 

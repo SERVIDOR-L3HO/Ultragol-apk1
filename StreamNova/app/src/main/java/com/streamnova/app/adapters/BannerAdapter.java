@@ -1,4 +1,4 @@
-package com.streamnova.app.adapters;
+package com.ultragol.app.adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -16,8 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-import com.streamnova.app.R;
-import com.streamnova.app.models.ContentItem;
+import com.ultragol.app.R;
+import com.ultragol.app.models.ContentItem;
 import java.util.List;
 
 public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder> {
@@ -26,11 +26,11 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
     private final List<ContentItem> items;
 
     private static final int[][] GRADIENTS = {
-        {0xFF3D0000, 0xFF0A0000},
-        {0xFF200000, 0xFF080000},
-        {0xFF3D0A0A, 0xFF1A0000},
-        {0xFF5C0000, 0xFF200000},
-        {0xFF2A0000, 0xFF0A0000}
+        {0xFF200A00, 0xFF080810},  // sport orange
+        {0xFF1A0A20, 0xFF080810},  // movie purple
+        {0xFF0A1020, 0xFF080810},  // series blue
+        {0xFF200A10, 0xFF080810},  // anime crimson
+        {0xFF0A1818, 0xFF080810}   // dorama teal
     };
 
     public BannerAdapter(Context context, List<ContentItem> items) {
@@ -125,7 +125,7 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.ViewHolder
             window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
             window.setDimAmount(0.75f);
             WindowManager.LayoutParams lp = window.getAttributes();
-            lp.width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.75f);
+            lp.width = (int) (context.getResources().getDisplayMetrics().widthPixels * 0.90f);
             lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
             window.setAttributes(lp);
         }

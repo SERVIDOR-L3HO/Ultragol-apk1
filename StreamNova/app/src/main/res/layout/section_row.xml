@@ -12,13 +12,14 @@
         android:paddingStart="14dp"
         android:paddingEnd="14dp"
         android:paddingTop="14dp"
-        android:paddingBottom="6dp">
+        android:paddingBottom="8dp">
 
+        <!-- Orange accent bar -->
         <View
             android:layout_width="3dp"
-            android:layout_height="16dp"
-            android:background="#E50914"
-            android:layout_marginEnd="8dp"/>
+            android:layout_height="18dp"
+            android:background="@drawable/accent_bar"
+            android:layout_marginEnd="9dp"/>
 
         <TextView
             android:id="@+id/sectionTitle"
@@ -27,7 +28,7 @@
             android:layout_weight="1"
             android:text="Sección"
             android:textColor="#FFFFFF"
-            android:textSize="14sp"
+            android:textSize="15sp"
             android:textStyle="bold"
             android:fontFamily="sans-serif-medium"/>
 
@@ -36,7 +37,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/see_all"
-            android:textColor="#E50914"
+            android:textColor="@color/color_primary"
             android:textSize="12sp"
             android:clickable="true"
             android:focusable="true"/>

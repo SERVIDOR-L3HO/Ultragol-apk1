@@ -1,4 +1,4 @@
-package com.streamnova.app.models;
+package com.ultragol.app.models;
 
 public class ContentItem {
     public static final int TYPE_MOVIE = 0;
@@ -43,5 +43,5 @@ public class ContentItem {
     public boolean isLive() { return isLive; }
     public String getBadge() { return badge; }
     public String getGenreYear() { return genre + " • " + year; }
-    public String getRatingDisplay() { return "⭐ " + rating; }
+    public String getRatingDisplay() { return "\u2B50 " + rating; }
 }

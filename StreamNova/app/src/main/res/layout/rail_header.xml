@@ -7,34 +7,18 @@
     android:paddingTop="16dp"
     android:paddingBottom="16dp">
 
-    <TextView
+    <ImageView
         android:layout_width="44dp"
         android:layout_height="44dp"
-        android:gravity="center"
-        android:text="⚽"
-        android:textSize="26sp"
-        android:background="@drawable/logo_circle"/>
+        android:src="@mipmap/ic_launcher_round"
+        android:scaleType="centerCrop"/>
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ULTRA"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-black"
-        android:letterSpacing="0.1"
+    <ImageView
+        android:layout_width="60dp"
+        android:layout_height="18dp"
+        android:src="@drawable/ultragol_logo"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
         android:layout_marginTop="6dp"/>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="GOL"
-        android:textColor="#E50914"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:fontFamily="sans-serif-black"
-        android:letterSpacing="0.1"
-        android:layout_marginTop="-3dp"/>
 
 </LinearLayout>
