@@ -129,6 +129,7 @@ id btnEpPlus
 id btnFavorite
 id btnInfo
 id btnLater
+id btnLoadEpisode
 id btnMarkAll
 id btnModalList
 id btnModalPlay
@@ -136,9 +137,6 @@ id btnPlay
 id btnPlayerBack
 id btnSeasonMinus
 id btnSeasonPlus
-id btnServer1
-id btnServer2
-id btnServer3
 id btnSignOut
 id btnUpdate
 id chipAll
@@ -152,6 +150,7 @@ id emptyList
 id emptyState
 id emptyText
 id episodeSection
+id errorServers
 id favoriteBtn
 id filterChips
 id filterIcon
@@ -160,7 +159,9 @@ id fullscreenContainer
 id genreText
 id glowCircle
 id heroBanner
+id langTabs
 id loadingContainer
+id loadingServers
 id logoContainer
 id logoIcon
 id menuHistory
@@ -206,6 +207,7 @@ id searchInput
 id searchResults
 id sectionTitle
 id seeAll
+id serverContainer
 id serverDialogTitle
 id sortIcon
 id srBadge
@@ -213,6 +215,9 @@ id srGenreYear
 id srImage
 id srRating
 id srTitle
+id tabEspanol
+id tabLatino
+id tabSubtitulado
 id thumbnailContainer
 id thumbnailImage
 id titleText
