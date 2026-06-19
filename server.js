@@ -21,6 +21,7 @@ const upload = multer({ storage });
 
 const VERSION_FILE = path.join(__dirname, 'version.json');
 const ULTRA1_VERSION_FILE = path.join(__dirname, 'version_ultra1.json');
+const ULTRAGOL1_VERSION_FILE = path.join(__dirname, 'version.json');
 
 function readVersion(file) {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -64,6 +65,24 @@ app.get('/ultra1/download', (req, res) => {
         return res.status(404).json({ error: 'APK no encontrado' });
     }
     res.download(apkPath, 'ultra1.apk');
+});
+
+// ── Ultragol1 endpoints ───────────────────────────────────────────────────────
+
+app.get('/ultragol1/version', (req, res) => {
+    try {
+        res.json(readVersion(ULTRAGOL1_VERSION_FILE));
+    } catch {
+        res.status(500).json({ error: 'No se pudo leer la versión' });
+    }
+});
+
+app.get('/ultragol1/download', (req, res) => {
+    const apkPath = path.join(__dirname, 'apks', 'ultragol1.apk');
+    if (!fs.existsSync(apkPath)) {
+        return res.status(404).json({ error: 'APK no encontrado' });
+    }
+    res.download(apkPath, 'ultragol1.apk');
 });
 
 // ── Admin endpoints ───────────────────────────────────────────────────────────

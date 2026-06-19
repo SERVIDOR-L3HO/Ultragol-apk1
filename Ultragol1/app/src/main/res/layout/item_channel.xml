@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="wrap_content"
+    android:orientation="vertical" android:layout_margin="6dp"
+    android:background="@drawable/card_bg" android:padding="12dp"
+    android:clickable="true" android:focusable="true">
+    <ImageView android:id="@+id/channelLogo"
+        android:layout_width="match_parent" android:layout_height="70dp"
+        android:scaleType="centerInside" android:padding="6dp"/>
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="#14FFFFFF" android:layout_marginTop="8dp"/>
+    <TextView android:id="@+id/channelName"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="8dp" android:textColor="#FFFFFF" android:textSize="12sp"
+        android:fontFamily="sans-serif-bold" android:maxLines="2" android:gravity="center"/>
+    <TextView android:id="@+id/channelCountry"
+        android:layout_width="wrap_content" android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal" android:layout_marginTop="2dp"
+        android:textColor="#77FFFFFF" android:textSize="10sp"/>
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="horizontal" android:layout_marginTop="6dp"
+        android:gravity="center_horizontal">
+        <TextView android:id="@+id/channelCategory"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:background="@drawable/badge_inactive" android:textColor="#AAFFFFFF"
+            android:textSize="9sp" android:paddingStart="6dp" android:paddingEnd="6dp"
+            android:paddingTop="2dp" android:paddingBottom="2dp"/>
+        <TextView android:id="@+id/channelLive"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginStart="6dp" android:background="@drawable/badge_live"
+            android:textColor="#FFFFFF" android:textSize="9sp" android:text="● EN VIVO"
+            android:paddingStart="6dp" android:paddingEnd="6dp"
+            android:paddingTop="2dp" android:paddingBottom="2dp"
+            android:fontFamily="sans-serif-bold"/>
+    </LinearLayout>
+</LinearLayout>

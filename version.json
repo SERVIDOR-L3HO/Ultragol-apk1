@@ -1,8 +1,9 @@
 {
-  "versionCode": 3,
-  "versionName": "3.0",
-  "changelog": "- Servidores de streaming reales (Latino, Español, Subtitulado)\n- Selección dinámica de servidor desde la API\n- Diseño glassmorphism naranja/negro/gris\n- Soporte para Peliculas, Series, Anime, Doramas\n- Reproductor WebView con pantalla completa\n- Sin crashes",
+  "versionCode": 4,
+  "versionName": "1.0",
+  "appName": "Ultragol1",
+  "changelog": "- App completa rediseñada: Películas, Series, Anime, Doramas, Deportes/TV en vivo\n- Diseño Netflix/Disney+ con glassmorphism naranja/negro\n- Banner dinámico con contenido TMDb\n- Reproductor de streaming con múltiples servidores\n- TV en vivo con canales deportivos\n- Búsqueda integrada\n- Favoritos locales",
   "downloadUrl": "https://ultragol-update-server--maricarmen43549.replit.app/download",
   "forceUpdate": false,
-  "updatedAt": "2026-06-19T16:17:00.000Z"
+  "updatedAt": "2026-06-19T17:11:00.000Z"
 }

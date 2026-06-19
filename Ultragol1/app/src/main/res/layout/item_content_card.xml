@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="110dp" android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginStart="4dp" android:layout_marginEnd="4dp"
+    android:clickable="true" android:focusable="true">
+    <FrameLayout android:layout_width="110dp" android:layout_height="155dp"
+        android:background="@drawable/card_bg">
+        <ImageView android:id="@+id/cardPoster"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+        <View android:layout_width="match_parent" android:layout_height="48dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_detail_bottom"/>
+        <TextView android:id="@+id/cardBadge"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="top|end" android:layout_margin="5dp"
+            android:background="@drawable/badge_inactive" android:text="HD"
+            android:textColor="#FFFFFF" android:textSize="9sp"
+            android:paddingStart="5dp" android:paddingEnd="5dp"
+            android:paddingTop="2dp" android:paddingBottom="2dp"/>
+        <TextView android:id="@+id/cardRating"
+            android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="5dp" android:textColor="@color/orange_primary"
+            android:textSize="10sp" android:fontFamily="sans-serif-bold"/>
+    </FrameLayout>
+    <TextView android:id="@+id/cardTitle"
+        android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:layout_marginTop="5dp" android:textColor="#CCFFFFFF" android:textSize="11sp"
+        android:maxLines="2" android:ellipsize="end" android:lineSpacingMultiplier="1.2"/>
+</LinearLayout>
