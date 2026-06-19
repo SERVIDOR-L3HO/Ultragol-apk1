@@ -1,0 +1,220 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.ultragol.app"
+4    android:versionCode="2"
+5    android:versionName="2.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+9        android:targetSdkVersion="33" />
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:4:5-67
+11-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:4:22-64
+12    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+12-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:5:5-79
+12-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:5:22-76
+13    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+13-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:6:5-83
+13-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:6:22-80
+14    <uses-permission
+14-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:7:5-8:38
+15        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+15-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:7:22-78
+16        android:maxSdkVersion="28" />
+16-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:8:9-35
+17    <uses-permission
+17-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:9:5-10:38
+18        android:name="android.permission.READ_EXTERNAL_STORAGE"
+18-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:9:22-77
+19        android:maxSdkVersion="32" />
+19-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:10:9-35
+20
+21    <!-- TV support -->
+22    <uses-feature
+22-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:13:5-87
+23        android:name="android.software.leanback"
+23-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:13:19-59
+24        android:required="false" />
+24-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:13:60-84
+25    <uses-feature
+25-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:14:5-90
+26        android:name="android.hardware.touchscreen"
+26-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:14:19-62
+27        android:required="false" />
+27-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:14:63-87
+28
+29    <permission
+29-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:22:5-24:47
+30        android:name="com.ultragol.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+30-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:23:9-81
+31        android:protectionLevel="signature" />
+31-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:24:9-44
+32
+33    <uses-permission android:name="com.ultragol.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+33-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:26:5-97
+33-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:26:22-94
+34
+35    <application
+35-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:16:5-67:19
+36        android:allowBackup="true"
+36-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:17:9-35
+37        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+37-->[androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:28:18-86
+38        android:banner="@drawable/gradient_hero"
+38-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:23:9-49
+39        android:debuggable="true"
+40        android:extractNativeLibs="true"
+41        android:icon="@mipmap/ic_launcher"
+41-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:18:9-43
+42        android:label="@string/app_name"
+42-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:19:9-41
+43        android:roundIcon="@mipmap/ic_launcher_round"
+43-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:20:9-54
+44        android:supportsRtl="true"
+44-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:21:9-35
+45        android:theme="@style/Theme.Ultragol" >
+45-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:22:9-46
+46        <activity
+46-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:25:9-35:20
+47            android:name="com.ultragol.app.SplashActivity"
+47-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:26:13-43
+48            android:exported="true"
+48-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:27:13-36
+49            android:screenOrientation="portrait"
+49-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:28:13-49
+50            android:theme="@style/Theme.Ultragol.Splash" >
+50-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:29:13-57
+51            <intent-filter>
+51-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:30:13-34:29
+52                <action android:name="android.intent.action.MAIN" />
+52-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:31:17-69
+52-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:31:25-66
+53
+54                <category android:name="android.intent.category.LAUNCHER" />
+54-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:32:17-77
+54-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:32:27-74
+55                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />
+55-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:33:17-86
+55-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:33:27-83
+56            </intent-filter>
+57        </activity>
+58        <activity
+58-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:37:9-41:58
+59            android:name="com.ultragol.app.MainActivity"
+59-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:38:13-41
+60            android:exported="false"
+60-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:39:13-37
+61            android:screenOrientation="portrait"
+61-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:40:13-49
+62            android:windowSoftInputMode="adjustResize" />
+62-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:41:13-55
+63        <activity
+63-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:43:9-47:71
+64            android:name="com.ultragol.app.SearchActivity"
+64-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:44:13-43
+65            android:exported="false"
+65-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:45:13-37
+66            android:screenOrientation="portrait"
+66-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:46:13-49
+67            android:windowSoftInputMode="stateVisible|adjustResize" />
+67-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:47:13-68
+68        <activity
+68-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:49:9-55:53
+69            android:name="com.ultragol.app.PlayerActivity"
+69-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:50:13-43
+70            android:configChanges="orientation|screenSize|keyboardHidden"
+70-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:54:13-74
+71            android:exported="false"
+71-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:51:13-37
+72            android:hardwareAccelerated="true"
+72-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:52:13-47
+73            android:screenOrientation="sensor"
+73-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:53:13-47
+74            android:theme="@style/Theme.Ultragol" />
+74-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:55:13-50
+75
+76        <provider
+77            android:name="androidx.core.content.FileProvider"
+77-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:58:13-62
+78            android:authorities="com.ultragol.app.fileprovider"
+78-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:59:13-64
+79            android:exported="false"
+79-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:60:13-37
+80            android:grantUriPermissions="true" >
+80-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:61:13-47
+81            <meta-data
+81-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:62:13-64:54
+82                android:name="android.support.FILE_PROVIDER_PATHS"
+82-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:63:17-67
+83                android:resource="@xml/file_paths" />
+83-->/home/runner/workspace/ultra1/app/src/main/AndroidManifest.xml:64:17-51
+84        </provider>
+85        <provider
+85-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:24:9-32:20
+86            android:name="androidx.startup.InitializationProvider"
+86-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:25:13-67
+87            android:authorities="com.ultragol.app.androidx-startup"
+87-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:26:13-68
+88            android:exported="false" >
+88-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:27:13-37
+89            <meta-data
+89-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:29:13-31:52
+90                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+90-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:30:17-75
+91                android:value="androidx.startup" />
+91-->[androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:31:17-49
+92            <meta-data
+92-->[androidx.lifecycle:lifecycle-process:2.6.1] /home/runner/.gradle/caches/transforms-3/71ebe3137e8152bf99755c3b0c94f78e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:29:13-31:52
+93                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+93-->[androidx.lifecycle:lifecycle-process:2.6.1] /home/runner/.gradle/caches/transforms-3/71ebe3137e8152bf99755c3b0c94f78e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:30:17-78
+94                android:value="androidx.startup" />
+94-->[androidx.lifecycle:lifecycle-process:2.6.1] /home/runner/.gradle/caches/transforms-3/71ebe3137e8152bf99755c3b0c94f78e/transformed/jetified-lifecycle-process-2.6.1/AndroidManifest.xml:31:17-49
+95            <meta-data
+95-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:29:13-31:52
+96                android:name="androidx.profileinstaller.ProfileInstallerInitializer"
+96-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:30:17-85
+97                android:value="androidx.startup" />
+97-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:31:17-49
+98        </provider>
+99
+100        <receiver
+100-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:34:9-52:20
+101            android:name="androidx.profileinstaller.ProfileInstallReceiver"
+101-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:35:13-76
+102            android:directBootAware="false"
+102-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:36:13-44
+103            android:enabled="true"
+103-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:37:13-35
+104            android:exported="true"
+104-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:38:13-36
+105            android:permission="android.permission.DUMP" >
+105-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:39:13-57
+106            <intent-filter>
+106-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:40:13-42:29
+107                <action android:name="androidx.profileinstaller.action.INSTALL_PROFILE" />
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:17-91
+107-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:41:25-88
+108            </intent-filter>
+109            <intent-filter>
+109-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:43:13-45:29
+110                <action android:name="androidx.profileinstaller.action.SKIP_FILE" />
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:17-85
+110-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:44:25-82
+111            </intent-filter>
+112            <intent-filter>
+112-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:46:13-48:29
+113                <action android:name="androidx.profileinstaller.action.SAVE_PROFILE" />
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:17-88
+113-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:47:25-85
+114            </intent-filter>
+115            <intent-filter>
+115-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:49:13-51:29
+116                <action android:name="androidx.profileinstaller.action.BENCHMARK_OPERATION" />
+116-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:17-95
+116-->[androidx.profileinstaller:profileinstaller:1.3.0] /home/runner/.gradle/caches/transforms-3/c25e5488006b1000142eee102d483a6e/transformed/jetified-profileinstaller-1.3.0/AndroidManifest.xml:50:25-92
+117            </intent-filter>
+118        </receiver>
+119    </application>
+120
+121</manifest>

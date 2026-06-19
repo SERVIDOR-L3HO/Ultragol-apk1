@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="card_corner_radius_large">18dp</dimen>
+    <dimen name="card_elevation">10dp</dimen>
+    <dimen name="card_width_portrait">130dp</dimen>
+    <dimen name="card_width_landscape">200dp</dimen>
+    <dimen name="card_height_portrait">200dp</dimen>
+    <dimen name="card_height_landscape">140dp</dimen>
+    <dimen name="banner_height">300dp</dimen>
+    <dimen name="section_spacing">20dp</dimen>
+    <dimen name="item_spacing">10dp</dimen>
+    <dimen name="content_padding">16dp</dimen>
+    <dimen name="nav_height">62dp</dimen>
+    <dimen name="badge_corner_radius">5dp</dimen>
+    <dimen name="search_corner_radius">24dp</dimen>
+    <dimen name="bottom_nav_icon_size">24dp</dimen>
+    <dimen name="modal_corner_radius">20dp</dimen>
+    <dimen name="glass_border_width">1dp</dimen>
+    <dimen name="topbar_height">56dp</dimen>
+    <dimen name="logo_height">32dp</dimen>
+</resources>
