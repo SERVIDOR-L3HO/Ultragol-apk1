@@ -26,18 +26,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setupDrawer() {
-        // Close button
         View close = drawerOverlay.findViewById(R.id.drawerClose);
         if (close != null) close.setOnClickListener(v -> hideMenu());
 
-        // Search inside drawer
         View search = drawerOverlay.findViewById(R.id.drawerSearch);
         if (search != null) search.setOnClickListener(v -> {
             hideMenu();
             startActivity(new Intent(this, SearchActivity.class));
         });
 
-        // Nav items
+        // ── Nav items ──
         View navInicio  = drawerOverlay.findViewById(R.id.navInicio);
         View navSeries  = drawerOverlay.findViewById(R.id.navSeries);
         View navMovies  = drawerOverlay.findViewById(R.id.navMovies);
@@ -49,11 +47,53 @@ public class MainActivity extends AppCompatActivity {
         if (navSeries  != null) navSeries.setOnClickListener(v  -> navigate(new SeriesFragment()));
         if (navMovies  != null) navMovies.setOnClickListener(v  -> navigate(new MoviesFragment()));
         if (navAnime   != null) navAnime.setOnClickListener(v   -> navigate(new AnimeFragment()));
-        if (navDoramas != null) navDoramas.setOnClickListener(v -> navigate(new SportsFragment()));
+        if (navDoramas != null) navDoramas.setOnClickListener(v -> navigate(new DoramasFragment()));
         if (navSearch  != null) navSearch.setOnClickListener(v  -> {
             hideMenu();
             startActivity(new Intent(this, SearchActivity.class));
         });
+
+        // ── Plataformas ──
+        // TMDB watch provider IDs (region MX)
+        // Netflix=8, Prime Video=119, Disney+=337, Apple TV+=350,
+        // Hulu=15, HBO Max=1899, Crunchyroll=283, At-X=1408, Tokyo MX=absent→use anime
+        View platNetflix    = drawerOverlay.findViewById(R.id.platNetflix);
+        View platPrime      = drawerOverlay.findViewById(R.id.platPrime);
+        View platDisney     = drawerOverlay.findViewById(R.id.platDisney);
+        View platApple      = drawerOverlay.findViewById(R.id.platApple);
+        View platHulu       = drawerOverlay.findViewById(R.id.platHulu);
+        View platHbo        = drawerOverlay.findViewById(R.id.platHbo);
+        View platCrunchyroll= drawerOverlay.findViewById(R.id.platCrunchyroll);
+        View platAtx        = drawerOverlay.findViewById(R.id.platAtx);
+        View platTokyoMx    = drawerOverlay.findViewById(R.id.platTokyoMx);
+
+        if (platNetflix != null)
+            platNetflix.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🔴 Netflix", 8, "all")));
+        if (platPrime != null)
+            platPrime.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🔵 Prime Video", 119, "all")));
+        if (platDisney != null)
+            platDisney.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🔷 Disney+", 337, "all")));
+        if (platApple != null)
+            platApple.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("⬜ Apple TV+", 350, "all")));
+        if (platHulu != null)
+            platHulu.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🟢 Hulu", 15, "all")));
+        if (platHbo != null)
+            platHbo.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🟣 HBO Max", 1899, "all")));
+        if (platCrunchyroll != null)
+            platCrunchyroll.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("🟠 Crunchyroll", 283, "anime")));
+        if (platAtx != null)
+            platAtx.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("⬜ At-X", 1408, "anime")));
+        if (platTokyoMx != null)
+            platTokyoMx.setOnClickListener(v ->
+                navigate(PlatformFragment.newInstance("📺 Tokyo MX", 2359, "anime")));
     }
 
     private void navigate(Fragment fragment) {

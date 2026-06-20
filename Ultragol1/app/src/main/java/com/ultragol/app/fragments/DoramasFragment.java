@@ -14,16 +14,17 @@ import com.ultragol.app.network.TmdbApi;
 import java.util.*;
 import java.util.concurrent.Executors;
 
-public class AnimeFragment extends Fragment {
+public class DoramasFragment extends Fragment {
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
         return i.inflate(R.layout.fragment_grid, p, false);
     }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle s) {
         super.onViewCreated(view, s);
         TextView title = view.findViewById(R.id.gridTitle);
-        if (title != null) title.setText("🎌 Anime & Doramas");
+        if (title != null) title.setText("🎭 Doramas");
         RecyclerView grid = view.findViewById(R.id.contentGrid);
         ProgressBar pb = view.findViewById(R.id.gridLoading);
         List<ContentItem> items = new ArrayList<>();
@@ -33,9 +34,17 @@ public class AnimeFragment extends Fragment {
         if (pb != null) pb.setVisibility(View.VISIBLE);
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                List<ContentItem> r = TmdbApi.fetchAnime();
-                requireActivity().runOnUiThread(() -> { items.addAll(r); adapter.notifyDataSetChanged(); if(pb!=null)pb.setVisibility(View.GONE); });
-            } catch (Exception e) { requireActivity().runOnUiThread(() -> { if(pb!=null)pb.setVisibility(View.GONE); }); }
+                List<ContentItem> r = TmdbApi.fetchDoramas();
+                requireActivity().runOnUiThread(() -> {
+                    items.addAll(r);
+                    adapter.notifyDataSetChanged();
+                    if (pb != null) pb.setVisibility(View.GONE);
+                });
+            } catch (Exception e) {
+                requireActivity().runOnUiThread(() -> {
+                    if (pb != null) pb.setVisibility(View.GONE);
+                });
+            }
         });
     }
 }

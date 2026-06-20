@@ -121,6 +121,17 @@ public class TmdbApi {
     public static List<ContentItem> fetchNewMovies() throws Exception {
         return parse(new JSONObject(fetch("/movie/now_playing?language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
+
+    public static List<ContentItem> fetchByProvider(int providerId, String mediaType) throws Exception {
+        int type = "movie".equals(mediaType) ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
+        String path = "/discover/" + mediaType
+            + "?with_watch_providers=" + providerId
+            + "&watch_region=MX"
+            + "&sort_by=popularity.desc"
+            + "&language=es-MX"
+            + "&page=1";
+        return parse(new JSONObject(fetch(path)).getJSONArray("results"), type);
+    }
     public static List<ContentItem> searchMulti(String query) throws Exception {
         String enc = java.net.URLEncoder.encode(query, "UTF-8");
         JSONArray arr = new JSONObject(fetch("/search/multi?query=" + enc + "&language=es-MX&page=1")).getJSONArray("results");
