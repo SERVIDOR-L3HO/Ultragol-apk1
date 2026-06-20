@@ -52,6 +52,7 @@ drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_channel_placeholder
 drawable nav_bg
+drawable nav_card_bg
 drawable poster_glass_bg
 drawable progress_orange
 drawable rating_pill_bg
@@ -80,7 +81,6 @@ id bannerImage
 id bannerMeta
 id bannerRating
 id bannerTitle
-id bottomNav
 id btnBack
 id btnBannerInfo
 id btnBannerPlay
@@ -89,6 +89,7 @@ id btnEpMinus
 id btnEpPlus
 id btnFavorite
 id btnLoadEpisode
+id btnMenu
 id btnMyList
 id btnPlay
 id btnPlayerBack
@@ -120,6 +121,9 @@ id detailTypeBadge
 id dot1
 id dot2
 id dot3
+id drawerClose
+id drawerOverlay
+id drawerSearch
 id emptyState
 id episodeSection
 id errorServers
@@ -134,6 +138,12 @@ id heroBanner
 id langTabs
 id loadingSearch
 id loadingServers
+id navAnime
+id navDoramas
+id navInicio
+id navMovies
+id navSearch
+id navSeries
 id nav_anime
 id nav_home
 id nav_movies

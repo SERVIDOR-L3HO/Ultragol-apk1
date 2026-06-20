@@ -3041,6 +3041,7 @@ drawable mtrl_switch_track
 drawable mtrl_switch_track_decoration
 drawable mtrl_tabs_default_indicator
 drawable nav_bg
+drawable nav_card_bg
 drawable navigation_empty_icon
 drawable notification_action_background
 drawable notification_bg
@@ -3179,7 +3180,6 @@ id beginning
 id bestChoice
 id blocking
 id bottom
-id bottomNav
 id bounce
 id bounceBoth
 id bounceEnd
@@ -3192,6 +3192,7 @@ id btnEpMinus
 id btnEpPlus
 id btnFavorite
 id btnLoadEpisode
+id btnMenu
 id btnMyList
 id btnPlay
 id btnPlayerBack
@@ -3290,6 +3291,9 @@ id dragLeft
 id dragRight
 id dragStart
 id dragUp
+id drawerClose
+id drawerOverlay
+id drawerSearch
 id dropdown_menu
 id easeIn
 id easeInOut
@@ -3439,6 +3443,12 @@ id mtrl_picker_text_input_range_start
 id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
+id navAnime
+id navDoramas
+id navInicio
+id navMovies
+id navSearch
+id navSeries
 id nav_anime
 id nav_home
 id nav_movies

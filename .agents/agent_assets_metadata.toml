@@ -18,3 +18,9 @@ id = "xqlURnvTdEqqyVvsQimfT"
 uri = "file://apks/ultragol1_detalle_sololatino.zip"
 type = "unspecified"
 title = "Ultragol1 — Detalle estilo SoloLatino"
+
+[[outputs]]
+id = "9ssYKuwxsm_Aew2cUgGdG"
+uri = "file://apks/ultragol1_hamburguer_menu.zip"
+type = "unspecified"
+title = "Ultragol1 — Menú hamburguesa estilo SoloLatino"

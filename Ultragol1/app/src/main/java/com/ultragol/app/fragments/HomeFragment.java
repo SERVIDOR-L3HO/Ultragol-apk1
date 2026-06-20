@@ -43,6 +43,13 @@ public class HomeFragment extends Fragment {
         View search = view.findViewById(R.id.btnSearch);
         if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));
+
+        View menu = view.findViewById(R.id.btnMenu);
+        if (menu != null) menu.setOnClickListener(v -> {
+            if (requireActivity() instanceof com.ultragol.app.MainActivity) {
+                ((com.ultragol.app.MainActivity) requireActivity()).showMenu();
+            }
+        });
     }
 
     private void setupHero(View view) {
