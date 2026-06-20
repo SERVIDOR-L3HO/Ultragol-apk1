@@ -12,3 +12,9 @@ id = "mJ_bYiECLrvgfy-t9eeGk"
 uri = "file://apks/ultragol1_sololatino.zip"
 type = "unspecified"
 title = "Ultragol1 — Rediseño Estilo SoloLatino"
+
+[[outputs]]
+id = "xqlURnvTdEqqyVvsQimfT"
+uri = "file://apks/ultragol1_detalle_sololatino.zip"
+type = "unspecified"
+title = "Ultragol1 — Detalle estilo SoloLatino"

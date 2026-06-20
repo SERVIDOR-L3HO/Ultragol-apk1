@@ -3,28 +3,28 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="#000000">
 
-    <!-- ── Backdrop full-height (fondo de vidrio) ── -->
+    <!-- Backdrop full width -->
     <ImageView
         android:id="@+id/detailBackdrop"
         android:layout_width="match_parent"
-        android:layout_height="420dp"
+        android:layout_height="290dp"
         android:scaleType="centerCrop"/>
 
-    <!-- Overlay degradado oscuro sobre el backdrop -->
+    <!-- Backdrop bottom gradient -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="420dp"
+        android:layout_height="290dp"
         android:background="@drawable/gradient_detail_overlay"/>
 
-    <!-- Overlay superior para la barra de estado -->
+    <!-- Top bar shadow -->
     <View
         android:layout_width="match_parent"
         android:layout_height="80dp"
         android:background="@drawable/gradient_top_black"/>
 
-    <!-- ── Botón atrás (glass) ── -->
+    <!-- Back button -->
     <FrameLayout
         android:id="@+id/btnDetailBack"
         android:layout_width="42dp"
@@ -42,392 +42,301 @@
             android:textSize="20sp"/>
     </FrameLayout>
 
-    <!-- Badge HD -->
-    <TextView
-        android:id="@+id/detailBadge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|end"
-        android:layout_margin="16dp"
-        android:background="@drawable/badge_new"
-        android:text="HD"
-        android:textColor="#FFFFFF"
-        android:textSize="10sp"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp"
-        android:fontFamily="sans-serif-bold"
-        android:letterSpacing="0.08"/>
-
-    <!-- ── Contenido scrolleable (sobre el backdrop) ── -->
+    <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:overScrollMode="never"
-        android:fillViewport="true">
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingTop="290dp">
+            android:orientation="vertical">
 
-            <!-- ── CARD GLASS: Poster + Título + Chips ── -->
-            <LinearLayout
+            <!-- Poster area: sits over backdrop -->
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:padding="14dp"
-                android:background="@drawable/glass_card_bg">
-
-                <!-- Poster -->
+                android:layout_height="290dp">
                 <ImageView
                     android:id="@+id/detailPoster"
-                    android:layout_width="90dp"
-                    android:layout_height="130dp"
+                    android:layout_width="155dp"
+                    android:layout_height="225dp"
+                    android:layout_gravity="center"
                     android:scaleType="centerCrop"
-                    android:background="@drawable/poster_glass_bg"/>
+                    android:background="@drawable/poster_glass_bg"
+                    android:elevation="6dp"/>
+            </FrameLayout>
 
-                <!-- Info derecha -->
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:layout_marginStart="14dp"
-                    android:orientation="vertical"
-                    android:gravity="start">
-
-                    <TextView
-                        android:id="@+id/detailTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20sp"
-                        android:fontFamily="sans-serif-black"
-                        android:maxLines="3"
-                        android:lineSpacingMultiplier="1.1"/>
-
-                    <TextView
-                        android:id="@+id/detailMeta"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:textColor="#AAFFFFFF"
-                        android:textSize="13sp"/>
-
-                    <TextView
-                        android:id="@+id/detailRating"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:textColor="@color/orange_primary"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-bold"/>
-
-                    <!-- Genre chips (inflados desde Java) -->
-                    <LinearLayout
-                        android:id="@+id/genreChips"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="10dp"
-                        android:orientation="horizontal"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ── CARD GLASS: Botón Ver ahora + acciones ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:layout_marginTop="10dp"
-                android:padding="12dp"
-                android:background="@drawable/glass_card_bg"
-                android:gravity="center_vertical">
-
-                <LinearLayout
-                    android:id="@+id/btnPlay"
-                    android:layout_width="0dp"
-                    android:layout_height="50dp"
-                    android:layout_weight="1"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="@drawable/btn_play_white_bg"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="▶  "
-                        android:textColor="#0A0A0F"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-bold"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ver ahora"
-                        android:textColor="#0A0A0F"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </LinearLayout>
-
-                <FrameLayout
-                    android:id="@+id/btnAdd"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/btn_action_glass"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="+"
-                        android:textColor="#FFFFFF"
-                        android:textSize="24sp"
-                        android:fontFamily="sans-serif-light"/>
-                </FrameLayout>
-
-                <FrameLayout
-                    android:id="@+id/btnShare"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:layout_marginStart="10dp"
-                    android:background="@drawable/btn_action_glass"
-                    android:clickable="true"
-                    android:focusable="true">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="↑"
-                        android:textColor="#FFFFFF"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </FrameLayout>
-            </LinearLayout>
-
-            <!-- ── CARD GLASS: Sinopsis ── -->
+            <!-- Info section — plain black background -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:layout_marginTop="10dp"
-                android:padding="16dp"
-                android:background="@drawable/glass_card_bg">
+                android:background="#000000"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp">
 
-                <TextView
+                <!-- Type badge + C rating badge -->
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SINOPSIS"
-                    android:textColor="#CCFFFFFF"
-                    android:textSize="11sp"
-                    android:fontFamily="sans-serif-bold"
-                    android:letterSpacing="0.14"/>
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
+                    <TextView
+                        android:id="@+id/detailTypeBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/detail_type_badge_bg"
+                        android:text="PELÍCULA"
+                        android:textColor="#FFFFFF"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif-bold"
+                        android:letterSpacing="0.06"
+                        android:paddingStart="10dp"
+                        android:paddingEnd="10dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"/>
+
+                    <TextView
+                        android:id="@+id/detailBadge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/badge_rating_pill"
+                        android:text="C"
+                        android:textColor="#AAFFFFFF"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif-bold"
+                        android:paddingStart="8dp"
+                        android:paddingEnd="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingBottom="4dp"/>
+                </LinearLayout>
+
+                <!-- Title -->
+                <TextView
+                    android:id="@+id/detailTitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="26sp"
+                    android:fontFamily="sans-serif-black"
+                    android:lineSpacingMultiplier="1.1"/>
+
+                <!-- Meta: year · duration · lang -->
+                <TextView
+                    android:id="@+id/detailMeta"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:textColor="#88FFFFFF"
+                    android:textSize="13sp"
+                    android:letterSpacing="0.02"/>
+
+                <!-- ◆ Rating pill -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/rating_pill_bg"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="◆ "
+                        android:textColor="#4FC3F7"
+                        android:textSize="12sp"/>
+                    <TextView
+                        android:id="@+id/detailRating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:fontFamily="sans-serif-bold"/>
+                </LinearLayout>
+
+                <!-- Genre chips row -->
+                <HorizontalScrollView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:scrollbars="none"
+                    android:overScrollMode="never">
+                    <LinearLayout
+                        android:id="@+id/genreChips"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"/>
+                </HorizontalScrollView>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="16dp"
+                    android:background="#1AFFFFFF"/>
+
+                <!-- Synopsis text -->
                 <TextView
                     android:id="@+id/detailOverview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:textColor="#E6FFFFFF"
+                    android:layout_marginTop="14dp"
+                    android:textColor="#DDFFFFFF"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.6"
-                    android:maxLines="4"
-                    android:ellipsize="end"/>
+                    android:lineSpacingMultiplier="1.65"
+                    android:fontFamily="sans-serif"/>
 
-                <TextView
-                    android:id="@+id/btnReadMore"
+                <!-- Action buttons -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginTop="22dp">
+
+                    <LinearLayout
+                        android:id="@+id/btnFavorite"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="@drawable/action_btn_bg"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="♡  "
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Favorito"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnMyList"
+                        android:layout_width="0dp"
+                        android:layout_height="46dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:orientation="horizontal"
+                        android:gravity="center"
+                        android:background="@drawable/action_btn_bg"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⊟  "
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Mi Lista"
+                            android:textColor="#FFFFFF"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"/>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/btnPlay"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/action_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="◎  "
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Vista"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"/>
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="8dp"/>
+            </LinearLayout>
+
+            <!-- Related section -->
+            <include android:id="@+id/rowRelated" layout="@layout/row_section"/>
+
+            <!-- Footer -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="#000000"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingTop="32dp"
+                android:paddingBottom="40dp">
+
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:text="Leer más →"
-                    android:textColor="@color/orange_primary"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ULTRA"
+                        android:textColor="#FFFFFF"
+                        android:textSize="18sp"
+                        android:fontFamily="sans-serif-black"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="GOL"
+                        android:textColor="@color/red_primary"
+                        android:textSize="18sp"
+                        android:fontFamily="sans-serif-black"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1.NET"
+                        android:textColor="@color/red_primary"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-black"
+                        android:layout_gravity="bottom"
+                        android:layout_marginBottom="2dp"/>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Tu plataforma de streaming en español Latino para ver\npelículas, series y animes online gratis."
+                    android:textColor="#66FFFFFF"
                     android:textSize="13sp"
-                    android:fontFamily="sans-serif-bold"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="gone"/>
+                    android:lineSpacingMultiplier="1.5"/>
             </LinearLayout>
-
-            <!-- ── CARD GLASS: Stats ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:layout_marginTop="10dp"
-                android:paddingTop="18dp"
-                android:paddingBottom="18dp"
-                android:background="@drawable/glass_card_bg"
-                android:gravity="center">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#128197;"
-                        android:textSize="22sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Año"
-                        android:textColor="#80FFFFFF"
-                        android:textSize="12sp"/>
-                    <TextView
-                        android:id="@+id/statYear"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="—"
-                        android:textColor="#FFFFFF"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="50dp"
-                    android:background="#26FFFFFF"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#128336;"
-                        android:textSize="22sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Episodios"
-                        android:textColor="#80FFFFFF"
-                        android:textSize="12sp"/>
-                    <TextView
-                        android:id="@+id/statEpisodes"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="—"
-                        android:textColor="#FFFFFF"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </LinearLayout>
-
-                <View
-                    android:layout_width="1dp"
-                    android:layout_height="50dp"
-                    android:background="#26FFFFFF"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="&#128100;"
-                        android:textSize="22sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
-                        android:text="Temporadas"
-                        android:textColor="#80FFFFFF"
-                        android:textSize="12sp"/>
-                    <TextView
-                        android:id="@+id/statSeasons"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="3dp"
-                        android:text="—"
-                        android:textColor="#FFFFFF"
-                        android:textSize="17sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <!-- ── CARD GLASS: Tabs ── -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                android:layout_marginTop="10dp"
-                android:padding="5dp"
-                android:background="@drawable/glass_card_bg"
-                android:gravity="center">
-
-                <TextView
-                    android:id="@+id/tabEpisodio"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Episodio"
-                    android:textColor="#0A0A0F"
-                    android:textSize="12sp"
-                    android:fontFamily="sans-serif-bold"
-                    android:background="@drawable/tab_selected_bg"/>
-
-                <TextView
-                    android:id="@+id/tabSimilar"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Similares"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="12sp"/>
-
-                <TextView
-                    android:id="@+id/tabVideos"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Videos"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="12sp"/>
-
-                <TextView
-                    android:id="@+id/tabReparto"
-                    android:layout_width="0dp"
-                    android:layout_height="38dp"
-                    android:layout_weight="1"
-                    android:gravity="center"
-                    android:text="Reparto"
-                    android:textColor="#99FFFFFF"
-                    android:textSize="12sp"/>
-            </LinearLayout>
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="40dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
 </FrameLayout>
