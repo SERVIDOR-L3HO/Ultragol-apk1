@@ -1,15 +1,15 @@
 [
     {
-        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_gradient_top_black.xml.flat",
-        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_top_black.xml"
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_mas_info_bg.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_mas_info_bg.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_splash_ring_outer.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/splash_ring_outer.xml"
     },
     {
-        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_mas_info_bg.xml.flat",
-        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_mas_info_bg.xml"
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_gradient_top_black.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_top_black.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_activity_player.xml.flat",
@@ -188,10 +188,6 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/dialog_server_select.xml"
     },
     {
-        "merged": "com.ultragol.app-merged_res-33:/layout_item_banner.xml.flat",
-        "source": "com.ultragol.app-main-35:/layout/item_banner.xml"
-    },
-    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_server_row.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/server_row.xml"
     },
@@ -240,8 +236,8 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/mipmap-hdpi/ic_launcher.png"
     },
     {
-        "merged": "com.ultragol.app-merged_res-33:/layout_fragment_home.xml.flat",
-        "source": "com.ultragol.app-main-35:/layout/fragment_home.xml"
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_row_trending_carousel.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/row_trending_carousel.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_gradient_banner_overlay.xml.flat",
@@ -258,6 +254,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_round_dark.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_round_dark.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_item_trending_card.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/item_trending_card.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_bottom_sheet_bg.xml.flat",

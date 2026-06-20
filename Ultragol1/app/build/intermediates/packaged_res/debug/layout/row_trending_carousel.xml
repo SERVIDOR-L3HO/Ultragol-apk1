@@ -37,12 +37,12 @@
     <!-- Carousel: [←] [ViewPager2] [→] -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="310dp">
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/trendingPager"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="310dp"/>
 
         <!-- Left arrow -->
         <FrameLayout

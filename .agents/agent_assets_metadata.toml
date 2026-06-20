@@ -42,3 +42,9 @@ id = "MLy9inh0ODbhEAfsTuf7z"
 uri = "file://apks/ultragol1_trending.zip"
 type = "unspecified"
 title = "Ultragol1 - Hero + Trending Carousel actualizado"
+
+[[outputs]]
+id = "_86lgTgg9MwFWnrriEfK5"
+uri = "file://apks/ultragol1_fixed.zip"
+type = "unspecified"
+title = "Ultragol1 - CRASH CORREGIDO (sin ViewPager2 wrap_content)"
