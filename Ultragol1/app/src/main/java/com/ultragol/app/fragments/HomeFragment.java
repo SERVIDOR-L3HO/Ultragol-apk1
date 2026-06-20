@@ -117,30 +117,30 @@ public class HomeFragment extends Fragment {
     // ── Trending carousel ────────────────────────────────────────────────────
 
     private void setupTrendingCarousel(View view) {
-        View carouselRoot = view.findViewById(R.id.rowTrendingCarousel);
-        if (carouselRoot == null) return;
+        try {
+            View carouselRoot = view.findViewById(R.id.rowTrendingCarousel);
+            if (carouselRoot == null) return;
 
-        trendingPager   = carouselRoot.findViewById(R.id.trendingPager);
-        View btnPrev    = carouselRoot.findViewById(R.id.trendingPrev);
-        View btnNext    = carouselRoot.findViewById(R.id.trendingNext);
+            trendingPager   = carouselRoot.findViewById(R.id.trendingPager);
+            View btnPrev    = carouselRoot.findViewById(R.id.trendingPrev);
+            View btnNext    = carouselRoot.findViewById(R.id.trendingNext);
 
-        trendingAdapter = new TrendingAdapter(requireContext(), trendingItems);
-        if (trendingPager == null) return;
-        trendingPager.setAdapter(trendingAdapter);
+            trendingAdapter = new TrendingAdapter(requireContext(), trendingItems);
+            if (trendingPager == null) return;
+            trendingPager.setAdapter(trendingAdapter);
+            trendingPager.setOffscreenPageLimit(1);
+            trendingPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                @Override public void onPageSelected(int p) { trendingPage = p; }
+            });
 
-        // Left/right margins so adjacent cards peek
-        trendingPager.setOffscreenPageLimit(1);
-        trendingPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-            @Override public void onPageSelected(int p) { trendingPage = p; }
-        });
-
-        if (btnPrev != null) btnPrev.setOnClickListener(v -> {
-            if (trendingPage > 0) trendingPager.setCurrentItem(trendingPage - 1, true);
-        });
-        if (btnNext != null) btnNext.setOnClickListener(v -> {
-            if (trendingPage < trendingItems.size() - 1)
-                trendingPager.setCurrentItem(trendingPage + 1, true);
-        });
+            if (btnPrev != null) btnPrev.setOnClickListener(v -> {
+                if (trendingPage > 0) trendingPager.setCurrentItem(trendingPage - 1, true);
+            });
+            if (btnNext != null) btnNext.setOnClickListener(v -> {
+                if (trendingPage < trendingItems.size() - 1)
+                    trendingPager.setCurrentItem(trendingPage + 1, true);
+            });
+        } catch (Exception ignored) {}
     }
 
     // ── Content rows ─────────────────────────────────────────────────────────

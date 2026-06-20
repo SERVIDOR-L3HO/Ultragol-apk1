@@ -48,3 +48,9 @@ id = "_86lgTgg9MwFWnrriEfK5"
 uri = "file://apks/ultragol1_fixed.zip"
 type = "unspecified"
 title = "Ultragol1 - CRASH CORREGIDO (sin ViewPager2 wrap_content)"
+
+[[outputs]]
+id = "bSnQWiShpjii-OaTNGjx0"
+uri = "file://apks/ultragol1_v3.zip"
+type = "unspecified"
+title = "Ultragol1 v3 — Build Limpio (desinstala la versión anterior primero)"
