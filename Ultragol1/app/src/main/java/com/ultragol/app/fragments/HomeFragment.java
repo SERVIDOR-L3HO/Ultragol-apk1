@@ -17,12 +17,22 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class HomeFragment extends Fragment {
+
+    // Hero banner
     private ViewPager2 hero;
     private LinearLayout dots;
     private final Handler autoHandler = new Handler();
     private int bannerPage = 0, bannerCount = 0;
     private BannerAdapter bannerAdapter;
     private final List<ContentItem> bannerItems = new ArrayList<>();
+
+    // Trending carousel
+    private ViewPager2 trendingPager;
+    private final List<ContentItem> trendingItems = new ArrayList<>();
+    private TrendingAdapter trendingAdapter;
+    private int trendingPage = 0;
+
+    // Content rows
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
 
     @Nullable @Override
@@ -35,6 +45,7 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, state);
         setupTopBar(view);
         setupHero(view);
+        setupTrendingCarousel(view);
         setupRows(view);
         loadAll();
     }
@@ -51,6 +62,8 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
+    // ── Hero banner ──────────────────────────────────────────────────────────
 
     private void setupHero(View view) {
         hero = view.findViewById(R.id.heroBanner);
@@ -101,6 +114,37 @@ public class HomeFragment extends Fragment {
         }
     }
 
+    // ── Trending carousel ────────────────────────────────────────────────────
+
+    private void setupTrendingCarousel(View view) {
+        View carouselRoot = view.findViewById(R.id.rowTrendingCarousel);
+        if (carouselRoot == null) return;
+
+        trendingPager   = carouselRoot.findViewById(R.id.trendingPager);
+        View btnPrev    = carouselRoot.findViewById(R.id.trendingPrev);
+        View btnNext    = carouselRoot.findViewById(R.id.trendingNext);
+
+        trendingAdapter = new TrendingAdapter(requireContext(), trendingItems);
+        if (trendingPager == null) return;
+        trendingPager.setAdapter(trendingAdapter);
+
+        // Left/right margins so adjacent cards peek
+        trendingPager.setOffscreenPageLimit(1);
+        trendingPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+            @Override public void onPageSelected(int p) { trendingPage = p; }
+        });
+
+        if (btnPrev != null) btnPrev.setOnClickListener(v -> {
+            if (trendingPage > 0) trendingPager.setCurrentItem(trendingPage - 1, true);
+        });
+        if (btnNext != null) btnNext.setOnClickListener(v -> {
+            if (trendingPage < trendingItems.size() - 1)
+                trendingPager.setCurrentItem(trendingPage + 1, true);
+        });
+    }
+
+    // ── Content rows ─────────────────────────────────────────────────────────
+
     private void setupRows(View view) {
         rowTrending = view.findViewById(R.id.rowTrending);
         rowTop10    = view.findViewById(R.id.rowTop10);
@@ -111,9 +155,9 @@ public class HomeFragment extends Fragment {
         rowDoramas  = view.findViewById(R.id.rowDoramas);
 
         initRow(rowTrending, "Tendencias");
-        initRow(rowNew,      "Últimos Episodios");
-        initRow(rowMovies,   "Películas Recientes");
-        initRow(rowSeries,   "Series Recientes");
+        initRow(rowNew,      "Últimos Estrenos");
+        initRow(rowMovies,   "Películas Populares");
+        initRow(rowSeries,   "Series Populares");
         initRow(rowAnime,    "Animes");
         initRow(rowDoramas,  "Doramas");
         initRow(rowTop10,    "Top 10");
@@ -128,18 +172,27 @@ public class HomeFragment extends Fragment {
             new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
+    // ── Load data ─────────────────────────────────────────────────────────────
+
     private void loadAll() {
         ExecutorService pool = Executors.newFixedThreadPool(4);
         Handler h = new Handler(android.os.Looper.getMainLooper());
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchTrending();
-            h.post(() -> { if (!isAdded()) return;
+            h.post(() -> {
+                if (!isAdded()) return;
+                // Hero banner (first 6)
                 bannerItems.clear();
                 bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
                 bannerAdapter.notifyDataSetChanged();
                 bannerCount = bannerItems.size();
                 buildDots();
+                // Trending carousel (all results)
+                trendingItems.clear();
+                trendingItems.addAll(r);
+                trendingAdapter.notifyDataSetChanged();
+                // Small cards row
                 fillRow(rowTrending, r);
             });
         } catch (Exception ignored) {} });

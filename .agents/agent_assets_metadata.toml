@@ -36,3 +36,9 @@ id = "nFUiBGz6JHE6CL-_WQ9UM"
 uri = "file://apks/ultragol1_nuevo.zip"
 type = "unspecified"
 title = "Ultragol1 APK actualizado (con menú corregido)"
+
+[[outputs]]
+id = "MLy9inh0ODbhEAfsTuf7z"
+uri = "file://apks/ultragol1_trending.zip"
+type = "unspecified"
+title = "Ultragol1 - Hero + Trending Carousel actualizado"

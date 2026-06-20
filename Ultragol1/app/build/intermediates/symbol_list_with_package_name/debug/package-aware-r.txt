@@ -3171,10 +3171,14 @@ id bannerDots
 id bannerGenre1
 id bannerGenre2
 id bannerGenre3
+id bannerGenreDot
+id bannerGenreRow
 id bannerImage
 id bannerMeta
-id bannerRating
+id bannerRatingPct
+id bannerStars
 id bannerTitle
+id bannerYear
 id barrier
 id baseline
 id beginOnFirstDraw
@@ -3187,6 +3191,7 @@ id bounceBoth
 id bounceEnd
 id bounceStart
 id btnBack
+id btnBannerBookmark
 id btnBannerInfo
 id btnBannerPlay
 id btnDetailBack
@@ -3537,6 +3542,7 @@ id rowSeries
 id rowTitle
 id rowTop10
 id rowTrending
+id rowTrendingCarousel
 id rowVerTodos
 id row_index_key
 id save_non_transition_alpha
@@ -3671,6 +3677,15 @@ id transition_layout_save
 id transition_position
 id transition_scene_layoutid_cache
 id transition_transform
+id trendingBadge
+id trendingCarouselTitle
+id trendingImage
+id trendingNext
+id trendingPager
+id trendingPrev
+id trendingRating
+id trendingTitle
+id trendingYear
 id triangle
 id tvEpisode
 id tvSeason
@@ -3840,6 +3855,7 @@ layout item_banner
 layout item_channel
 layout item_content_card
 layout item_content_grid
+layout item_trending_card
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
 layout m3_alert_dialog_title
@@ -3898,6 +3914,7 @@ layout notification_template_icon_group
 layout notification_template_part_chronometer
 layout notification_template_part_time
 layout row_section
+layout row_trending_carousel
 layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material

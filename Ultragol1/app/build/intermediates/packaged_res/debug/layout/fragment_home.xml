@@ -112,6 +112,9 @@
                 android:gravity="center"/>
         </FrameLayout>
 
+        <!-- ── Trending Carousel ── -->
+        <include android:id="@+id/rowTrendingCarousel" layout="@layout/row_trending_carousel"/>
+
         <!-- ── Rows ── -->
         <include android:id="@+id/rowTrending" layout="@layout/row_section"/>
         <include android:id="@+id/rowNew"      layout="@layout/row_section"/>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="24dp"
+    android:paddingEnd="24dp"
+    android:paddingBottom="8dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Large landscape card image -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="210dp"
+        android:background="@drawable/card_bg"
+        android:elevation="4dp">
+
+        <ImageView
+            android:id="@+id/trendingImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
+
+        <!-- Bottom gradient -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_detail_bottom"/>
+    </FrameLayout>
+
+    <!-- Info below the card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingStart="4dp"
+        android:paddingEnd="4dp">
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/trendingTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-bold"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:layout_marginBottom="6dp"/>
+
+        <!-- Badge row: [SERIES] · 2026  ★ 8.4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/trendingBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/badge_type_bg"
+                android:text="SERIES"
+                android:textColor="#FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="0.05"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  ·  "
+                android:textColor="#66FFFFFF"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/trendingYear"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#AAFFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <!-- Star + Rating -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="★ "
+                android:textColor="#FFD700"
+                android:textSize="13sp"/>
+
+            <TextView
+                android:id="@+id/trendingRating"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
