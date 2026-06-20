@@ -37,7 +37,6 @@ public class DetailActivity extends AppCompatActivity {
         TextView    statEpisodes = findViewById(R.id.statEpisodes);
         TextView    statSeasons  = findViewById(R.id.statSeasons);
         TextView    btnReadMore  = findViewById(R.id.btnReadMore);
-        View        ratingRow    = findViewById(R.id.ratingRow);
         LinearLayout genreChips = findViewById(R.id.genreChips);
         View        btnPlay      = findViewById(R.id.btnPlay);
         View        btnBack      = findViewById(R.id.btnDetailBack);
@@ -57,9 +56,7 @@ public class DetailActivity extends AppCompatActivity {
             meta.setText(metaText);
         }
 
-        // Rating row (hidden — rating is already in meta line above)
-        if (ratingRow != null) ratingRow.setVisibility(View.GONE);
-        if (rating != null)    rating.setText(item.getRating());
+        if (rating != null) rating.setText(item.getRating());
 
         // Overview + Leer más
         if (overview != null) {

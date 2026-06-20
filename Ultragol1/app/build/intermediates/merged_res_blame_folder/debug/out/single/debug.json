@@ -8,6 +8,14 @@
         "source": "com.ultragol.app-main-35:/layout/fragment_grid.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_ring_inner.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_ring_inner.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_tab_bar_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/tab_bar_bg.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_gradient_banner_overlay.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/gradient_banner_overlay.xml"
     },
@@ -48,6 +56,14 @@
         "source": "com.ultragol.app-main-35:/mipmap-xxhdpi/ic_launcher.png"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_genre_chip_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/genre_chip_bg.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_dot_dim.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_dot_dim.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_row_section.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/row_section.xml"
     },
@@ -80,8 +96,16 @@
         "source": "com.ultragol.app-main-35:/layout/activity_player.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_divider_vertical_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/divider_vertical_glass.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_dialog_server_select.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/dialog_server_select.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_btn_play_white_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/btn_play_white_bg.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_dot_inactive.xml.flat",
@@ -100,6 +124,10 @@
         "source": "com.ultragol.app-main-35:/drawable/ic_channel_placeholder.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_ring_outer.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_ring_outer.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_server_row_active.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/server_row_active.xml"
     },
@@ -112,8 +140,16 @@
         "source": "com.ultragol.app-main-35:/color/nav_tint.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_icon_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_icon_bg.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_item_content_grid.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/item_content_grid.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_synopsis_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/synopsis_bg.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_nav_bg.xml.flat",
@@ -124,12 +160,20 @@
         "source": "com.ultragol.app-main-35:/mipmap-xhdpi/ic_launcher_round.png"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_gradient_detail_overlay.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/gradient_detail_overlay.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_item_banner.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/item_banner.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_badge_inactive.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/badge_inactive.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_ring_mid.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_ring_mid.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_gradient_radial_splash.xml.flat",
@@ -156,12 +200,20 @@
         "source": "com.ultragol.app-main-35:/drawable/tab_active.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_poster_glass_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/poster_glass_bg.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_dot_active.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/dot_active.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_gradient_detail_bottom.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/gradient_detail_bottom.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_back_btn_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/back_btn_glass.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_badge_new.xml.flat",
@@ -174,6 +226,14 @@
     {
         "merged": "com.ultragol.app-merged_res-33:/mipmap-xhdpi_ic_launcher.png.flat",
         "source": "com.ultragol.app-main-35:/mipmap-xhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_splash_dot.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/splash_dot.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_tab_selected_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/tab_selected_bg.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/layout_item_channel.xml.flat",
@@ -196,12 +256,20 @@
         "source": "com.ultragol.app-main-35:/drawable/search_bg.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_btn_action_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/btn_action_glass.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/mipmap-mdpi_ic_launcher.png.flat",
         "source": "com.ultragol.app-main-35:/mipmap-mdpi/ic_launcher.png"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_badge_active.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/badge_active.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_glass_card_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/glass_card_bg.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/mipmap-xxhdpi_ic_launcher_round.png.flat",
