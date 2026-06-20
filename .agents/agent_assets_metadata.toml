@@ -30,3 +30,9 @@ id = "fBU1kehhxPnqY1oZWZXrn"
 uri = "file://apks/ultragol1_servers.zip"
 type = "unspecified"
 title = "Ultragol1 — Selector de servidores rediseñado"
+
+[[outputs]]
+id = "nFUiBGz6JHE6CL-_WQ9UM"
+uri = "file://apks/ultragol1_nuevo.zip"
+type = "unspecified"
+title = "Ultragol1 APK actualizado (con menú corregido)"

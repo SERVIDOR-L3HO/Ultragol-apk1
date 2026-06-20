@@ -154,6 +154,15 @@ id nav_home
 id nav_movies
 id nav_series
 id nav_sports
+id platApple
+id platAtx
+id platCrunchyroll
+id platDisney
+id platHbo
+id platHulu
+id platNetflix
+id platPrime
+id platTokyoMx
 id playerProgress
 id playerTitle
 id playerWebView
