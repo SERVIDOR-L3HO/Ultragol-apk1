@@ -29,35 +29,61 @@ public class BannerAdapter extends RecyclerView.Adapter<BannerAdapter.VH> {
     @Override
     public void onBindViewHolder(@NonNull VH h, int pos) {
         ContentItem item = items.get(pos);
+
         h.title.setText(item.getTitle());
-        h.meta.setText(item.getGenreYear());
-        h.rating.setText(item.getRatingDisplay());
+
+        String desc = item.getOverview();
+        if (desc != null && !desc.isEmpty()) {
+            h.meta.setText(desc);
+            h.meta.setVisibility(View.VISIBLE);
+        } else {
+            h.meta.setVisibility(View.GONE);
+        }
+
+        TextView[] genreViews = { h.genre1, h.genre2, h.genre3 };
+        for (TextView gv : genreViews) gv.setVisibility(View.GONE);
+        String genre = item.getGenre();
+        if (genre != null && !genre.isEmpty()) {
+            String[] parts = genre.split("[,/]");
+            for (int i = 0; i < Math.min(parts.length, 3); i++) {
+                String g = parts[i].trim();
+                if (!g.isEmpty()) {
+                    genreViews[i].setText(g);
+                    genreViews[i].setVisibility(View.VISIBLE);
+                }
+            }
+        }
+
         String img = !item.getBackdropUrl().isEmpty() ? item.getBackdropUrl() : item.getPosterUrl();
-        if (!img.isEmpty()) Glide.with(ctx).load(img).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(h.image);
-        else h.image.setImageResource(R.drawable.gradient_hero);
-        h.btnPlay.setOnClickListener(v -> {
+        if (!img.isEmpty()) {
+            Glide.with(ctx).load(img).transition(DrawableTransitionOptions.withCrossFade()).centerCrop().into(h.image);
+        } else {
+            h.image.setImageResource(R.drawable.gradient_hero);
+        }
+
+        View.OnClickListener openDetail = v -> {
             Intent i = new Intent(ctx, DetailActivity.class);
             i.putExtra("item", item);
             ctx.startActivity(i);
-        });
-        h.btnInfo.setOnClickListener(v -> {
-            Intent i = new Intent(ctx, DetailActivity.class);
-            i.putExtra("item", item);
-            ctx.startActivity(i);
-        });
+        };
+        h.btnPlay.setOnClickListener(openDetail);
+        h.btnInfo.setOnClickListener(openDetail);
     }
 
     @Override public int getItemCount() { return items.size(); }
 
     static class VH extends RecyclerView.ViewHolder {
-        ImageView image; TextView title, meta, rating;
+        ImageView image;
+        TextView title, meta, genre1, genre2, genre3;
         View btnPlay, btnInfo;
         VH(View v) {
             super(v);
             image  = v.findViewById(R.id.bannerImage);
             title  = v.findViewById(R.id.bannerTitle);
             meta   = v.findViewById(R.id.bannerMeta);
-            rating = v.findViewById(R.id.bannerRating);
+            genre1 = v.findViewById(R.id.bannerGenre1);
+            genre2 = v.findViewById(R.id.bannerGenre2);
+            genre3 = v.findViewById(R.id.bannerGenre3);
             btnPlay = v.findViewById(R.id.btnBannerPlay);
             btnInfo = v.findViewById(R.id.btnBannerInfo);
         }

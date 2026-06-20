@@ -6,3 +6,9 @@ id = "bi_c6NNz17zWzJuf96nVa"
 uri = "file://apks/ultragol1_glass.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Glass Style (Debug)"
+
+[[outputs]]
+id = "mJ_bYiECLrvgfy-t9eeGk"
+uri = "file://apks/ultragol1_sololatino.zip"
+type = "unspecified"
+title = "Ultragol1 — Rediseño Estilo SoloLatino"

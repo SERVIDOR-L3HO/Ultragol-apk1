@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.*;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
@@ -34,19 +33,16 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
+        setupTopBar(view);
         setupHero(view);
         setupRows(view);
-        setupTopBar(view);
         loadAll();
     }
 
     private void setupTopBar(View view) {
-        View search  = view.findViewById(R.id.btnSearch);
-        View profile = view.findViewById(R.id.btnProfile);
-        if (search  != null) search.setOnClickListener(v ->
+        View search = view.findViewById(R.id.btnSearch);
+        if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));
-        if (profile != null) profile.setOnClickListener(v ->
-            Toast.makeText(requireContext(), "Perfil", Toast.LENGTH_SHORT).show());
     }
 
     private void setupHero(View view) {
@@ -55,11 +51,6 @@ public class HomeFragment extends Fragment {
         bannerAdapter = new BannerAdapter(requireContext(), bannerItems);
         if (hero == null) return;
         hero.setAdapter(bannerAdapter);
-        hero.setPageTransformer((page, pos) -> {
-            float abs = Math.abs(pos);
-            page.setAlpha(1 - abs * 0.25f);
-            page.setTranslationX(page.getWidth() * pos * -0.12f);
-        });
         hero.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override public void onPageSelected(int p) { bannerPage = p; updateDots(p); }
         });
@@ -111,10 +102,14 @@ public class HomeFragment extends Fragment {
         rowSeries   = view.findViewById(R.id.rowSeries);
         rowAnime    = view.findViewById(R.id.rowAnime);
         rowDoramas  = view.findViewById(R.id.rowDoramas);
-        initRow(rowTrending, "🔥 Tendencias"); initRow(rowTop10, "🏆 Top 10");
-        initRow(rowNew, "✨ Estrenos"); initRow(rowMovies, "🎬 Películas");
-        initRow(rowSeries, "📺 Series"); initRow(rowAnime, "🎌 Anime");
-        initRow(rowDoramas, "🌸 Doramas");
+
+        initRow(rowTrending, "Tendencias");
+        initRow(rowNew,      "Últimos Episodios");
+        initRow(rowMovies,   "Películas Recientes");
+        initRow(rowSeries,   "Series Recientes");
+        initRow(rowAnime,    "Animes");
+        initRow(rowDoramas,  "Doramas");
+        initRow(rowTop10,    "Top 10");
     }
 
     private void initRow(View row, String title) {
@@ -122,28 +117,56 @@ public class HomeFragment extends Fragment {
         TextView tv = row.findViewById(R.id.rowTitle);
         RecyclerView rv = row.findViewById(R.id.rowRv);
         if (tv != null) tv.setText(title);
-        if (rv != null) rv.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        if (rv != null) rv.setLayoutManager(
+            new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
     }
 
     private void loadAll() {
         ExecutorService pool = Executors.newFixedThreadPool(4);
         Handler h = new Handler(android.os.Looper.getMainLooper());
 
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchTrending();
-            h.post(() -> { if(isAdded()){ bannerItems.clear(); if(r.size()>5)bannerItems.addAll(r.subList(0,5)); else bannerItems.addAll(r);
-                bannerAdapter.notifyDataSetChanged(); bannerCount=bannerItems.size(); buildDots(); fillRow(rowTrending, r); }}); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchTopMovies();
-            h.post(() -> { if(isAdded()) fillRow(rowTop10, r); }); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchNewMovies();
-            h.post(() -> { if(isAdded()) fillRow(rowNew, r); }); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchMovies();
-            h.post(() -> { if(isAdded()) fillRow(rowMovies, r); }); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchSeries();
-            h.post(() -> { if(isAdded()) fillRow(rowSeries, r); }); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchAnime();
-            h.post(() -> { if(isAdded()) fillRow(rowAnime, r); }); } catch(Exception ignored){}});
-        pool.execute(() -> { try { List<ContentItem> r = TmdbApi.fetchDoramas();
-            h.post(() -> { if(isAdded()) fillRow(rowDoramas, r); }); } catch(Exception ignored){}});
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchTrending();
+            h.post(() -> { if (!isAdded()) return;
+                bannerItems.clear();
+                bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
+                bannerAdapter.notifyDataSetChanged();
+                bannerCount = bannerItems.size();
+                buildDots();
+                fillRow(rowTrending, r);
+            });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchNewMovies();
+            h.post(() -> { if (isAdded()) fillRow(rowNew, r); });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchMovies();
+            h.post(() -> { if (isAdded()) fillRow(rowMovies, r); });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchSeries();
+            h.post(() -> { if (isAdded()) fillRow(rowSeries, r); });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchAnime();
+            h.post(() -> { if (isAdded()) fillRow(rowAnime, r); });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchDoramas();
+            h.post(() -> { if (isAdded()) fillRow(rowDoramas, r); });
+        } catch (Exception ignored) {} });
+
+        pool.execute(() -> { try {
+            List<ContentItem> r = TmdbApi.fetchTopMovies();
+            h.post(() -> { if (isAdded()) fillRow(rowTop10, r); });
+        } catch (Exception ignored) {} });
+
         pool.shutdown();
     }
 
@@ -153,7 +176,12 @@ public class HomeFragment extends Fragment {
         if (rv != null) rv.setAdapter(new ContentRowAdapter(requireContext(), items));
     }
 
-    private int dp(int v) { return Math.round(v * requireContext().getResources().getDisplayMetrics().density); }
+    private int dp(int v) {
+        return Math.round(v * requireContext().getResources().getDisplayMetrics().density);
+    }
 
-    @Override public void onDestroyView() { super.onDestroyView(); autoHandler.removeCallbacksAndMessages(null); }
+    @Override public void onDestroyView() {
+        super.onDestroyView();
+        autoHandler.removeCallbacksAndMessages(null);
+    }
 }

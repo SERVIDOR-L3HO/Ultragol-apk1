@@ -1337,6 +1337,11 @@ color background_floating_material_dark
 color background_floating_material_light
 color background_material_dark
 color background_material_light
+color badge_anime
+color badge_dorama
+color badge_pelicula
+color badge_serie
+color badge_sport
 color bg_card
 color bg_primary
 color bg_surface
@@ -2042,6 +2047,7 @@ color primary_text_default_material_light
 color primary_text_disabled_material_dark
 color primary_text_disabled_material_light
 color red_live
+color red_primary
 color ripple_material_dark
 color ripple_material_light
 color secondary_text_default_material_dark
@@ -2920,6 +2926,7 @@ drawable badge_active
 drawable badge_inactive
 drawable badge_live
 drawable badge_new
+drawable badge_type_bg
 drawable bottom_sheet_bg
 drawable btn_action_glass
 drawable btn_checkbox_checked_mtrl
@@ -2927,6 +2934,7 @@ drawable btn_checkbox_checked_to_unchecked_mtrl_animation
 drawable btn_checkbox_unchecked_mtrl
 drawable btn_checkbox_unchecked_to_checked_mtrl_animation
 drawable btn_info_bg
+drawable btn_mas_info_bg
 drawable btn_play_bg
 drawable btn_play_white_bg
 drawable btn_radio_off_mtrl
@@ -2934,6 +2942,7 @@ drawable btn_radio_off_to_on_mtrl_animation
 drawable btn_radio_on_mtrl
 drawable btn_radio_on_to_off_mtrl_animation
 drawable btn_round_dark
+drawable btn_ver_ahora_bg
 drawable card_bg
 drawable design_fab_background
 drawable design_ic_visibility
@@ -3054,6 +3063,7 @@ drawable splash_icon_bg
 drawable splash_ring_inner
 drawable splash_ring_mid
 drawable splash_ring_outer
+drawable star_rating_bg
 drawable synopsis_bg
 drawable tab_active
 drawable tab_bar_bg
@@ -3062,6 +3072,7 @@ drawable tab_selected_bg
 drawable test_level_drawable
 drawable tooltip_frame_dark
 drawable tooltip_frame_light
+drawable ver_todos_bg
 id ALT
 id BOTTOM_END
 id BOTTOM_START
@@ -3150,6 +3161,9 @@ id autoComplete
 id autoCompleteToEnd
 id autoCompleteToStart
 id bannerDots
+id bannerGenre1
+id bannerGenre2
+id bannerGenre3
 id bannerImage
 id bannerMeta
 id bannerRating
@@ -3176,7 +3190,6 @@ id btnEpPlus
 id btnLoadEpisode
 id btnPlay
 id btnPlayerBack
-id btnProfile
 id btnReadMore
 id btnSearch
 id btnSeasonMinus
@@ -3187,9 +3200,11 @@ id cache_measures
 id callMeasure
 id cancel_button
 id cardBadge
+id cardNew
 id cardPoster
 id cardRating
 id cardTitle
+id cardYear
 id carryVelocity
 id categoryChips
 id center
@@ -3493,6 +3508,7 @@ id rowSeries
 id rowTitle
 id rowTop10
 id rowTrending
+id rowVerTodos
 id row_index_key
 id save_non_transition_alpha
 id save_overlay_view

@@ -1,13 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent" android:layout_height="wrap_content"
-    android:orientation="vertical" android:layout_marginTop="8dp">
-    <TextView android:id="@+id/rowTitle"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginStart="16dp" android:layout_marginBottom="8dp"
-        android:textColor="#FFFFFF" android:textSize="15sp" android:fontFamily="sans-serif-bold"/>
-    <androidx.recyclerview.widget.RecyclerView android:id="@+id/rowRv"
-        android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:paddingStart="12dp" android:paddingEnd="12dp" android:clipToPadding="false"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginTop="28dp">
+
+    <!-- Section header: [bar] TÍTULO    [Ver todos ▾] -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="12dp"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="12dp">
+
+        <!-- Red accent bar -->
+        <View
+            android:layout_width="4dp"
+            android:layout_height="22dp"
+            android:background="@color/red_primary"
+            android:layout_marginEnd="10dp"/>
+
+        <!-- Title -->
+        <TextView
+            android:id="@+id/rowTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.04"
+            android:textAllCaps="true"/>
+
+        <!-- Ver todos button -->
+        <TextView
+            android:id="@+id/rowVerTodos"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="↓ Ver todos"
+            android:textColor="#CCFFFFFF"
+            android:textSize="12sp"
+            android:background="@drawable/ver_todos_bg"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:clickable="true"
+            android:focusable="true"/>
+    </LinearLayout>
+
+    <!-- Content list -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rowRv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:clipToPadding="false"
         android:overScrollMode="never"/>
 </LinearLayout>
