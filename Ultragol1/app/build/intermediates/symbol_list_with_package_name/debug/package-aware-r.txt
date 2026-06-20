@@ -3059,6 +3059,8 @@ drawable poster_glass_bg
 drawable progress_orange
 drawable rating_pill_bg
 drawable search_bg
+drawable server_radio_dot
+drawable server_radio_ring
 drawable server_row
 drawable server_row_active
 drawable sheet_handle
@@ -3272,6 +3274,9 @@ id detailPoster
 id detailRating
 id detailTitle
 id detailTypeBadge
+id dialogBadge
+id dialogDismiss
+id dialogPoster
 id dialog_button
 id dimensions
 id direct
@@ -4347,6 +4352,7 @@ style Base_Widget_MaterialComponents_TextView
 style CardView
 style CardView_Dark
 style CardView_Light
+style FullScreenServerDialog
 style GlassBottomSheet
 style GlassBottomSheetTheme
 style MaterialAlertDialog_Material3

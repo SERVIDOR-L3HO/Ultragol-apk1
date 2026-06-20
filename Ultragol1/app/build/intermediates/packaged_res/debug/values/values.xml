@@ -25,6 +25,11 @@
     <string name="nav_movies">Películas</string>
     <string name="nav_series">Series</string>
     <string name="nav_sports">Deportes</string>
+    <style name="FullScreenServerDialog" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
     <style name="GlassBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
         <item name="android:background">@android:color/transparent</item>
         <item name="backgroundTint">@android:color/transparent</item>

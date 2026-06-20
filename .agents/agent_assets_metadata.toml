@@ -24,3 +24,9 @@ id = "9ssYKuwxsm_Aew2cUgGdG"
 uri = "file://apks/ultragol1_hamburguer_menu.zip"
 type = "unspecified"
 title = "Ultragol1 — Menú hamburguesa estilo SoloLatino"
+
+[[outputs]]
+id = "fBU1kehhxPnqY1oZWZXrn"
+uri = "file://apks/ultragol1_servers.zip"
+type = "unspecified"
+title = "Ultragol1 — Selector de servidores rediseñado"

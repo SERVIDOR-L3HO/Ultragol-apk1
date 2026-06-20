@@ -57,6 +57,8 @@ drawable poster_glass_bg
 drawable progress_orange
 drawable rating_pill_bg
 drawable search_bg
+drawable server_radio_dot
+drawable server_radio_ring
 drawable server_row
 drawable server_row_active
 drawable sheet_handle
@@ -118,6 +120,9 @@ id detailPoster
 id detailRating
 id detailTitle
 id detailTypeBadge
+id dialogBadge
+id dialogDismiss
+id dialogPoster
 id dot1
 id dot2
 id dot3
@@ -205,6 +210,7 @@ string nav_home
 string nav_movies
 string nav_series
 string nav_sports
+style FullScreenServerDialog
 style GlassBottomSheet
 style GlassBottomSheetTheme
 style Theme.Ultragol
