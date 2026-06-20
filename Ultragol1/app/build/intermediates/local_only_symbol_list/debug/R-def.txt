@@ -150,8 +150,10 @@ id loadingSearch
 id loadingServers
 id navAnime
 id navDoramas
+id navFavorites
 id navInicio
 id navMovies
+id navMyList
 id navSearch
 id navSeries
 id nav_anime
