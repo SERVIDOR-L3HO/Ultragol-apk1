@@ -45,8 +45,8 @@ public class DetailActivity extends AppCompatActivity {
         LinearLayout genreChips = findViewById(R.id.genreChips);
         View btnPlay           = findViewById(R.id.btnPlay);
         View btnBack           = findViewById(R.id.btnDetailBack);
-        View btnFavorite       = findViewById(R.id.btnFavorite);
-        View btnMyList         = findViewById(R.id.btnMyList);
+        LinearLayout btnFavorite = findViewById(R.id.btnFavorite);
+        LinearLayout btnMyList   = findViewById(R.id.btnMyList);
 
         // ── Title ──────────────────────────────────────────────────────────────
         if (title != null) title.setText(item.getTitle());
@@ -102,10 +102,10 @@ public class DetailActivity extends AppCompatActivity {
         if (genreChips != null && !item.getGenre().isEmpty()) {
             String[] genres = item.getGenre().split("[,/•]");
             for (String g : genres) {
-                String label = g.trim();
-                if (label.isEmpty()) continue;
+                String lbl = g.trim();
+                if (lbl.isEmpty()) continue;
                 TextView chip = new TextView(this);
-                chip.setText(label);
+                chip.setText(lbl);
                 chip.setTextColor(0xCCFFFFFF);
                 chip.setTextSize(TypedValue.COMPLEX_UNIT_SP, 12f);
                 GradientDrawable chipBg = new GradientDrawable();
@@ -144,10 +144,56 @@ public class DetailActivity extends AppCompatActivity {
         });
         if (btnPlay != null) btnPlay.setOnClickListener(v ->
             ServerSelectDialog.show(this, item));
-        if (btnFavorite != null) btnFavorite.setOnClickListener(v ->
-            Toast.makeText(this, "Agregado a Favoritos", Toast.LENGTH_SHORT).show());
-        if (btnMyList != null) btnMyList.setOnClickListener(v ->
-            Toast.makeText(this, "Agregado a Mi Lista", Toast.LENGTH_SHORT).show());
+
+        // ── Favorito button ───────────────────────────────────────────────────
+        if (btnFavorite != null) {
+            updateFavoriteBtn(btnFavorite);
+            btnFavorite.setOnClickListener(v -> {
+                FavoritesManager.toggle(this, item);
+                updateFavoriteBtn(btnFavorite);
+                boolean isFav = FavoritesManager.isFav(this, item);
+                Toast.makeText(this,
+                    isFav ? "Agregado a Favoritos" : "Eliminado de Favoritos",
+                    Toast.LENGTH_SHORT).show();
+            });
+        }
+
+        // ── Mi Lista button ───────────────────────────────────────────────────
+        if (btnMyList != null) {
+            updateMyListBtn(btnMyList);
+            btnMyList.setOnClickListener(v -> {
+                MyListManager.toggle(this, item);
+                updateMyListBtn(btnMyList);
+                boolean inList = MyListManager.isInList(this, item);
+                Toast.makeText(this,
+                    inList ? "Agregado a Mi Lista" : "Eliminado de Mi Lista",
+                    Toast.LENGTH_SHORT).show();
+            });
+        }
+    }
+
+    private void updateFavoriteBtn(LinearLayout btn) {
+        boolean isFav = FavoritesManager.isFav(this, item);
+        if (btn.getChildCount() >= 2) {
+            TextView icon  = (TextView) btn.getChildAt(0);
+            TextView label = (TextView) btn.getChildAt(1);
+            icon.setText(isFav ? "♥  " : "♡  ");
+            icon.setTextColor(isFav ? Color.parseColor("#FF5252") : Color.WHITE);
+            label.setText(isFav ? "Favorito ✓" : "Favorito");
+            label.setTextColor(isFav ? Color.parseColor("#FF5252") : Color.WHITE);
+        }
+    }
+
+    private void updateMyListBtn(LinearLayout btn) {
+        boolean inList = MyListManager.isInList(this, item);
+        if (btn.getChildCount() >= 2) {
+            TextView icon  = (TextView) btn.getChildAt(0);
+            TextView label = (TextView) btn.getChildAt(1);
+            icon.setText(inList ? "⊞  " : "⊟  ");
+            icon.setTextColor(inList ? Color.parseColor("#4FC3F7") : Color.WHITE);
+            label.setText(inList ? "Mi Lista ✓" : "Mi Lista");
+            label.setTextColor(inList ? Color.parseColor("#4FC3F7") : Color.WHITE);
+        }
     }
 
     private void loadRelated() {
@@ -159,7 +205,6 @@ public class DetailActivity extends AppCompatActivity {
         if (rv != null) rv.setLayoutManager(
             new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
-        // Title based on type
         String sectionTitle = item.getContentType() == ContentItem.TYPE_MOVIE
             ? "Películas Relacionadas"
             : item.getContentType() == ContentItem.TYPE_ANIME

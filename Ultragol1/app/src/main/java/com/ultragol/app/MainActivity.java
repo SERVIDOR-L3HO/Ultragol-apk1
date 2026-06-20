@@ -36,19 +36,23 @@ public class MainActivity extends AppCompatActivity {
         });
 
         // ── Nav items ──
-        View navInicio  = drawerOverlay.findViewById(R.id.navInicio);
-        View navSeries  = drawerOverlay.findViewById(R.id.navSeries);
-        View navMovies  = drawerOverlay.findViewById(R.id.navMovies);
-        View navAnime   = drawerOverlay.findViewById(R.id.navAnime);
-        View navDoramas = drawerOverlay.findViewById(R.id.navDoramas);
-        View navSearch  = drawerOverlay.findViewById(R.id.navSearch);
+        View navInicio    = drawerOverlay.findViewById(R.id.navInicio);
+        View navSeries    = drawerOverlay.findViewById(R.id.navSeries);
+        View navMovies    = drawerOverlay.findViewById(R.id.navMovies);
+        View navAnime     = drawerOverlay.findViewById(R.id.navAnime);
+        View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
+        View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
+        View navFavorites = drawerOverlay.findViewById(R.id.navFavorites);
+        View navMyList    = drawerOverlay.findViewById(R.id.navMyList);
 
-        if (navInicio  != null) navInicio.setOnClickListener(v  -> navigate(new HomeFragment()));
-        if (navSeries  != null) navSeries.setOnClickListener(v  -> navigate(new SeriesFragment()));
-        if (navMovies  != null) navMovies.setOnClickListener(v  -> navigate(new MoviesFragment()));
-        if (navAnime   != null) navAnime.setOnClickListener(v   -> navigate(new AnimeFragment()));
-        if (navDoramas != null) navDoramas.setOnClickListener(v -> navigate(new DoramasFragment()));
-        if (navSearch  != null) navSearch.setOnClickListener(v  -> {
+        if (navInicio    != null) navInicio.setOnClickListener(v    -> navigate(new HomeFragment()));
+        if (navSeries    != null) navSeries.setOnClickListener(v    -> navigate(new SeriesFragment()));
+        if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
+        if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
+        if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
+        if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
+        if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
+        if (navSearch    != null) navSearch.setOnClickListener(v    -> {
             hideMenu();
             startActivity(new Intent(this, SearchActivity.class));
         });

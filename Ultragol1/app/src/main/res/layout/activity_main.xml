@@ -234,6 +234,46 @@
                             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Buscar" android:textColor="#DDFFFFFF" android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
                         </LinearLayout>
                     </LinearLayout>
+
+                    <!-- Row 4: Favoritos + Mi Lista -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="10dp">
+
+                        <LinearLayout
+                            android:id="@+id/navFavorites"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="5dp"
+                            android:orientation="vertical"
+                            android:gravity="center_vertical"
+                            android:paddingStart="16dp"
+                            android:background="@drawable/nav_card_bg"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="♥" android:textColor="#FF5252" android:textSize="22sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Favoritos" android:textColor="#DDFFFFFF" android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/navMyList"
+                            android:layout_width="0dp"
+                            android:layout_height="80dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="5dp"
+                            android:orientation="vertical"
+                            android:gravity="center_vertical"
+                            android:paddingStart="16dp"
+                            android:background="@drawable/nav_card_bg"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⊟" android:textColor="#4FC3F7" android:textSize="22sp"/>
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Mi Lista" android:textColor="#DDFFFFFF" android:textSize="14sp" android:fontFamily="sans-serif-medium"/>
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
 
                 <!-- ── PLATAFORMAS section ── -->
