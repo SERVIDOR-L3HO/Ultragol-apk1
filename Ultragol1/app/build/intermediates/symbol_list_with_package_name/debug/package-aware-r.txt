@@ -2920,6 +2920,12 @@ drawable abc_textfield_search_default_mtrl_alpha
 drawable abc_textfield_search_material
 drawable abc_vector_test
 drawable action_btn_bg
+drawable agenda_channel_card
+drawable agenda_gol_stream_card
+drawable agenda_live_badge
+drawable agenda_match_card
+drawable agenda_match_live_card
+drawable agenda_time_badge
 drawable avd_hide_password
 drawable avd_show_password
 drawable back_btn_glass
@@ -3397,7 +3403,6 @@ id jumpToStart
 id labeled
 id langTabs
 id layout
-id leagueTabBar
 id left
 id leftToRight
 id legacy
@@ -3598,8 +3603,6 @@ id search_view_status_bar_spacer
 id search_view_toolbar
 id search_view_toolbar_container
 id search_voice_btn
-id sectionTabBar
-id sectionTabScroll
 id select_dialog_listview
 id selected
 id selection_type

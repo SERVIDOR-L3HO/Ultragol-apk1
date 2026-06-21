@@ -22,52 +22,27 @@ import java.util.concurrent.Executors;
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
+/**
+ * Agenda-style sports screen — each league loads its "marcadores" data
+ * and renders as a horizontal-scroll event row, like GOLXU.
+ */
 public class FootballFragment extends Fragment {
 
     private static final String API = "https://ultragol-api-3--maricarmen43549.replit.app";
 
-    private static final String[][] LEAGUES = {
-        {"⚡", "EN VIVO",     "__live__"},
-        {"🇲🇽", "Liga MX",    ""},
-        {"🏴", "Premier",     "premier/"},
-        {"🇪🇸", "La Liga",    "laliga/"},
-        {"🇮🇹", "Serie A",    "seriea/"},
-        {"🇩🇪", "Bundesliga", "bundesliga/"},
-        {"🇫🇷", "Ligue 1",    "ligue1/"},
-        {"🌍", "Todas",       "__todas__"},
+    // {emoji, label, api-prefix, accent-color}
+    private static final Object[][] LEAGUES = {
+        {"🇲🇽", "LIGA MX",     "",             0xFFFF6B00},
+        {"🏴",  "PREMIER",     "premier/",     0xFF5C9AFF},
+        {"🇪🇸", "LA LIGA",     "laliga/",      0xFFFF3B3B},
+        {"🇮🇹", "SERIE A",     "seriea/",      0xFF00C4FF},
+        {"🇩🇪", "BUNDESLIGA",  "bundesliga/",  0xFFFF6B00},
+        {"🇫🇷", "LIGUE 1",     "ligue1/",      0xFF5C9AFF},
     };
 
-    private static final String[][] SECTIONS = {
-        {"Marcadores",   "marcadores"},
-        {"Tabla",        "tabla"},
-        {"Goleadores",   "goleadores"},
-        {"Calendario",   "calendario"},
-        {"Alineaciones", "alineaciones"},
-        {"Highlights",   "mejores-momentos"},
-        {"Noticias",     "noticias"},
-    };
-
-    private static final String[][] LIGAMX_SECTIONS = {
-        {"Marcadores",   "marcadores"},
-        {"Tabla",        "tabla"},
-        {"Goleadores",   "goleadores"},
-        {"Calendario",   "calendario"},
-        {"Alineaciones", "alineaciones"},
-        {"Equipos",      "equipos"},
-        {"Highlights",   "videos"},
-        {"Noticias",     "noticias"},
-    };
-
-    private int selLeague  = 0;
-    private int selSection = 0;
-
-    private LinearLayout leagueTabBar;
-    private LinearLayout sectionTabBar;
-    private View         sectionTabScroll;
     private LinearLayout contentContainer;
     private ProgressBar  progressBar;
     private TextView     errorView;
-    private ScrollView   contentScroll;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
@@ -77,498 +52,439 @@ public class FootballFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle s) {
         super.onViewCreated(view, s);
-        leagueTabBar     = view.findViewById(R.id.leagueTabBar);
-        sectionTabBar    = view.findViewById(R.id.sectionTabBar);
-        sectionTabScroll = view.findViewById(R.id.sectionTabScroll);
         contentContainer = view.findViewById(R.id.footballContent);
         progressBar      = view.findViewById(R.id.footballLoading);
         errorView        = view.findViewById(R.id.footballError);
-        contentScroll    = view.findViewById(R.id.footballScroll);
-        buildLeagueTabs();
-        selectLeague(0);
+        loadAgenda();
     }
 
-    // ─── League tabs ─────────────────────────────────────────────────────────────
+    // ─── Agenda builder ───────────────────────────────────────────────────────────
 
-    private void buildLeagueTabs() {
-        leagueTabBar.removeAllViews();
-        for (int i = 0; i < LEAGUES.length; i++) {
-            final int idx = i;
-            String[] l = LEAGUES[i];
-
-            LinearLayout tab = new LinearLayout(requireContext());
-            tab.setOrientation(LinearLayout.VERTICAL);
-            tab.setGravity(Gravity.CENTER);
-            tab.setPadding(dp(12), dp(4), dp(12), dp(4));
-            tab.setClickable(true);
-            tab.setFocusable(true);
-
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(60), MATCH_PARENT);
-            lp.setMarginEnd(dp(6));
-            tab.setLayoutParams(lp);
-
-            TextView emoji = new TextView(requireContext());
-            emoji.setText(l[0]);
-            emoji.setTextSize(22);
-            emoji.setGravity(Gravity.CENTER);
-
-            TextView label = new TextView(requireContext());
-            label.setText(l[1]);
-            label.setTextSize(10);
-            label.setGravity(Gravity.CENTER);
-            label.setTypeface(null, Typeface.BOLD);
-            label.setLetterSpacing(0.02f);
-            label.setMaxLines(1);
-            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            tlp.setMargins(0, dp(3), 0, 0);
-            label.setLayoutParams(tlp);
-
-            tab.addView(emoji);
-            tab.addView(label);
-            tab.setTag(idx);
-            tab.setOnClickListener(v -> selectLeague(idx));
-            leagueTabBar.addView(tab);
-        }
-    }
-
-    private void selectLeague(int idx) {
-        selLeague  = idx;
-        selSection = 0;
-        for (int i = 0; i < leagueTabBar.getChildCount(); i++) {
-            View tab = leagueTabBar.getChildAt(i);
-            boolean active = (i == idx);
-            tab.setBackgroundResource(active
-                ? R.drawable.sport_league_tab_active
-                : R.drawable.sport_league_tab_inactive);
-            if (tab instanceof LinearLayout) {
-                LinearLayout ll = (LinearLayout) tab;
-                if (ll.getChildCount() >= 2) {
-                    if (ll.getChildAt(0) instanceof TextView)
-                        ((TextView) ll.getChildAt(0)).setTextColor(active ? 0xFFFFFFFF : 0xBBFFFFFF);
-                    if (ll.getChildAt(1) instanceof TextView)
-                        ((TextView) ll.getChildAt(1)).setTextColor(active ? 0xFFFFFFFF : 0x66FFFFFF);
-                }
-            }
-        }
-
-        String prefix = LEAGUES[idx][2];
-        if ("__live__".equals(prefix)) {
-            if (sectionTabScroll != null) sectionTabScroll.setVisibility(View.GONE);
-            loadLiveStreams();
-        } else if ("__todas__".equals(prefix)) {
-            if (sectionTabScroll != null) sectionTabScroll.setVisibility(View.GONE);
-            loadUrl("/resultados/todas-las-ligas");
-        } else {
-            buildSectionTabs(idx);
-            if (sectionTabScroll != null) sectionTabScroll.setVisibility(View.VISIBLE);
-            loadSection(idx, 0);
-        }
-    }
-
-    // ─── Section chips ────────────────────────────────────────────────────────────
-
-    private void buildSectionTabs(int leagueIdx) {
-        sectionTabBar.removeAllViews();
-        String[][] sections = (leagueIdx == 1) ? LIGAMX_SECTIONS : SECTIONS;
-        for (int i = 0; i < sections.length; i++) {
-            final int idx = i;
-            TextView chip = new TextView(requireContext());
-            chip.setText(sections[i][0]);
-            chip.setTextSize(12);
-            chip.setTypeface(null, Typeface.BOLD);
-            chip.setPadding(dp(14), dp(5), dp(14), dp(5));
-            chip.setGravity(Gravity.CENTER);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            lp.setMarginEnd(dp(7));
-            lp.gravity = Gravity.CENTER_VERTICAL;
-            chip.setLayoutParams(lp);
-            chip.setClickable(true);
-            chip.setFocusable(true);
-            chip.setTag(idx);
-            chip.setOnClickListener(v -> {
-                selSection = idx;
-                updateSectionChips();
-                loadSection(selLeague, idx);
-            });
-            sectionTabBar.addView(chip);
-        }
-        updateSectionChips();
-    }
-
-    private void updateSectionChips() {
-        for (int i = 0; i < sectionTabBar.getChildCount(); i++) {
-            View v = sectionTabBar.getChildAt(i);
-            boolean active = (i == selSection);
-            v.setBackgroundResource(active
-                ? R.drawable.sport_section_chip_active
-                : R.drawable.sport_section_chip_inactive);
-            if (v instanceof TextView)
-                ((TextView) v).setTextColor(active ? 0xFFFFFFFF : 0x88FFFFFF);
-        }
-    }
-
-    private void loadSection(int leagueIdx, int sectionIdx) {
-        String prefix = LEAGUES[leagueIdx][2];
-        String[][] sections = (leagueIdx == 1) ? LIGAMX_SECTIONS : SECTIONS;
-        String key  = sections[sectionIdx][1];
-        loadUrl("/" + prefix + key);
-    }
-
-    // ─── EN VIVO ─────────────────────────────────────────────────────────────────
-
-    private void loadLiveStreams() {
-        showLoading();
+    private void loadAgenda() {
         contentContainer.removeAllViews();
-        addSectionHeader("📡", "Transmisiones en Vivo");
 
-        String[][] streams = {
-            {"Gol 1", "1", "/gol-1"},
-            {"Gol 2", "2", "/gol-2"},
-            {"Gol 3", "3", "/gol-3"},
-            {"Gol 4", "4", "/gol-4"},
-            {"Gol 5", "5", "/gol-5"},
-            {"Gol 6", "6", "/gol-6"},
-        };
+        // 1) EN VIVO static streams section
+        buildLiveSection();
 
-        LinearLayout grid = new LinearLayout(requireContext());
-        grid.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams gLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        gLp.setMargins(dp(12), 0, dp(12), dp(4));
-        grid.setLayoutParams(gLp);
+        // 2) Each league section (async)
+        for (Object[] league : LEAGUES) {
+            String emoji  = (String) league[0];
+            String label  = (String) league[1];
+            String prefix = (String) league[2];
+            int    color  = (int)    league[3];
 
-        for (int i = 0; i < streams.length; i += 2) {
-            LinearLayout row = new LinearLayout(requireContext());
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            rLp.setMargins(0, 0, 0, dp(10));
-            row.setLayoutParams(rLp);
-            row.addView(makeStreamButton(streams[i][0], streams[i][1], streams[i][2]));
-            if (i + 1 < streams.length)
-                row.addView(makeStreamButton(streams[i+1][0], streams[i+1][1], streams[i+1][2]));
-            grid.addView(row);
+            // Reserve placeholder row immediately so order is stable
+            LinearLayout sectionHolder = new LinearLayout(requireContext());
+            sectionHolder.setOrientation(LinearLayout.VERTICAL);
+            sectionHolder.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+            contentContainer.addView(sectionHolder);
+
+            // Build header now
+            addAgendaHeader(sectionHolder, emoji, label, "PRÓXIMOS EVENTOS", color);
+
+            // Add skeleton loading row
+            ProgressBar mini = new ProgressBar(requireContext(), null,
+                android.R.attr.progressBarStyleSmall);
+            mini.setIndeterminateTintList(
+                android.content.res.ColorStateList.valueOf(color));
+            LinearLayout.LayoutParams mlp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+            mlp.setMargins(dp(18), dp(4), 0, dp(16));
+            mini.setLayoutParams(mlp);
+            sectionHolder.addView(mini);
+
+            // Fetch async
+            final String path = "/" + prefix + "marcadores";
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    String json = fetch(path);
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (!isAdded()) return;
+                        sectionHolder.removeView(mini);
+                        buildLeagueRow(sectionHolder, json, color);
+                    });
+                } catch (Exception e) {
+                    new Handler(Looper.getMainLooper()).post(() -> {
+                        if (!isAdded()) return;
+                        sectionHolder.removeView(mini);
+                        addNoDataLabel(sectionHolder);
+                    });
+                }
+            });
         }
-        contentContainer.addView(grid);
-        hideLoading();
 
-        addSectionHeader("📺", "Canales IPTV");
-        showLoading();
+        // 3) IPTV Canales section (async, at the bottom)
+        LinearLayout iptv = new LinearLayout(requireContext());
+        iptv.setOrientation(LinearLayout.VERTICAL);
+        iptv.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        contentContainer.addView(iptv);
+        addAgendaHeader(iptv, "📺", "CANALES IPTV", "TRANSMISIONES", 0xFFFFB800);
+        ProgressBar iptvBar = new ProgressBar(requireContext(), null,
+            android.R.attr.progressBarStyleSmall);
+        iptvBar.setIndeterminateTintList(
+            android.content.res.ColorStateList.valueOf(0xFFFFB800));
+        LinearLayout.LayoutParams iblp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        iblp.setMargins(dp(18), dp(4), 0, dp(16));
+        iptvBar.setLayoutParams(iblp);
+        iptv.addView(iptvBar);
+
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 String json = fetch("/canales");
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    hideLoading();
-                    renderCanales(json);
+                    if (!isAdded()) return;
+                    iptv.removeView(iptvBar);
+                    buildIptvList(iptv, json);
                 });
             } catch (Exception e) {
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    hideLoading();
-                    addErrorCard("No se pudieron cargar los canales");
+                    if (!isAdded()) return;
+                    iptv.removeView(iptvBar);
+                    addNoDataLabel(iptv);
                 });
             }
         });
     }
 
-    private View makeStreamButton(String name, String number, String path) {
-        LinearLayout btn = new LinearLayout(requireContext());
-        btn.setOrientation(LinearLayout.VERTICAL);
-        btn.setGravity(Gravity.CENTER);
-        btn.setBackgroundResource(R.drawable.sport_stream_btn);
-        btn.setClickable(true);
-        btn.setFocusable(true);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(90), 1f);
-        lp.setMarginEnd(dp(8));
-        btn.setLayoutParams(lp);
-        btn.setPadding(dp(8), dp(12), dp(8), dp(12));
+    // ─── EN VIVO section ─────────────────────────────────────────────────────────
 
-        TextView icon = new TextView(requireContext());
-        icon.setText("▶");
-        icon.setTextColor(0xFFFFFFFF);
-        icon.setTextSize(24);
-        icon.setGravity(Gravity.CENTER);
+    private void buildLiveSection() {
+        LinearLayout section = new LinearLayout(requireContext());
+        section.setOrientation(LinearLayout.VERTICAL);
+        section.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+        contentContainer.addView(section);
 
-        TextView label = new TextView(requireContext());
-        label.setText("⚽  Gol " + number);
-        label.setTextColor(0xFFFFFFFF);
-        label.setTextSize(14);
-        label.setTypeface(null, Typeface.BOLD);
-        label.setGravity(Gravity.CENTER);
+        addAgendaHeader(section, "⚡", "EN VIVO", "TRANSMISIONES AHORA", 0xFFFF3B3B);
+
+        HorizontalScrollView hsv = new HorizontalScrollView(requireContext());
+        hsv.setHorizontalScrollBarEnabled(false);
+        hsv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout.LayoutParams hsvLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        hsvLp.setMargins(0, 0, 0, dp(8));
+        hsv.setLayoutParams(hsvLp);
+
+        LinearLayout row = new LinearLayout(requireContext());
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(dp(16), dp(4), dp(16), dp(12));
+
+        String[][] streams = {
+            {"1","/gol-1"},{"2","/gol-2"},{"3","/gol-3"},
+            {"4","/gol-4"},{"5","/gol-5"},{"6","/gol-6"},
+        };
+        for (String[] s : streams) row.addView(makeGolCard(s[0], s[1]));
+
+        hsv.addView(row);
+        section.addView(hsv);
+    }
+
+    private View makeGolCard(String number, String path) {
+        LinearLayout card = new LinearLayout(requireContext());
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setGravity(Gravity.CENTER);
+        card.setBackgroundResource(R.drawable.agenda_gol_stream_card);
+        card.setClickable(true);
+        card.setFocusable(true);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(148), dp(160));
+        lp.setMarginEnd(dp(10));
+        card.setLayoutParams(lp);
+        card.setPadding(dp(10), dp(14), dp(10), dp(14));
+
+        // Play circle
+        LinearLayout playCircle = new LinearLayout(requireContext());
+        playCircle.setGravity(Gravity.CENTER);
+        android.graphics.drawable.GradientDrawable circBg = new android.graphics.drawable.GradientDrawable();
+        circBg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+        circBg.setColor(0x22FFFFFF);
+        circBg.setStroke(dp(1), 0x44FFFFFF);
+        playCircle.setBackground(circBg);
+        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(dp(52), dp(52));
+        clp.gravity = Gravity.CENTER_HORIZONTAL;
+        playCircle.setLayoutParams(clp);
+
+        TextView tvPlay = new TextView(requireContext());
+        tvPlay.setText("▶");
+        tvPlay.setTextColor(0xFFFFFFFF);
+        tvPlay.setTextSize(20);
+        tvPlay.setGravity(Gravity.CENTER);
+        playCircle.addView(tvPlay);
+        card.addView(playCircle);
+
+        // Sport tag
+        TextView tvTag = new TextView(requireContext());
+        tvTag.setText("FOOTBALL");
+        tvTag.setTextColor(0xAAFFFFFF);
+        tvTag.setTextSize(9);
+        tvTag.setLetterSpacing(0.12f);
+        tvTag.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams taglp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        taglp.setMargins(0, dp(10), 0, dp(3));
+        tvTag.setLayoutParams(taglp);
+        card.addView(tvTag);
+
+        // Title
+        TextView tvTitle = new TextView(requireContext());
+        tvTitle.setText("⚽  Gol " + number);
+        tvTitle.setTextColor(0xFFFFFFFF);
+        tvTitle.setTextSize(15);
+        tvTitle.setTypeface(null, Typeface.BOLD);
+        tvTitle.setGravity(Gravity.CENTER);
+        card.addView(tvTitle);
+
+        // Live badge
+        TextView tvLive = new TextView(requireContext());
+        tvLive.setText("  EN VIVO  ");
+        tvLive.setTextColor(0xFFFFFFFF);
+        tvLive.setTextSize(9);
+        tvLive.setTypeface(null, Typeface.BOLD);
+        tvLive.setLetterSpacing(0.1f);
+        tvLive.setBackgroundResource(R.drawable.agenda_live_badge);
         LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        llp.setMargins(0, dp(4), 0, 0);
-        label.setLayoutParams(llp);
+        llp.gravity = Gravity.CENTER_HORIZONTAL;
+        llp.setMargins(0, dp(8), 0, 0);
+        tvLive.setLayoutParams(llp);
+        tvLive.setPadding(dp(8), dp(3), dp(8), dp(3));
+        card.addView(tvLive);
 
-        TextView sub = new TextView(requireContext());
-        sub.setText("• EN VIVO");
-        sub.setTextColor(0xBBFFFFFF);
-        sub.setTextSize(9);
-        sub.setLetterSpacing(0.12f);
-        sub.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        slp.setMargins(0, dp(2), 0, 0);
-        sub.setLayoutParams(slp);
-
-        btn.addView(icon);
-        btn.addView(label);
-        btn.addView(sub);
-
-        btn.setOnClickListener(v -> {
-            btn.animate().alpha(0.5f).setDuration(100).start();
+        card.setOnClickListener(v -> {
+            card.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).withEndAction(() ->
+                card.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
+            ).start();
             Executors.newSingleThreadExecutor().execute(() -> {
                 try {
                     String json = fetch(path);
                     String url  = extractUrl(json);
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        btn.animate().alpha(1f).setDuration(200).start();
+                        if (!isAdded()) return;
                         if (url != null && !url.isEmpty()) {
-                            Intent intent = new Intent(requireContext(), PlayerActivity.class);
-                            intent.putExtra("url", url);
-                            intent.putExtra("title", "Gol " + number + " ⚽");
-                            startActivity(intent);
+                            Intent i = new Intent(requireContext(), PlayerActivity.class);
+                            i.putExtra("url", url);
+                            i.putExtra("title", "⚽ Gol " + number);
+                            startActivity(i);
                         } else {
                             Toast.makeText(requireContext(), "Stream no disponible", Toast.LENGTH_SHORT).show();
                         }
                     });
                 } catch (Exception e) {
                     new Handler(Looper.getMainLooper()).post(() -> {
-                        btn.animate().alpha(1f).setDuration(200).start();
+                        if (!isAdded()) return;
                         Toast.makeText(requireContext(), "Error al cargar stream", Toast.LENGTH_SHORT).show();
                     });
                 }
             });
         });
-        return btn;
-    }
-
-    // ─── Generic loader ───────────────────────────────────────────────────────────
-
-    private void loadUrl(String path) {
-        showLoading();
-        contentContainer.removeAllViews();
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                String json = fetch(path);
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    hideLoading();
-                    renderJson(path, json);
-                });
-            } catch (Exception e) {
-                new Handler(Looper.getMainLooper()).post(() -> {
-                    hideLoading();
-                    showError("Sin conexión o sin datos disponibles");
-                });
-            }
-        });
-    }
-
-    // ─── JSON Dispatcher ─────────────────────────────────────────────────────────
-
-    private void renderJson(String path, String json) {
-        contentContainer.removeAllViews();
-        hideError();
-        try {
-            JSONObject root = new JSONObject(json);
-            if      (path.contains("marcadores"))              renderMarcadores(root);
-            else if (path.contains("tabla"))                   renderTabla(root);
-            else if (path.contains("goleadores"))              renderGoleadores(root);
-            else if (path.contains("calendario"))              renderCalendario(root);
-            else if (path.contains("alineaciones"))            renderAlineaciones(root);
-            else if (path.contains("videos") || path.contains("momentos")) renderHighlights(root);
-            else if (path.contains("noticias"))                renderNoticias(root);
-            else if (path.contains("equipos"))                 renderEquipos(root);
-            else if (path.contains("canales"))                 renderCanales(json);
-            else                                               renderGeneric(root);
-        } catch (Exception e) {
-            try {
-                JSONArray arr = new JSONArray(json);
-                renderArray(arr);
-            } catch (Exception e2) {
-                showError("Formato de respuesta desconocido");
-            }
-        }
-    }
-
-    // ─── Section Renderers ────────────────────────────────────────────────────────
-
-    private void renderMarcadores(JSONObject root) {
-        addSectionHeader("⚽", "Marcadores");
-        JSONArray arr = findArray(root, "partidos","matches","fixtures","resultados","marcadores","data");
-        if (arr == null || arr.length() == 0) {
-            addErrorCard("No hay marcadores disponibles");
-            return;
-        }
-        for (int i = 0; i < arr.length(); i++) {
-            try { addMatchCard(arr.getJSONObject(i)); } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderTabla(JSONObject root) {
-        addSectionHeader("📊", "Tabla de Posiciones");
-        JSONArray arr = findArray(root, "tabla","posiciones","standings","teams","data","equipos");
-        if (arr == null || arr.length() == 0) { addErrorCard("Sin datos de tabla"); return; }
-        addTableHeader(new String[]{"#", "Equipo", "PJ", "G", "E", "P", "Pts"});
-        for (int i = 0; i < arr.length(); i++) {
-            try {
-                JSONObject t   = arr.getJSONObject(i);
-                int pos        = t.optInt("posicion", t.optInt("pos", t.optInt("rank", i + 1)));
-                String eq      = t.optString("equipo", t.optString("team", t.optString("nombre", t.optString("name","—"))));
-                int pj         = t.optInt("pj",      t.optInt("played",     t.optInt("gamesPlayed", 0)));
-                int g          = t.optInt("g",        t.optInt("won",        t.optInt("wins",        0)));
-                int e          = t.optInt("e",        t.optInt("drawn",      t.optInt("draws",       0)));
-                int p          = t.optInt("p",        t.optInt("lost",       t.optInt("losses",      0)));
-                int pts        = t.optInt("puntos",   t.optInt("points",     t.optInt("pts",         0)));
-                addTableRow(new String[]{
-                    String.valueOf(pos), eq, String.valueOf(pj),
-                    String.valueOf(g), String.valueOf(e), String.valueOf(p), String.valueOf(pts)
-                }, i % 2 == 0, pos <= 4);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderGoleadores(JSONObject root) {
-        addSectionHeader("👟", "Goleadores");
-        JSONArray arr = findArray(root, "goleadores","scorers","jugadores","data","players");
-        if (arr == null || arr.length() == 0) { addErrorCard("Sin datos de goleadores"); return; }
-        addTableHeader(new String[]{"#", "Jugador", "Equipo", "⚽"});
-        for (int i = 0; i < arr.length(); i++) {
-            try {
-                JSONObject p = arr.getJSONObject(i);
-                String nombre = p.optString("jugador", p.optString("player", p.optString("nombre", p.optString("name","—"))));
-                String equipo = p.optString("equipo",  p.optString("team",   p.optString("club",   "—")));
-                int goles     = p.optInt("goles", p.optInt("goals", p.optInt("scored", 0)));
-                addTableRow(new String[]{String.valueOf(i+1), nombre, equipo, String.valueOf(goles)},
-                    i % 2 == 0, i == 0);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderCalendario(JSONObject root) {
-        addSectionHeader("📅", "Calendario");
-        JSONArray arr = findArray(root, "partidos","fixtures","calendario","matches","data");
-        if (arr == null || arr.length() == 0) { addErrorCard("No hay partidos programados"); return; }
-        for (int i = 0; i < arr.length(); i++) {
-            try { addMatchCard(arr.getJSONObject(i)); } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderAlineaciones(JSONObject root) {
-        addSectionHeader("📋", "Alineaciones");
-        JSONArray arr = findArray(root, "partidos","matches","alineaciones","equipos","data");
-        if (arr == null) { renderGeneric(root); return; }
-        for (int i = 0; i < arr.length(); i++) {
-            try {
-                JSONObject m   = arr.getJSONObject(i);
-                String nameL   = getTeamName(m, "local");
-                String nameV   = getTeamName(m, "visitante");
-                LinearLayout card = makeGlassCard(false);
-                card.setPadding(dp(16), dp(14), dp(16), dp(14));
-                TextView tv = new TextView(requireContext());
-                tv.setText("🏠  " + nameL + "   vs   " + nameV + "  ✈");
-                tv.setTextColor(0xFFFFFFFF);
-                tv.setTextSize(14);
-                tv.setTypeface(null, Typeface.BOLD);
-                card.addView(tv);
-                contentContainer.addView(card);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderHighlights(JSONObject root) {
-        addSectionHeader("🎬", "Highlights");
-        JSONArray arr = findArray(root, "videos","highlights","clips","data","items","results");
-        if (arr == null || arr.length() == 0) { addErrorCard("Sin highlights disponibles"); return; }
-        for (int i = 0; i < arr.length(); i++) {
-            try {
-                JSONObject v = arr.getJSONObject(i);
-                String title = v.optString("titulo", v.optString("title", v.optString("nombre","Video "+(i+1))));
-                String url   = v.optString("url",    v.optString("link",  v.optString("video_url","")));
-                if (url.isEmpty()) continue;
-                addVideoCard(title, url);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderNoticias(JSONObject root) {
-        addSectionHeader("📰", "Noticias");
-        JSONArray arr = findArray(root, "noticias","news","articles","data","items");
-        if (arr == null || arr.length() == 0) { addErrorCard("Sin noticias disponibles"); return; }
-        for (int i = 0; i < arr.length(); i++) {
-            try {
-                JSONObject n = arr.getJSONObject(i);
-                String titulo = n.optString("titulo", n.optString("title",   n.optString("headline","Noticia")));
-                String fuente = n.optString("fuente", n.optString("source",  n.optString("author",  "")));
-                String fecha  = n.optString("fecha",  n.optString("date",    n.optString("published","")));
-                String sub    = (fuente.isEmpty() ? "" : fuente) + (fecha.isEmpty() ? "" : " · " + fecha);
-                addNewsCard(titulo, sub);
-            } catch (Exception ignored) {}
-        }
-    }
-
-    private void renderEquipos(JSONObject root) {
-        addSectionHeader("🏆", "Equipos");
-        JSONArray arr = findArray(root, "equipos","teams","data","clubs");
-        if (arr == null || arr.length() == 0) { renderGeneric(root); return; }
-        LinearLayout grid = new LinearLayout(requireContext());
-        grid.setOrientation(LinearLayout.VERTICAL);
-        LinearLayout.LayoutParams gLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        gLp.setMargins(dp(12), 0, dp(12), 0);
-        grid.setLayoutParams(gLp);
-        for (int i = 0; i < arr.length(); i += 2) {
-            LinearLayout row = new LinearLayout(requireContext());
-            row.setOrientation(LinearLayout.HORIZONTAL);
-            LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            rLp.setMargins(0, 0, 0, dp(8));
-            row.setLayoutParams(rLp);
-            row.addView(makeTeamCard(arr.optJSONObject(i)));
-            if (i + 1 < arr.length()) row.addView(makeTeamCard(arr.optJSONObject(i + 1)));
-            grid.addView(row);
-        }
-        contentContainer.addView(grid);
-    }
-
-    private View makeTeamCard(JSONObject t) {
-        LinearLayout card = new LinearLayout(requireContext());
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setGravity(Gravity.CENTER);
-        card.setBackgroundResource(R.drawable.sport_match_card);
-        card.setPadding(dp(8), dp(14), dp(8), dp(14));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(80), 1f);
-        lp.setMarginEnd(dp(6));
-        card.setLayoutParams(lp);
-
-        String nombre = t != null ? t.optString("nombre", t.optString("name", t.optString("equipo","—"))) : "—";
-        String logo   = t != null ? t.optString("escudo", t.optString("logo", t.optString("badge", ""))) : "";
-
-        if (!logo.isEmpty() && isAdded()) {
-            ImageView img = new ImageView(requireContext());
-            LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(dp(40), dp(40));
-            ilp.gravity = Gravity.CENTER_HORIZONTAL;
-            img.setLayoutParams(ilp);
-            img.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Glide.with(this).load(logo)
-                 .apply(new RequestOptions().transform(new RoundedCorners(dp(8))))
-                 .placeholder(R.drawable.ic_channel_placeholder)
-                 .error(R.drawable.ic_channel_placeholder)
-                 .into(img);
-            card.addView(img);
-        } else {
-            TextView emojiTv = new TextView(requireContext());
-            emojiTv.setText("⚽");
-            emojiTv.setTextSize(22);
-            emojiTv.setGravity(Gravity.CENTER);
-            card.addView(emojiTv);
-        }
-
-        TextView nameTv = new TextView(requireContext());
-        nameTv.setText(nombre);
-        nameTv.setTextColor(0xDDFFFFFF);
-        nameTv.setTextSize(12);
-        nameTv.setGravity(Gravity.CENTER);
-        nameTv.setMaxLines(2);
-        nameTv.setPadding(0, dp(4), 0, 0);
-        card.addView(nameTv);
         return card;
     }
 
-    private void renderCanales(String json) {
+    // ─── League match row ─────────────────────────────────────────────────────────
+
+    private void buildLeagueRow(LinearLayout parent, String json, int accentColor) {
+        try {
+            JSONArray arr = null;
+            try {
+                JSONObject root = new JSONObject(json);
+                arr = findArray(root, "partidos","matches","fixtures","resultados","marcadores","data");
+            } catch (Exception e) {
+                arr = new JSONArray(json);
+            }
+            if (arr == null || arr.length() == 0) { addNoDataLabel(parent); return; }
+
+            HorizontalScrollView hsv = new HorizontalScrollView(requireContext());
+            hsv.setHorizontalScrollBarEnabled(false);
+            hsv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            LinearLayout.LayoutParams hsvLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            hsvLp.setMargins(0, 0, 0, dp(8));
+            hsv.setLayoutParams(hsvLp);
+
+            LinearLayout row = new LinearLayout(requireContext());
+            row.setOrientation(LinearLayout.HORIZONTAL);
+            row.setPadding(dp(16), dp(4), dp(16), dp(14));
+
+            for (int i = 0; i < arr.length(); i++) {
+                try {
+                    row.addView(makeMatchCard(arr.getJSONObject(i), accentColor));
+                } catch (Exception ignored) {}
+            }
+
+            hsv.addView(row);
+            parent.addView(hsv);
+
+        } catch (Exception e) {
+            addNoDataLabel(parent);
+        }
+    }
+
+    private View makeMatchCard(JSONObject match, int accentColor) {
+        String nameL  = getTeamName(match, "local");
+        String nameV  = getTeamName(match, "visitante");
+        String logoL  = getTeamLogo(match, "local");
+        String logoV  = getTeamLogo(match, "visitante");
+        String gL     = getTeamScore(match, "local");
+        String gV     = getTeamScore(match, "visitante");
+        String estado = match.optString("estado", match.optString("status", ""));
+        String fecha  = match.optString("fecha",  match.optString("date",   ""));
+        String hora   = match.optString("hora",   match.optString("time",   ""));
+        String minuto = match.optString("minuto", match.optString("minute", ""));
+
+        boolean isLive   = estado.toLowerCase().contains("vivo") ||
+                           estado.toLowerCase().contains("live") ||
+                           minuto.matches("\\d+.*");
+        boolean hasScore = !gL.equals("-") && !gV.equals("-");
+
+        LinearLayout card = new LinearLayout(requireContext());
+        card.setOrientation(LinearLayout.VERTICAL);
+        card.setBackgroundResource(isLive ? R.drawable.agenda_match_live_card : R.drawable.agenda_match_card);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(158), dp(185));
+        lp.setMarginEnd(dp(10));
+        card.setLayoutParams(lp);
+        card.setPadding(dp(12), dp(12), dp(12), dp(12));
+
+        // ── Top: LIVE or time badge ──
+        LinearLayout topRow = new LinearLayout(requireContext());
+        topRow.setOrientation(LinearLayout.HORIZONTAL);
+        topRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams trLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        trLp.setMargins(0, 0, 0, dp(8));
+        topRow.setLayoutParams(trLp);
+
+        if (isLive) {
+            TextView liveBadge = new TextView(requireContext());
+            liveBadge.setText("  LIVE  ");
+            liveBadge.setTextColor(0xFFFFFFFF);
+            liveBadge.setTextSize(9);
+            liveBadge.setTypeface(null, Typeface.BOLD);
+            liveBadge.setLetterSpacing(0.1f);
+            liveBadge.setBackgroundResource(R.drawable.agenda_live_badge);
+            liveBadge.setPadding(dp(6), dp(2), dp(6), dp(2));
+            topRow.addView(liveBadge);
+            if (!minuto.isEmpty()) {
+                TextView tvMin = new TextView(requireContext());
+                tvMin.setText("  " + minuto);
+                tvMin.setTextColor(0xAAFF6B00);
+                tvMin.setTextSize(10);
+                tvMin.setTypeface(null, Typeface.BOLD);
+                topRow.addView(tvMin);
+            }
+        } else if (!hora.isEmpty() || !fecha.isEmpty()) {
+            String timeStr = hora.isEmpty() ? fecha : hora;
+            TextView tvTime = new TextView(requireContext());
+            tvTime.setText("  " + timeStr + "  ");
+            tvTime.setTextColor(0xCCFFFFFF);
+            tvTime.setTextSize(11);
+            tvTime.setTypeface(null, Typeface.BOLD);
+            tvTime.setBackgroundResource(R.drawable.agenda_time_badge);
+            tvTime.setPadding(dp(6), dp(3), dp(6), dp(3));
+            topRow.addView(tvTime);
+        }
+        card.addView(topRow);
+
+        // ── Logos row ──
+        LinearLayout logosRow = new LinearLayout(requireContext());
+        logosRow.setOrientation(LinearLayout.HORIZONTAL);
+        logosRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams lrLp = new LinearLayout.LayoutParams(MATCH_PARENT, dp(52));
+        lrLp.setMargins(0, dp(2), 0, dp(2));
+        logosRow.setLayoutParams(lrLp);
+
+        // Left logo
+        ImageView logoLeft = makeLogoView(logoL);
+        logoLeft.setLayoutParams(new LinearLayout.LayoutParams(dp(44), dp(44)));
+        logosRow.addView(logoLeft);
+
+        // VS spacer
+        TextView tvVs = new TextView(requireContext());
+        tvVs.setText("vs");
+        tvVs.setTextColor(0x55FFFFFF);
+        tvVs.setTextSize(11);
+        tvVs.setGravity(Gravity.CENTER);
+        tvVs.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+        logosRow.addView(tvVs);
+
+        // Right logo
+        ImageView logoRight = makeLogoView(logoV);
+        logoRight.setLayoutParams(new LinearLayout.LayoutParams(dp(44), dp(44)));
+        logosRow.addView(logoRight);
+
+        card.addView(logosRow);
+
+        // ── Score or separator ──
+        if (hasScore) {
+            TextView tvScore = new TextView(requireContext());
+            tvScore.setText(gL + "  —  " + gV);
+            tvScore.setTextColor(accentColor);
+            tvScore.setTextSize(22);
+            tvScore.setTypeface(null, Typeface.BOLD);
+            tvScore.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            slp.setMargins(0, dp(4), 0, dp(6));
+            tvScore.setLayoutParams(slp);
+            card.addView(tvScore);
+        } else {
+            View divider = new View(requireContext());
+            divider.setBackgroundColor(0x15FFFFFF);
+            LinearLayout.LayoutParams dlp = new LinearLayout.LayoutParams(MATCH_PARENT, dp(1));
+            dlp.setMargins(0, dp(6), 0, dp(6));
+            divider.setLayoutParams(dlp);
+            card.addView(divider);
+        }
+
+        // ── Team names ──
+        LinearLayout namesRow = new LinearLayout(requireContext());
+        namesRow.setOrientation(LinearLayout.HORIZONTAL);
+        namesRow.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+
+        TextView tvNameL = new TextView(requireContext());
+        tvNameL.setText(nameL);
+        tvNameL.setTextColor(0xEEFFFFFF);
+        tvNameL.setTextSize(11);
+        tvNameL.setTypeface(null, Typeface.BOLD);
+        tvNameL.setMaxLines(2);
+        tvNameL.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+
+        TextView tvNameV = new TextView(requireContext());
+        tvNameV.setText(nameV);
+        tvNameV.setTextColor(0xEEFFFFFF);
+        tvNameV.setTextSize(11);
+        tvNameV.setTypeface(null, Typeface.BOLD);
+        tvNameV.setMaxLines(2);
+        tvNameV.setGravity(Gravity.END);
+        tvNameV.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+
+        namesRow.addView(tvNameL);
+        namesRow.addView(tvNameV);
+        card.addView(namesRow);
+
+        // Bottom date if has score + date
+        if (hasScore && !fecha.isEmpty()) {
+            TextView tvDate = new TextView(requireContext());
+            tvDate.setText(fecha);
+            tvDate.setTextColor(0x55FFFFFF);
+            tvDate.setTextSize(10);
+            tvDate.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams datelp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            datelp.setMargins(0, dp(5), 0, 0);
+            tvDate.setLayoutParams(datelp);
+            card.addView(tvDate);
+        }
+
+        return card;
+    }
+
+    private ImageView makeLogoView(String url) {
+        ImageView iv = new ImageView(requireContext());
+        iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        if (!url.isEmpty() && isAdded()) {
+            Glide.with(this)
+                 .load(url)
+                 .apply(new RequestOptions().transform(new RoundedCorners(dp(6))))
+                 .placeholder(R.drawable.ic_channel_placeholder)
+                 .error(R.drawable.ic_channel_placeholder)
+                 .into(iv);
+        }
+        return iv;
+    }
+
+    // ─── IPTV list ────────────────────────────────────────────────────────────────
+
+    private void buildIptvList(LinearLayout parent, String json) {
         try {
             JSONArray arr;
             try {
@@ -578,346 +494,42 @@ public class FootballFragment extends Fragment {
             } catch (Exception e) {
                 arr = new JSONArray(json);
             }
-            if (arr.length() == 0) { addErrorCard("Sin canales IPTV"); return; }
+            if (arr.length() == 0) { addNoDataLabel(parent); return; }
+
+            LinearLayout listHolder = new LinearLayout(requireContext());
+            listHolder.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams hlp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            hlp.setMargins(dp(16), 0, dp(16), dp(8));
+            listHolder.setLayoutParams(hlp);
+            parent.addView(listHolder);
+
             for (int i = 0; i < arr.length(); i++) {
                 try {
                     JSONObject c  = arr.getJSONObject(i);
-                    String nombre = c.optString("nombre", c.optString("name",       "Canal "+(i+1)));
-                    String bandera= c.optString("bandera",c.optString("flag",       "📺"));
-                    String pUrl   = c.optString("player_url", c.optString("url",    ""));
-                    String pais   = c.optString("pais",   c.optString("country",    ""));
+                    String nombre = c.optString("nombre", c.optString("name",     "Canal "+(i+1)));
+                    String bandera= c.optString("bandera",c.optString("flag",     "📺"));
+                    String pUrl   = c.optString("player_url", c.optString("url",  ""));
+                    String pais   = c.optString("pais",   c.optString("country",  ""));
                     if (pUrl.isEmpty()) continue;
-                    addChannelCard(bandera + "  " + nombre, pais, pUrl);
+                    listHolder.addView(makeChannelRow(bandera + "  " + nombre, pais, pUrl));
                 } catch (Exception ignored) {}
             }
         } catch (Exception e) {
-            addErrorCard("Error al parsear canales");
+            addNoDataLabel(parent);
         }
     }
 
-    private void renderGeneric(JSONObject root) {
-        java.util.Iterator<String> keys = root.keys();
-        boolean found = false;
-        while (keys.hasNext()) {
-            String key = keys.next();
-            try {
-                Object val = root.get(key);
-                if (val instanceof JSONArray) {
-                    JSONArray arr = (JSONArray) val;
-                    if (arr.length() > 0) {
-                        found = true;
-                        addSectionHeader("📋", cap(key));
-                        for (int i = 0; i < Math.min(arr.length(), 30); i++) {
-                            Object item = arr.get(i);
-                            if (item instanceof JSONObject) addGenericCard((JSONObject) item);
-                            else addInfoCard(item.toString());
-                        }
-                    }
-                } else if (val instanceof JSONObject && !key.equals("meta")) {
-                    found = true;
-                    addSectionHeader("📋", cap(key));
-                    addGenericCard((JSONObject) val);
-                }
-            } catch (Exception ignored) {}
-        }
-        if (!found) addErrorCard("Sin datos disponibles");
-    }
-
-    private void renderArray(JSONArray arr) {
-        for (int i = 0; i < Math.min(arr.length(), 50); i++) {
-            try {
-                Object item = arr.get(i);
-                if (item instanceof JSONObject) addMatchCard((JSONObject) item);
-                else addInfoCard(item.toString());
-            } catch (Exception ignored) {}
-        }
-    }
-
-    // ─── Match Card (main UI piece) ───────────────────────────────────────────────
-
-    private void addMatchCard(JSONObject match) {
-        String nameL  = getTeamName(match, "local");
-        String nameV  = getTeamName(match, "visitante");
-        String logoL  = getTeamLogo(match, "local");
-        String logoV  = getTeamLogo(match, "visitante");
-        String gL     = getTeamScore(match, "local");
-        String gV     = getTeamScore(match, "visitante");
-        String estado = match.optString("estado",  match.optString("status",  ""));
-        String fecha  = match.optString("fecha",   match.optString("date",    ""));
-        String hora   = match.optString("hora",    match.optString("time",    ""));
-        String minuto = match.optString("minuto",  match.optString("minute",  ""));
-
-        boolean isLive  = estado.toLowerCase().contains("vivo") ||
-                          estado.toLowerCase().contains("live") ||
-                          minuto.matches("\\d+.*");
-        boolean hasScore = !gL.equals("-") && !gV.equals("-");
-
-        LinearLayout card = makeGlassCard(isLive);
-        card.setPadding(dp(14), dp(13), dp(14), dp(13));
-
-        // Status bar (live indicator or match state)
-        if (!estado.isEmpty() || !minuto.isEmpty()) {
-            LinearLayout statusBar = new LinearLayout(requireContext());
-            statusBar.setOrientation(LinearLayout.HORIZONTAL);
-            statusBar.setGravity(Gravity.CENTER_VERTICAL);
-            LinearLayout.LayoutParams sbLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            sbLp.setMargins(0, 0, 0, dp(8));
-            statusBar.setLayoutParams(sbLp);
-
-            if (isLive) {
-                // Pulsing green dot
-                View dot = new View(requireContext());
-                LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(dp(7), dp(7));
-                dLp.gravity   = Gravity.CENTER_VERTICAL;
-                dLp.setMarginEnd(dp(5));
-                dot.setLayoutParams(dLp);
-                dot.setBackgroundResource(R.drawable.badge_live);
-                statusBar.addView(dot);
-            }
-
-            TextView badge = new TextView(requireContext());
-            badge.setText(isLive ? "EN VIVO" : estado.toUpperCase());
-            badge.setTextColor(isLive ? 0xFF4CAF50 : 0x77FFFFFF);
-            badge.setTextSize(10);
-            badge.setTypeface(null, Typeface.BOLD);
-            badge.setLetterSpacing(0.1f);
-            badge.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
-            statusBar.addView(badge);
-
-            if (!minuto.isEmpty()) {
-                TextView tvMin = new TextView(requireContext());
-                tvMin.setText(minuto);
-                tvMin.setTextColor(isLive ? 0xFFFF6B00 : 0x77FFFFFF);
-                tvMin.setTextSize(11);
-                tvMin.setTypeface(null, Typeface.BOLD);
-                statusBar.addView(tvMin);
-            }
-            card.addView(statusBar);
-        }
-
-        // Score row: [logo + name] [score] [name + logo]
-        LinearLayout scoreRow = new LinearLayout(requireContext());
-        scoreRow.setOrientation(LinearLayout.HORIZONTAL);
-        scoreRow.setGravity(Gravity.CENTER_VERTICAL);
-        scoreRow.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, dp(72)));
-
-        // Left team
-        LinearLayout leftTeam = makeTeamBlock(nameL, logoL, Gravity.START);
-        leftTeam.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, 3f));
-
-        // Score center
-        LinearLayout center = new LinearLayout(requireContext());
-        center.setOrientation(LinearLayout.VERTICAL);
-        center.setGravity(Gravity.CENTER);
-        center.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, 2f));
-
-        TextView tvScore = new TextView(requireContext());
-        if (hasScore) {
-            tvScore.setText(gL + "  —  " + gV);
-            tvScore.setTextColor(0xFFFF6B00);
-            tvScore.setTextSize(24);
-            tvScore.setTypeface(null, Typeface.BOLD);
-        } else {
-            tvScore.setText("vs");
-            tvScore.setTextColor(0x44FFFFFF);
-            tvScore.setTextSize(18);
-            tvScore.setTypeface(null, Typeface.BOLD);
-        }
-        tvScore.setGravity(Gravity.CENTER);
-        center.addView(tvScore);
-
-        if (!fecha.isEmpty() || !hora.isEmpty()) {
-            String timeStr = fecha + (hora.isEmpty() ? "" : "\n" + hora);
-            TextView tvTime = new TextView(requireContext());
-            tvTime.setText(timeStr);
-            tvTime.setTextColor(0x55FFFFFF);
-            tvTime.setTextSize(10);
-            tvTime.setGravity(Gravity.CENTER);
-            LinearLayout.LayoutParams tlp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            tlp.setMargins(0, dp(4), 0, 0);
-            tvTime.setLayoutParams(tlp);
-            center.addView(tvTime);
-        }
-
-        // Right team
-        LinearLayout rightTeam = makeTeamBlock(nameV, logoV, Gravity.END);
-        rightTeam.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, 3f));
-
-        scoreRow.addView(leftTeam);
-        scoreRow.addView(center);
-        scoreRow.addView(rightTeam);
-        card.addView(scoreRow);
-        contentContainer.addView(card);
-    }
-
-    private LinearLayout makeTeamBlock(String name, String logoUrl, int textGravity) {
-        LinearLayout block = new LinearLayout(requireContext());
-        block.setOrientation(LinearLayout.VERTICAL);
-        block.setGravity(Gravity.CENTER);
-
-        if (!logoUrl.isEmpty() && isAdded()) {
-            ImageView img = new ImageView(requireContext());
-            LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(dp(42), dp(42));
-            ilp.gravity = Gravity.CENTER_HORIZONTAL;
-            img.setLayoutParams(ilp);
-            img.setScaleType(ImageView.ScaleType.FIT_CENTER);
-            Glide.with(this).load(logoUrl)
-                 .apply(new RequestOptions().transform(new RoundedCorners(dp(6))))
-                 .placeholder(R.drawable.ic_channel_placeholder)
-                 .error(R.drawable.ic_channel_placeholder)
-                 .into(img);
-            block.addView(img);
-        }
-
-        TextView tvName = new TextView(requireContext());
-        tvName.setText(name);
-        tvName.setTextColor(0xEEFFFFFF);
-        tvName.setTextSize(12);
-        tvName.setTypeface(null, Typeface.BOLD);
-        tvName.setGravity(Gravity.CENTER);
-        tvName.setMaxLines(2);
-        LinearLayout.LayoutParams nlp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        nlp.setMargins(0, dp(4), 0, 0);
-        tvName.setLayoutParams(nlp);
-        block.addView(tvName);
-        return block;
-    }
-
-    // ─── Card / UI builders ───────────────────────────────────────────────────────
-
-    private void addSectionHeader(String icon, String text) {
+    private View makeChannelRow(String name, String country, String url) {
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setBackgroundResource(R.drawable.agenda_channel_card);
+        row.setClickable(true);
+        row.setFocusable(true);
+        row.setPadding(dp(14), dp(12), dp(14), dp(12));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        lp.setMargins(dp(16), dp(18), dp(16), dp(10));
+        lp.setMargins(0, 0, 0, dp(6));
         row.setLayoutParams(lp);
-
-        TextView tvIcon = new TextView(requireContext());
-        tvIcon.setText(icon);
-        tvIcon.setTextSize(16);
-        LinearLayout.LayoutParams ilp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        ilp.setMarginEnd(dp(8));
-        tvIcon.setLayoutParams(ilp);
-        row.addView(tvIcon);
-
-        TextView tvText = new TextView(requireContext());
-        tvText.setText(text);
-        tvText.setTextColor(0xFFFFFFFF);
-        tvText.setTextSize(15);
-        tvText.setTypeface(null, Typeface.BOLD);
-        tvText.setLetterSpacing(0.03f);
-        tvText.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
-        row.addView(tvText);
-
-        // Orange accent line
-        View accent = new View(requireContext());
-        accent.setBackgroundColor(0x40FF6B00);
-        accent.setLayoutParams(new LinearLayout.LayoutParams(dp(3), dp(20)));
-        row.addView(accent);
-
-        contentContainer.addView(row);
-    }
-
-    private void addTableHeader(String[] cols) {
-        LinearLayout row = new LinearLayout(requireContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setBackgroundColor(0x22FF6B00);
-        row.setPadding(dp(10), dp(8), dp(10), dp(8));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        lp.setMargins(dp(12), 0, dp(12), 0);
-        row.setLayoutParams(lp);
-        int[] weights = getColWeights(cols.length);
-        for (int i = 0; i < cols.length; i++) {
-            TextView tv = new TextView(requireContext());
-            tv.setText(cols[i]);
-            tv.setTextColor(0xBBFF6B00);
-            tv.setTextSize(11);
-            tv.setTypeface(null, Typeface.BOLD);
-            tv.setLetterSpacing(0.05f);
-            tv.setGravity(i == 1 ? Gravity.START : Gravity.CENTER);
-            tv.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, weights[i]));
-            row.addView(tv);
-        }
-        contentContainer.addView(row);
-    }
-
-    private void addTableRow(String[] cols, boolean alt, boolean highlight) {
-        LinearLayout row = new LinearLayout(requireContext());
-        row.setOrientation(LinearLayout.HORIZONTAL);
-        int bg = highlight ? 0x15FF6B00 : (alt ? 0x08FFFFFF : 0x00000000);
-        row.setBackgroundColor(bg);
-        row.setPadding(dp(10), dp(11), dp(10), dp(11));
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        lp.setMargins(dp(12), 0, dp(12), 0);
-        row.setLayoutParams(lp);
-        int[] weights = getColWeights(cols.length);
-        for (int i = 0; i < cols.length; i++) {
-            TextView tv = new TextView(requireContext());
-            tv.setText(cols[i]);
-            tv.setTextColor(i == 0 && highlight ? 0xFFFF6B00 :
-                            i == 1 ? 0xFFFFFFFF : 0xAAFFFFFF);
-            tv.setTextSize(i == 1 ? 13 : 12);
-            if (i == 1 || (i == 0 && highlight)) tv.setTypeface(null, Typeface.BOLD);
-            tv.setGravity(i == 1 ? Gravity.START : Gravity.CENTER);
-            tv.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, weights[i]));
-            row.addView(tv);
-        }
-        contentContainer.addView(row);
-    }
-
-    private int[] getColWeights(int count) {
-        if (count == 7) return new int[]{1, 4, 1, 1, 1, 1, 1};
-        if (count == 4) return new int[]{1, 4, 3, 2};
-        int[] w = new int[count]; for (int i = 0; i < count; i++) w[i] = 1; return w;
-    }
-
-    private void addVideoCard(String title, String url) {
-        LinearLayout card = makeGlassCard(false);
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding(dp(16), dp(14), dp(16), dp(14));
-        card.setClickable(true);
-        card.setFocusable(true);
-
-        TextView icon = new TextView(requireContext());
-        icon.setText("▶");
-        icon.setTextColor(0xFFFF6B00);
-        icon.setTextSize(22);
-        LinearLayout.LayoutParams ip = new LinearLayout.LayoutParams(dp(40), dp(40));
-        ip.setMarginEnd(dp(12));
-        icon.setLayoutParams(ip);
-        icon.setGravity(Gravity.CENTER);
-
-        TextView tv = new TextView(requireContext());
-        tv.setText(title);
-        tv.setTextColor(0xEEFFFFFF);
-        tv.setTextSize(13);
-        tv.setMaxLines(2);
-        tv.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
-
-        card.addView(icon);
-        card.addView(tv);
-        card.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), PlayerActivity.class);
-            intent.putExtra("url", url);
-            intent.putExtra("title", title);
-            startActivity(intent);
-        });
-        contentContainer.addView(card);
-    }
-
-    private void addChannelCard(String name, String country, String url) {
-        LinearLayout card = makeGlassCard(false);
-        card.setOrientation(LinearLayout.HORIZONTAL);
-        card.setGravity(Gravity.CENTER_VERTICAL);
-        card.setPadding(dp(16), dp(12), dp(16), dp(12));
-        card.setClickable(true);
-        card.setFocusable(true);
-
-        LinearLayout.LayoutParams clp = (LinearLayout.LayoutParams) card.getLayoutParams();
-        clp.setMargins(dp(12), 0, dp(12), dp(7));
-        card.setLayoutParams(clp);
 
         LinearLayout textBlock = new LinearLayout(requireContext());
         textBlock.setOrientation(LinearLayout.VERTICAL);
@@ -933,7 +545,7 @@ public class FootballFragment extends Fragment {
         if (!country.isEmpty()) {
             TextView tvCountry = new TextView(requireContext());
             tvCountry.setText(country);
-            tvCountry.setTextColor(0x66FFFFFF);
+            tvCountry.setTextColor(0x55FFFFFF);
             tvCountry.setTextSize(11);
             LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
             cp.setMargins(0, dp(2), 0, 0);
@@ -947,114 +559,99 @@ public class FootballFragment extends Fragment {
         tvPlay.setTextSize(12);
         tvPlay.setTypeface(null, Typeface.BOLD);
 
-        card.addView(textBlock);
-        card.addView(tvPlay);
-        card.setOnClickListener(v -> {
+        row.addView(textBlock);
+        row.addView(tvPlay);
+
+        row.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), PlayerActivity.class);
             intent.putExtra("url", url);
             intent.putExtra("title", name);
             startActivity(intent);
         });
-        contentContainer.addView(card);
+        return row;
     }
 
-    private void addNewsCard(String title, String sub) {
-        LinearLayout card = makeGlassCard(false);
-        card.setPadding(dp(16), dp(14), dp(16), dp(14));
+    // ─── Section header ───────────────────────────────────────────────────────────
+
+    private void addAgendaHeader(LinearLayout parent, String emoji, String title,
+                                  String subtitle, int accentColor) {
+        LinearLayout wrapper = new LinearLayout(requireContext());
+        wrapper.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        wlp.setMargins(0, dp(18), 0, dp(10));
+        wrapper.setLayoutParams(wlp);
+
+        LinearLayout titleRow = new LinearLayout(requireContext());
+        titleRow.setOrientation(LinearLayout.HORIZONTAL);
+        titleRow.setGravity(Gravity.CENTER_VERTICAL);
+        titleRow.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+
+        // Gold accent bar
+        View bar = new View(requireContext());
+        bar.setBackgroundColor(accentColor);
+        LinearLayout.LayoutParams barlp = new LinearLayout.LayoutParams(dp(3), dp(22));
+        barlp.setMargins(dp(16), 0, dp(12), 0);
+        bar.setLayoutParams(barlp);
+        titleRow.addView(bar);
+
+        // Emoji
+        TextView tvEmoji = new TextView(requireContext());
+        tvEmoji.setText(emoji + "  ");
+        tvEmoji.setTextSize(16);
+        titleRow.addView(tvEmoji);
+
+        // Title
         TextView tvTitle = new TextView(requireContext());
         tvTitle.setText(title);
         tvTitle.setTextColor(0xFFFFFFFF);
-        tvTitle.setTextSize(14);
-        tvTitle.setMaxLines(3);
-        card.addView(tvTitle);
-        if (!sub.trim().isEmpty()) {
-            TextView tvSub = new TextView(requireContext());
-            tvSub.setText(sub.trim());
-            tvSub.setTextColor(0x55FFFFFF);
-            tvSub.setTextSize(11);
-            LinearLayout.LayoutParams sp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            sp.setMargins(0, dp(5), 0, 0);
-            tvSub.setLayoutParams(sp);
-            card.addView(tvSub);
-        }
-        contentContainer.addView(card);
+        tvTitle.setTextSize(16);
+        tvTitle.setTypeface(null, Typeface.BOLD);
+        tvTitle.setLetterSpacing(0.06f);
+        tvTitle.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+        titleRow.addView(tvTitle);
+
+        wrapper.addView(titleRow);
+
+        // Subtitle
+        TextView tvSub = new TextView(requireContext());
+        tvSub.setText(subtitle);
+        tvSub.setTextColor(0x66FFFFFF);
+        tvSub.setTextSize(11);
+        tvSub.setLetterSpacing(0.05f);
+        LinearLayout.LayoutParams sublp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        sublp.setMargins(dp(31), dp(3), 0, 0);
+        tvSub.setLayoutParams(sublp);
+        wrapper.addView(tvSub);
+
+        parent.addView(wrapper);
     }
 
-    private void addGenericCard(JSONObject obj) {
-        LinearLayout card = makeGlassCard(false);
-        card.setPadding(dp(16), dp(12), dp(16), dp(12));
-        StringBuilder sb = new StringBuilder();
-        java.util.Iterator<String> keys = obj.keys();
-        while (keys.hasNext()) {
-            String k = keys.next();
-            try {
-                Object v = obj.get(k);
-                if (!(v instanceof JSONObject) && !(v instanceof JSONArray))
-                    sb.append(cap(k)).append(":  ").append(v).append("\n");
-            } catch (Exception ignored) {}
-        }
-        if (sb.length() > 0) {
-            TextView tv = new TextView(requireContext());
-            tv.setText(sb.toString().trim());
-            tv.setTextColor(0xCCFFFFFF);
-            tv.setTextSize(13);
-            card.addView(tv);
-            contentContainer.addView(card);
-        }
-    }
-
-    private void addInfoCard(String text) {
-        LinearLayout card = makeGlassCard(false);
-        card.setPadding(dp(16), dp(12), dp(16), dp(12));
+    private void addNoDataLabel(LinearLayout parent) {
         TextView tv = new TextView(requireContext());
-        tv.setText(text);
-        tv.setTextColor(0xCCFFFFFF);
-        tv.setTextSize(13);
-        card.addView(tv);
-        contentContainer.addView(card);
-    }
-
-    private void addErrorCard(String msg) {
-        TextView tv = new TextView(requireContext());
-        tv.setText(msg);
-        tv.setTextColor(0x55FFFFFF);
-        tv.setTextSize(13);
-        tv.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        lp.setMargins(dp(16), dp(24), dp(16), dp(24));
+        tv.setText("Sin datos disponibles");
+        tv.setTextColor(0x44FFFFFF);
+        tv.setTextSize(12);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        lp.setMargins(dp(31), 0, 0, dp(16));
         tv.setLayoutParams(lp);
-        contentContainer.addView(tv);
+        parent.addView(tv);
     }
 
-    private LinearLayout makeGlassCard(boolean live) {
-        LinearLayout card = new LinearLayout(requireContext());
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setBackgroundResource(live ? R.drawable.sport_match_live_card : R.drawable.sport_match_card);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        lp.setMargins(dp(12), 0, dp(12), dp(10));
-        card.setLayoutParams(lp);
-        return card;
-    }
+    // ─── JSON Helpers ─────────────────────────────────────────────────────────────
 
-    // ─── JSON helpers ─────────────────────────────────────────────────────────────
-
-    /** Extracts team name: handles nested obj {nombre,name,nombreCorto} or flat string */
     private String getTeamName(JSONObject match, String key) {
         JSONObject team = match.optJSONObject(key);
         if (team != null) {
-            String n = team.optString("nombre", "");
-            if (!n.isEmpty() && !n.equals("null")) return n;
-            n = team.optString("name", "");
-            if (!n.isEmpty() && !n.equals("null")) return n;
-            n = team.optString("nombreCorto", "");
-            if (!n.isEmpty() && !n.equals("null")) return n;
+            for (String f : new String[]{"nombre","name","nombreCorto"}) {
+                String n = team.optString(f, "");
+                if (!n.isEmpty() && !n.equals("null")) return n;
+            }
         }
         String flat = match.optString(key, "");
         if (!flat.startsWith("{") && !flat.isEmpty()) return flat;
         return key.equals("local") ? "Local" : "Visitante";
     }
 
-    /** Extracts team score from nested obj or flat field */
     private String getTeamScore(JSONObject match, String key) {
         JSONObject team = match.optJSONObject(key);
         if (team != null) {
@@ -1063,18 +660,19 @@ public class FootballFragment extends Fragment {
                 return m.toString();
         }
         boolean isLocal = key.equals("local");
-        int v = match.optInt(isLocal ? "marcador_local"  : "marcador_visitante",
-                match.optInt(isLocal ? "score_home"      : "score_away",
-                match.optInt(isLocal ? "goles_local"     : "goles_visitante", -1)));
+        int v = match.optInt(isLocal ? "marcador_local" : "marcador_visitante",
+                match.optInt(isLocal ? "score_home"     : "score_away",
+                match.optInt(isLocal ? "goles_local"    : "goles_visitante", -1)));
         return v >= 0 ? String.valueOf(v) : "-";
     }
 
-    /** Extracts team logo URL from nested obj */
     private String getTeamLogo(JSONObject match, String key) {
         JSONObject team = match.optJSONObject(key);
         if (team != null) {
-            String logo = team.optString("logo", team.optString("logo_url", team.optString("escudo","")));
-            if (!logo.isEmpty() && !logo.equals("null")) return logo;
+            for (String f : new String[]{"logo","logo_url","escudo","badge"}) {
+                String l = team.optString(f, "");
+                if (!l.isEmpty() && !l.equals("null")) return l;
+            }
         }
         return match.optString(key + "_logo", "");
     }
@@ -1092,12 +690,12 @@ public class FootballFragment extends Fragment {
             JSONObject obj = new JSONObject(json);
             String url = obj.optString("url", obj.optString("stream_url",
                          obj.optString("embed_url", obj.optString("player_url",
-                         obj.optString("hls", obj.optString("m3u8","" ))))));
+                         obj.optString("hls", obj.optString("m3u8",""))))));
             if (!url.isEmpty()) return url;
             java.util.Iterator<String> keys = obj.keys();
             while (keys.hasNext()) {
                 Object v = obj.opt(keys.next());
-                if (v instanceof String && ((String) v).startsWith("http")) return (String) v;
+                if (v instanceof String && ((String)v).startsWith("http")) return (String)v;
             }
         } catch (Exception ignored) {}
         if (json.trim().startsWith("http")) return json.trim();
@@ -1108,7 +706,7 @@ public class FootballFragment extends Fragment {
         URL url = new URL(API + path);
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
         c.setRequestMethod("GET");
-        c.setRequestProperty("Accept", "application/json");
+        c.setRequestProperty("Accept","application/json");
         c.setConnectTimeout(12000);
         c.setReadTimeout(15000);
         int code = c.getResponseCode();
@@ -1121,23 +719,7 @@ public class FootballFragment extends Fragment {
         return sb.toString();
     }
 
-    private String cap(String s) {
-        if (s == null || s.isEmpty()) return s;
-        return Character.toUpperCase(s.charAt(0)) + s.substring(1).replace("_", " ");
-    }
-
     private int dp(int v) {
         return Math.round(v * requireContext().getResources().getDisplayMetrics().density);
-    }
-
-    // ─── State helpers ────────────────────────────────────────────────────────────
-
-    private void showLoading() { if (progressBar != null) progressBar.setVisibility(View.VISIBLE); }
-    private void hideLoading() { if (progressBar != null) progressBar.setVisibility(View.GONE);    }
-    private void showError(String msg) {
-        if (errorView != null) { errorView.setText(msg); errorView.setVisibility(View.VISIBLE); }
-    }
-    private void hideError() {
-        if (errorView != null) errorView.setVisibility(View.GONE);
     }
 }
