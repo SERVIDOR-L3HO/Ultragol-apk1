@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
         View navAnime     = drawerOverlay.findViewById(R.id.navAnime);
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
+        View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
         View navFavorites = drawerOverlay.findViewById(R.id.navFavorites);
         View navMyList    = drawerOverlay.findViewById(R.id.navMyList);
 
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
+        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new FootballFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
         if (navSearch    != null) navSearch.setOnClickListener(v    -> {

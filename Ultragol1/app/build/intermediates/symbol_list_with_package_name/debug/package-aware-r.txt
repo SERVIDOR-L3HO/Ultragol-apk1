@@ -3337,6 +3337,10 @@ id fitXY
 id fixed
 id flip
 id floating
+id footballContent
+id footballError
+id footballLoading
+id footballScroll
 id forever
 id fragmentContainer
 id fragment_container_view_tag
@@ -3385,6 +3389,7 @@ id jumpToStart
 id labeled
 id langTabs
 id layout
+id leagueTabBar
 id left
 id leftToRight
 id legacy
@@ -3456,6 +3461,7 @@ id mtrl_picker_title_text
 id mtrl_view_tag_bottom_padding
 id multiply
 id navAnime
+id navDeportes
 id navDoramas
 id navFavorites
 id navInicio
@@ -3584,6 +3590,8 @@ id search_view_status_bar_spacer
 id search_view_toolbar
 id search_view_toolbar_container
 id search_voice_btn
+id sectionTabBar
+id sectionTabScroll
 id select_dialog_listview
 id selected
 id selection_type
@@ -3852,6 +3860,7 @@ layout design_navigation_menu_item
 layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_server_select
+layout fragment_football
 layout fragment_grid
 layout fragment_home
 layout fragment_sports

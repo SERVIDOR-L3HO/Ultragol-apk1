@@ -138,6 +138,10 @@ id drawerSearch
 id emptyState
 id episodeSection
 id errorServers
+id footballContent
+id footballError
+id footballLoading
+id footballScroll
 id fragmentContainer
 id fullscreenContainer
 id genreChips
@@ -148,9 +152,11 @@ id gridTitle
 id gridYear
 id heroBanner
 id langTabs
+id leagueTabBar
 id loadingSearch
 id loadingServers
 id navAnime
+id navDeportes
 id navDoramas
 id navFavorites
 id navInicio
@@ -192,6 +198,8 @@ id rowTrending
 id rowTrendingCarousel
 id rowVerTodos
 id searchInput
+id sectionTabBar
+id sectionTabScroll
 id serverContainer
 id serverDialogTitle
 id splashLogo
@@ -221,6 +229,7 @@ layout activity_player
 layout activity_search
 layout activity_splash
 layout dialog_server_select
+layout fragment_football
 layout fragment_grid
 layout fragment_home
 layout fragment_sports
