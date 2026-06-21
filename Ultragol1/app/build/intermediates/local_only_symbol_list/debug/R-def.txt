@@ -51,6 +51,7 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_channel_placeholder
+drawable logo_ultragol
 drawable nav_bg
 drawable nav_card_bg
 drawable poster_glass_bg
@@ -140,6 +141,7 @@ id errorServers
 id fragmentContainer
 id fullscreenContainer
 id genreChips
+id gridBack
 id gridLoading
 id gridPoster
 id gridTitle

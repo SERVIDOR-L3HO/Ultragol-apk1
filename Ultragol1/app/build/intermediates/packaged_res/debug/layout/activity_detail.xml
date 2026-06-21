@@ -24,24 +24,6 @@
         android:layout_height="80dp"
         android:background="@drawable/gradient_top_black"/>
 
-    <!-- Back button -->
-    <FrameLayout
-        android:id="@+id/btnDetailBack"
-        android:layout_width="42dp"
-        android:layout_height="42dp"
-        android:layout_margin="16dp"
-        android:background="@drawable/back_btn_glass"
-        android:clickable="true"
-        android:focusable="true">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="←"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"/>
-    </FrameLayout>
-
     <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -339,4 +321,23 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Back button — LAST so it renders on top of scroll content -->
+    <FrameLayout
+        android:id="@+id/btnDetailBack"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/back_btn_glass"
+        android:clickable="true"
+        android:focusable="true"
+        android:elevation="8dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="←"
+            android:textColor="#FFFFFF"
+            android:textSize="20sp"/>
+    </FrameLayout>
 </FrameLayout>

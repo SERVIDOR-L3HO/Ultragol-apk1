@@ -2982,6 +2982,7 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
+drawable logo_ultragol
 drawable m3_appbar_background
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3349,6 +3350,7 @@ id glide_custom_view_target_tag
 id gone
 id graph
 id graph_wrap
+id gridBack
 id gridLoading
 id gridPoster
 id gridTitle
