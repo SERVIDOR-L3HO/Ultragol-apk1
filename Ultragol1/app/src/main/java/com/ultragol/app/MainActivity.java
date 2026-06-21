@@ -1,10 +1,13 @@
 package com.ultragol.app;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.*;
 import android.view.animation.AlphaAnimation;
 import android.widget.FrameLayout;
+import android.widget.ScrollView;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.ultragol.app.fragments.*;
@@ -19,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         drawerOverlay = findViewById(R.id.drawerOverlay);
+
+        checkAndShowCrash();
 
         if (savedInstanceState == null) loadFragment(new HomeFragment());
 
@@ -98,6 +103,24 @@ public class MainActivity extends AppCompatActivity {
         if (platTokyoMx != null)
             platTokyoMx.setOnClickListener(v ->
                 navigate(PlatformFragment.newInstance("📺 Tokyo MX", 2359, "anime")));
+    }
+
+    private void checkAndShowCrash() {
+        String crash = UltragolApp.getLastCrash(this);
+        if (crash == null) return;
+        UltragolApp.clearCrash(this);
+        TextView tv = new TextView(this);
+        tv.setText(crash);
+        tv.setTextSize(11);
+        tv.setPadding(16, 16, 16, 16);
+        tv.setTextIsSelectable(true);
+        ScrollView sv = new ScrollView(this);
+        sv.addView(tv);
+        new AlertDialog.Builder(this)
+            .setTitle("CRASH DETECTADO")
+            .setView(sv)
+            .setPositiveButton("OK", null)
+            .show();
     }
 
     private void navigate(Fragment fragment) {
