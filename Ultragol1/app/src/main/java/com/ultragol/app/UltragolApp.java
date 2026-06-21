@@ -32,7 +32,7 @@ public class UltragolApp extends Application {
                     }
                 }
                 getSharedPreferences(PREF, MODE_PRIVATE)
-                        .edit().putString(KEY, sb.toString()).apply();
+                        .edit().putString(KEY, sb.toString()).commit();
             } catch (Exception ignored) {}
 
             if (defaultHandler != null) defaultHandler.uncaughtException(thread, throwable);

@@ -201,32 +201,32 @@ public class HomeFragment extends Fragment {
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchNewMovies();
-            h.post(() -> { if (isAdded()) fillRow(rowNew, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowNew, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchMovies();
-            h.post(() -> { if (isAdded()) fillRow(rowMovies, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowMovies, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchSeries();
-            h.post(() -> { if (isAdded()) fillRow(rowSeries, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowSeries, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchAnime();
-            h.post(() -> { if (isAdded()) fillRow(rowAnime, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowAnime, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchDoramas();
-            h.post(() -> { if (isAdded()) fillRow(rowDoramas, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowDoramas, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchTopMovies();
-            h.post(() -> { if (isAdded()) fillRow(rowTop10, r); });
+            h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
         pool.shutdown();
