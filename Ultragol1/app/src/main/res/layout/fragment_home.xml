@@ -20,42 +20,14 @@
             android:background="@color/bg_primary">
 
             <!-- Logo -->
-            <LinearLayout
+            <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="36dp"
                 android:layout_gravity="center_vertical"
-                android:orientation="horizontal">
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ULTRA"
-                    android:textColor="#FFFFFF"
-                    android:textSize="21sp"
-                    android:fontFamily="sans-serif-black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="GOL"
-                    android:textColor="@color/red_primary"
-                    android:textSize="21sp"
-                    android:fontFamily="sans-serif-black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1"
-                    android:textColor="#FFFFFF"
-                    android:textSize="16sp"
-                    android:fontFamily="sans-serif-black"/>
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=".NET"
-                    android:textColor="@color/red_primary"
-                    android:textSize="13sp"
-                    android:fontFamily="sans-serif-black"
-                    android:layout_gravity="bottom"
-                    android:layout_marginBottom="2dp"/>
-            </LinearLayout>
+                android:src="@drawable/logo_ultragol"
+                android:scaleType="fitStart"
+                android:adjustViewBounds="true"
+                android:contentDescription="Ultragol"/>
 
             <!-- Íconos derecha -->
             <LinearLayout
