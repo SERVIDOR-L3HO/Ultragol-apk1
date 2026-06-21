@@ -123,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             .show();
     }
 
-    private void navigate(Fragment fragment) {
+    public void navigate(Fragment fragment) {
         hideMenu();
         loadFragment(fragment);
     }

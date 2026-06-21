@@ -24,13 +24,19 @@ public class MyListFragment extends Fragment {
         super.onViewCreated(view, s);
 
         TextView title = view.findViewById(R.id.gridTitle);
-        if (title != null) title.setText("⊟ Mi Lista");
+        if (title != null) title.setText("⊟  Mi Lista");
 
+        View btnBack = view.findViewById(R.id.gridBack);
+        if (btnBack != null) btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
+
+        loadContent(view);
+    }
+
+    private void loadContent(View view) {
         RecyclerView grid = view.findViewById(R.id.contentGrid);
+        if (grid == null) return;
         grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-
         List<ContentItem> items = MyListManager.getAll(requireContext());
-
         if (items.isEmpty()) {
             TextView empty = new TextView(requireContext());
             empty.setText("Tu lista está vacía.\nAgrega contenido desde su detalle.");

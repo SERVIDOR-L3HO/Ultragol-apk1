@@ -154,22 +154,34 @@ public class HomeFragment extends Fragment {
         rowAnime    = view.findViewById(R.id.rowAnime);
         rowDoramas  = view.findViewById(R.id.rowDoramas);
 
-        initRow(rowTrending, "Tendencias");
-        initRow(rowNew,      "Últimos Estrenos");
-        initRow(rowMovies,   "Películas Populares");
-        initRow(rowSeries,   "Series Populares");
-        initRow(rowAnime,    "Animes");
-        initRow(rowDoramas,  "Doramas");
-        initRow(rowTop10,    "Top 10");
+        initRow(rowTrending, "Tendencias",          null);
+        initRow(rowNew,      "Últimos Estrenos",    new MoviesFragment());
+        initRow(rowMovies,   "Películas Populares", new MoviesFragment());
+        initRow(rowSeries,   "Series Populares",    new SeriesFragment());
+        initRow(rowAnime,    "Animes",              new AnimeFragment());
+        initRow(rowDoramas,  "Doramas",             new DoramasFragment());
+        initRow(rowTop10,    "Top 10",              new MoviesFragment());
     }
 
-    private void initRow(View row, String title) {
+    private void initRow(View row, String title, Fragment verTodosTarget) {
         if (row == null) return;
-        TextView tv = row.findViewById(R.id.rowTitle);
+        TextView tv   = row.findViewById(R.id.rowTitle);
         RecyclerView rv = row.findViewById(R.id.rowRv);
+        View verTodos = row.findViewById(R.id.rowVerTodos);
         if (tv != null) tv.setText(title);
         if (rv != null) rv.setLayoutManager(
             new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        if (verTodos != null) {
+            if (verTodosTarget != null) {
+                verTodos.setOnClickListener(v -> {
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).navigate(verTodosTarget);
+                    }
+                });
+            } else {
+                verTodos.setVisibility(View.GONE);
+            }
+        }
     }
 
     // ── Load data ─────────────────────────────────────────────────────────────

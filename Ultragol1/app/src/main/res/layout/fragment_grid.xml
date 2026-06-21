@@ -2,14 +2,44 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent" android:layout_height="match_parent"
     android:orientation="vertical" android:background="@color/bg_primary">
-    <TextView android:id="@+id/gridTitle"
-        android:layout_width="wrap_content" android:layout_height="wrap_content"
-        android:layout_marginStart="16dp" android:layout_marginTop="16dp"
-        android:layout_marginBottom="12dp" android:textColor="#FFFFFF"
-        android:textSize="18sp" android:fontFamily="sans-serif-bold"/>
+
+    <!-- Top bar: back button + title -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="4dp"
+        android:paddingEnd="16dp">
+
+        <FrameLayout
+            android:id="@+id/gridBack"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:clickable="true"
+            android:focusable="true">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="←"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp"/>
+        </FrameLayout>
+
+        <TextView android:id="@+id/gridTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp"
+            android:fontFamily="sans-serif-bold"/>
+    </LinearLayout>
+
     <ProgressBar android:id="@+id/gridLoading"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="center" android:visibility="gone"/>
+
     <androidx.recyclerview.widget.RecyclerView android:id="@+id/contentGrid"
         android:layout_width="match_parent" android:layout_height="match_parent"
         android:padding="4dp" android:clipToPadding="false"/>
