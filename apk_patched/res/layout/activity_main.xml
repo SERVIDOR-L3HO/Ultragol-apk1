@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:background="@color/bg_primary" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <FrameLayout android:id="@id/fragmentContainer" android:layout_width="fill_parent" android:layout_height="fill_parent" />
+    <FrameLayout android:id="@id/drawerOverlay" android:background="#e0000000" android:focusable="true" android:visibility="gone" android:clickable="true" android:layout_width="fill_parent" android:layout_height="fill_parent">
+        <androidx.core.widget.NestedScrollView android:layout_width="fill_parent" android:layout_height="fill_parent" android:overScrollMode="never">
+            <LinearLayout android:orientation="vertical" android:background="#ff000000" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                <FrameLayout android:layout_width="fill_parent" android:layout_height="56.0dip" android:paddingStart="16.0dip" android:paddingEnd="16.0dip">
+                    <LinearLayout android:layout_gravity="center_vertical" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                        <TextView android:textSize="20.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="ULTRA" android:fontFamily="sans-serif-black" />
+                        <TextView android:textSize="20.0sp" android:textColor="@color/red_primary" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="GOL" android:fontFamily="sans-serif-black" />
+                        <TextView android:textSize="12.0sp" android:textColor="@color/red_primary" android:layout_gravity="bottom" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="2.0dip" android:text="1.NET" android:fontFamily="sans-serif-black" />
+                    </LinearLayout>
+                    <LinearLayout android:gravity="center_vertical" android:layout_gravity="end|center" android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content">
+                        <ImageView android:id="@id/drawerSearch" android:padding="6.0dip" android:focusable="true" android:clickable="true" android:layout_width="38.0dip" android:layout_height="38.0dip" android:src="@android:drawable/ic_menu_search" android:tint="#ffffffff" />
+                        <TextView android:textSize="18.0sp" android:gravity="center" android:layout_width="38.0dip" android:layout_height="38.0dip" android:text="🔔" />
+                        <TextView android:textSize="20.0sp" android:textColor="#aaffffff" android:gravity="center" android:id="@id/drawerClose" android:focusable="true" android:clickable="true" android:layout_width="38.0dip" android:layout_height="38.0dip" android:text="✕" />
+                    </LinearLayout>
+                </FrameLayout>
+                <LinearLayout android:orientation="vertical" android:paddingTop="8.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingStart="12.0dip" android:paddingEnd="12.0dip">
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navInicio" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginEnd="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⌂" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Inicio" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navSeries" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginStart="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▣" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Series" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navMovies" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginEnd="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="▢" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Películas" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navAnime" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginStart="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✦" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Animes" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navDoramas" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginEnd="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="❧" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Doramas" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navSearch" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginStart="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⌕" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Buscar" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="10.0dip">
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navFavorites" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginEnd="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ffff5252" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="♥" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Favoritos" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center_vertical" android:orientation="vertical" android:id="@id/navMyList" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="80.0dip" android:layout_weight="1.0" android:paddingStart="16.0dip" android:layout_marginStart="5.0dip">
+                            <TextView android:textSize="22.0sp" android:textColor="#ff4fc3f7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⊟" />
+                            <TextView android:textSize="14.0sp" android:textColor="#ddffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4.0dip" android:text="Mi Lista" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <LinearLayout android:orientation="vertical" android:paddingTop="16.0dip" android:paddingBottom="16.0dip" android:layout_width="fill_parent" android:layout_height="wrap_content" android:paddingStart="16.0dip" android:paddingEnd="16.0dip">
+                    <TextView android:textSize="12.0sp" android:textColor="#88ffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginBottom="14.0dip" android:text="PLATAFORMAS" android:fontFamily="sans-serif-bold" android:letterSpacing="0.12" />
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip">
+                        <LinearLayout android:gravity="center" android:id="@id/platNetflix" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="13.0sp" android:textColor="#ffe50914" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="NETFLIX" android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platPrime" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="11.0sp" android:textColor="#ff00a8e0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Prime Video" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platDisney" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip">
+                            <TextView android:textSize="11.0sp" android:textColor="#ff113ccf" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Disney+" android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginBottom="8.0dip">
+                        <LinearLayout android:gravity="center" android:id="@id/platApple" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="11.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Apple TV+" android:fontFamily="sans-serif-medium" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platHulu" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="13.0sp" android:textColor="#ff1ce783" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Hulu" android:fontFamily="sans-serif-black" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platHbo" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip">
+                            <TextView android:textSize="11.0sp" android:textColor="#ff9b3de8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="HBO Max" android:fontFamily="sans-serif-bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                        <LinearLayout android:gravity="center" android:id="@id/platCrunchyroll" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="10.0sp" android:textColor="#fff47521" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Crunchyroll" android:fontFamily="sans-serif-bold" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platAtx" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip" android:layout_marginEnd="4.0dip">
+                            <TextView android:textSize="13.0sp" android:textColor="#ffffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="At-X" android:fontFamily="sans-serif-bold" />
+                        </LinearLayout>
+                        <LinearLayout android:gravity="center" android:id="@id/platTokyoMx" android:background="@drawable/nav_card_bg" android:focusable="true" android:clickable="true" android:layout_width="0.0dip" android:layout_height="52.0dip" android:layout_weight="1.0" android:layout_marginStart="4.0dip">
+                            <TextView android:textSize="10.0sp" android:textColor="#aaffffff" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Tokyo MX" android:fontFamily="sans-serif-bold" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+                <View android:layout_width="fill_parent" android:layout_height="32.0dip" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </FrameLayout>
+</FrameLayout>
