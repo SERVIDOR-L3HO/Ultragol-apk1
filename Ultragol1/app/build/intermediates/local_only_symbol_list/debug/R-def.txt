@@ -69,6 +69,14 @@ drawable splash_icon_bg
 drawable splash_ring_inner
 drawable splash_ring_mid
 drawable splash_ring_outer
+drawable sport_header_bg
+drawable sport_league_tab_active
+drawable sport_league_tab_inactive
+drawable sport_match_card
+drawable sport_match_live_card
+drawable sport_section_chip_active
+drawable sport_section_chip_inactive
+drawable sport_stream_btn
 drawable star_rating_bg
 drawable synopsis_bg
 drawable tab_active

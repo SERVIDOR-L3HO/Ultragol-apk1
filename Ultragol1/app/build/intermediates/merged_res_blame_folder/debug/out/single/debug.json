@@ -1,15 +1,15 @@
 [
     {
-        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_gradient_top_black.xml.flat",
-        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_top_black.xml"
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_mas_info_bg.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_mas_info_bg.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_splash_ring_outer.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/splash_ring_outer.xml"
     },
     {
-        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_mas_info_bg.xml.flat",
-        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_mas_info_bg.xml"
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_gradient_top_black.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_top_black.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_activity_player.xml.flat",
@@ -124,6 +124,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_detail_bottom.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_league_tab_active.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_league_tab_active.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/xml_file_paths.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/xml/file_paths.xml"
     },
@@ -134,6 +138,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/mipmap-mdpi_ic_launcher.png.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/mipmap-mdpi/ic_launcher.png"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_stream_btn.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_stream_btn.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_splash_dot.xml.flat",
@@ -150,6 +158,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_search_bg.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/search_bg.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_header_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_header_bg.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_logo_ultragol.png.flat",
@@ -188,6 +200,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/mipmap-xxhdpi/ic_launcher.png"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_match_live_card.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_match_live_card.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_dialog_server_select.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/dialog_server_select.xml"
     },
@@ -220,6 +236,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/poster_glass_bg.xml"
     },
     {
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_fragment_football.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/fragment_football.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/mipmap-xhdpi_ic_launcher_round.png.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/mipmap-xhdpi/ic_launcher_round.png"
     },
@@ -230,6 +250,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_fragment_home.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/fragment_home.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_league_tab_inactive.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_league_tab_inactive.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/mipmap-xhdpi_ic_launcher.png.flat",
@@ -248,12 +272,20 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/gradient_banner_overlay.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_match_card.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_match_card.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_badge_new.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/badge_new.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_activity_search.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/activity_search.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_section_chip_inactive.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_section_chip_inactive.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_round_dark.xml.flat",
@@ -278,6 +310,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_splash_dot_dim.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/splash_dot_dim.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_sport_section_chip_active.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/sport_section_chip_active.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_server_radio_ring.xml.flat",
@@ -318,10 +354,6 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_server_radio_dot.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/server_radio_dot.xml"
-    },
-    {
-        "merged": "com.ultragol.app-merged_res-33:/layout_activity_main.xml.flat",
-        "source": "com.ultragol.app-main-35:/layout/activity_main.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_ic_channel_placeholder.xml.flat",

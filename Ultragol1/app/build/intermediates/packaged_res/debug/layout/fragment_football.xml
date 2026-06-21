@@ -3,43 +3,69 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_primary">
+    android:background="#0A0A14">
 
-    <!-- Header -->
+    <!-- Header bar -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="58dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:background="@color/bg_surface">
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:background="@drawable/sport_header_bg">
+
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="⚽ Deportes"
+            android:text="⚽  Deportes"
             android:textColor="#FFFFFF"
-            android:textSize="18sp"
-            android:fontFamily="sans-serif-bold"/>
-        <TextView
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.02"/>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="● EN VIVO"
-            android:textColor="#4CAF50"
-            android:textSize="11sp"
-            android:fontFamily="sans-serif-bold"
-            android:letterSpacing="0.08"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/sport_match_live_card"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="#4CAF50"
+                android:layout_marginEnd="5dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EN VIVO"
+                android:textColor="#4CAF50"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-bold"
+                android:letterSpacing="0.1"/>
+        </LinearLayout>
     </LinearLayout>
 
-    <!-- League tab bar -->
+    <!-- Divider -->
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#18FF6B00"/>
+
+    <!-- League tabs -->
     <HorizontalScrollView
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="80dp"
         android:scrollbars="none"
-        android:background="@color/bg_surface"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp">
+        android:background="#0DFFFFFF"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
         <LinearLayout
             android:id="@+id/leagueTabBar"
             android:layout_width="wrap_content"
@@ -48,17 +74,17 @@
             android:gravity="center_vertical"/>
     </HorizontalScrollView>
 
-    <!-- Section (sub) tab bar -->
+    <!-- Section chip bar -->
     <HorizontalScrollView
         android:id="@+id/sectionTabScroll"
         android:layout_width="match_parent"
-        android:layout_height="44dp"
+        android:layout_height="46dp"
         android:scrollbars="none"
-        android:background="#0DFFFFFF"
-        android:paddingStart="10dp"
-        android:paddingTop="6dp"
-        android:paddingEnd="10dp"
-        android:paddingBottom="6dp"
+        android:background="#08FFFFFF"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="7dp"
+        android:paddingBottom="7dp"
         android:visibility="gone">
         <LinearLayout
             android:id="@+id/sectionTabBar"
@@ -68,14 +94,19 @@
             android:gravity="center_vertical"/>
     </HorizontalScrollView>
 
+    <!-- Gradient separator -->
+    <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#10FFFFFF"/>
+
     <!-- Loading -->
     <ProgressBar
         android:id="@+id/footballLoading"
+        style="?android:attr/progressBarStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="8dp"
-        android:indeterminateTint="@color/orange_primary"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="2dp"
+        android:indeterminateTint="#FF6B00"
         android:visibility="gone"/>
 
     <!-- Error -->
@@ -89,7 +120,7 @@
         android:padding="24dp"
         android:visibility="gone"/>
 
-    <!-- Content scroll -->
+    <!-- Content -->
     <ScrollView
         android:id="@+id/footballScroll"
         android:layout_width="match_parent"
@@ -101,7 +132,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingBottom="24dp"/>
+            android:paddingTop="10dp"
+            android:paddingBottom="32dp"/>
     </ScrollView>
 
 </LinearLayout>
