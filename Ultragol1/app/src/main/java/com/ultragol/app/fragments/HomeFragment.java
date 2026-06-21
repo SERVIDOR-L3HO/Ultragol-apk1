@@ -181,19 +181,21 @@ public class HomeFragment extends Fragment {
         pool.execute(() -> { try {
             List<ContentItem> r = TmdbApi.fetchTrending();
             h.post(() -> {
-                if (!isAdded()) return;
-                // Hero banner (first 6)
-                bannerItems.clear();
-                bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
-                bannerAdapter.notifyDataSetChanged();
-                bannerCount = bannerItems.size();
-                buildDots();
-                // Trending carousel (all results)
-                trendingItems.clear();
-                trendingItems.addAll(r);
-                trendingAdapter.notifyDataSetChanged();
-                // Small cards row
-                fillRow(rowTrending, r);
+                try {
+                    if (!isAdded()) return;
+                    // Hero banner (first 6)
+                    bannerItems.clear();
+                    bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
+                    if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
+                    bannerCount = bannerItems.size();
+                    buildDots();
+                    // Trending carousel (all results)
+                    trendingItems.clear();
+                    trendingItems.addAll(r);
+                    if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
+                    // Small cards row
+                    fillRow(rowTrending, r);
+                } catch (Exception ignored) {}
             });
         } catch (Exception ignored) {} });
 
