@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Ultragol1</string>
+    <string name="app_name">Ultragol</string>
     <string name="nav_home">Inicio</string>
     <string name="nav_movies">Películas</string>
     <string name="nav_series">Series</string>
