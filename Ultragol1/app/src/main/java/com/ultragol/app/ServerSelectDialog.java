@@ -194,21 +194,35 @@ public class ServerSelectDialog {
         }
     }
 
-    /** Builds a single server row: name right-aligned + "STREAM" + radio circle */
+    /** Builds a single server row: full-width card with name right-aligned + "STREAM" + radio circle */
     private static View buildRow(Context ctx, StreamingApi.Server srv, int idx, boolean selected) {
         LinearLayout row = new LinearLayout(ctx);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.END);
+        row.setGravity(android.view.Gravity.CENTER_VERTICAL);
         row.setClickable(true);
         row.setFocusable(true);
 
-        // sizing
-        int rowH = selected ? dp(ctx, 68) : dp(ctx, 56);
+        // Full-width card row
+        int rowH = selected ? dp(ctx, 70) : dp(ctx, 54);
+        int marginV = selected ? dp(ctx, 5) : dp(ctx, 3);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, rowH);
-        lp.setMargins(0, 0, 0, dp(ctx, 4));
+            ViewGroup.LayoutParams.MATCH_PARENT, rowH);
+        lp.setMargins(0, marginV, 0, marginV);
         row.setLayoutParams(lp);
-        row.setBackground(null);
+
+        // Card background: orange-glass for selected, subtle for unselected
+        row.setBackgroundResource(selected ? R.drawable.server_row_active : R.drawable.server_row);
+
+        // Padding inside card
+        int padH = dp(ctx, 18);
+        int padV = dp(ctx, 10);
+        row.setPadding(padH, padV, padH, padV);
+
+        // Spacer to push content to the right
+        View spacer = new View(ctx);
+        LinearLayout.LayoutParams spacerLp = new LinearLayout.LayoutParams(0, 0, 1f);
+        spacer.setLayoutParams(spacerLp);
+        row.addView(spacer);
 
         // text section (name + STREAM), right-aligned
         LinearLayout textCol = new LinearLayout(ctx);
@@ -216,7 +230,7 @@ public class ServerSelectDialog {
         textCol.setGravity(android.view.Gravity.END);
         LinearLayout.LayoutParams tcLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tcLp.setMarginEnd(dp(ctx, 14));
+        tcLp.setMarginEnd(dp(ctx, 16));
         textCol.setLayoutParams(tcLp);
 
         // Server name
@@ -225,10 +239,10 @@ public class ServerSelectDialog {
         tvName.setGravity(android.view.Gravity.END);
         if (selected) {
             tvName.setTextColor(0xFFFFFFFF);
-            tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 19f);
+            tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 20f);
             tvName.setTypeface(null, Typeface.BOLD);
         } else {
-            tvName.setTextColor(0x88FFFFFF);
+            tvName.setTextColor(0x99FFFFFF);
             tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 15f);
             tvName.setTypeface(null, Typeface.NORMAL);
         }
@@ -238,7 +252,7 @@ public class ServerSelectDialog {
         TextView tvStream = new TextView(ctx);
         tvStream.setText("STREAM");
         tvStream.setGravity(android.view.Gravity.END);
-        tvStream.setTextColor(selected ? 0x99FFFFFF : 0x44FFFFFF);
+        tvStream.setTextColor(selected ? 0xCCFFFFFF : 0x55FFFFFF);
         tvStream.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 10f);
         tvStream.setLetterSpacing(0.12f);
         tvStream.setTypeface(null, Typeface.BOLD);
@@ -252,7 +266,7 @@ public class ServerSelectDialog {
 
         // Radio indicator
         View radio = new View(ctx);
-        int radioSize = selected ? dp(ctx, 18) : dp(ctx, 8);
+        int radioSize = selected ? dp(ctx, 22) : dp(ctx, 10);
         LinearLayout.LayoutParams rLp = new LinearLayout.LayoutParams(radioSize, radioSize);
         radio.setLayoutParams(rLp);
         radio.setBackgroundResource(selected ? R.drawable.server_radio_ring : R.drawable.server_radio_dot);

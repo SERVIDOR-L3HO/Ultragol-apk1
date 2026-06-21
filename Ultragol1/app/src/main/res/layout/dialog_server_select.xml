@@ -154,10 +154,10 @@
 
     <!-- Server list: right side, centered vertically -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="230dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:layout_marginEnd="20dp"
+        android:layout_marginEnd="16dp"
         android:orientation="vertical"
         android:gravity="end">
 
@@ -184,11 +184,12 @@
         <!-- Lang tabs (right-aligned) -->
         <LinearLayout
             android:id="@+id/langTabs"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_gravity="end"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="12dp"
+            android:gravity="end"
             android:visibility="gone">
             <TextView android:id="@+id/tabLatino"
                 android:layout_width="wrap_content" android:layout_height="30dp"
@@ -213,10 +214,9 @@
         <!-- Server rows container -->
         <LinearLayout
             android:id="@+id/serverContainer"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="end"/>
+            android:orientation="vertical"/>
     </LinearLayout>
 
 </FrameLayout>
