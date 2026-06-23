@@ -15,10 +15,11 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import java.util.List;
 
 /**
- * Glass-style bottom-sheet dialog for selecting a live stream server.
- * Shows match info at top and a scrollable server list below.
+ * Premium glass bottom-sheet dialog for live match server selection.
  */
 public class LiveMatchServerDialog {
+
+    // ── Data model ────────────────────────────────────────────────────────────
 
     public static class LiveMatch {
         public final String titulo;
@@ -30,133 +31,157 @@ public class LiveMatchServerDialog {
 
         public LiveMatch(String titulo, String liga, String hora,
                          String fecha, String logoUrl, List<String[]> servidores) {
-            this.titulo    = titulo;
-            this.liga      = liga;
-            this.hora      = hora;
-            this.fecha     = fecha;
-            this.logoUrl   = logoUrl;
+            this.titulo     = titulo;
+            this.liga       = liga;
+            this.hora       = hora;
+            this.fecha      = fecha;
+            this.logoUrl    = logoUrl;
             this.servidores = servidores;
         }
     }
 
-    public static void show(Context context, LiveMatch match) {
-        Dialog dialog = new Dialog(context, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
+    // ── Server icon color palette ─────────────────────────────────────────────
+    private static final int[] ICON_COLORS = {
+        0xFFFF6B00, 0xFFE53935, 0xFF8E24AA, 0xFF1E88E5,
+        0xFF43A047, 0xFFF4511E, 0xFF039BE5, 0xFF6D4C41,
+        0xFF00ACC1, 0xFF7CB342, 0xFFFFB300, 0xFF5E35B1
+    };
+
+    // ── Icon labels for each slot ─────────────────────────────────────────────
+    private static final String[] ICON_LABELS = {
+        "1","2","3","4","5","6","7","8","9","10","11","12",
+        "13","14","15","16","17","18","19","20"
+    };
+
+    // ── Show ─────────────────────────────────────────────────────────────────
+
+    public static void show(Context ctx, LiveMatch match) {
+        Dialog dialog = new Dialog(ctx, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
-        // ── Root: dim overlay ──────────────────────────────────────────────────────
-        FrameLayout root = new FrameLayout(context);
+        // ── Dim overlay ───────────────────────────────────────────────────────
+        FrameLayout root = new FrameLayout(ctx);
         root.setBackgroundColor(0xCC000000);
         root.setClickable(true);
         root.setFocusable(true);
         root.setOnClickListener(v -> dialog.dismiss());
 
-        // ── Glass panel ────────────────────────────────────────────────────────────
-        LinearLayout panel = new LinearLayout(context);
+        // ── Glass panel ───────────────────────────────────────────────────────
+        LinearLayout panel = new LinearLayout(ctx);
         panel.setOrientation(LinearLayout.VERTICAL);
         panel.setClickable(true);
         panel.setFocusable(true);
-        panel.setOnClickListener(v -> { /* absorb */ });
+        panel.setOnClickListener(v -> {/* absorb clicks */});
 
         GradientDrawable panelBg = new GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
-            new int[]{0xF2101018, 0xF2080810});
-        panelBg.setCornerRadii(new float[]{dp(context,26),dp(context,26), dp(context,26),dp(context,26), 0,0, 0,0});
-        panelBg.setStroke(dp(context,1), 0x33FFFFFF);
+            new int[]{0xF50A0A18, 0xF5060610});
+        panelBg.setCornerRadii(new float[]{
+            dp(ctx,28),dp(ctx,28), dp(ctx,28),dp(ctx,28), 0,0, 0,0});
+        panelBg.setStroke(dp(ctx,1), 0x25FFFFFF);
         panel.setBackground(panelBg);
-        panel.setPadding(dp(context,24), dp(context,10), dp(context,24), dp(context,32));
+        panel.setPadding(dp(ctx,20), dp(ctx,8), dp(ctx,20), dp(ctx,36));
 
         FrameLayout.LayoutParams panelLp = new FrameLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT,
-            ViewGroup.LayoutParams.WRAP_CONTENT);
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         panelLp.gravity = Gravity.BOTTOM;
         panel.setLayoutParams(panelLp);
 
-        // ── Drag handle ────────────────────────────────────────────────────────────
-        View handle = new View(context);
-        GradientDrawable handleBg = new GradientDrawable();
-        handleBg.setColor(0x44FFFFFF);
-        handleBg.setCornerRadius(dp(context,3));
-        handle.setBackground(handleBg);
-        LinearLayout.LayoutParams handleLp = new LinearLayout.LayoutParams(dp(context,40), dp(context,4));
-        handleLp.gravity = Gravity.CENTER_HORIZONTAL;
-        handleLp.setMargins(0, dp(context,6), 0, dp(context,20));
-        handle.setLayoutParams(handleLp);
+        // ── Drag handle ───────────────────────────────────────────────────────
+        View handle = new View(ctx);
+        GradientDrawable hBg = new GradientDrawable();
+        hBg.setColor(0x44FFFFFF);
+        hBg.setCornerRadius(dp(ctx,4));
+        handle.setBackground(hBg);
+        LinearLayout.LayoutParams hLp = new LinearLayout.LayoutParams(dp(ctx,44), dp(ctx,4));
+        hLp.gravity = Gravity.CENTER_HORIZONTAL;
+        hLp.setMargins(0, dp(ctx,4), 0, dp(ctx,22));
+        handle.setLayoutParams(hLp);
         panel.addView(handle);
 
-        // ── Match header ──────────────────────────────────────────────────────────
-        LinearLayout header = new LinearLayout(context);
+        // ── Header ────────────────────────────────────────────────────────────
+        LinearLayout header = new LinearLayout(ctx);
         header.setOrientation(LinearLayout.HORIZONTAL);
         header.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout.LayoutParams headerLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        headerLp.setMargins(0, 0, 0, dp(context,20));
+        headerLp.setMargins(0, 0, 0, dp(ctx,20));
         header.setLayoutParams(headerLp);
 
-        // Logo circle
-        ImageView logoImg = new ImageView(context);
+        // Logo circle (premium ring)
+        ImageView logo = new ImageView(ctx);
         GradientDrawable logoBg = new GradientDrawable();
         logoBg.setShape(GradientDrawable.OVAL);
         logoBg.setColor(0x22FFFFFF);
-        logoBg.setStroke(dp(context,2), 0x44FF6B00);
-        logoImg.setBackground(logoBg);
-        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams(dp(context,58), dp(context,58));
-        logoLp.setMarginEnd(dp(context,16));
-        logoImg.setLayoutParams(logoLp);
-        logoImg.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        logoImg.setPadding(dp(context,8), dp(context,8), dp(context,8), dp(context,8));
+        logoBg.setStroke(dp(ctx,2), 0x66FF6B00);
+        logo.setBackground(logoBg);
+        LinearLayout.LayoutParams logoLp = new LinearLayout.LayoutParams(dp(ctx,64), dp(ctx,64));
+        logoLp.setMarginEnd(dp(ctx,16));
+        logo.setLayoutParams(logoLp);
+        logo.setPadding(dp(ctx,10), dp(ctx,10), dp(ctx,10), dp(ctx,10));
+        logo.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
 
         if (match.logoUrl != null && !match.logoUrl.isEmpty()) {
-            Glide.with(context)
-                .load(match.logoUrl)
+            Glide.with(ctx).load(match.logoUrl)
                 .transform(new CircleCrop())
                 .placeholder(android.R.drawable.ic_menu_gallery)
-                .into(logoImg);
+                .into(logo);
         }
-        header.addView(logoImg);
+        header.addView(logo);
 
         // Text block
-        LinearLayout textBlock = new LinearLayout(context);
+        LinearLayout textBlock = new LinearLayout(ctx);
         textBlock.setOrientation(LinearLayout.VERTICAL);
-        textBlock.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        textBlock.setLayoutParams(new LinearLayout.LayoutParams(
+            0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
-        // League badge
-        TextView tvLeague = new TextView(context);
-        tvLeague.setText("🏆  " + (match.liga != null ? match.liga.toUpperCase() : "EN VIVO"));
-        tvLeague.setTextColor(0xFFFF6B00);
-        tvLeague.setTextSize(10);
-        tvLeague.setTypeface(null, Typeface.BOLD);
-        tvLeague.setLetterSpacing(0.1f);
-        LinearLayout.LayoutParams leagueLp = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        leagueLp.setMargins(0, 0, 0, dp(context,4));
-        tvLeague.setLayoutParams(leagueLp);
-        textBlock.addView(tvLeague);
+        // League pill
+        if (match.liga != null && !match.liga.isEmpty()) {
+            TextView tvLig = new TextView(ctx);
+            tvLig.setText("🏆  " + match.liga.toUpperCase());
+            tvLig.setTextColor(0xFFFF6B00);
+            tvLig.setTextSize(9);
+            tvLig.setTypeface(null, Typeface.BOLD);
+            tvLig.setLetterSpacing(0.1f);
+            GradientDrawable ligBg = new GradientDrawable();
+            ligBg.setColor(0x1AFF6B00);
+            ligBg.setStroke(dp(ctx,1), 0x33FF6B00);
+            ligBg.setCornerRadius(dp(ctx,50));
+            tvLig.setBackground(ligBg);
+            tvLig.setPadding(dp(ctx,8), dp(ctx,3), dp(ctx,8), dp(ctx,3));
+            LinearLayout.LayoutParams lLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            lLp.setMargins(0, 0, 0, dp(ctx,6));
+            tvLig.setLayoutParams(lLp);
+            textBlock.addView(tvLig);
+        }
 
-        // Match title
-        TextView tvTitle = new TextView(context);
+        // Title
+        TextView tvTitle = new TextView(ctx);
         tvTitle.setText(match.titulo);
         tvTitle.setTextColor(0xFFFFFFFF);
-        tvTitle.setTextSize(15);
+        tvTitle.setTextSize(16);
         tvTitle.setTypeface(null, Typeface.BOLD);
         tvTitle.setMaxLines(2);
         tvTitle.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        tvTitle.setLineSpacing(0, 1.2f);
         LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        titleLp.setMargins(0, 0, 0, dp(context,4));
+        titleLp.setMargins(0, 0, 0, dp(ctx,5));
         tvTitle.setLayoutParams(titleLp);
         textBlock.addView(tvTitle);
 
         // Time row
-        StringBuilder metaSb = new StringBuilder();
-        if (match.hora  != null && !match.hora.isEmpty())  metaSb.append("🕐 ").append(match.hora);
+        StringBuilder meta = new StringBuilder();
+        if (match.hora != null && !match.hora.isEmpty())  meta.append("🕐  ").append(match.hora);
         if (match.fecha != null && !match.fecha.isEmpty()) {
-            if (metaSb.length() > 0) metaSb.append("   ·   ");
-            metaSb.append("📅 ").append(match.fecha);
+            if (meta.length() > 0) meta.append("   ·   ");
+            meta.append("📅  ").append(match.fecha);
         }
-        if (metaSb.length() > 0) {
-            TextView tvMeta = new TextView(context);
-            tvMeta.setText(metaSb.toString());
-            tvMeta.setTextColor(0x88FFFFFF);
+        if (meta.length() > 0) {
+            TextView tvMeta = new TextView(ctx);
+            tvMeta.setText(meta.toString());
+            tvMeta.setTextColor(0x66FFFFFF);
             tvMeta.setTextSize(11);
             textBlock.addView(tvMeta);
         }
@@ -164,103 +189,113 @@ public class LiveMatchServerDialog {
         header.addView(textBlock);
 
         // Close button
-        TextView closeBtn = new TextView(context);
+        TextView closeBtn = new TextView(ctx);
         closeBtn.setText("✕");
-        closeBtn.setTextColor(0x66FFFFFF);
-        closeBtn.setTextSize(18);
+        closeBtn.setTextColor(0x77FFFFFF);
+        closeBtn.setTextSize(16);
         closeBtn.setGravity(Gravity.CENTER);
         GradientDrawable closeBg = new GradientDrawable();
         closeBg.setShape(GradientDrawable.OVAL);
-        closeBg.setColor(0x0FFFFFFF);
-        closeBg.setStroke(dp(context,1), 0x22FFFFFF);
+        closeBg.setColor(0x14FFFFFF);
+        closeBg.setStroke(dp(ctx,1), 0x22FFFFFF);
         closeBtn.setBackground(closeBg);
-        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(dp(context,34), dp(context,34));
-        closeLp.setMarginStart(dp(context,12));
+        LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(dp(ctx,36), dp(ctx,36));
+        closeLp.setMarginStart(dp(ctx,12));
         closeLp.gravity = Gravity.TOP;
         closeBtn.setLayoutParams(closeLp);
         closeBtn.setOnClickListener(v -> dialog.dismiss());
         header.addView(closeBtn);
-
         panel.addView(header);
 
-        // ── Divider ───────────────────────────────────────────────────────────────
-        View divider = new View(context);
+        // ── Orange gradient divider ───────────────────────────────────────────
+        View divider = new View(ctx);
         GradientDrawable divBg = new GradientDrawable(
             GradientDrawable.Orientation.LEFT_RIGHT,
-            new int[]{Color.TRANSPARENT, 0x66FF6B00, Color.TRANSPARENT});
+            new int[]{Color.TRANSPARENT, 0x88FF6B00, Color.TRANSPARENT});
         divider.setBackground(divBg);
         LinearLayout.LayoutParams divLp = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(context,1));
-        divLp.setMargins(0, 0, 0, dp(context,18));
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx,1));
+        divLp.setMargins(0, 0, 0, dp(ctx,18));
         divider.setLayoutParams(divLp);
         panel.addView(divider);
 
-        // ── Section subtitle ─────────────────────────────────────────────────────
-        TextView tvSub = new TextView(context);
+        // ── Subtitle ─────────────────────────────────────────────────────────
+        TextView tvSub = new TextView(ctx);
         tvSub.setText("SELECCIONA UN SERVIDOR");
-        tvSub.setTextColor(0x66FFFFFF);
+        tvSub.setTextColor(0x55FFFFFF);
         tvSub.setTextSize(10);
         tvSub.setTypeface(null, Typeface.BOLD);
         tvSub.setLetterSpacing(0.14f);
         LinearLayout.LayoutParams subLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        subLp.setMargins(0, 0, 0, dp(context,12));
+        subLp.setMargins(0, 0, 0, dp(ctx,14));
         tvSub.setLayoutParams(subLp);
         panel.addView(tvSub);
 
-        // ── Server list ───────────────────────────────────────────────────────────
-        ScrollView scroll = new ScrollView(context);
+        // ── Server scroll list ────────────────────────────────────────────────
+        ScrollView scroll = new ScrollView(ctx);
         scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
         scroll.setVerticalScrollBarEnabled(false);
         LinearLayout.LayoutParams scrollLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        scrollLp.setMargins(0, 0, 0, 0);
         scroll.setLayoutParams(scrollLp);
 
-        LinearLayout serverList = new LinearLayout(context);
-        serverList.setOrientation(LinearLayout.VERTICAL);
-        serverList.setLayoutParams(new LinearLayout.LayoutParams(
+        LinearLayout list = new LinearLayout(ctx);
+        list.setOrientation(LinearLayout.VERTICAL);
+        list.setLayoutParams(new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
 
-        String[] icons = {"📺","📡","🖥️","🌐","⚡","🔴","🟠","💎","🟣","🔵"};
-        List<String[]> servers = match.servidores;
-
-        for (int i = 0; i < servers.size(); i++) {
-            String[] srv   = servers.get(i);
+        for (int i = 0; i < match.servidores.size(); i++) {
+            String[] srv   = match.servidores.get(i);
             String canal   = srv[0];
             String url     = srv[1];
-            String icon    = icons[i % icons.length];
-            int num        = i + 1;
+            int iconColor  = ICON_COLORS[i % ICON_COLORS.length];
+            String numLabel = ICON_LABELS[Math.min(i, ICON_LABELS.length - 1)];
 
-            LinearLayout row = new LinearLayout(context);
+            // Row container
+            LinearLayout row = new LinearLayout(ctx);
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setGravity(Gravity.CENTER_VERTICAL);
             row.setClickable(true);
             row.setFocusable(true);
-            row.setBackgroundResource(R.drawable.live_server_btn_bg);
-            row.setPadding(dp(context,14), dp(context,14), dp(context,14), dp(context,14));
+            row.setBackgroundResource(R.drawable.live_server_row_premium_bg);
+            row.setPadding(dp(ctx,14), dp(ctx,14), dp(ctx,14), dp(ctx,14));
             LinearLayout.LayoutParams rowLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            rowLp.setMargins(0, 0, 0, dp(context,8));
+            rowLp.setMargins(0, 0, 0, dp(ctx,8));
             row.setLayoutParams(rowLp);
 
-            // Number circle
-            TextView tvNum = new TextView(context);
-            tvNum.setText(icon);
-            tvNum.setTextSize(16);
-            tvNum.setGravity(Gravity.CENTER);
-            tvNum.setBackgroundResource(R.drawable.live_server_number_bg);
-            LinearLayout.LayoutParams numLp = new LinearLayout.LayoutParams(dp(context,42), dp(context,42));
-            numLp.setMarginEnd(dp(context,14));
-            tvNum.setLayoutParams(numLp);
-            row.addView(tvNum);
+            // Colored number circle
+            TextView numView = new TextView(ctx);
+            numView.setText(numLabel);
+            numView.setTextColor(0xFFFFFFFF);
+            numView.setTextSize(14);
+            numView.setTypeface(null, Typeface.BOLD);
+            numView.setGravity(Gravity.CENTER);
+            GradientDrawable numBg = new GradientDrawable();
+            numBg.setShape(GradientDrawable.OVAL);
+            numBg.setColor((iconColor & 0x00FFFFFF) | 0x33000000);  // 20% tint
+            numBg.setStroke(dp(ctx,2), (iconColor & 0x00FFFFFF) | 0x88000000);
+            // Reconstruct properly: low opacity fill, medium opacity border
+            numBg.setColor(Color.argb(40,
+                Color.red(iconColor), Color.green(iconColor), Color.blue(iconColor)));
+            numBg.setStroke(dp(ctx,2), Color.argb(140,
+                Color.red(iconColor), Color.green(iconColor), Color.blue(iconColor)));
+            numView.setBackground(numBg);
+            numView.setTextColor(iconColor);
+            LinearLayout.LayoutParams numLp = new LinearLayout.LayoutParams(
+                dp(ctx,44), dp(ctx,44));
+            numLp.setMarginEnd(dp(ctx,14));
+            numView.setLayoutParams(numLp);
+            row.addView(numView);
 
             // Info column
-            LinearLayout info = new LinearLayout(context);
+            LinearLayout info = new LinearLayout(ctx);
             info.setOrientation(LinearLayout.VERTICAL);
-            info.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+            info.setLayoutParams(new LinearLayout.LayoutParams(
+                0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
-            TextView tvCanal = new TextView(context);
+            TextView tvCanal = new TextView(ctx);
             tvCanal.setText(canal);
             tvCanal.setTextColor(0xFFFFFFFF);
             tvCanal.setTextSize(14);
@@ -269,70 +304,72 @@ public class LiveMatchServerDialog {
             tvCanal.setEllipsize(android.text.TextUtils.TruncateAt.END);
             info.addView(tvCanal);
 
-            TextView tvLabel = new TextView(context);
-            tvLabel.setText("Servidor " + num + " de " + servers.size());
-            tvLabel.setTextColor(0x55FFFFFF);
-            tvLabel.setTextSize(11);
-            LinearLayout.LayoutParams labelLp = new LinearLayout.LayoutParams(
+            TextView tvSrvLabel = new TextView(ctx);
+            tvSrvLabel.setText("Servidor " + (i + 1) + " de " + match.servidores.size());
+            tvSrvLabel.setTextColor(0x44FFFFFF);
+            tvSrvLabel.setTextSize(11);
+            LinearLayout.LayoutParams lblLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            labelLp.setMargins(0, dp(context,2), 0, 0);
-            tvLabel.setLayoutParams(labelLp);
-            info.addView(tvLabel);
-
+            lblLp.setMargins(0, dp(ctx,2), 0, 0);
+            tvSrvLabel.setLayoutParams(lblLp);
+            info.addView(tvSrvLabel);
             row.addView(info);
 
             // Arrow
-            TextView tvArrow = new TextView(context);
-            tvArrow.setText("›");
-            tvArrow.setTextColor(0x44FF6B00);
-            tvArrow.setTextSize(22);
-            tvArrow.setGravity(Gravity.CENTER);
-            LinearLayout.LayoutParams arrowLp = new LinearLayout.LayoutParams(
+            TextView arrow = new TextView(ctx);
+            arrow.setText("›");
+            arrow.setTextSize(24);
+            arrow.setTextColor(Color.argb(100,
+                Color.red(iconColor), Color.green(iconColor), Color.blue(iconColor)));
+            arrow.setGravity(Gravity.CENTER);
+            LinearLayout.LayoutParams arrLp = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-            arrowLp.setMarginStart(dp(context,10));
-            tvArrow.setLayoutParams(arrowLp);
-            row.addView(tvArrow);
+            arrLp.setMarginStart(dp(ctx,10));
+            arrow.setLayoutParams(arrLp);
+            row.addView(arrow);
 
-            final String finalUrl = url;
-            final String finalTitle = match.titulo;
+            final String fUrl   = url;
+            final String fTitle = match.titulo;
             row.setOnClickListener(v -> {
-                row.animate().scaleX(0.95f).scaleY(0.95f).setDuration(60)
-                    .withEndAction(() -> row.animate().scaleX(1f).scaleY(1f).setDuration(120).start())
+                row.animate().scaleX(0.96f).scaleY(0.96f).setDuration(60)
+                    .withEndAction(() ->
+                        row.animate().scaleX(1f).scaleY(1f).setDuration(120).start())
                     .start();
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    Intent intent = new Intent(context, PlayerActivity.class);
-                    intent.putExtra("url", finalUrl);
-                    intent.putExtra("title", finalTitle);
+                    Intent intent = new Intent(ctx, PlayerActivity.class);
+                    intent.putExtra("url",   fUrl);
+                    intent.putExtra("title", fTitle);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    context.startActivity(intent);
+                    ctx.startActivity(intent);
                     dialog.dismiss();
-                }, 150);
+                }, 160);
             });
 
-            serverList.addView(row);
+            list.addView(row);
         }
 
-        scroll.addView(serverList);
+        scroll.addView(list);
         panel.addView(scroll);
-
         root.addView(panel);
         dialog.setContentView(root);
 
         Window win = dialog.getWindow();
         if (win != null) {
-            win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT,
+                          ViewGroup.LayoutParams.MATCH_PARENT);
             win.setBackgroundDrawableResource(android.R.color.transparent);
             win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         }
 
-        // Slide-in animation
-        panel.setTranslationY(600f);
+        // Slide-up animation
+        panel.setTranslationY(700f);
         panel.setAlpha(0f);
-        dialog.setOnShowListener(d -> panel.animate()
-            .translationY(0f).alpha(1f)
-            .setDuration(340)
-            .setInterpolator(new android.view.animation.DecelerateInterpolator(2f))
-            .start());
+        dialog.setOnShowListener(d ->
+            panel.animate()
+                .translationY(0f).alpha(1f)
+                .setDuration(360)
+                .setInterpolator(new android.view.animation.DecelerateInterpolator(2.2f))
+                .start());
 
         dialog.show();
     }

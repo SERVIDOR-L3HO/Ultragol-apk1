@@ -1,61 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/glassCard"
-    android:layout_width="295dp"
-    android:layout_height="150dp"
-    android:layout_marginEnd="12dp"
-    android:background="@drawable/glass_live_card_bg"
+    android:layout_width="320dp"
+    android:layout_height="172dp"
+    android:layout_marginEnd="14dp"
+    android:background="@drawable/live_card_main_bg"
     android:clickable="true"
-    android:focusable="true">
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground">
 
-    <!-- Left dark area: logo -->
-    <LinearLayout
-        android:layout_width="98dp"
+    <!-- Orange glow spot on left logo zone -->
+    <View
+        android:layout_width="170dp"
         android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:background="@drawable/live_card_left_glow"/>
+
+    <!-- Left logo zone -->
+    <LinearLayout
+        android:layout_width="148dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
         android:orientation="vertical"
-        android:gravity="center"
-        android:background="#1A000000">
+        android:gravity="center">
 
         <ImageView
             android:id="@+id/cardLogo"
-            android:layout_width="58dp"
-            android:layout_height="58dp"
-            android:background="@drawable/live_logo_circle_bg"
-            android:padding="9dp"
+            android:layout_width="74dp"
+            android:layout_height="74dp"
+            android:background="@drawable/live_logo_ring"
+            android:padding="11dp"
             android:scaleType="centerInside"
             android:contentDescription="logo"/>
     </LinearLayout>
 
-    <!-- Right fade overlay from left area -->
+    <!-- Vertical separator -->
     <View
-        android:layout_width="24dp"
+        android:layout_width="1dp"
         android:layout_height="match_parent"
-        android:layout_marginStart="84dp"
-        android:background="@drawable/glass_fade_left_right"/>
+        android:layout_gravity="start"
+        android:layout_marginStart="148dp"
+        android:background="#20FFFFFF"/>
 
-    <!-- Right info column -->
+    <!-- Right glass info panel -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_vertical"
-        android:paddingStart="108dp"
-        android:paddingEnd="12dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp">
+        android:paddingStart="162dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-        <!-- League -->
+        <!-- League pill -->
         <TextView
             android:id="@+id/cardLeague"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textColor="#FFFF6B00"
             android:textSize="9sp"
             android:textStyle="bold"
+            android:letterSpacing="0.08"
             android:maxLines="1"
             android:ellipsize="end"
-            android:letterSpacing="0.06"
-            android:layout_marginBottom="5dp"/>
+            android:background="@drawable/league_pill_bg"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:layout_marginBottom="7dp"/>
 
         <!-- Match title -->
         <TextView
@@ -67,10 +81,10 @@
             android:textStyle="bold"
             android:maxLines="2"
             android:ellipsize="end"
-            android:lineSpacingMultiplier="1.15"
-            android:layout_marginBottom="5dp"/>
+            android:lineSpacingMultiplier="1.2"
+            android:layout_marginBottom="6dp"/>
 
-        <!-- Time -->
+        <!-- Time row -->
         <TextView
             android:id="@+id/cardTime"
             android:layout_width="match_parent"
@@ -79,7 +93,7 @@
             android:textSize="10sp"
             android:maxLines="1"
             android:ellipsize="end"
-            android:layout_marginBottom="10dp"/>
+            android:layout_marginBottom="11dp"/>
 
         <!-- CTA button -->
         <TextView
@@ -92,25 +106,27 @@
             android:textStyle="bold"
             android:gravity="center"
             android:background="@drawable/live_cta_glass_btn"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp"/>
+            android:paddingTop="7dp"
+            android:paddingBottom="7dp"/>
+
     </LinearLayout>
 
-    <!-- EN VIVO badge — top left -->
+    <!-- ● EN VIVO badge — top left -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
-        android:layout_margin="8dp"
+        android:layout_margin="10dp"
         android:text="● EN VIVO"
         android:textColor="#FF00E676"
         android:textSize="8sp"
         android:textStyle="bold"
+        android:letterSpacing="0.06"
         android:background="@drawable/badge_live_green"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"/>
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"/>
 
     <!-- Server count badge — top right -->
     <TextView
@@ -118,15 +134,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_margin="8dp"
+        android:layout_margin="10dp"
         android:textColor="#FFFF6B00"
         android:textSize="8sp"
         android:textStyle="bold"
         android:background="@drawable/live_server_number_bg"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp"
         android:visibility="gone"/>
 
 </FrameLayout>
