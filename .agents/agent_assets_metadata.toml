@@ -60,3 +60,9 @@ id = "vtsVMibRTabXP_LwnSfpC"
 uri = "file://ultragol-debug.zip"
 type = "unspecified"
 title = "Ultragol APK — con carrusel glass EN VIVO"
+
+[[outputs]]
+id = "vl69a0xpPChyRzxaz5fbC"
+uri = "file://apks/ultragol1_debug.zip"
+type = "unspecified"
+title = "Ultragol1 APK — Diseño Glass Premium"

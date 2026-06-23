@@ -3,8 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_marginTop="20dp"
-    android:background="@drawable/live_section_glow_bg">
+    android:layout_marginTop="24dp"
+    android:layout_marginBottom="8dp">
+
+    <!-- Top shimmer divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/live_card_top_shimmer"/>
 
     <!-- Section header -->
     <LinearLayout
@@ -13,16 +22,22 @@
         android:orientation="horizontal"
         android:paddingStart="16dp"
         android:paddingEnd="12dp"
-        android:paddingTop="14dp"
-        android:paddingBottom="12dp"
+        android:paddingBottom="14dp"
         android:gravity="center_vertical">
 
-        <!-- Orange accent bar -->
-        <View
-            android:layout_width="4dp"
-            android:layout_height="22dp"
-            android:background="#FF6B00"
-            android:layout_marginEnd="10dp"/>
+        <!-- Orange accent glow column -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginEnd="12dp">
+
+            <View
+                android:layout_width="3dp"
+                android:layout_height="28dp"
+                android:background="@drawable/live_accent_bar"/>
+        </LinearLayout>
 
         <!-- Title + subtitle -->
         <LinearLayout
@@ -35,35 +50,63 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="EN VIVO AHORA"
-                android:textColor="#FFFFFF"
-                android:textSize="15sp"
+                android:textColor="#FFFFFFFF"
+                android:textSize="16sp"
                 android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.04"
+                android:letterSpacing="0.06"
                 android:textAllCaps="true"/>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="3dp">
+
+                <View
+                    android:layout_width="5dp"
+                    android:layout_height="5dp"
+                    android:background="@drawable/live_dot_pulse"
+                    android:layout_marginEnd="6dp"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Transmisiones en directo"
+                    android:textColor="#88FF6B00"
+                    android:textSize="10sp"
+                    android:letterSpacing="0.02"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Live pill -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/badge_live_green_premium"
+            android:paddingStart="10dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <View
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:background="@drawable/live_dot_pulse"
+                android:layout_marginEnd="6dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="● Transmisiones en directo"
-                android:textColor="#88FF6B00"
-                android:textSize="10sp"
-                android:layout_marginTop="2dp"/>
+                android:text="EN VIVO"
+                android:textColor="#FF00E676"
+                android:textSize="9sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.07"/>
         </LinearLayout>
 
-        <!-- Live pill -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EN VIVO"
-            android:textColor="#FF00E676"
-            android:textSize="9sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.06"
-            android:background="@drawable/badge_live_green"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"/>
     </LinearLayout>
 
     <!-- Glass cards RecyclerView -->
@@ -73,8 +116,16 @@
         android:layout_height="wrap_content"
         android:paddingStart="12dp"
         android:paddingEnd="12dp"
-        android:paddingBottom="16dp"
+        android:paddingBottom="18dp"
         android:clipToPadding="false"
         android:overScrollMode="never"/>
+
+    <!-- Bottom shimmer divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/live_card_top_shimmer"/>
 
 </LinearLayout>
