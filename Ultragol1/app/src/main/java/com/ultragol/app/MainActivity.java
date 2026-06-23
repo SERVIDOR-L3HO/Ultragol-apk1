@@ -1,7 +1,10 @@
 package com.ultragol.app;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.view.animation.AlphaAnimation;
@@ -9,6 +12,8 @@ import android.widget.FrameLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import com.ultragol.app.fragments.*;
 
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
         drawerOverlay = findViewById(R.id.drawerOverlay);
 
         checkAndShowCrash();
+        requestNotificationPermission();
 
         if (savedInstanceState == null) loadFragment(new HomeFragment());
 
@@ -158,6 +164,16 @@ public class MainActivity extends AppCompatActivity {
             hideMenu();
         } else {
             super.onBackPressed();
+        }
+    }
+
+    private void requestNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this,
+                        new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
+            }
         }
     }
 

@@ -2,8 +2,8 @@
   "versionCode": 5,
   "versionName": "1.1",
   "appName": "Ultragol1",
-  "changelog": "- App completa rediseñada: Películas, Series, Anime, Doramas, Deportes/TV en vivo\n- Diseño Netflix/Disney+ con glassmorphism naranja/negro\n- Banner dinámico con contenido TMDb\n- Reproductor de streaming con múltiples servidores\n- TV en vivo con canales deportivos\n- Búsqueda integrada\n- Favoritos locales",
+  "changelog": "- Notificaciones del panel ahora llegan a la app\n- App completa rediseñada: Películas, Series, Anime, Doramas, Deportes/TV en vivo\n- Diseño Netflix/Disney+ con glassmorphism naranja/negro\n- Banner dinámico con contenido TMDb\n- Reproductor de streaming con múltiples servidores\n- TV en vivo con canales deportivos",
   "downloadUrl": "https://da8cd50c-b6a4-475c-8783-70b87f2e70be-00-3s6o17dujacbo.spock.replit.dev/ultragol1/download",
   "forceUpdate": false,
-  "updatedAt": "2026-06-23T21:19:00.000Z"
+  "updatedAt": "2026-06-23T21:35:00.000Z"
 }
