@@ -1,7 +1,9 @@
 package com.ultragol.app.fragments;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,13 +12,19 @@ import android.widget.*;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.ultragol.app.LiveMatchServerDialog;
 import com.ultragol.app.PlayerActivity;
 import com.ultragol.app.R;
 import org.json.*;
 import java.io.*;
 import java.net.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
@@ -63,8 +71,8 @@ public class FootballFragment extends Fragment {
     private void loadAgenda() {
         contentContainer.removeAllViews();
 
-        // 1) EN VIVO static streams section
-        buildLiveSection();
+        // 1) EN VIVO — Gol 3 live carousel
+        buildGol3Carousel();
 
         // 2) Each league section (async)
         for (Object[] league : LEAGUES) {
@@ -145,15 +153,15 @@ public class FootballFragment extends Fragment {
         });
     }
 
-    // ─── EN VIVO section ─────────────────────────────────────────────────────────
+    // ─── Gol-3 live carousel ─────────────────────────────────────────────────────
 
-    private void buildLiveSection() {
+    private void buildGol3Carousel() {
         LinearLayout section = new LinearLayout(requireContext());
         section.setOrientation(LinearLayout.VERTICAL);
         section.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         contentContainer.addView(section);
 
-        addAgendaHeader(section, "⚡", "EN VIVO", "TRANSMISIONES AHORA", 0xFFFF3B3B);
+        addAgendaHeader(section, "🔥", "EN VIVO", "PARTIDOS AHORA", 0xFFFF3B3B);
 
         HorizontalScrollView hsv = new HorizontalScrollView(requireContext());
         hsv.setHorizontalScrollBarEnabled(false);
@@ -164,114 +172,284 @@ public class FootballFragment extends Fragment {
 
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(dp(16), dp(4), dp(16), dp(12));
+        row.setPadding(dp(16), dp(4), dp(16), dp(16));
 
-        String[][] streams = {
-            {"1","/gol-1"},{"2","/gol-2"},{"3","/gol-3"},
-            {"4","/gol-4"},{"5","/gol-5"},{"6","/gol-6"},
-        };
-        for (String[] s : streams) row.addView(makeGolCard(s[0], s[1]));
-
+        // Skeleton while loading
+        for (int i = 0; i < 3; i++) row.addView(makeCarouselSkeleton());
         hsv.addView(row);
         section.addView(hsv);
+
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                String json = fetch("/gol-3");
+                List<LiveMatchServerDialog.LiveMatch> matches = parseGol3(json);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!isAdded()) return;
+                    row.removeAllViews();
+                    if (matches.isEmpty()) {
+                        addNoDataLabel(section);
+                    } else {
+                        for (LiveMatchServerDialog.LiveMatch m : matches) {
+                            row.addView(makeLiveMatchCard(m));
+                        }
+                    }
+                });
+            } catch (Exception e) {
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!isAdded()) return;
+                    row.removeAllViews();
+                    addNoDataLabel(section);
+                });
+            }
+        });
     }
 
-    private View makeGolCard(String number, String path) {
+    private List<LiveMatchServerDialog.LiveMatch> parseGol3(String json) throws Exception {
+        JSONObject root = new JSONObject(json);
+        JSONArray arr   = root.optJSONArray("transmisiones");
+        if (arr == null) arr = new JSONArray(json);
+
+        // Group by title preserving order
+        LinkedHashMap<String, List<String[]>> grouped = new LinkedHashMap<>();
+        LinkedHashMap<String, JSONObject>     meta    = new LinkedHashMap<>();
+
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item  = arr.getJSONObject(i);
+            String titulo    = item.optString("titulo", "Partido " + (i + 1));
+            String canal     = item.optString("canal", "Servidor " + (i + 1));
+            String url       = item.optString("url", "");
+            if (url.isEmpty()) continue;
+
+            if (!grouped.containsKey(titulo)) {
+                grouped.put(titulo, new ArrayList<>());
+                meta.put(titulo, item);
+            }
+            grouped.get(titulo).add(new String[]{canal, url});
+        }
+
+        List<LiveMatchServerDialog.LiveMatch> result = new ArrayList<>();
+        for (String titulo : grouped.keySet()) {
+            JSONObject m = meta.get(titulo);
+            result.add(new LiveMatchServerDialog.LiveMatch(
+                titulo,
+                m.optString("liga", ""),
+                m.optString("hora", ""),
+                m.optString("fecha", ""),
+                m.optString("logoUrl", ""),
+                grouped.get(titulo)
+            ));
+        }
+        return result;
+    }
+
+    private View makeLiveMatchCard(LiveMatchServerDialog.LiveMatch match) {
+        int CARD_W = dp(188);
+        int CARD_H = dp(238);
+
+        // ── Card container ────────────────────────────────────────────────────────
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
-        card.setGravity(Gravity.CENTER);
-        card.setBackgroundResource(R.drawable.agenda_gol_stream_card);
         card.setClickable(true);
         card.setFocusable(true);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(148), dp(160));
-        lp.setMarginEnd(dp(10));
+        card.setBackgroundResource(R.drawable.live_match_card_premium);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(CARD_W, CARD_H);
+        lp.setMarginEnd(dp(12));
         card.setLayoutParams(lp);
-        card.setPadding(dp(10), dp(14), dp(10), dp(14));
 
-        // Play circle
-        LinearLayout playCircle = new LinearLayout(requireContext());
-        playCircle.setGravity(Gravity.CENTER);
-        android.graphics.drawable.GradientDrawable circBg = new android.graphics.drawable.GradientDrawable();
-        circBg.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-        circBg.setColor(0x22FFFFFF);
-        circBg.setStroke(dp(1), 0x44FFFFFF);
-        playCircle.setBackground(circBg);
-        LinearLayout.LayoutParams clp = new LinearLayout.LayoutParams(dp(52), dp(52));
-        clp.gravity = Gravity.CENTER_HORIZONTAL;
-        playCircle.setLayoutParams(clp);
+        // ── Top visual area ───────────────────────────────────────────────────────
+        FrameLayout topArea = new FrameLayout(requireContext());
+        LinearLayout.LayoutParams topLp = new LinearLayout.LayoutParams(MATCH_PARENT, dp(126));
+        topArea.setLayoutParams(topLp);
 
-        TextView tvPlay = new TextView(requireContext());
-        tvPlay.setText("▶");
-        tvPlay.setTextColor(0xFFFFFFFF);
-        tvPlay.setTextSize(20);
-        tvPlay.setGravity(Gravity.CENTER);
-        playCircle.addView(tvPlay);
-        card.addView(playCircle);
+        // Gradient background for top area
+        GradientDrawable topBg = new GradientDrawable(
+            GradientDrawable.Orientation.TOP_BOTTOM,
+            new int[]{0xFF200800, 0xFF0F0F1E});
+        topBg.setCornerRadii(new float[]{dp(17),dp(17), dp(17),dp(17), 0,0, 0,0});
+        topArea.setBackground(topBg);
 
-        // Sport tag
-        TextView tvTag = new TextView(requireContext());
-        tvTag.setText("FOOTBALL");
-        tvTag.setTextColor(0xAAFFFFFF);
-        tvTag.setTextSize(9);
-        tvTag.setLetterSpacing(0.12f);
-        tvTag.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams taglp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        taglp.setMargins(0, dp(10), 0, dp(3));
-        tvTag.setLayoutParams(taglp);
-        card.addView(tvTag);
+        // Centered logo circle
+        ImageView logoImg = new ImageView(requireContext());
+        GradientDrawable logoBg = new GradientDrawable();
+        logoBg.setShape(GradientDrawable.OVAL);
+        logoBg.setColor(0x22FFFFFF);
+        logoBg.setStroke(dp(2), 0x55FFFFFF);
+        logoImg.setBackground(logoBg);
+        int logoSz = dp(76);
+        FrameLayout.LayoutParams logoLp = new FrameLayout.LayoutParams(logoSz, logoSz);
+        logoLp.gravity = Gravity.CENTER;
+        logoImg.setLayoutParams(logoLp);
+        logoImg.setPadding(dp(10), dp(10), dp(10), dp(10));
 
-        // Title
-        TextView tvTitle = new TextView(requireContext());
-        tvTitle.setText("⚽  Gol " + number);
-        tvTitle.setTextColor(0xFFFFFFFF);
-        tvTitle.setTextSize(15);
-        tvTitle.setTypeface(null, Typeface.BOLD);
-        tvTitle.setGravity(Gravity.CENTER);
-        card.addView(tvTitle);
+        if (!match.logoUrl.isEmpty() && isAdded()) {
+            Glide.with(this)
+                .load(match.logoUrl)
+                .transform(new CircleCrop())
+                .placeholder(R.drawable.ic_channel_placeholder)
+                .error(R.drawable.ic_channel_placeholder)
+                .into(logoImg);
+        }
+        topArea.addView(logoImg);
 
-        // Live badge
+        // EN VIVO badge — top left
         TextView tvLive = new TextView(requireContext());
-        tvLive.setText("  EN VIVO  ");
-        tvLive.setTextColor(0xFFFFFFFF);
-        tvLive.setTextSize(9);
+        tvLive.setText("● EN VIVO");
+        tvLive.setTextColor(0xFF00E676);
+        tvLive.setTextSize(8);
         tvLive.setTypeface(null, Typeface.BOLD);
         tvLive.setLetterSpacing(0.1f);
-        tvLive.setBackgroundResource(R.drawable.agenda_live_badge);
-        LinearLayout.LayoutParams llp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        llp.gravity = Gravity.CENTER_HORIZONTAL;
-        llp.setMargins(0, dp(8), 0, 0);
-        tvLive.setLayoutParams(llp);
-        tvLive.setPadding(dp(8), dp(3), dp(8), dp(3));
-        card.addView(tvLive);
+        GradientDrawable liveBg = new GradientDrawable();
+        liveBg.setColor(0x1A00E676);
+        liveBg.setStroke(dp(1), 0x4400E676);
+        liveBg.setCornerRadius(dp(50));
+        tvLive.setBackground(liveBg);
+        tvLive.setPadding(dp(7), dp(3), dp(7), dp(3));
+        FrameLayout.LayoutParams liveLp = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        liveLp.gravity = Gravity.TOP | Gravity.START;
+        liveLp.setMargins(dp(10), dp(10), 0, 0);
+        tvLive.setLayoutParams(liveLp);
+        topArea.addView(tvLive);
 
+        // Server count badge — top right (only if > 1)
+        int srvCount = match.servidores.size();
+        if (srvCount > 1) {
+            TextView tvSrv = new TextView(requireContext());
+            tvSrv.setText("📡 " + srvCount);
+            tvSrv.setTextColor(0xFFFF6B00);
+            tvSrv.setTextSize(8);
+            tvSrv.setTypeface(null, Typeface.BOLD);
+            GradientDrawable srvBg = new GradientDrawable();
+            srvBg.setColor(0x1AFF6B00);
+            srvBg.setStroke(dp(1), 0x55FF6B00);
+            srvBg.setCornerRadius(dp(50));
+            tvSrv.setBackground(srvBg);
+            tvSrv.setPadding(dp(7), dp(3), dp(7), dp(3));
+            FrameLayout.LayoutParams srvLp = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+            srvLp.gravity = Gravity.TOP | Gravity.END;
+            srvLp.setMargins(0, dp(10), dp(10), 0);
+            tvSrv.setLayoutParams(srvLp);
+            topArea.addView(tvSrv);
+        }
+
+        // Bottom fade overlay on top area
+        View fade = new View(requireContext());
+        GradientDrawable fadeBg = new GradientDrawable(
+            GradientDrawable.Orientation.BOTTOM_TOP,
+            new int[]{0xCC1A0A00, Color.TRANSPARENT});
+        fade.setBackground(fadeBg);
+        FrameLayout.LayoutParams fadeLp = new FrameLayout.LayoutParams(MATCH_PARENT, dp(45));
+        fadeLp.gravity = Gravity.BOTTOM;
+        fade.setLayoutParams(fadeLp);
+        topArea.addView(fade);
+
+        card.addView(topArea);
+
+        // ── Bottom info area ──────────────────────────────────────────────────────
+        LinearLayout info = new LinearLayout(requireContext());
+        info.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams infoLp = new LinearLayout.LayoutParams(MATCH_PARENT, 0, 1f);
+        infoLp.setMargins(dp(12), dp(10), dp(12), dp(12));
+        info.setLayoutParams(infoLp);
+
+        // League
+        String liga = match.liga != null && !match.liga.isEmpty()
+            ? match.liga.toUpperCase() : "FÚTBOL";
+        TextView tvLeague = new TextView(requireContext());
+        tvLeague.setText("🏆  " + liga);
+        tvLeague.setTextColor(0xFFFF6B00);
+        tvLeague.setTextSize(9);
+        tvLeague.setTypeface(null, Typeface.BOLD);
+        tvLeague.setLetterSpacing(0.08f);
+        tvLeague.setMaxLines(1);
+        tvLeague.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        LinearLayout.LayoutParams leagueLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        leagueLp.setMargins(0, 0, 0, dp(5));
+        tvLeague.setLayoutParams(leagueLp);
+        info.addView(tvLeague);
+
+        // Match title
+        TextView tvTitle = new TextView(requireContext());
+        tvTitle.setText(match.titulo);
+        tvTitle.setTextColor(0xFFFFFFFF);
+        tvTitle.setTextSize(12);
+        tvTitle.setTypeface(null, Typeface.BOLD);
+        tvTitle.setMaxLines(2);
+        tvTitle.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        tvTitle.setLineSpacing(0, 1.2f);
+        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        titleLp.setMargins(0, 0, 0, dp(5));
+        tvTitle.setLayoutParams(titleLp);
+        info.addView(tvTitle);
+
+        // Time
+        if (match.hora != null && !match.hora.isEmpty()) {
+            TextView tvTime = new TextView(requireContext());
+            tvTime.setText("🕐  " + match.hora + (match.fecha != null && !match.fecha.isEmpty() ? "  ·  " + match.fecha : ""));
+            tvTime.setTextColor(0x77FFFFFF);
+            tvTime.setTextSize(10);
+            tvTime.setMaxLines(1);
+            tvTime.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            LinearLayout.LayoutParams timeLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            timeLp.setMargins(0, 0, 0, dp(8));
+            tvTime.setLayoutParams(timeLp);
+            info.addView(tvTime);
+        }
+
+        // CTA button
+        TextView tvCta = new TextView(requireContext());
+        String ctaLabel = srvCount > 1
+            ? "▶  " + srvCount + " servidores"
+            : "▶  Ver ahora";
+        tvCta.setText(ctaLabel);
+        tvCta.setTextColor(0xFFFFFFFF);
+        tvCta.setTextSize(11);
+        tvCta.setTypeface(null, Typeface.BOLD);
+        tvCta.setGravity(Gravity.CENTER);
+        GradientDrawable ctaBg = new GradientDrawable();
+        ctaBg.setColor(0xFFFF6B00);
+        ctaBg.setCornerRadius(dp(10));
+        tvCta.setBackground(ctaBg);
+        tvCta.setPadding(dp(8), dp(8), dp(8), dp(8));
+        LinearLayout.LayoutParams ctaLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        ctaLp.setMargins(0, dp(4), 0, 0);
+        tvCta.setLayoutParams(ctaLp);
+        info.addView(tvCta);
+
+        card.addView(info);
+
+        // ── Click handler ─────────────────────────────────────────────────────────
         card.setOnClickListener(v -> {
-            card.animate().scaleX(0.94f).scaleY(0.94f).setDuration(80).withEndAction(() ->
-                card.animate().scaleX(1f).scaleY(1f).setDuration(150).start()
-            ).start();
-            Executors.newSingleThreadExecutor().execute(() -> {
-                try {
-                    String json = fetch(path);
-                    String url  = extractUrl(json);
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (!isAdded()) return;
-                        if (url != null && !url.isEmpty()) {
-                            Intent i = new Intent(requireContext(), PlayerActivity.class);
-                            i.putExtra("url", url);
-                            i.putExtra("title", "⚽ Gol " + number);
-                            startActivity(i);
-                        } else {
-                            Toast.makeText(requireContext(), "Stream no disponible", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                } catch (Exception e) {
-                    new Handler(Looper.getMainLooper()).post(() -> {
-                        if (!isAdded()) return;
-                        Toast.makeText(requireContext(), "Error al cargar stream", Toast.LENGTH_SHORT).show();
-                    });
-                }
-            });
+            card.animate().scaleX(0.93f).scaleY(0.93f).setDuration(70)
+                .withEndAction(() -> card.animate().scaleX(1f).scaleY(1f).setDuration(140).start())
+                .start();
+            if (!isAdded()) return;
+            if (srvCount == 1) {
+                // Single server — launch player directly
+                Intent intent = new Intent(requireContext(), PlayerActivity.class);
+                intent.putExtra("url",   match.servidores.get(0)[1]);
+                intent.putExtra("title", match.titulo);
+                startActivity(intent);
+            } else {
+                // Multiple servers — show glass dialog
+                LiveMatchServerDialog.show(requireContext(), match);
+            }
         });
+
         return card;
+    }
+
+    /** Skeleton placeholder card shown while loading */
+    private View makeCarouselSkeleton() {
+        View sk = new View(requireContext());
+        GradientDrawable bg = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
+            new int[]{0x0AFFFFFF, 0x14FFFFFF, 0x0AFFFFFF});
+        bg.setCornerRadius(dp(18));
+        sk.setBackground(bg);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(188), dp(238));
+        lp.setMarginEnd(dp(12));
+        sk.setLayoutParams(lp);
+        return sk;
     }
 
     // ─── League match row ─────────────────────────────────────────────────────────
