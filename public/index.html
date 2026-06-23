@@ -3,238 +3,746 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultragol — Panel de Actualizaciones</title>
+<title>Ultragol — En Vivo</title>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: #0a0a0f;
-    color: #fff;
-    font-family: 'Segoe UI', sans-serif;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #ff6b00;
+    --orange-glow: rgba(255,107,0,0.35);
+    --orange-dim: rgba(255,107,0,0.12);
+    --green: #00e676;
+    --bg: #07070d;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
+    --radius: 18px;
   }
-  .card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 20px;
-    padding: 40px;
-    width: 100%;
-    max-width: 520px;
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND ORBS ── */
+  .bg-orbs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .bg-orbs span { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.16; }
+  .bg-orbs span:nth-child(1) {
+    width: 600px; height: 600px; background: var(--orange);
+    top: -200px; left: -150px;
+    animation: orbFloat 12s ease-in-out infinite alternate;
+  }
+  .bg-orbs span:nth-child(2) {
+    width: 400px; height: 400px; background: #6d28d9;
+    bottom: 0; right: -100px;
+    animation: orbFloat 15s ease-in-out infinite alternate-reverse;
+  }
+  .bg-orbs span:nth-child(3) {
+    width: 280px; height: 280px; background: var(--orange);
+    top: 55%; left: 55%; opacity: 0.07;
+    animation: orbFloat 18s ease-in-out infinite alternate;
+  }
+  @keyframes orbFloat {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(40px,30px) scale(1.15); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 32px;
+    background: rgba(7,7,13,0.75);
+    backdrop-filter: blur(24px);
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 21px; font-weight: 900; color: var(--orange); letter-spacing: -0.5px;
+  }
+  .ball { font-size: 24px; animation: spin 7s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .live-badge {
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.28);
+    border-radius: 50px; padding: 5px 13px;
+    font-size: 11px; font-weight: 800; color: var(--green); letter-spacing: 1.2px;
+  }
+  .live-dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    animation: pulseGreen 1.6s ease-in-out infinite;
+  }
+  @keyframes pulseGreen {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.65); }
+    50%      { box-shadow: 0 0 0 7px rgba(0,230,118,0); }
+  }
+  .header-admin {
+    background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.3);
+    border-radius: 10px; padding: 8px 16px;
+    font-size: 13px; font-weight: 700; color: var(--orange);
+    cursor: pointer; transition: background 0.2s;
+  }
+  .header-admin:hover { background: rgba(255,107,0,0.22); }
+
+  /* ── MAIN ── */
+  main { position: relative; z-index: 1; padding: 36px 32px 80px; max-width: 1400px; margin: 0 auto; }
+
+  /* ── SECTION HEADER ── */
+  .section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .section-title {
+    font-size: 21px; font-weight: 800;
+    background: linear-gradient(135deg,#fff 40%,rgba(255,255,255,0.45));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .section-count {
+    background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.25);
+    border-radius: 50px; padding: 3px 11px;
+    font-size: 12px; font-weight: 800; color: var(--orange);
+  }
+  .section-line { flex: 1; height: 1px; background: linear-gradient(90deg,rgba(255,107,0,0.28),transparent); }
+  .refresh-btn {
+    background: none; border: none; color: rgba(255,255,255,0.35);
+    font-size: 19px; cursor: pointer; transition: color 0.2s, transform 0.3s; line-height: 1;
+  }
+  .refresh-btn:hover { color: var(--orange); transform: rotate(180deg); }
+
+  /* ── CAROUSEL ── */
+  .carousel-wrap { position: relative; }
+  .carousel-track-outer { overflow: hidden; border-radius: var(--radius); }
+  .carousel-track {
+    display: flex; gap: 16px;
+    transition: transform 0.42s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+  }
+
+  /* ── MATCH CARD ── */
+  .match-card {
+    flex: 0 0 272px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius);
+    overflow: hidden; cursor: pointer; position: relative;
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
     backdrop-filter: blur(12px);
   }
-  .logo { font-size: 28px; font-weight: 800; color: #ff6b00; margin-bottom: 6px; }
-  .subtitle { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 32px; }
-  .status-box {
-    background: rgba(255,107,0,0.08);
-    border: 1px solid rgba(255,107,0,0.25);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 28px;
-    font-size: 13px;
+  .match-card:hover {
+    transform: translateY(-7px) scale(1.015);
+    border-color: rgba(255,107,0,0.5);
+    box-shadow: 0 22px 55px rgba(0,0,0,0.55), 0 0 32px var(--orange-glow);
   }
-  .status-box .label { color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
-  .status-box .value { color: #ff6b00; font-weight: 700; font-size: 20px; }
-  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
-  label { display: block; color: rgba(255,255,255,0.6); font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
-  input, textarea {
-    width: 100%;
+
+  .card-top {
+    position: relative; height: 128px;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .card-bg { position: absolute; inset: 0; background: linear-gradient(135deg,#0f0f1e 0%,#1a0800 100%); }
+  .card-bg-glow {
+    position: absolute; inset: 0; opacity: 0.09; filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card-bg-glow img { width: 150px; height: 150px; object-fit: contain; }
+
+  .card-logo {
+    position: relative; z-index: 1;
+    width: 68px; height: 68px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.13);
     background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 10px;
-    color: #fff;
-    padding: 12px 14px;
-    font-size: 14px;
-    outline: none;
-    transition: border-color 0.2s;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; box-shadow: 0 6px 24px rgba(0,0,0,0.55);
   }
-  input:focus, textarea:focus { border-color: #ff6b00; }
-  textarea { resize: vertical; min-height: 80px; font-family: inherit; }
-  .field { margin-bottom: 18px; }
-  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
-  .checkbox-row input { width: auto; }
-  .checkbox-row span { color: rgba(255,255,255,0.7); font-size: 14px; }
-  .file-label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: rgba(255,255,255,0.06);
-    border: 1px dashed rgba(255,255,255,0.25);
-    border-radius: 10px;
-    padding: 14px 16px;
-    cursor: pointer;
-    font-size: 14px;
-    color: rgba(255,255,255,0.6);
-    transition: border-color 0.2s, background 0.2s;
-    margin-bottom: 18px;
+  .card-logo img { width: 100%; height: 100%; object-fit: contain; padding: 7px; }
+  .card-logo-fb { font-size: 30px; }
+
+  .card-live-tag {
+    position: absolute; top: 10px; left: 10px; z-index: 2;
+    background: rgba(0,230,118,0.13); border: 1px solid rgba(0,230,118,0.32);
+    border-radius: 50px; padding: 3px 9px;
+    font-size: 9px; font-weight: 800; color: var(--green); letter-spacing: 1.2px;
+    display: flex; align-items: center; gap: 5px; backdrop-filter: blur(10px);
   }
-  .file-label:hover { border-color: #ff6b00; background: rgba(255,107,0,0.06); }
-  .file-label input[type=file] { display: none; }
-  #fileName { color: #ff6b00; font-weight: 600; }
-  .btn {
-    width: 100%;
-    background: #ff6b00;
-    color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 15px;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
+  .card-live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: pulseGreen 1.6s ease-in-out infinite; }
+
+  .card-srv-tag {
+    position: absolute; top: 10px; right: 10px; z-index: 2;
+    background: rgba(255,107,0,0.14); border: 1px solid rgba(255,107,0,0.3);
+    border-radius: 50px; padding: 3px 8px;
+    font-size: 9px; font-weight: 800; color: var(--orange);
+    backdrop-filter: blur(10px);
   }
-  .btn:hover { background: #e05d00; }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { background: #555; cursor: not-allowed; }
-  .msg {
-    margin-top: 16px;
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 14px;
-    display: none;
+  .card-grad { position: absolute; bottom: 0; left: 0; right: 0; height: 55px; background: linear-gradient(to top,rgba(7,7,13,0.95),transparent); }
+
+  .card-body { padding: 14px 15px 15px; }
+  .card-league { font-size: 9px; font-weight: 800; color: var(--orange); text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 6px; }
+  .card-title {
+    font-size: 13px; font-weight: 700; line-height: 1.38; color: #fff; margin-bottom: 9px;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
   }
-  .msg.success { background: rgba(0,200,80,0.12); border: 1px solid rgba(0,200,80,0.3); color: #4dff99; }
-  .msg.error   { background: rgba(255,0,0,0.1);   border: 1px solid rgba(255,0,0,0.3);   color: #ff6b6b; }
-  hr { border: none; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }
-  .key-field { display: flex; gap: 10px; margin-bottom: 24px; }
-  .key-field input { flex: 1; }
-  .key-btn {
-    background: rgba(255,107,0,0.15);
-    border: 1px solid #ff6b00;
-    color: #ff6b00;
-    border-radius: 10px;
-    padding: 12px 16px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
+  .card-meta { font-size: 11px; color: rgba(255,255,255,0.38); display: flex; gap: 8px; align-items: center; }
+  .card-watch {
+    margin-top: 13px;
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    background: var(--orange); border-radius: 10px; padding: 9px;
+    font-size: 12px; font-weight: 800; color: #fff;
     transition: background 0.2s;
   }
-  .key-btn:hover { background: rgba(255,107,0,0.25); }
+  .match-card:hover .card-watch { background: #e05d00; }
+
+  /* ── CAROUSEL BUTTONS ── */
+  .carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(7,7,13,0.88); border: 1px solid var(--glass-border);
+    color: #fff; font-size: 20px; cursor: pointer; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: background 0.2s, border-color 0.2s, box-shadow 0.2s;
+  }
+  .carousel-btn:hover { background: var(--orange); border-color: var(--orange); box-shadow: 0 0 22px var(--orange-glow); }
+  .carousel-btn:disabled { opacity: 0.25; pointer-events: none; }
+  .carousel-btn.prev { left: -22px; }
+  .carousel-btn.next { right: -22px; }
+
+  /* ── DOTS ── */
+  .carousel-dots { display: flex; justify-content: center; gap: 7px; margin-top: 20px; }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,0.18); cursor: pointer; transition: all 0.3s; }
+  .dot.active { background: var(--orange); width: 22px; border-radius: 3px; }
+
+  /* ── SKELETONS ── */
+  .skeleton {
+    flex: 0 0 272px; height: 238px; border-radius: var(--radius);
+    background: linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);
+    background-size: 200% 100%; animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { to { background-position: -200% 0; } }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.28); }
+  .empty-state .ico { font-size: 46px; margin-bottom: 12px; }
+  .empty-state p { font-size: 15px; line-height: 1.6; }
+
+  /* ── MODAL GLASS ── */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(18px);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+    opacity: 0; pointer-events: none; transition: opacity 0.28s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal {
+    background: rgba(12,12,22,0.78);
+    border: 1px solid rgba(255,255,255,0.11);
+    border-radius: 26px; padding: 32px;
+    width: 100%; max-width: 455px;
+    backdrop-filter: blur(44px);
+    box-shadow: 0 44px 90px rgba(0,0,0,0.65), 0 0 60px rgba(255,107,0,0.07);
+    transform: scale(0.9) translateY(18px);
+    transition: transform 0.36s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+  .modal-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.55); font-size: 15px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s, color 0.2s;
+  }
+  .modal-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+
+  .modal-logo-wrap {
+    width: 62px; height: 62px; border-radius: 50%;
+    border: 2px solid rgba(255,107,0,0.3);
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden; margin-bottom: 15px;
+    box-shadow: 0 0 28px rgba(255,107,0,0.18);
+  }
+  .modal-logo-wrap img { width: 100%; height: 100%; object-fit: contain; padding: 7px; }
+
+  .modal-league { font-size: 10px; font-weight: 800; color: var(--orange); text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 6px; }
+  .modal-title  { font-size: 17px; font-weight: 800; line-height: 1.32; margin-bottom: 5px; }
+  .modal-meta   { font-size: 12px; color: rgba(255,255,255,0.38); margin-bottom: 22px; }
+
+  .modal-divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(255,107,0,0.28),transparent); margin-bottom: 18px; }
+  .modal-sub { font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.35); text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 13px; }
+
+  .server-list { display: flex; flex-direction: column; gap: 9px; max-height: 340px; overflow-y: auto; }
+  .server-list::-webkit-scrollbar { width: 4px; }
+  .server-list::-webkit-scrollbar-thumb { background: rgba(255,107,0,0.3); border-radius: 2px; }
+
+  .server-btn {
+    display: flex; align-items: center; gap: 13px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; padding: 13px 15px;
+    cursor: pointer; text-align: left; color: #fff; text-decoration: none;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+  }
+  .server-btn:hover { background: rgba(255,107,0,0.1); border-color: rgba(255,107,0,0.35); transform: translateX(5px); }
+  .srv-icon {
+    width: 38px; height: 38px; border-radius: 10px;
+    background: rgba(255,107,0,0.1); border: 1px solid rgba(255,107,0,0.18);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; flex-shrink: 0;
+  }
+  .srv-info { flex: 1; }
+  .srv-name  { font-size: 14px; font-weight: 700; margin-bottom: 2px; }
+  .srv-label { font-size: 11px; color: rgba(255,255,255,0.33); }
+  .srv-arrow { color: rgba(255,255,255,0.22); font-size: 17px; transition: color 0.2s; }
+  .server-btn:hover .srv-arrow { color: var(--orange); }
+
+  /* ── ADMIN SECTION ── */
+  .admin-section { margin-top: 64px; scroll-margin-top: 88px; }
+  .admin-card {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 24px; padding: 38px;
+    max-width: 530px; margin: 0 auto; backdrop-filter: blur(12px);
+  }
+  .admin-logo { font-size: 21px; font-weight: 900; color: var(--orange); margin-bottom: 4px; }
+  .admin-sub  { color: rgba(255,255,255,0.38); font-size: 13px; margin-bottom: 26px; }
+
+  .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; margin-bottom: 26px; }
+  .status-box { background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.18); border-radius: 12px; padding: 13px 15px; }
+  .s-label { color: rgba(255,255,255,0.42); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .s-val   { color: var(--orange); font-weight: 800; font-size: 16px; }
+
+  label { display: block; color: rgba(255,255,255,0.5); font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  input, textarea {
+    width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.11);
+    border-radius: 10px; color: #fff; padding: 12px 14px;
+    font-size: 14px; outline: none; font-family: inherit; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { border-color: var(--orange); }
+  textarea { resize: vertical; min-height: 80px; }
+  .field { margin-bottom: 15px; }
+  .checkbox-row { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+  .checkbox-row input { width: auto; accent-color: var(--orange); }
+  .checkbox-row span { color: rgba(255,255,255,0.62); font-size: 13px; }
+  .file-label {
+    display: flex; align-items: center; gap: 10px;
+    background: rgba(255,255,255,0.04); border: 1px dashed rgba(255,255,255,0.18);
+    border-radius: 10px; padding: 14px 16px;
+    cursor: pointer; font-size: 14px; color: rgba(255,255,255,0.45);
+    transition: border-color 0.2s, background 0.2s; margin-bottom: 15px;
+  }
+  .file-label:hover { border-color: var(--orange); background: var(--orange-dim); }
+  .file-label input[type=file] { display: none; }
+  #fileName { color: var(--orange); font-weight: 700; }
+  .key-field { display: flex; gap: 10px; margin-bottom: 20px; }
+  .key-field input { flex: 1; }
+  .key-btn {
+    background: var(--orange-dim); border: 1px solid rgba(255,107,0,0.35);
+    color: var(--orange); border-radius: 10px; padding: 12px 16px;
+    font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; transition: background 0.2s;
+  }
+  .key-btn:hover { background: rgba(255,107,0,0.2); }
+  .btn {
+    width: 100%; background: var(--orange); color: #fff; border: none;
+    border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 800;
+    cursor: pointer; transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+  }
+  .btn:hover { background: #e05d00; box-shadow: 0 8px 28px rgba(255,107,0,0.38); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { background: #2a2a2a; cursor: not-allowed; box-shadow: none; }
+  .msg { margin-top: 13px; padding: 12px 16px; border-radius: 10px; font-size: 13px; display: none; }
+  .msg.success { background: rgba(0,200,80,0.1);  border: 1px solid rgba(0,200,80,0.28); color: #4dff99; }
+  .msg.error   { background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.28); color: #ff7070; }
+  hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 22px 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 12px 16px; }
+    main { padding: 22px 16px 60px; }
+    .match-card { flex: 0 0 240px; }
+    .carousel-btn.prev { left: -16px; }
+    .carousel-btn.next { right: -16px; }
+    .admin-card { padding: 22px 16px; }
+  }
 </style>
 </head>
 <body>
-<div class="card">
-  <div class="logo">⚽ Ultragol</div>
-  <div class="subtitle">Panel de Control — Actualizaciones APK</div>
 
-  <div id="currentVersion" class="status-grid" style="display:none">
-    <div class="status-box">
-      <div class="label">Versión Actual</div>
-      <div class="value" id="cvName">—</div>
+<div class="bg-orbs"><span></span><span></span><span></span></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-logo">
+    <span class="ball">⚽</span>
+    Ultragol
+  </div>
+  <div class="live-badge">
+    <div class="live-dot"></div>
+    EN VIVO
+  </div>
+  <button class="header-admin" onclick="document.getElementById('adminSection').scrollIntoView({behavior:'smooth'})">
+    ⚙️ Admin
+  </button>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- CAROUSEL -->
+  <div class="section-header">
+    <span style="font-size:20px">🔥</span>
+    <span class="section-title">Transmisiones en Vivo</span>
+    <span class="section-count" id="matchCount">—</span>
+    <div class="section-line"></div>
+    <button class="refresh-btn" onclick="loadMatches()" title="Actualizar">⟳</button>
+  </div>
+
+  <div class="carousel-wrap" id="carouselWrap">
+    <div class="carousel-track-outer">
+      <div class="carousel-track" id="carouselTrack">
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+        <div class="skeleton"></div>
+      </div>
     </div>
-    <div class="status-box">
-      <div class="label">APK en Servidor</div>
-      <div class="value" id="cvApk">—</div>
+    <button class="carousel-btn prev" id="btnPrev" onclick="slide(-1)">‹</button>
+    <button class="carousel-btn next" id="btnNext" onclick="slide(1)">›</button>
+  </div>
+  <div class="carousel-dots" id="carouselDots"></div>
+
+  <!-- ADMIN -->
+  <div class="admin-section" id="adminSection">
+    <div class="section-header" style="margin-bottom:20px">
+      <span style="font-size:20px">⚙️</span>
+      <span class="section-title">Panel de Administración</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="admin-card">
+      <div class="admin-logo">⚽ Ultragol</div>
+      <div class="admin-sub">Panel de Control — Actualizaciones APK</div>
+
+      <div id="currentVersion" class="status-grid" style="display:none">
+        <div class="status-box">
+          <div class="s-label">Versión Actual</div>
+          <div class="s-val" id="cvName">—</div>
+        </div>
+        <div class="status-box">
+          <div class="s-label">APK en Servidor</div>
+          <div class="s-val" id="cvApk">—</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Clave de administrador</label>
+        <div class="key-field">
+          <input type="password" id="adminKey" placeholder="Ingresa tu clave secreta" />
+          <button class="key-btn" onclick="loadStatus()">Verificar</button>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="field">
+        <label>Número de versión (versionCode)</label>
+        <input type="number" id="versionCode" placeholder="Ej: 3" min="1" />
+      </div>
+      <div class="field">
+        <label>Nombre de versión</label>
+        <input type="text" id="versionName" placeholder="Ej: 3.0" />
+      </div>
+      <div class="field">
+        <label>Novedades (changelog)</label>
+        <textarea id="changelog" placeholder="- Nuevo diseño&#10;- Mejoras de rendimiento&#10;- Corrección de errores"></textarea>
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="forceUpdate" />
+        <span>Actualización obligatoria (el usuario no puede cerrar el modal)</span>
+      </div>
+      <label>Archivo APK <span style="color:rgba(255,255,255,0.28);font-weight:400;font-size:11px">(opcional — sólo si cambió el APK)</span></label>
+      <label class="file-label">
+        <span>📦</span>
+        <span id="fileName">Seleccionar archivo .apk</span>
+        <input type="file" id="apkFile" accept=".apk" onchange="onFileChange(this)" />
+      </label>
+
+      <button class="btn" id="submitBtn" onclick="submitUpdate()">🚀 Publicar Actualización</button>
+      <div class="msg" id="msg"></div>
     </div>
   </div>
 
-  <div class="field">
-    <label>Clave de administrador</label>
-    <div class="key-field">
-      <input type="password" id="adminKey" placeholder="Ingresa tu clave secreta" />
-      <button class="key-btn" onclick="loadStatus()">Verificar</button>
+</main>
+
+<!-- SERVER MODAL GLASS -->
+<div class="modal-overlay" id="modalOverlay" onclick="onOverlayClick(event)">
+  <div class="modal" id="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+
+    <div class="modal-logo-wrap" id="modalLogo">
+      <span style="font-size:26px">⚽</span>
     </div>
+    <div class="modal-league" id="modalLeague"></div>
+    <div class="modal-title"  id="modalTitle"></div>
+    <div class="modal-meta"   id="modalMeta"></div>
+    <div class="modal-divider"></div>
+    <div class="modal-sub">Selecciona un servidor</div>
+    <div class="server-list"  id="serverList"></div>
   </div>
-
-  <hr>
-
-  <div class="field">
-    <label>Número de versión (versionCode)</label>
-    <input type="number" id="versionCode" placeholder="Ej: 3" min="1" />
-  </div>
-
-  <div class="field">
-    <label>Nombre de versión</label>
-    <input type="text" id="versionName" placeholder="Ej: 3.0" />
-  </div>
-
-  <div class="field">
-    <label>Novedades (changelog)</label>
-    <textarea id="changelog" placeholder="- Nuevo diseño&#10;- Mejoras de rendimiento&#10;- Corrección de errores"></textarea>
-  </div>
-
-  <div class="checkbox-row">
-    <input type="checkbox" id="forceUpdate" />
-    <span>Actualización obligatoria (el usuario no puede cerrar el modal)</span>
-  </div>
-
-  <label>Archivo APK <span style="color:rgba(255,255,255,0.4);font-weight:400;font-size:11px">(opcional — sólo si cambió el APK)</span></label>
-  <label class="file-label">
-    <span>📦</span>
-    <span id="fileName">Seleccionar archivo .apk</span>
-    <input type="file" id="apkFile" accept=".apk" onchange="onFileChange(this)" />
-  </label>
-
-  <button class="btn" id="submitBtn" onclick="submitUpdate()">🚀 Publicar Actualización</button>
-  <div class="msg" id="msg"></div>
 </div>
 
 <script>
-  async function loadStatus() {
-    const key = document.getElementById('adminKey').value.trim();
-    if (!key) return showMsg('Ingresa la clave de administrador', 'error');
-    try {
-      const r = await fetch('/admin/info', { headers: { 'x-admin-key': key } });
-      if (!r.ok) return showMsg('Clave incorrecta', 'error');
-      const d = await r.json();
-      document.getElementById('cvName').textContent = `v${d.version.versionName} (${d.version.versionCode})`;
-      document.getElementById('cvApk').textContent = d.apkExists ? (d.apkSize || 'Sí') : 'No subido';
-      document.getElementById('currentVersion').style.display = 'grid';
-      document.getElementById('versionCode').value = d.version.versionCode;
-      document.getElementById('versionName').value = d.version.versionName;
-      document.getElementById('changelog').value = d.version.changelog;
-      document.getElementById('forceUpdate').checked = d.version.forceUpdate;
-      showMsg('Conexión exitosa ✓', 'success');
-    } catch { showMsg('Error de conexión', 'error'); }
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let allMatches = [];
+let currentIdx = 0;
+
+function visibleCount() {
+  if (window.innerWidth < 600)  return 1;
+  if (window.innerWidth < 900)  return 2;
+  if (window.innerWidth < 1200) return 3;
+  return 4;
+}
+
+// ─── FETCH ───────────────────────────────────────────────────────────────────
+async function loadMatches() {
+  const track = document.getElementById('carouselTrack');
+  track.innerHTML = `
+    <div class="skeleton"></div><div class="skeleton"></div>
+    <div class="skeleton"></div><div class="skeleton"></div>`;
+  document.getElementById('carouselDots').innerHTML = '';
+
+  try {
+    const res  = await fetch('/api/gol');
+    const data = await res.json();
+    allMatches = data.partidos || [];
+    currentIdx = 0;
+    renderCarousel();
+  } catch {
+    track.innerHTML = `<div class="empty-state" style="width:100%">
+      <div class="ico">📡</div><p>No se pudo cargar la cartelera.<br>Intenta de nuevo.</p></div>`;
   }
+  document.getElementById('matchCount').textContent = allMatches.length || '—';
+}
 
-  function onFileChange(input) {
-    const name = input.files[0]?.name || 'Seleccionar archivo .apk';
-    document.getElementById('fileName').textContent = name;
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderCarousel() {
+  const track = document.getElementById('carouselTrack');
+  if (!allMatches.length) {
+    track.innerHTML = `<div class="empty-state" style="width:100%">
+      <div class="ico">🏟️</div><p>No hay partidos en vivo ahora mismo.<br>Vuelve más tarde.</p></div>`;
+    document.getElementById('carouselDots').innerHTML = '';
+    return;
   }
+  track.innerHTML = allMatches.map((m, i) => cardHTML(m, i)).join('');
+  updateTransform();
+  renderDots();
+  updateNavBtns();
+}
 
-  async function submitUpdate() {
-    const key = document.getElementById('adminKey').value.trim();
-    if (!key) return showMsg('Ingresa la clave de administrador', 'error');
+const SRV_ICONS = ['📺','📡','🖥️','🌐','⚡','🔴','🟠','💎','🟣','🔵'];
 
-    const versionCode = document.getElementById('versionCode').value;
-    const versionName = document.getElementById('versionName').value.trim();
-    if (!versionCode || !versionName) return showMsg('Completa versionCode y versionName', 'error');
+function cardHTML(m, idx) {
+  const cnt     = m.servidores.length;
+  const logoSrc = h(m.logoUrl || '');
+  const logoEl  = logoSrc
+    ? `<img src="${logoSrc}" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">\
+       <span class="card-logo-fb" style="display:none">⚽</span>`
+    : `<span class="card-logo-fb">⚽</span>`;
+  const bgGlow  = logoSrc ? `<img src="${logoSrc}" alt="">` : '';
 
-    const btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Publicando…';
+  return `<div class="match-card" onclick="onCardClick(${idx})">
+    <div class="card-top">
+      <div class="card-bg"></div>
+      <div class="card-bg-glow">${bgGlow}</div>
+      <div class="card-live-tag"><div class="card-live-dot"></div>EN VIVO</div>
+      ${cnt > 1 ? `<div class="card-srv-tag">📡 ${cnt}</div>` : ''}
+      <div class="card-logo">${logoEl}</div>
+      <div class="card-grad"></div>
+    </div>
+    <div class="card-body">
+      <div class="card-league">🏆 ${h(m.liga || 'Fútbol')}</div>
+      <div class="card-title">${h(m.titulo)}</div>
+      <div class="card-meta">
+        ${m.hora  ? `<span>🕐 ${h(m.hora)}</span>` : ''}
+        ${m.fecha ? `<span>· 📅 ${h(m.fecha)}</span>` : ''}
+      </div>
+      <div class="card-watch">▶ ${cnt > 1 ? 'Elegir servidor' : 'Ver ahora'}</div>
+    </div>
+  </div>`;
+}
 
-    const form = new FormData();
-    form.append('versionCode', versionCode);
-    form.append('versionName', versionName);
-    form.append('changelog', document.getElementById('changelog').value);
-    form.append('forceUpdate', document.getElementById('forceUpdate').checked);
-    const apk = document.getElementById('apkFile').files[0];
-    if (apk) form.append('apk', apk);
+// ─── CARD CLICK ───────────────────────────────────────────────────────────────
+function onCardClick(idx) {
+  const m = allMatches[idx];
+  if (!m) return;
+  if (m.servidores.length === 1) { window.open(m.servidores[0].url, '_blank'); return; }
+  openModal(m);
+}
 
-    try {
-      const r = await fetch('/admin/update', { method: 'POST', headers: { 'x-admin-key': key }, body: form });
-      const d = await r.json();
-      if (!r.ok) return showMsg(d.error || 'Error al publicar', 'error');
-      showMsg(`✅ Actualización publicada: v${d.version.versionName} (${d.version.versionCode})`, 'success');
-      await loadStatus();
-    } catch { showMsg('Error de red', 'error'); }
+// ─── SLIDE ────────────────────────────────────────────────────────────────────
+function slide(dir) {
+  const vis = visibleCount();
+  const max = Math.max(0, allMatches.length - vis);
+  currentIdx = Math.min(max, Math.max(0, currentIdx + dir));
+  updateTransform();
+  updateNavBtns();
+  updateDots();
+}
 
-    btn.disabled = false;
-    btn.textContent = '🚀 Publicar Actualización';
+function updateTransform() {
+  const cardW = 272 + 16;
+  document.getElementById('carouselTrack').style.transform = `translateX(-${currentIdx * cardW}px)`;
+}
+
+function updateNavBtns() {
+  const vis = visibleCount();
+  document.getElementById('btnPrev').disabled = currentIdx <= 0;
+  document.getElementById('btnNext').disabled = currentIdx >= allMatches.length - vis;
+}
+
+// ─── DOTS ─────────────────────────────────────────────────────────────────────
+function renderDots() {
+  const vis   = visibleCount();
+  const pages = Math.max(1, Math.ceil(allMatches.length / vis));
+  document.getElementById('carouselDots').innerHTML =
+    Array.from({length: pages}, (_, i) =>
+      `<div class="dot${i === 0 ? ' active' : ''}" onclick="jumpTo(${i})"></div>`
+    ).join('');
+}
+function updateDots() {
+  const vis = visibleCount();
+  const cur = Math.round(currentIdx / vis);
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === cur));
+}
+function jumpTo(page) {
+  currentIdx = page * visibleCount();
+  updateTransform(); updateNavBtns(); updateDots();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+function openModal(m) {
+  const logoEl = document.getElementById('modalLogo');
+  logoEl.innerHTML = m.logoUrl
+    ? `<img src="${h(m.logoUrl)}" alt="" style="width:100%;height:100%;object-fit:contain;padding:8px">`
+    : `<span style="font-size:26px">⚽</span>`;
+
+  document.getElementById('modalLeague').textContent = '🏆 ' + (m.liga || 'Fútbol');
+  document.getElementById('modalTitle').textContent  = m.titulo;
+
+  const parts = [];
+  if (m.hora)  parts.push('🕐 ' + m.hora);
+  if (m.fecha) parts.push('📅 ' + m.fecha);
+  document.getElementById('modalMeta').textContent = parts.join('   ·   ');
+
+  document.getElementById('serverList').innerHTML = m.servidores.map((s, i) => `
+    <a class="server-btn" href="${h(s.url)}" target="_blank" rel="noopener noreferrer">
+      <div class="srv-icon">${SRV_ICONS[i % SRV_ICONS.length]}</div>
+      <div class="srv-info">
+        <div class="srv-name">${h(s.canal)}</div>
+        <div class="srv-label">Servidor ${i + 1} de ${m.servidores.length}</div>
+      </div>
+      <span class="srv-arrow">›</span>
+    </a>`).join('');
+
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function onOverlayClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────────
+async function loadStatus() {
+  const key = document.getElementById('adminKey').value.trim();
+  if (!key) return showMsg('Ingresa la clave de administrador', 'error');
+  try {
+    const r = await fetch('/admin/info', { headers: { 'x-admin-key': key } });
+    if (!r.ok) return showMsg('Clave incorrecta', 'error');
+    const d = await r.json();
+    document.getElementById('cvName').textContent = `v${d.version.versionName} (${d.version.versionCode})`;
+    document.getElementById('cvApk').textContent  = d.apkExists ? (d.apkSize || 'Sí') : 'No subido';
+    document.getElementById('currentVersion').style.display = 'grid';
+    document.getElementById('versionCode').value   = d.version.versionCode;
+    document.getElementById('versionName').value   = d.version.versionName;
+    document.getElementById('changelog').value     = d.version.changelog;
+    document.getElementById('forceUpdate').checked = d.version.forceUpdate;
+    showMsg('Conexión exitosa ✓', 'success');
+  } catch { showMsg('Error de conexión', 'error'); }
+}
+
+function onFileChange(input) {
+  document.getElementById('fileName').textContent = input.files[0]?.name || 'Seleccionar archivo .apk';
+}
+
+async function submitUpdate() {
+  const key = document.getElementById('adminKey').value.trim();
+  if (!key) return showMsg('Ingresa la clave de administrador', 'error');
+  const versionCode = document.getElementById('versionCode').value;
+  const versionName = document.getElementById('versionName').value.trim();
+  if (!versionCode || !versionName) return showMsg('Completa versionCode y versionName', 'error');
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Publicando…';
+
+  const form = new FormData();
+  form.append('versionCode', versionCode);
+  form.append('versionName', versionName);
+  form.append('changelog',   document.getElementById('changelog').value);
+  form.append('forceUpdate', document.getElementById('forceUpdate').checked);
+  const apk = document.getElementById('apkFile').files[0];
+  if (apk) form.append('apk', apk);
+
+  try {
+    const r = await fetch('/admin/update', { method: 'POST', headers: { 'x-admin-key': key }, body: form });
+    const d = await r.json();
+    if (!r.ok) return showMsg(d.error || 'Error al publicar', 'error');
+    showMsg(`✅ v${d.version.versionName} (${d.version.versionCode}) publicada`, 'success');
+    await loadStatus();
+  } catch { showMsg('Error de red', 'error'); }
+
+  btn.disabled = false; btn.textContent = '🚀 Publicar Actualización';
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('msg');
+  el.textContent = text; el.className = `msg ${type}`; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4200);
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function h(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── KEYBOARD + SWIPE ────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.getElementById('modalOverlay').classList.contains('open')) {
+    if (e.key === 'Escape') closeModal();
+    return;
   }
+  if (e.key === 'ArrowLeft')  slide(-1);
+  if (e.key === 'ArrowRight') slide(1);
+});
 
-  function showMsg(text, type) {
-    const el = document.getElementById('msg');
-    el.textContent = text;
-    el.className = `msg ${type}`;
-    el.style.display = 'block';
-    setTimeout(() => el.style.display = 'none', 4000);
-  }
+let swipeX = 0;
+const track = document.getElementById('carouselTrack');
+track.addEventListener('touchstart', e => { swipeX = e.touches[0].clientX; }, { passive: true });
+track.addEventListener('touchend',   e => {
+  const diff = swipeX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 48) slide(diff > 0 ? 1 : -1);
+});
+
+// ─── INIT + AUTO REFRESH ─────────────────────────────────────────────────────
+loadMatches();
+setInterval(loadMatches, 5 * 60 * 1000);
+window.addEventListener('resize', () => { updateTransform(); updateNavBtns(); renderDots(); });
 </script>
 </body>
 </html>
