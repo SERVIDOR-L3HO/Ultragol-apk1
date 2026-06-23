@@ -103,7 +103,6 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void proceed() {
-        NotificationChecker.check(this);
         if (updateAvailable && updateData != null) {
             // Show update dialog — then go to MainActivity when user decides
             boolean force = updateData.optBoolean("forceUpdate", false);

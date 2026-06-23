@@ -61,6 +61,12 @@ public class HomeFragment extends Fragment {
         if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));
 
+        View bell = view.findViewById(R.id.btnBell);
+        if (bell != null) bell.setOnClickListener(v -> {
+            com.ultragol.app.NotificationsSheet sheet = new com.ultragol.app.NotificationsSheet();
+            sheet.show(getParentFragmentManager(), "notifications");
+        });
+
         View menu = view.findViewById(R.id.btnMenu);
         if (menu != null) menu.setOnClickListener(v -> {
             if (requireActivity() instanceof com.ultragol.app.MainActivity) {

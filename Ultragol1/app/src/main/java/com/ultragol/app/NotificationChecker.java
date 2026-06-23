@@ -27,7 +27,7 @@ import java.util.Set;
 
 public class NotificationChecker {
 
-    private static final String NOTIF_URL =
+    public static final String NOTIF_URL =
             "https://da8cd50c-b6a4-475c-8783-70b87f2e70be-00-3s6o17dujacbo.spock.replit.dev/notifications";
     private static final String CHANNEL_ID  = "ultragol_notifs";
     private static final String PREFS_NAME  = "ultragol_notif_prefs";
@@ -89,7 +89,7 @@ public class NotificationChecker {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
                 .setContentText(message)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(message))

@@ -2992,6 +2992,7 @@ drawable ic_mtrl_checked_circle
 drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
+drawable ic_notification
 drawable ic_search_black_24
 drawable league_pill_bg
 drawable league_pill_premium_bg
@@ -3240,6 +3241,8 @@ id btnBack
 id btnBannerBookmark
 id btnBannerInfo
 id btnBannerPlay
+id btnBell
+id btnClearAll
 id btnDetailBack
 id btnEpMinus
 id btnEpPlus
@@ -3541,6 +3544,12 @@ id noState
 id none
 id normal
 id north
+id notifDot
+id notifEmpty
+id notifList
+id notifLoading
+id notifMessage
+id notifTitle
 id notification_background
 id notification_main_column
 id notification_main_column_container
@@ -3923,6 +3932,7 @@ layout item_channel
 layout item_content_card
 layout item_content_grid
 layout item_live_glass_card
+layout item_notification_card
 layout item_trending_card
 layout m3_alert_dialog
 layout m3_alert_dialog_actions
@@ -3987,6 +3997,7 @@ layout row_trending_carousel
 layout select_dialog_item_material
 layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
+layout sheet_notifications
 layout support_simple_spinner_dropdown_item
 menu bottom_nav
 mipmap ic_launcher

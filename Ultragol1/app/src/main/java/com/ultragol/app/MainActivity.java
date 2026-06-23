@@ -173,7 +173,20 @@ public class MainActivity extends AppCompatActivity {
                     != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(this,
                         new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1001);
+                return;
             }
+        }
+        NotificationChecker.check(this);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+            @androidx.annotation.NonNull String[] permissions,
+            @androidx.annotation.NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001 && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            NotificationChecker.check(this);
         }
     }
 

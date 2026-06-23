@@ -62,6 +62,7 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_channel_placeholder
+drawable ic_notification
 drawable league_pill_bg
 drawable league_pill_premium_bg
 drawable live_accent_bar
@@ -137,6 +138,8 @@ id btnBack
 id btnBannerBookmark
 id btnBannerInfo
 id btnBannerPlay
+id btnBell
+id btnClearAll
 id btnDetailBack
 id btnEpMinus
 id btnEpPlus
@@ -221,6 +224,12 @@ id nav_home
 id nav_movies
 id nav_series
 id nav_sports
+id notifDot
+id notifEmpty
+id notifList
+id notifLoading
+id notifMessage
+id notifTitle
 id platApple
 id platAtx
 id platCrunchyroll
@@ -292,10 +301,12 @@ layout item_channel
 layout item_content_card
 layout item_content_grid
 layout item_live_glass_card
+layout item_notification_card
 layout item_trending_card
 layout row_live_glass
 layout row_section
 layout row_trending_carousel
+layout sheet_notifications
 menu bottom_nav
 mipmap ic_launcher
 mipmap ic_launcher_round
