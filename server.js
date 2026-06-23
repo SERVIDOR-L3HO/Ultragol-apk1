@@ -100,7 +100,9 @@ app.post('/admin/update', upload.single('apk'), (req, res) => {
     const appName  = req.query.app || 'ultragol';
     const vFile    = appName === 'ultra1' ? ULTRA1_VERSION_FILE : VERSION_FILE;
     const host     = `${req.protocol}://${req.get('host')}`;
-    const dlPath   = appName === 'ultra1' ? '/ultra1/download' : '/download';
+    const dlPath   = appName === 'ultra1' ? '/ultra1/download'
+                   : appName === 'ultragol1' ? '/ultragol1/download'
+                   : '/download';
 
     const data = {
         versionCode:  parseInt(versionCode),
@@ -155,8 +157,12 @@ app.get('/admin/info', (req, res) => {
         return res.status(401).json({ error: 'No autorizado' });
     }
     const appName  = req.query.app || 'ultragol';
-    const vFile    = appName === 'ultra1' ? ULTRA1_VERSION_FILE : VERSION_FILE;
-    const apkFile  = appName === 'ultra1' ? 'ultra1.apk' : 'ultragol.apk';
+    const vFile    = appName === 'ultra1'    ? ULTRA1_VERSION_FILE
+                   : appName === 'ultragol1' ? ULTRAGOL1_VERSION_FILE
+                   : VERSION_FILE;
+    const apkFile  = appName === 'ultra1'    ? 'ultra1.apk'
+                   : appName === 'ultragol1' ? 'ultragol1.apk'
+                   : 'ultragol.apk';
     const apkPath  = path.join(__dirname, 'apks', apkFile);
     const apkExists = fs.existsSync(apkPath);
     const apkSize   = apkExists ? (fs.statSync(apkPath).size / 1024 / 1024).toFixed(2) + ' MB' : null;
