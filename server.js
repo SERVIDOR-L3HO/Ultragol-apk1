@@ -6,7 +6,16 @@ const webPush  = require('web-push');
 
 const app  = express();
 const PORT = process.env.PORT || 5000;
-const ADMIN_KEY = process.env.ADMIN_KEY || 'ultragol2024';
+const ADMIN_KEY = process.env.ADMIN_KEY;
+
+// ── BASE URL (dominio Replit actual) ──────────────────────────────────────────
+function getBaseUrl() {
+    const domains = process.env.REPLIT_DOMAINS;
+    if (domains) return 'https://' + domains.split(',')[0].trim();
+    const devDomain = process.env.REPLIT_DEV_DOMAIN;
+    if (devDomain) return 'https://' + devDomain;
+    return `http://localhost:${PORT}`;
+}
 
 app.use(express.json());
 app.use(express.static('public'));
@@ -53,6 +62,26 @@ webPush.setVapidDetails(
 // ── INIT NOTIF FILE ───────────────────────────────────────────────────────────
 if (!fs.existsSync(NOTIF_FILE)) writeJSON(NOTIF_FILE, []);
 if (!fs.existsSync(SUBS_FILE))  writeJSON(SUBS_FILE,  []);
+
+// ── AUTO-FIX DOWNLOAD URLS ────────────────────────────────────────────────────
+function autoFixDownloadUrls() {
+    const base = getBaseUrl();
+    const fixes = [
+        { file: VERSION_FILE,        dlPath: '/download' },
+        { file: ULTRA1_VERSION_FILE, dlPath: '/ultra1/download' },
+    ];
+    for (const { file, dlPath } of fixes) {
+        if (!fs.existsSync(file)) continue;
+        const data = readJSON(file);
+        const correctUrl = `${base}${dlPath}`;
+        if (data.downloadUrl !== correctUrl) {
+            data.downloadUrl = correctUrl;
+            writeJSON(file, data);
+            console.log(`URL actualizada: ${correctUrl}`);
+        }
+    }
+}
+autoFixDownloadUrls();
 
 // ── VERSION HELPERS ───────────────────────────────────────────────────────────
 function getVersionFile(appName) {
@@ -117,14 +146,13 @@ app.post('/admin/update', upload.single('apk'), (req, res) => {
 
     const appName = req.query.app || 'ultragol1';
     const vFile   = getVersionFile(appName);
-    const host    = `${req.protocol}://${req.get('host')}`;
     const dlPath  = getDownloadPath(appName);
 
     const data = {
         versionCode:  parseInt(versionCode),
         versionName,
         changelog:    changelog || '',
-        downloadUrl:  `${host}${dlPath}`,
+        downloadUrl:  `${getBaseUrl()}${dlPath}`,
         forceUpdate:  forceUpdate === 'true' || forceUpdate === true,
         updatedAt:    new Date().toISOString()
     };
