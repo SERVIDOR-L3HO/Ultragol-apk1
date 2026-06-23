@@ -2988,6 +2988,10 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_search_black_24
+drawable live_logo_circle_bg
+drawable live_match_card_premium
+drawable live_server_btn_bg
+drawable live_server_number_bg
 drawable logo_ultragol
 drawable m3_appbar_background
 drawable m3_avd_hide_password

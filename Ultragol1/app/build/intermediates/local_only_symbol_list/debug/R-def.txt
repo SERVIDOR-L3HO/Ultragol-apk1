@@ -57,6 +57,10 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_channel_placeholder
+drawable live_logo_circle_bg
+drawable live_match_card_premium
+drawable live_server_btn_bg
+drawable live_server_number_bg
 drawable logo_ultragol
 drawable nav_bg
 drawable nav_card_bg

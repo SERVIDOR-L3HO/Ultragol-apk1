@@ -54,3 +54,9 @@ id = "bSnQWiShpjii-OaTNGjx0"
 uri = "file://apks/ultragol1_v3.zip"
 type = "unspecified"
 title = "Ultragol1 v3 — Build Limpio (desinstala la versión anterior primero)"
+
+[[outputs]]
+id = "vtsVMibRTabXP_LwnSfpC"
+uri = "file://ultragol-debug.zip"
+type = "unspecified"
+title = "Ultragol APK (debug) — descargar y extraer app-debug.apk"

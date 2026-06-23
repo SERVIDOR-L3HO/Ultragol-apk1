@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr format="color|reference" name="hintTextColor"/>
+    <color name="badge_anime">#E91E63</color>
+    <color name="badge_dorama">#26A69A</color>
+    <color name="badge_pelicula">#FF8F00</color>
+    <color name="badge_serie">#00BCD4</color>
+    <color name="badge_sport">#43A047</color>
+    <color name="bg_card">#1A1A24</color>
+    <color name="bg_primary">#070707</color>
+    <color name="bg_surface">#111118</color>
+    <color name="nav_active">#FF6B00</color>
+    <color name="nav_inactive">#66FFFFFF</color>
+    <color name="orange_10">#1AFF6B00</color>
+    <color name="orange_dark">#CC5500</color>
+    <color name="orange_primary">#FF6B00</color>
+    <color name="red_live">#E53935</color>
+    <color name="red_primary">#CC1111</color>
+    <color name="text_hint">#55FFFFFF</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#AAFFFFFF</color>
+    <string name="app_name">Ultragol</string>
+    <string name="nav_anime">Anime</string>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_movies">Películas</string>
+    <string name="nav_series">Series</string>
+    <string name="nav_sports">Deportes</string>
+    <style name="FullScreenServerDialog" parent="@android:style/Theme.Translucent.NoTitleBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
+    <style name="GlassBottomSheet" parent="Widget.MaterialComponents.BottomSheet.Modal">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="backgroundTint">@android:color/transparent</item>
+    </style>
+    <style name="GlassBottomSheetTheme" parent="Theme.MaterialComponents.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/GlassBottomSheet</item>
+        <item name="android:backgroundDimAmount">0.7</item>
+    </style>
+    <style name="Theme.Ultragol" parent="Theme.MaterialComponents.NoActionBar">
+        <item name="colorPrimary">@color/orange_primary</item>
+        <item name="colorPrimaryVariant">@color/orange_dark</item>
+        <item name="colorOnPrimary">@color/text_primary</item>
+        <item name="colorSurface">@color/bg_surface</item>
+        <item name="colorOnSurface">@color/text_primary</item>
+        <item name="android:windowBackground">@color/bg_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/bg_primary</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="Theme.Ultragol.Splash" parent="Theme.Ultragol">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <declare-styleable name="BottomNavCompat">
+        <attr format="color|reference" name="itemActiveIndicatorColor"/>
+    </declare-styleable>
+</resources>
