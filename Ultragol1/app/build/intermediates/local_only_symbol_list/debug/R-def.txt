@@ -118,6 +118,8 @@ drawable tab_active
 drawable tab_bar_bg
 drawable tab_inactive
 drawable tab_selected_bg
+drawable update_dialog_bg
+drawable update_icon_bg
 drawable ver_todos_bg
 id bannerDots
 id bannerGenre1
@@ -271,6 +273,8 @@ id trendingTitle
 id trendingYear
 id tvEpisode
 id tvSeason
+id updateChangelog
+id updateVersion
 id webviewContainer
 layout activity_detail
 layout activity_main
@@ -278,6 +282,7 @@ layout activity_player
 layout activity_search
 layout activity_splash
 layout dialog_server_select
+layout dialog_update
 layout fragment_football
 layout fragment_grid
 layout fragment_home
@@ -300,10 +305,14 @@ string nav_home
 string nav_movies
 string nav_series
 string nav_sports
+string update_server_url
 style FullScreenServerDialog
 style GlassBottomSheet
 style GlassBottomSheetTheme
 style Theme.Ultragol
 style Theme.Ultragol.Splash
+style UpdateDialogTheme
+style UpdateNegativeBtn
+style UpdatePositiveBtn
 styleable BottomNavCompat itemActiveIndicatorColor
 xml file_paths

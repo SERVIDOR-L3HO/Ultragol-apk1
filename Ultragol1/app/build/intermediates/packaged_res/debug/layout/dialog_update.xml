@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="@drawable/update_dialog_bg"
+    android:padding="24dp">
+
+    <!-- Icon + title row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:background="@drawable/update_icon_bg"
+            android:gravity="center"
+            android:layout_marginEnd="14dp">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🚀"
+                android:textSize="22sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Actualización disponible"
+                android:textColor="#99FFFFFF"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.05"
+                android:layout_marginBottom="3dp"/>
+
+            <TextView
+                android:id="@+id/updateVersion"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nueva versión"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-black"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1AFFFFFF"
+        android:layout_marginBottom="14dp"/>
+
+    <!-- Changelog label -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="NOVEDADES"
+        android:textColor="#66FFFFFF"
+        android:textSize="10sp"
+        android:fontFamily="sans-serif-bold"
+        android:letterSpacing="0.12"
+        android:layout_marginBottom="8dp"/>
+
+    <!-- Changelog content -->
+    <TextView
+        android:id="@+id/updateChangelog"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#CCFFFFFF"
+        android:textSize="13sp"
+        android:lineSpacingMultiplier="1.5"
+        android:fontFamily="sans-serif"
+        android:layout_marginBottom="6dp"/>
+
+</LinearLayout>

@@ -302,33 +302,14 @@
 .method synthetic lambda$onCreate$2$com-ultragol-app-SplashActivity()V
     .locals 2
 
-    .line 80
     iget-object v0, p0, Lcom/ultragol/app/SplashActivity;->dotHandler:Landroid/os/Handler;
 
     iget-object v1, p0, Lcom/ultragol/app/SplashActivity;->dotRunnable:Ljava/lang/Runnable;
 
     invoke-virtual {v0, v1}, Landroid/os/Handler;->removeCallbacks(Ljava/lang/Runnable;)V
 
-    .line 81
-    new-instance v0, Landroid/content/Intent;
+    invoke-static {p0}, Lcom/ultragol/app/UpdateChecker;->check(Landroidx/appcompat/app/AppCompatActivity;)V
 
-    const-class v1, Lcom/ultragol/app/MainActivity;
-
-    invoke-direct {v0, p0, v1}, Landroid/content/Intent;-><init>(Landroid/content/Context;Ljava/lang/Class;)V
-
-    invoke-virtual {p0, v0}, Lcom/ultragol/app/SplashActivity;->startActivity(Landroid/content/Intent;)V
-
-    .line 82
-    const/high16 v0, 0x10a0000
-
-    const v1, 0x10a0001
-
-    invoke-virtual {p0, v0, v1}, Lcom/ultragol/app/SplashActivity;->overridePendingTransition(II)V
-
-    .line 83
-    invoke-virtual {p0}, Lcom/ultragol/app/SplashActivity;->finish()V
-
-    .line 84
     return-void
 .end method
 
