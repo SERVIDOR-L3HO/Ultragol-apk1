@@ -803,6 +803,7 @@ function nav(id) {
   document.getElementById('pageSub').textContent   = s;
   if (id === 'notifications') loadNotifications();
   if (id === 'settings')      fillSettings();
+  if (id === 'update' && adminKey) prefillUpdateForm();
   closeSidebar();
 }
 
@@ -1178,13 +1179,6 @@ function prefillUpdateForm() {
   if (v.versionName) document.getElementById('upName').value = v.versionName;
   if (v.changelog)   document.getElementById('upLog').value  = v.changelog;
   if (v.forceUpdate) document.getElementById('upForce').checked = v.forceUpdate;
-}
-
-// Override nav for update section to prefill form
-const _origNav = nav;
-function nav(id) {
-  _origNav(id);
-  if (id === 'update' && adminKey) prefillUpdateForm();
 }
 
 // ─── COPY FIELD ───────────────────────────────────────────────────────────────

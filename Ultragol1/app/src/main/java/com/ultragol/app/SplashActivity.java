@@ -10,7 +10,11 @@ import android.view.animation.AnimationSet;
 import android.view.animation.ScaleAnimation;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONObject;
+
 public class SplashActivity extends AppCompatActivity {
+
+    private static final long SPLASH_DURATION = 2400;
 
     private View dot1, dot2, dot3;
     private int dotStep = 0;
@@ -22,6 +26,12 @@ public class SplashActivity extends AppCompatActivity {
             dotHandler.postDelayed(this, 350);
         }
     };
+
+    // Update check result (set from background thread, read on main thread)
+    private boolean updateCheckDone   = false;
+    private boolean splashDone        = false;
+    private boolean updateAvailable   = false;
+    private JSONObject updateData     = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,13 +85,85 @@ public class SplashActivity extends AppCompatActivity {
             }
         }, 900);
 
-        // Launch MainActivity
+        // ── Start update check in parallel with the splash animation ──
+        UpdateChecker.check(this, (needsUpdate, data) -> {
+            updateAvailable = needsUpdate;
+            updateData      = data;
+            updateCheckDone = true;
+            if (splashDone) proceed(); // splash already finished → go now
+        });
+
+        // ── Splash timer ──
         new Handler().postDelayed(() -> {
             dotHandler.removeCallbacks(dotRunnable);
-            startActivity(new Intent(this, MainActivity.class));
-            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            finish();
-        }, 2400);
+            splashDone = true;
+            if (updateCheckDone) proceed(); // check already done → go now
+            // else wait for check callback above
+        }, SPLASH_DURATION);
+    }
+
+    private void proceed() {
+        if (updateAvailable && updateData != null) {
+            // Show update dialog — then go to MainActivity when user decides
+            boolean force = updateData.optBoolean("forceUpdate", false);
+            showUpdateAndProceed(force);
+        } else {
+            goToMain();
+        }
+    }
+
+    private void showUpdateAndProceed(boolean force) {
+        // Show dialog; on dismiss (if not forced) go to main
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_update, null);
+        android.widget.TextView tvVersion   = dialogView.findViewById(R.id.updateVersion);
+        android.widget.TextView tvChangelog = dialogView.findViewById(R.id.updateChangelog);
+
+        String version  = updateData.optString("versionName", "");
+        String changelog = updateData.optString("changelog", "");
+        String dlUrl    = updateData.optString("downloadUrl", "");
+
+        if (tvVersion != null)
+            tvVersion.setText("Versión " + version + " disponible");
+        if (tvChangelog != null) {
+            if (changelog.isEmpty()) {
+                tvChangelog.setVisibility(View.GONE);
+            } else {
+                tvChangelog.setText(changelog);
+            }
+        }
+
+        androidx.appcompat.app.AlertDialog.Builder builder =
+            new androidx.appcompat.app.AlertDialog.Builder(this, R.style.UpdateDialogTheme)
+                .setView(dialogView)
+                .setCancelable(!force)
+                .setPositiveButton("⬇  Descargar ahora", (d, w) -> {
+                    if (!dlUrl.isEmpty()) {
+                        try {
+                            startActivity(new Intent(Intent.ACTION_VIEW,
+                                android.net.Uri.parse(dlUrl)));
+                        } catch (Exception ignored) {}
+                    }
+                    if (!force) goToMain();
+                });
+
+        if (!force) {
+            builder.setNegativeButton("Más tarde", (d, w) -> goToMain());
+        }
+
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        if (dialog.getWindow() != null)
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        if (!isFinishing() && !isDestroyed()) {
+            dialog.show();
+        }
+    }
+
+    private void goToMain() {
+        if (isFinishing() || isDestroyed()) return;
+        startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+        finish();
     }
 
     private void animateFadeIn(View v, long delay, long duration) {
