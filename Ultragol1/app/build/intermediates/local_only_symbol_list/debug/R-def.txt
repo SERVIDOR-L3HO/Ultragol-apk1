@@ -32,6 +32,7 @@ drawable back_btn_glass
 drawable badge_active
 drawable badge_inactive
 drawable badge_live
+drawable badge_live_green
 drawable badge_new
 drawable badge_rating_pill
 drawable badge_type_bg
@@ -50,6 +51,8 @@ drawable dot_active
 drawable dot_inactive
 drawable genre_chip_bg
 drawable glass_card_bg
+drawable glass_fade_left_right
+drawable glass_live_card_bg
 drawable gradient_banner_overlay
 drawable gradient_detail_bottom
 drawable gradient_detail_overlay
@@ -57,8 +60,10 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_channel_placeholder
+drawable live_cta_glass_btn
 drawable live_logo_circle_bg
 drawable live_match_card_premium
+drawable live_section_glow_bg
 drawable live_server_btn_bg
 drawable live_server_number_bg
 drawable logo_ultragol
@@ -123,9 +128,14 @@ id btnSearch
 id btnSeasonMinus
 id btnSeasonPlus
 id cardBadge
+id cardCta
+id cardLeague
+id cardLogo
 id cardNew
 id cardPoster
 id cardRating
+id cardServerCount
+id cardTime
 id cardTitle
 id cardYear
 id categoryChips
@@ -163,6 +173,7 @@ id footballScroll
 id fragmentContainer
 id fullscreenContainer
 id genreChips
+id glassCard
 id gridBack
 id gridLoading
 id gridPoster
@@ -170,6 +181,7 @@ id gridTitle
 id gridYear
 id heroBanner
 id langTabs
+id liveCarouselRv
 id loadingSearch
 id loadingServers
 id navAnime
@@ -204,6 +216,7 @@ id ringMid
 id ringOuter
 id rowAnime
 id rowDoramas
+id rowLiveGlass
 id rowMovies
 id rowNew
 id rowRelated
@@ -252,7 +265,9 @@ layout item_banner
 layout item_channel
 layout item_content_card
 layout item_content_grid
+layout item_live_glass_card
 layout item_trending_card
+layout row_live_glass
 layout row_section
 layout row_trending_carousel
 menu bottom_nav

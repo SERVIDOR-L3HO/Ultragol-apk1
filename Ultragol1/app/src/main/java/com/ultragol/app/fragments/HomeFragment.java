@@ -13,6 +13,9 @@ import com.ultragol.app.*;
 import com.ultragol.app.adapters.*;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
+import org.json.*;
+import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -34,6 +37,9 @@ public class HomeFragment extends Fragment {
 
     // Content rows
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
+    private View rowLiveGlass;
+
+    private static final String GOL3_API = "https://ultragol-api-3--maricarmen43549.replit.app/gol-3";
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle state) {
@@ -146,13 +152,14 @@ public class HomeFragment extends Fragment {
     // ── Content rows ─────────────────────────────────────────────────────────
 
     private void setupRows(View view) {
-        rowTrending = view.findViewById(R.id.rowTrending);
-        rowTop10    = view.findViewById(R.id.rowTop10);
-        rowNew      = view.findViewById(R.id.rowNew);
-        rowMovies   = view.findViewById(R.id.rowMovies);
-        rowSeries   = view.findViewById(R.id.rowSeries);
-        rowAnime    = view.findViewById(R.id.rowAnime);
-        rowDoramas  = view.findViewById(R.id.rowDoramas);
+        rowTrending  = view.findViewById(R.id.rowTrending);
+        rowTop10     = view.findViewById(R.id.rowTop10);
+        rowNew       = view.findViewById(R.id.rowNew);
+        rowMovies    = view.findViewById(R.id.rowMovies);
+        rowSeries    = view.findViewById(R.id.rowSeries);
+        rowAnime     = view.findViewById(R.id.rowAnime);
+        rowDoramas   = view.findViewById(R.id.rowDoramas);
+        rowLiveGlass = view.findViewById(R.id.rowLiveGlass);
 
         initRow(rowTrending, "Tendencias",          null);
         initRow(rowNew,      "Últimos Estrenos",    new MoviesFragment());
@@ -161,6 +168,13 @@ public class HomeFragment extends Fragment {
         initRow(rowAnime,    "Animes",              new AnimeFragment());
         initRow(rowDoramas,  "Doramas",             new DoramasFragment());
         initRow(rowTop10,    "Top 10",              new MoviesFragment());
+
+        // Init live glass carousel RecyclerView
+        if (rowLiveGlass != null) {
+            RecyclerView rv = rowLiveGlass.findViewById(R.id.liveCarouselRv);
+            if (rv != null) rv.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        }
     }
 
     private void initRow(View row, String title, Fragment verTodosTarget) {
@@ -241,7 +255,80 @@ public class HomeFragment extends Fragment {
             h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
         } catch (Exception ignored) {} });
 
+        // Live glass carousel — independent, uses its own executor
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                List<LiveMatchServerDialog.LiveMatch> matches = fetchAndParseGol3();
+                h.post(() -> {
+                    try {
+                        if (!isAdded() || rowLiveGlass == null) return;
+                        RecyclerView rv = rowLiveGlass.findViewById(R.id.liveCarouselRv);
+                        if (rv == null) return;
+                        if (matches.isEmpty()) {
+                            rowLiveGlass.setVisibility(View.GONE);
+                        } else {
+                            rv.setAdapter(new GlassLiveAdapter(requireContext(), matches));
+                            rowLiveGlass.setVisibility(View.VISIBLE);
+                        }
+                    } catch (Exception ignored) {}
+                });
+            } catch (Exception ignored) {
+                h.post(() -> { if (rowLiveGlass != null) rowLiveGlass.setVisibility(View.GONE); });
+            }
+        });
+
         pool.shutdown();
+    }
+
+    // ── Gol-3 fetch & parse ───────────────────────────────────────────────────
+
+    private List<LiveMatchServerDialog.LiveMatch> fetchAndParseGol3() throws Exception {
+        URL url = new URL(GOL3_API);
+        HttpURLConnection c = (HttpURLConnection) url.openConnection();
+        c.setRequestMethod("GET");
+        c.setRequestProperty("Accept", "application/json");
+        c.setConnectTimeout(10000);
+        c.setReadTimeout(12000);
+        if (c.getResponseCode() != 200) throw new Exception("HTTP " + c.getResponseCode());
+        BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+        StringBuilder sb = new StringBuilder();
+        String line;
+        while ((line = br.readLine()) != null) sb.append(line);
+        br.close();
+
+        JSONObject root = new JSONObject(sb.toString());
+        JSONArray arr   = root.optJSONArray("transmisiones");
+        if (arr == null || arr.length() == 0) return Collections.emptyList();
+
+        LinkedHashMap<String, List<String[]>> grouped = new LinkedHashMap<>();
+        LinkedHashMap<String, JSONObject>     meta    = new LinkedHashMap<>();
+
+        for (int i = 0; i < arr.length(); i++) {
+            JSONObject item = arr.getJSONObject(i);
+            String titulo   = item.optString("titulo", "Partido " + (i + 1));
+            String canal    = item.optString("canal", "Servidor " + (i + 1));
+            String streamUrl = item.optString("url", "");
+            if (streamUrl.isEmpty()) continue;
+            if (!grouped.containsKey(titulo)) {
+                grouped.put(titulo, new ArrayList<>());
+                meta.put(titulo, item);
+            }
+            grouped.get(titulo).add(new String[]{canal, streamUrl});
+        }
+
+        List<LiveMatchServerDialog.LiveMatch> result = new ArrayList<>();
+        for (String titulo : grouped.keySet()) {
+            JSONObject m = meta.get(titulo);
+            result.add(new LiveMatchServerDialog.LiveMatch(
+                titulo,
+                m.optString("liga", ""),
+                m.optString("hora", ""),
+                m.optString("fecha", ""),
+                m.optString("logoUrl", ""),
+                grouped.get(titulo)
+            ));
+        }
+        return result;
     }
 
     private void fillRow(View row, List<ContentItem> items) {
