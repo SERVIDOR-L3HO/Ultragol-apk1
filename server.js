@@ -67,7 +67,7 @@ if (!fs.existsSync(SUBS_FILE))  writeJSON(SUBS_FILE,  []);
 function autoFixDownloadUrls() {
     const base = getBaseUrl();
     const fixes = [
-        { file: VERSION_FILE,        dlPath: '/download' },
+        { file: VERSION_FILE,        dlPath: '/ultragol1/download' },
         { file: ULTRA1_VERSION_FILE, dlPath: '/ultra1/download' },
     ];
     for (const { file, dlPath } of fixes) {

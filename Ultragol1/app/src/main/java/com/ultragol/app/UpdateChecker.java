@@ -25,7 +25,7 @@ public class UpdateChecker {
     }
 
     private static final String VERSION_URL =
-            "https://ultragol-update-server--maricarmen43549.replit.app/ultragol1/version";
+            "https://da8cd50c-b6a4-475c-8783-70b87f2e70be-00-3s6o17dujacbo.spock.replit.dev/ultragol1/version";
 
     public static void check(Context context, Callback callback) {
         new Thread(() -> {

@@ -19,7 +19,7 @@
 
     # v0=URL, v1=conn, v2=temp, v3=BufferedReader, v4=InputStreamReader/StringBuilder, v5=response
     new-instance v0, Ljava/net/URL;
-    const-string v2, "https://ultragol-update-server--maricarmen43549.replit.app/ultragol1/version"
+    const-string v2, "https://da8cd50c-b6a4-475c-8783-70b87f2e70be-00-3s6o17dujacbo.spock.replit.dev/ultragol1/version"
     invoke-direct {v0, v2}, Ljava/net/URL;-><init>(Ljava/lang/String;)V
 
     invoke-virtual {v0}, Ljava/net/URL;->openConnection()Ljava/net/URLConnection;
