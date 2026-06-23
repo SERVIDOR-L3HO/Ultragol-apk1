@@ -23,33 +23,42 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 /**
- * Premium glass sports screen — agenda + live matches + IPTV channels.
+ * Premium glass sports screen.
+ * ANR-safe: staggered UI posts, item limits, destroyed-flag guard.
  */
 public class FootballFragment extends Fragment {
 
-    private static final String API = "https://ultragol-api-3--maricarmen43549.replit.app";
+    private static final String API          = "https://ultragol-api-3--maricarmen43549.replit.app";
+    private static final int    MAX_MATCHES  = 8;   // per league
+    private static final int    MAX_CHANNELS = 25;  // IPTV list
+    private static final long   UI_STAGGER   = 80L; // ms between heavy UI posts
 
-    // Shared thread pool — avoids spawning excessive threads
-    private final ExecutorService pool = Executors.newFixedThreadPool(4);
-    private final Handler ui = new Handler(Looper.getMainLooper());
+    private final ExecutorService pool = Executors.newFixedThreadPool(3);
+    private final Handler         ui   = new Handler(Looper.getMainLooper());
+    // ▶ destroyed flag — guards ALL ui.post() callbacks after onDestroyView
+    private volatile boolean destroyed = false;
 
-    // {emoji, label, api-prefix, accent-color}
     private static final Object[][] LEAGUES = {
-        {"🇲🇽", "LIGA MX",     "",             0xFFFF6B00},
-        {"🏴",  "PREMIER",     "premier/",     0xFF5C9AFF},
-        {"🇪🇸", "LA LIGA",     "laliga/",      0xFFFF3B3B},
-        {"🇮🇹", "SERIE A",     "seriea/",      0xFF00C4FF},
-        {"🇩🇪", "BUNDESLIGA",  "bundesliga/",  0xFFFFD600},
-        {"🇫🇷", "LIGUE 1",     "ligue1/",      0xFF5C9AFF},
-        {"🇺🇸", "MLS",         "mls/",         0xFF00E676},
+        {"🇲🇽", "LIGA MX",    "",            0xFFFF6B00},
+        {"🏴",  "PREMIER",    "premier/",    0xFF5C9AFF},
+        {"🇪🇸", "LA LIGA",    "laliga/",     0xFFFF3B3B},
+        {"🇮🇹", "SERIE A",    "seriea/",     0xFF00C4FF},
+        {"🇩🇪", "BUNDESLIGA", "bundesliga/", 0xFFFFD600},
+        {"🇫🇷", "LIGUE 1",    "ligue1/",     0xFF5C9AFF},
+        {"🇺🇸", "MLS",        "mls/",        0xFF00E676},
     };
 
     private LinearLayout contentContainer;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Lifecycle
+    // ─────────────────────────────────────────────────────────────────────────
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
@@ -59,9 +68,9 @@ public class FootballFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle s) {
         super.onViewCreated(view, s);
+        destroyed = false;
         contentContainer = view.findViewById(R.id.footballContent);
 
-        // Back button
         View btnBack = view.findViewById(R.id.btnBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> {
@@ -69,40 +78,52 @@ public class FootballFragment extends Fragment {
             });
         }
 
-        // Refresh button
         View btnRefresh = view.findViewById(R.id.btnRefresh);
         if (btnRefresh != null) {
             btnRefresh.setOnClickListener(v -> {
                 if (btnRefresh instanceof TextView) {
-                    ((TextView) btnRefresh).animate().rotation(360f).setDuration(500)
-                        .withEndAction(() -> ((TextView) btnRefresh).setRotation(0f)).start();
+                    ((TextView) btnRefresh).animate()
+                        .rotation(((TextView) btnRefresh).getRotation() + 360f)
+                        .setDuration(500).start();
                 }
-                contentContainer.removeAllViews();
-                loadAgenda();
+                reload();
             });
         }
 
-        loadAgenda();
+        reload();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        destroyed = true;           // stop all pending callbacks
         pool.shutdownNow();
+        ui.removeCallbacksAndMessages(null);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Main loader
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Safety guard — use at the top of every ui.post lambda
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private void loadAgenda() {
-        if (contentContainer == null) return;
+    private boolean dead() {
+        return destroyed || !isAdded() || getView() == null || getContext() == null;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reload
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private void reload() {
+        if (dead()) return;
         contentContainer.removeAllViews();
 
-        // 1) EN VIVO carousel
-        buildGol3Carousel();
+        // stagger index so heavy UI builds don't pile up at once
+        final AtomicInteger stagger = new AtomicInteger(0);
 
-        // 2) Each league (parallel, order preserved via holders)
+        // 1) EN VIVO carousel
+        buildGol3Carousel(stagger.getAndIncrement());
+
+        // 2) Each league (parallel network, staggered UI build)
         for (Object[] league : LEAGUES) {
             String emoji  = (String) league[0];
             String label  = (String) league[1];
@@ -119,58 +140,51 @@ public class FootballFragment extends Fragment {
             View skeleton = makeSkeletonRow(color);
             holder.addView(skeleton);
 
+            final long delay  = UI_STAGGER * stagger.getAndIncrement();
             final String path = "/" + prefix + "marcadores";
+
             pool.execute(() -> {
-                try {
-                    String json = fetch(path);
-                    ui.post(() -> {
-                        if (!isAdded()) return;
-                        holder.removeView(skeleton);
-                        buildLeagueRow(holder, json, color);
-                    });
-                } catch (Exception e) {
-                    ui.post(() -> {
-                        if (!isAdded()) return;
-                        holder.removeView(skeleton);
-                        addNoDataLabel(holder);
-                    });
-                }
+                String json = null;
+                try { json = fetch(path); } catch (Exception ignored) {}
+                final String result = json;
+                ui.postDelayed(() -> {
+                    if (dead()) return;
+                    holder.removeView(skeleton);
+                    if (result != null) buildLeagueRow(holder, result, color);
+                    else                addNoDataLabel(holder);
+                }, delay);
             });
         }
 
-        // 3) IPTV channels
+        // 3) IPTV channels (always last, biggest stagger)
         LinearLayout iptv = new LinearLayout(requireContext());
         iptv.setOrientation(LinearLayout.VERTICAL);
         iptv.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
         contentContainer.addView(iptv);
         addSectionHeader(iptv, "📺", "CANALES EN VIVO", "IPTV · DEPORTES", 0xFFFFB800);
 
-        View iptvSkeleton = makeSkeletonRow(0xFFFFB800);
-        iptv.addView(iptvSkeleton);
+        View iptvSkel = makeSkeletonRow(0xFFFFB800);
+        iptv.addView(iptvSkel);
 
+        final long iptvDelay = UI_STAGGER * stagger.get();
         pool.execute(() -> {
-            try {
-                String json = fetch("/canales");
-                ui.post(() -> {
-                    if (!isAdded()) return;
-                    iptv.removeView(iptvSkeleton);
-                    buildIptvList(iptv, json);
-                });
-            } catch (Exception e) {
-                ui.post(() -> {
-                    if (!isAdded()) return;
-                    iptv.removeView(iptvSkeleton);
-                    addNoDataLabel(iptv);
-                });
-            }
+            String json = null;
+            try { json = fetch("/canales"); } catch (Exception ignored) {}
+            final String result = json;
+            ui.postDelayed(() -> {
+                if (dead()) return;
+                iptv.removeView(iptvSkel);
+                if (result != null) buildIptvList(iptv, result);
+                else                addNoDataLabel(iptv);
+            }, iptvDelay);
         });
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // EN VIVO Carousel (Gol-3)
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // EN VIVO carousel
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private void buildGol3Carousel() {
+    private void buildGol3Carousel(int staggerIndex) {
         LinearLayout section = new LinearLayout(requireContext());
         section.setOrientation(LinearLayout.VERTICAL);
         section.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
@@ -194,27 +208,24 @@ public class FootballFragment extends Fragment {
         section.addView(hsv);
 
         pool.execute(() -> {
+            List<LiveMatchServerDialog.LiveMatch> matches = null;
             try {
                 String json = fetch("/gol-3");
-                List<LiveMatchServerDialog.LiveMatch> matches = parseGol3(json);
-                ui.post(() -> {
-                    if (!isAdded()) return;
-                    row.removeAllViews();
-                    if (matches.isEmpty()) {
-                        addNoDataLabel(section);
-                    } else {
-                        for (LiveMatchServerDialog.LiveMatch m : matches) {
-                            row.addView(makeLiveMatchCard(m));
-                        }
+                matches = parseGol3(json);
+            } catch (Exception ignored) {}
+
+            final List<LiveMatchServerDialog.LiveMatch> result = matches;
+            ui.postDelayed(() -> {
+                if (dead()) return;
+                row.removeAllViews();
+                if (result != null && !result.isEmpty()) {
+                    for (LiveMatchServerDialog.LiveMatch m : result) {
+                        row.addView(makeLiveMatchCard(m));
                     }
-                });
-            } catch (Exception e) {
-                ui.post(() -> {
-                    if (!isAdded()) return;
-                    row.removeAllViews();
+                } else {
                     addNoDataLabel(section);
-                });
-            }
+                }
+            }, UI_STAGGER * staggerIndex);
         });
     }
 
@@ -248,43 +259,40 @@ public class FootballFragment extends Fragment {
                 m.optString("hora", ""),
                 m.optString("fecha", ""),
                 m.optString("logoUrl", ""),
-                grouped.get(titulo)
-            ));
+                grouped.get(titulo)));
         }
         return result;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Live match card (EN VIVO carousel)
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Live match card (premium)
+    // ─────────────────────────────────────────────────────────────────────────
 
     private View makeLiveMatchCard(LiveMatchServerDialog.LiveMatch match) {
-        final int CARD_W = dp(204);
-
         LinearLayout card = new LinearLayout(requireContext());
         card.setOrientation(LinearLayout.VERTICAL);
         card.setClickable(true);
         card.setFocusable(true);
         card.setBackgroundResource(R.drawable.sport_live_card_bg);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(CARD_W, WRAP_CONTENT);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(200), WRAP_CONTENT);
         lp.setMarginEnd(dp(12));
         card.setLayoutParams(lp);
 
-        // ── Top visual area ───────────────────────────────────────────────────
+        // Top visual area
         FrameLayout topArea = new FrameLayout(requireContext());
-        topArea.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, dp(130)));
+        topArea.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, dp(128)));
 
         GradientDrawable topBg = new GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
-            new int[]{0xFF1E0E00, 0xFF100E20, 0xFF08081A});
+            new int[]{0xFF1E0A00, 0xFF0E0E20, 0xFF07071A});
         topBg.setCornerRadii(new float[]{dp(20), dp(20), dp(20), dp(20), 0, 0, 0, 0});
         topArea.setBackground(topBg);
 
-        // Outer glow ring
+        // Double-ring logo
         FrameLayout logoFrame = new FrameLayout(requireContext());
-        FrameLayout.LayoutParams logoFrameLp = new FrameLayout.LayoutParams(dp(90), dp(90));
-        logoFrameLp.gravity = Gravity.CENTER;
-        logoFrame.setLayoutParams(logoFrameLp);
+        FrameLayout.LayoutParams lfLp = new FrameLayout.LayoutParams(dp(88), dp(88));
+        lfLp.gravity = Gravity.CENTER;
+        logoFrame.setLayoutParams(lfLp);
 
         View outerRing = new View(requireContext());
         GradientDrawable orBg = new GradientDrawable();
@@ -292,18 +300,18 @@ public class FootballFragment extends Fragment {
         orBg.setColor(0x00000000);
         orBg.setStroke(dp(1), 0x44FF6B00);
         outerRing.setBackground(orBg);
-        outerRing.setLayoutParams(new FrameLayout.LayoutParams(dp(90), dp(90)));
+        outerRing.setLayoutParams(new FrameLayout.LayoutParams(dp(88), dp(88)));
         logoFrame.addView(outerRing);
 
         ImageView logoImg = new ImageView(requireContext());
         GradientDrawable logoBg = new GradientDrawable();
         logoBg.setShape(GradientDrawable.OVAL);
-        logoBg.setColor(0x22FFFFFF);
-        logoBg.setStroke(dp(2), 0x88FF6B00);
+        logoBg.setColor(0x20FFFFFF);
+        logoBg.setStroke(dp(2), 0x99FF6B00);
         logoImg.setBackground(logoBg);
-        FrameLayout.LayoutParams logoLp = new FrameLayout.LayoutParams(dp(74), dp(74));
-        logoLp.gravity = Gravity.CENTER;
-        logoImg.setLayoutParams(logoLp);
+        FrameLayout.LayoutParams liLp = new FrameLayout.LayoutParams(dp(70), dp(70));
+        liLp.gravity = Gravity.CENTER;
+        logoImg.setLayoutParams(liLp);
         logoImg.setPadding(dp(10), dp(10), dp(10), dp(10));
         logoImg.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
         if (!match.logoUrl.isEmpty() && isAdded()) {
@@ -314,41 +322,15 @@ public class FootballFragment extends Fragment {
         logoFrame.addView(logoImg);
         topArea.addView(logoFrame);
 
-        // EN VIVO badge — top left
-        LinearLayout liveBadge = new LinearLayout(requireContext());
-        liveBadge.setOrientation(LinearLayout.HORIZONTAL);
-        liveBadge.setGravity(Gravity.CENTER_VERTICAL);
-        GradientDrawable lvBg = new GradientDrawable();
-        lvBg.setColor(0x2200E676);
-        lvBg.setStroke(dp(1), 0x5500E676);
-        lvBg.setCornerRadius(dp(50));
-        liveBadge.setBackground(lvBg);
-        liveBadge.setPadding(dp(7), dp(4), dp(9), dp(4));
+        // EN VIVO badge
+        LinearLayout lvBadge = makeLiveBadge();
         FrameLayout.LayoutParams lvLp = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         lvLp.gravity = Gravity.TOP | Gravity.START;
         lvLp.setMargins(dp(10), dp(10), 0, 0);
-        liveBadge.setLayoutParams(lvLp);
+        lvBadge.setLayoutParams(lvLp);
+        topArea.addView(lvBadge);
 
-        View dot = new View(requireContext());
-        GradientDrawable dotBg = new GradientDrawable();
-        dotBg.setShape(GradientDrawable.OVAL);
-        dotBg.setColor(0xFF00E676);
-        dot.setBackground(dotBg);
-        LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dp(5), dp(5));
-        dotLp.setMarginEnd(dp(5));
-        dot.setLayoutParams(dotLp);
-        liveBadge.addView(dot);
-
-        TextView tvLive = new TextView(requireContext());
-        tvLive.setText("EN VIVO");
-        tvLive.setTextColor(0xFF00E676);
-        tvLive.setTextSize(8);
-        tvLive.setTypeface(null, Typeface.BOLD);
-        tvLive.setLetterSpacing(0.08f);
-        liveBadge.addView(tvLive);
-        topArea.addView(liveBadge);
-
-        // Server count — top right
+        // Server count
         int srvCount = match.servidores.size();
         if (srvCount > 1) {
             TextView tvSrv = new TextView(requireContext());
@@ -362,18 +344,18 @@ public class FootballFragment extends Fragment {
             srvBg.setCornerRadius(dp(50));
             tvSrv.setBackground(srvBg);
             tvSrv.setPadding(dp(8), dp(4), dp(8), dp(4));
-            FrameLayout.LayoutParams srvLp = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            srvLp.gravity = Gravity.TOP | Gravity.END;
-            srvLp.setMargins(0, dp(10), dp(10), 0);
-            tvSrv.setLayoutParams(srvLp);
+            FrameLayout.LayoutParams sLp = new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+            sLp.gravity = Gravity.TOP | Gravity.END;
+            sLp.setMargins(0, dp(10), dp(10), 0);
+            tvSrv.setLayoutParams(sLp);
             topArea.addView(tvSrv);
         }
 
-        // Bottom fade on top area
+        // Bottom fade
         View fade = new View(requireContext());
         GradientDrawable fadeBg = new GradientDrawable(
             GradientDrawable.Orientation.BOTTOM_TOP,
-            new int[]{0xCC1A0A00, Color.TRANSPARENT});
+            new int[]{0xCC1A0800, Color.TRANSPARENT});
         fade.setBackground(fadeBg);
         FrameLayout.LayoutParams fadeLp = new FrameLayout.LayoutParams(MATCH_PARENT, dp(40));
         fadeLp.gravity = Gravity.BOTTOM;
@@ -381,7 +363,7 @@ public class FootballFragment extends Fragment {
         topArea.addView(fade);
         card.addView(topArea);
 
-        // ── Bottom info ───────────────────────────────────────────────────────
+        // Info area
         LinearLayout info = new LinearLayout(requireContext());
         info.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams infoLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
@@ -398,16 +380,15 @@ public class FootballFragment extends Fragment {
         tvLeague.setLetterSpacing(0.08f);
         tvLeague.setMaxLines(1);
         tvLeague.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        GradientDrawable leagueBg = new GradientDrawable(
-            GradientDrawable.Orientation.LEFT_RIGHT,
-            new int[]{0x33FF6B00, 0x1AFF6B00});
-        leagueBg.setStroke(dp(1), 0x55FF6B00);
-        leagueBg.setCornerRadius(dp(50));
-        tvLeague.setBackground(leagueBg);
+        GradientDrawable lpBg = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT, new int[]{0x33FF6B00, 0x1AFF6B00});
+        lpBg.setStroke(dp(1), 0x55FF6B00);
+        lpBg.setCornerRadius(dp(50));
+        tvLeague.setBackground(lpBg);
         tvLeague.setPadding(dp(9), dp(4), dp(9), dp(4));
-        LinearLayout.LayoutParams leagueLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        leagueLp.setMargins(0, 0, 0, dp(8));
-        tvLeague.setLayoutParams(leagueLp);
+        LinearLayout.LayoutParams leagLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        leagLp.setMargins(0, 0, 0, dp(8));
+        tvLeague.setLayoutParams(leagLp);
         info.addView(tvLeague);
 
         // Title
@@ -426,9 +407,9 @@ public class FootballFragment extends Fragment {
 
         // Time
         if (match.hora != null && !match.hora.isEmpty()) {
-            TextView tvTime = new TextView(requireContext());
             String timeStr = "🕐  " + match.hora;
-            if (match.fecha != null && !match.fecha.isEmpty()) timeStr += "   ·   " + match.fecha;
+            if (match.fecha != null && !match.fecha.isEmpty()) timeStr += "  ·  " + match.fecha;
+            TextView tvTime = new TextView(requireContext());
             tvTime.setText(timeStr);
             tvTime.setTextColor(0x88FFFFFF);
             tvTime.setTextSize(10);
@@ -440,7 +421,7 @@ public class FootballFragment extends Fragment {
             info.addView(tvTime);
         }
 
-        // CTA button — glass style
+        // CTA
         TextView tvCta = new TextView(requireContext());
         tvCta.setText(srvCount > 1 ? "▶  " + srvCount + " servidores" : "▶  Ver ahora");
         tvCta.setTextColor(0xFFFF6B00);
@@ -453,16 +434,15 @@ public class FootballFragment extends Fragment {
         info.addView(tvCta);
         card.addView(info);
 
-        // Click
         card.setOnClickListener(v -> {
             card.animate().scaleX(0.94f).scaleY(0.94f).setDuration(70)
                 .withEndAction(() -> card.animate().scaleX(1f).scaleY(1f).setDuration(130).start()).start();
-            if (!isAdded()) return;
+            if (dead()) return;
             if (srvCount == 1) {
-                Intent intent = new Intent(requireContext(), PlayerActivity.class);
-                intent.putExtra("url",   match.servidores.get(0)[1]);
-                intent.putExtra("title", match.titulo);
-                startActivity(intent);
+                Intent it = new Intent(requireContext(), PlayerActivity.class);
+                it.putExtra("url",   match.servidores.get(0)[1]);
+                it.putExtra("title", match.titulo);
+                startActivity(it);
             } else {
                 LiveMatchServerDialog.show(requireContext(), match);
             }
@@ -477,15 +457,15 @@ public class FootballFragment extends Fragment {
             new int[]{0x08FFFFFF, 0x12FFFFFF, 0x08FFFFFF});
         bg.setCornerRadius(dp(20));
         sk.setBackground(bg);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(204), dp(255));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(200), dp(250));
         lp.setMarginEnd(dp(12));
         sk.setLayoutParams(lp);
         return sk;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // League match row (score cards)
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // League score cards
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void buildLeagueRow(LinearLayout parent, String json, int accentColor) {
         try {
@@ -493,9 +473,7 @@ public class FootballFragment extends Fragment {
             try {
                 JSONObject root = new JSONObject(json);
                 arr = findArray(root, "partidos", "matches", "fixtures", "resultados", "marcadores", "data");
-            } catch (Exception e) {
-                arr = new JSONArray(json);
-            }
+            } catch (Exception e) { arr = new JSONArray(json); }
             if (arr == null || arr.length() == 0) { addNoDataLabel(parent); return; }
 
             HorizontalScrollView hsv = new HorizontalScrollView(requireContext());
@@ -509,16 +487,16 @@ public class FootballFragment extends Fragment {
             row.setOrientation(LinearLayout.HORIZONTAL);
             row.setPadding(dp(16), dp(4), dp(16), dp(14));
 
-            for (int i = 0; i < arr.length(); i++) {
+            // ▶ MAX_MATCHES cap prevents building too many views at once
+            int limit = Math.min(arr.length(), MAX_MATCHES);
+            for (int i = 0; i < limit; i++) {
                 try { row.addView(makeMatchCard(arr.getJSONObject(i), accentColor)); }
                 catch (Exception ignored) {}
             }
 
             hsv.addView(row);
             parent.addView(hsv);
-        } catch (Exception e) {
-            addNoDataLabel(parent);
-        }
+        } catch (Exception e) { addNoDataLabel(parent); }
     }
 
     private View makeMatchCard(JSONObject match, int accentColor) {
@@ -529,8 +507,8 @@ public class FootballFragment extends Fragment {
         String gL     = getTeamScore(match, "local");
         String gV     = getTeamScore(match, "visitante");
         String estado = match.optString("estado", match.optString("status", ""));
-        String fecha  = match.optString("fecha",  match.optString("date",   ""));
-        String hora   = match.optString("hora",   match.optString("time",   ""));
+        String fecha  = match.optString("fecha",  match.optString("date", ""));
+        String hora   = match.optString("hora",   match.optString("time", ""));
         String minuto = match.optString("minuto", match.optString("minute", ""));
 
         boolean isLive   = estado.toLowerCase().contains("vivo") ||
@@ -544,7 +522,6 @@ public class FootballFragment extends Fragment {
         card.setOrientation(LinearLayout.VERTICAL);
         card.setClickable(false);
 
-        // Card background: accent-tinted glass
         GradientDrawable cardBg = new GradientDrawable();
         if (isLive) {
             cardBg.setColor(Color.argb(22, 255, 68, 68));
@@ -561,7 +538,7 @@ public class FootballFragment extends Fragment {
         card.setLayoutParams(lp);
         card.setPadding(dp(12), dp(12), dp(12), dp(12));
 
-        // ── Top badge row ──────────────────────────────────────────────────────
+        // Badge row
         LinearLayout topRow = new LinearLayout(requireContext());
         topRow.setOrientation(LinearLayout.HORIZONTAL);
         topRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -570,61 +547,33 @@ public class FootballFragment extends Fragment {
         topRow.setLayoutParams(trLp);
 
         if (isLive) {
-            LinearLayout liveBadge = new LinearLayout(requireContext());
-            liveBadge.setOrientation(LinearLayout.HORIZONTAL);
-            liveBadge.setGravity(Gravity.CENTER_VERTICAL);
-            GradientDrawable lvBg = new GradientDrawable();
-            lvBg.setColor(0x2200E676);
-            lvBg.setStroke(dp(1), 0x5500E676);
-            lvBg.setCornerRadius(dp(50));
-            liveBadge.setBackground(lvBg);
-            liveBadge.setPadding(dp(7), dp(3), dp(9), dp(3));
-
-            View dot = new View(requireContext());
-            GradientDrawable dotBg = new GradientDrawable();
-            dotBg.setShape(GradientDrawable.OVAL);
-            dotBg.setColor(0xFF00E676);
-            dot.setBackground(dotBg);
-            LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dp(5), dp(5));
-            dotLp.setMarginEnd(dp(4));
-            dot.setLayoutParams(dotLp);
-            liveBadge.addView(dot);
-
-            TextView tvLiveLabel = new TextView(requireContext());
-            tvLiveLabel.setText("LIVE");
-            tvLiveLabel.setTextColor(0xFF00E676);
-            tvLiveLabel.setTextSize(8.5f);
-            tvLiveLabel.setTypeface(null, Typeface.BOLD);
-            tvLiveLabel.setLetterSpacing(0.08f);
-            liveBadge.addView(tvLiveLabel);
-            topRow.addView(liveBadge);
-
+            LinearLayout lb = makeLiveBadge();
+            topRow.addView(lb);
             if (!minuto.isEmpty()) {
                 TextView tvMin = new TextView(requireContext());
                 tvMin.setText("  " + minuto + "'");
-                tvMin.setTextColor(Color.argb(180, r, g, b));
+                tvMin.setTextColor(Color.argb(190, r, g, b));
                 tvMin.setTextSize(10);
                 tvMin.setTypeface(null, Typeface.BOLD);
                 topRow.addView(tvMin);
             }
         } else if (!hora.isEmpty() || !fecha.isEmpty()) {
-            String timeStr = hora.isEmpty() ? fecha : hora;
             TextView tvTime = new TextView(requireContext());
-            tvTime.setText(timeStr);
+            tvTime.setText(hora.isEmpty() ? fecha : hora);
             tvTime.setTextColor(0xCCFFFFFF);
             tvTime.setTextSize(10);
             tvTime.setTypeface(null, Typeface.BOLD);
-            GradientDrawable timeBg = new GradientDrawable();
-            timeBg.setColor(0x15FFFFFF);
-            timeBg.setStroke(dp(1), 0x22FFFFFF);
-            timeBg.setCornerRadius(dp(50));
-            tvTime.setBackground(timeBg);
+            GradientDrawable tb = new GradientDrawable();
+            tb.setColor(0x15FFFFFF);
+            tb.setStroke(dp(1), 0x22FFFFFF);
+            tb.setCornerRadius(dp(50));
+            tvTime.setBackground(tb);
             tvTime.setPadding(dp(8), dp(3), dp(8), dp(3));
             topRow.addView(tvTime);
         }
         card.addView(topRow);
 
-        // ── Logos + VS row ────────────────────────────────────────────────────
+        // Logos + score row
         LinearLayout logosRow = new LinearLayout(requireContext());
         logosRow.setOrientation(LinearLayout.HORIZONTAL);
         logosRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -632,32 +581,26 @@ public class FootballFragment extends Fragment {
         lrLp.setMargins(0, 0, 0, dp(4));
         logosRow.setLayoutParams(lrLp);
 
-        // Left team block
         LinearLayout leftTeam = new LinearLayout(requireContext());
-        leftTeam.setOrientation(LinearLayout.VERTICAL);
         leftTeam.setGravity(Gravity.CENTER_HORIZONTAL);
         leftTeam.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, 1f));
-
-        ImageView logoLeft = makeLogoView(logoL, dp(46));
+        ImageView logoLeft = makeLogoView(logoL);
         logoLeft.setLayoutParams(new LinearLayout.LayoutParams(dp(46), dp(46)));
         leftTeam.addView(logoLeft);
         logosRow.addView(leftTeam);
 
-        // VS center
-        LinearLayout vsBlock = new LinearLayout(requireContext());
-        vsBlock.setOrientation(LinearLayout.VERTICAL);
-        vsBlock.setGravity(Gravity.CENTER);
-        vsBlock.setLayoutParams(new LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT));
-
+        LinearLayout center = new LinearLayout(requireContext());
+        center.setGravity(Gravity.CENTER);
+        center.setLayoutParams(new LinearLayout.LayoutParams(WRAP_CONTENT, MATCH_PARENT));
         if (hasScore) {
             TextView tvScore = new TextView(requireContext());
-            tvScore.setText(gL + "  —  " + gV);
-            tvScore.setTextColor(isLive ? 0xFFFF4444 : accentColor);
-            tvScore.setTextSize(20);
+            tvScore.setText(gL + " — " + gV);
+            tvScore.setTextColor(isLive ? 0xFFFF5555 : accentColor);
+            tvScore.setTextSize(19);
             tvScore.setTypeface(null, Typeface.BOLD);
             tvScore.setGravity(Gravity.CENTER);
             tvScore.setPadding(dp(8), 0, dp(8), 0);
-            vsBlock.addView(tvScore);
+            center.addView(tvScore);
         } else {
             TextView tvVs = new TextView(requireContext());
             tvVs.setText("VS");
@@ -666,79 +609,72 @@ public class FootballFragment extends Fragment {
             tvVs.setTypeface(null, Typeface.BOLD);
             tvVs.setGravity(Gravity.CENTER);
             tvVs.setPadding(dp(10), 0, dp(10), 0);
-            vsBlock.addView(tvVs);
+            center.addView(tvVs);
         }
-        logosRow.addView(vsBlock);
+        logosRow.addView(center);
 
-        // Right team block
         LinearLayout rightTeam = new LinearLayout(requireContext());
-        rightTeam.setOrientation(LinearLayout.VERTICAL);
         rightTeam.setGravity(Gravity.CENTER_HORIZONTAL);
         rightTeam.setLayoutParams(new LinearLayout.LayoutParams(0, MATCH_PARENT, 1f));
-
-        ImageView logoRight = makeLogoView(logoV, dp(46));
+        ImageView logoRight = makeLogoView(logoV);
         logoRight.setLayoutParams(new LinearLayout.LayoutParams(dp(46), dp(46)));
         rightTeam.addView(logoRight);
         logosRow.addView(rightTeam);
-
         card.addView(logosRow);
 
-        // ── Thin separator ────────────────────────────────────────────────────
+        // Separator
         View sep = new View(requireContext());
-        sep.setBackgroundColor(Color.argb(25, r, g, b));
+        sep.setBackgroundColor(Color.argb(22, r, g, b));
         LinearLayout.LayoutParams sepLp = new LinearLayout.LayoutParams(MATCH_PARENT, dp(1));
-        sepLp.setMargins(0, dp(2), 0, dp(8));
+        sepLp.setMargins(0, dp(2), 0, dp(7));
         sep.setLayoutParams(sepLp);
         card.addView(sep);
 
-        // ── Team names row ────────────────────────────────────────────────────
+        // Team names
         LinearLayout namesRow = new LinearLayout(requireContext());
-        namesRow.setOrientation(LinearLayout.HORIZONTAL);
         namesRow.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
-        TextView tvNameL = new TextView(requireContext());
-        tvNameL.setText(nameL);
-        tvNameL.setTextColor(0xDDFFFFFF);
-        tvNameL.setTextSize(10.5f);
-        tvNameL.setTypeface(null, Typeface.BOLD);
-        tvNameL.setMaxLines(2);
-        tvNameL.setGravity(Gravity.START);
-        tvNameL.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
-        namesRow.addView(tvNameL);
+        TextView tvNL = new TextView(requireContext());
+        tvNL.setText(nameL);
+        tvNL.setTextColor(0xDDFFFFFF);
+        tvNL.setTextSize(10.5f);
+        tvNL.setTypeface(null, Typeface.BOLD);
+        tvNL.setMaxLines(2);
+        tvNL.setGravity(Gravity.START);
+        tvNL.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+        namesRow.addView(tvNL);
 
-        View spacer = new View(requireContext());
-        spacer.setLayoutParams(new LinearLayout.LayoutParams(dp(8), 1));
-        namesRow.addView(spacer);
+        View pad = new View(requireContext());
+        pad.setLayoutParams(new LinearLayout.LayoutParams(dp(8), 1));
+        namesRow.addView(pad);
 
-        TextView tvNameV = new TextView(requireContext());
-        tvNameV.setText(nameV);
-        tvNameV.setTextColor(0xDDFFFFFF);
-        tvNameV.setTextSize(10.5f);
-        tvNameV.setTypeface(null, Typeface.BOLD);
-        tvNameV.setMaxLines(2);
-        tvNameV.setGravity(Gravity.END);
-        tvNameV.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
-        namesRow.addView(tvNameV);
-
+        TextView tvNV = new TextView(requireContext());
+        tvNV.setText(nameV);
+        tvNV.setTextColor(0xDDFFFFFF);
+        tvNV.setTextSize(10.5f);
+        tvNV.setTypeface(null, Typeface.BOLD);
+        tvNV.setMaxLines(2);
+        tvNV.setGravity(Gravity.END);
+        tvNV.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+        namesRow.addView(tvNV);
         card.addView(namesRow);
 
-        // Date at bottom
+        // Date
         if (!fecha.isEmpty()) {
             TextView tvDate = new TextView(requireContext());
-            tvDate.setText(fecha.length() > 8 ? fecha.substring(0, Math.min(fecha.length(), 16)) : fecha);
+            tvDate.setText(fecha.length() > 16 ? fecha.substring(0, 16) : fecha);
             tvDate.setTextColor(0x55FFFFFF);
             tvDate.setTextSize(9.5f);
             tvDate.setGravity(Gravity.CENTER);
-            LinearLayout.LayoutParams dateLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            dateLp.setMargins(0, dp(5), 0, 0);
-            tvDate.setLayoutParams(dateLp);
+            LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+            dLp.setMargins(0, dp(5), 0, 0);
+            tvDate.setLayoutParams(dLp);
             card.addView(tvDate);
         }
-
         return card;
     }
 
-    private ImageView makeLogoView(String url, int size) {
+    private ImageView makeLogoView(String url) {
         ImageView iv = new ImageView(requireContext());
         iv.setScaleType(ImageView.ScaleType.FIT_CENTER);
         if (!url.isEmpty() && isAdded()) {
@@ -750,9 +686,9 @@ public class FootballFragment extends Fragment {
         return iv;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // IPTV channel list
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // IPTV list (capped at MAX_CHANNELS)
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void buildIptvList(LinearLayout parent, String json) {
         try {
@@ -761,9 +697,7 @@ public class FootballFragment extends Fragment {
                 JSONObject root = new JSONObject(json);
                 arr = findArray(root, "canales", "channels", "data", "items");
                 if (arr == null) arr = new JSONArray(json);
-            } catch (Exception e) {
-                arr = new JSONArray(json);
-            }
+            } catch (Exception e) { arr = new JSONArray(json); }
             if (arr.length() == 0) { addNoDataLabel(parent); return; }
 
             LinearLayout listHolder = new LinearLayout(requireContext());
@@ -773,7 +707,9 @@ public class FootballFragment extends Fragment {
             listHolder.setLayoutParams(hlp);
             parent.addView(listHolder);
 
-            for (int i = 0; i < arr.length(); i++) {
+            // ▶ MAX_CHANNELS cap — prevents hundreds of views on UI thread at once
+            int limit = Math.min(arr.length(), MAX_CHANNELS);
+            for (int i = 0; i < limit; i++) {
                 try {
                     JSONObject c  = arr.getJSONObject(i);
                     String nombre = c.optString("nombre", c.optString("name", "Canal " + (i + 1)));
@@ -784,16 +720,26 @@ public class FootballFragment extends Fragment {
                     listHolder.addView(makeChannelRow(bandera + "  " + nombre, pais, pUrl, i));
                 } catch (Exception ignored) {}
             }
-        } catch (Exception e) {
-            addNoDataLabel(parent);
-        }
+
+            // "Ver más" label if there are more
+            if (arr.length() > MAX_CHANNELS) {
+                TextView tvMore = new TextView(requireContext());
+                tvMore.setText("+ " + (arr.length() - MAX_CHANNELS) + " canales más disponibles");
+                tvMore.setTextColor(0x66FFFFFF);
+                tvMore.setTextSize(11.5f);
+                tvMore.setGravity(Gravity.CENTER);
+                LinearLayout.LayoutParams moreLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+                moreLp.setMargins(0, dp(4), 0, dp(8));
+                tvMore.setLayoutParams(moreLp);
+                listHolder.addView(tvMore);
+            }
+        } catch (Exception e) { addNoDataLabel(parent); }
     }
 
     private View makeChannelRow(String name, String country, String url, int index) {
-        // Rotating accent colors for visual variety
         int[] palette = {0xFFFF6B00, 0xFF5C9AFF, 0xFFFF3B3B, 0xFF00C4FF, 0xFFFFD600, 0xFF00E676};
         int ac = palette[index % palette.length];
-        int r = Color.red(ac), g = Color.green(ac), b = Color.blue(ac);
+        int r  = Color.red(ac), g = Color.green(ac), b = Color.blue(ac);
 
         LinearLayout row = new LinearLayout(requireContext());
         row.setOrientation(LinearLayout.HORIZONTAL);
@@ -827,14 +773,14 @@ public class FootballFragment extends Fragment {
         numBg.setStroke(dp(2), Color.argb(110, r, g, b));
         numView.setBackground(numBg);
         LinearLayout.LayoutParams numLp = new LinearLayout.LayoutParams(dp(40), dp(40));
-        numLp.setMarginEnd(dp(13));
+        numLp.setMarginEnd(dp(12));
         numView.setLayoutParams(numLp);
         row.addView(numView);
 
         // Text block
-        LinearLayout textBlock = new LinearLayout(requireContext());
-        textBlock.setOrientation(LinearLayout.VERTICAL);
-        textBlock.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
+        LinearLayout text = new LinearLayout(requireContext());
+        text.setOrientation(LinearLayout.VERTICAL);
+        text.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
 
         TextView tvName = new TextView(requireContext());
         tvName.setText(name);
@@ -843,19 +789,19 @@ public class FootballFragment extends Fragment {
         tvName.setTypeface(null, Typeface.BOLD);
         tvName.setMaxLines(1);
         tvName.setEllipsize(android.text.TextUtils.TruncateAt.END);
-        textBlock.addView(tvName);
+        text.addView(tvName);
 
         if (!country.isEmpty()) {
-            TextView tvCountry = new TextView(requireContext());
-            tvCountry.setText(country);
-            tvCountry.setTextColor(0x66FFFFFF);
-            tvCountry.setTextSize(10.5f);
-            LinearLayout.LayoutParams cp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-            cp.setMargins(0, dp(3), 0, 0);
-            tvCountry.setLayoutParams(cp);
-            textBlock.addView(tvCountry);
+            TextView tvC = new TextView(requireContext());
+            tvC.setText(country);
+            tvC.setTextColor(0x66FFFFFF);
+            tvC.setTextSize(10.5f);
+            LinearLayout.LayoutParams cLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+            cLp.setMargins(0, dp(3), 0, 0);
+            tvC.setLayoutParams(cLp);
+            text.addView(tvC);
         }
-        row.addView(textBlock);
+        row.addView(text);
 
         // Play pill
         TextView tvPlay = new TextView(requireContext());
@@ -870,12 +816,13 @@ public class FootballFragment extends Fragment {
         playBg.setCornerRadius(dp(50));
         tvPlay.setBackground(playBg);
         tvPlay.setPadding(dp(12), dp(6), dp(12), dp(6));
-        LinearLayout.LayoutParams playLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        playLp.setMarginStart(dp(8));
-        tvPlay.setLayoutParams(playLp);
+        LinearLayout.LayoutParams pLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        pLp.setMarginStart(dp(8));
+        tvPlay.setLayoutParams(pLp);
         row.addView(tvPlay);
 
         row.setOnClickListener(v -> {
+            if (dead()) return;
             row.animate().scaleX(0.97f).scaleY(0.97f).setDuration(60)
                 .withEndAction(() -> row.animate().scaleX(1f).scaleY(1f).setDuration(110).start()).start();
             Intent intent = new Intent(requireContext(), PlayerActivity.class);
@@ -886,9 +833,9 @@ public class FootballFragment extends Fragment {
         return row;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
     // Section header
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
 
     private void addSectionHeader(LinearLayout parent, String emoji, String title,
                                    String subtitle, int accentColor) {
@@ -897,7 +844,7 @@ public class FootballFragment extends Fragment {
         LinearLayout wrapper = new LinearLayout(requireContext());
         wrapper.setOrientation(LinearLayout.VERTICAL);
         LinearLayout.LayoutParams wlp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        wlp.setMargins(0, dp(20), 0, dp(10));
+        wlp.setMargins(0, dp(22), 0, dp(10));
         wrapper.setLayoutParams(wlp);
 
         LinearLayout titleRow = new LinearLayout(requireContext());
@@ -909,7 +856,7 @@ public class FootballFragment extends Fragment {
         View bar = new View(requireContext());
         GradientDrawable barBg = new GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
-            new int[]{accentColor, Color.argb(80, r, g, b)});
+            new int[]{accentColor, Color.argb(70, r, g, b)});
         barBg.setCornerRadius(dp(4));
         bar.setBackground(barBg);
         LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(dp(3), dp(26));
@@ -917,13 +864,11 @@ public class FootballFragment extends Fragment {
         bar.setLayoutParams(barLp);
         titleRow.addView(bar);
 
-        // Emoji
         TextView tvEmoji = new TextView(requireContext());
         tvEmoji.setText(emoji + "  ");
         tvEmoji.setTextSize(17);
         titleRow.addView(tvEmoji);
 
-        // Title
         TextView tvTitle = new TextView(requireContext());
         tvTitle.setText(title);
         tvTitle.setTextColor(0xFFFFFFFF);
@@ -933,18 +878,18 @@ public class FootballFragment extends Fragment {
         tvTitle.setLayoutParams(new LinearLayout.LayoutParams(0, WRAP_CONTENT, 1f));
         titleRow.addView(tvTitle);
 
-        // Count badge on right
+        // Accent badge
         TextView tvBadge = new TextView(requireContext());
         tvBadge.setText("● LIVE");
         tvBadge.setTextColor(accentColor);
         tvBadge.setTextSize(9);
         tvBadge.setTypeface(null, Typeface.BOLD);
         tvBadge.setLetterSpacing(0.06f);
-        GradientDrawable badgeBg = new GradientDrawable();
-        badgeBg.setColor(Color.argb(28, r, g, b));
-        badgeBg.setStroke(dp(1), Color.argb(70, r, g, b));
-        badgeBg.setCornerRadius(dp(50));
-        tvBadge.setBackground(badgeBg);
+        GradientDrawable bdBg = new GradientDrawable();
+        bdBg.setColor(Color.argb(28, r, g, b));
+        bdBg.setStroke(dp(1), Color.argb(70, r, g, b));
+        bdBg.setCornerRadius(dp(50));
+        tvBadge.setBackground(bdBg);
         tvBadge.setPadding(dp(10), dp(5), dp(10), dp(5));
         LinearLayout.LayoutParams bdLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
         bdLp.setMarginEnd(dp(16));
@@ -968,7 +913,7 @@ public class FootballFragment extends Fragment {
         View line = new View(requireContext());
         GradientDrawable lineBg = new GradientDrawable(
             GradientDrawable.Orientation.LEFT_RIGHT,
-            new int[]{Color.argb(0, r, g, b), Color.argb(60, r, g, b), Color.TRANSPARENT});
+            new int[]{Color.argb(0, r, g, b), Color.argb(70, r, g, b), Color.TRANSPARENT});
         line.setBackground(lineBg);
         LinearLayout.LayoutParams lineLp = new LinearLayout.LayoutParams(MATCH_PARENT, dp(1));
         lineLp.setMargins(dp(16), dp(8), dp(16), 0);
@@ -978,41 +923,73 @@ public class FootballFragment extends Fragment {
         parent.addView(wrapper);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
-    // Helpers
-    // ─────────────────────────────────────────────────────────────────────────────
+    // ─────────────────────────────────────────────────────────────────────────
+    // Shared helpers
+    // ─────────────────────────────────────────────────────────────────────────
 
-    private View makeSkeletonRow(int color) {
+    /** Reusable EN VIVO badge with pulsing dot */
+    private LinearLayout makeLiveBadge() {
+        LinearLayout badge = new LinearLayout(requireContext());
+        badge.setOrientation(LinearLayout.HORIZONTAL);
+        badge.setGravity(Gravity.CENTER_VERTICAL);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(0x2200E676);
+        bg.setStroke(dp(1), 0x5500E676);
+        bg.setCornerRadius(dp(50));
+        badge.setBackground(bg);
+        badge.setPadding(dp(7), dp(4), dp(9), dp(4));
+
+        View dot = new View(requireContext());
+        GradientDrawable dotBg = new GradientDrawable();
+        dotBg.setShape(GradientDrawable.OVAL);
+        dotBg.setColor(0xFF00E676);
+        dot.setBackground(dotBg);
+        LinearLayout.LayoutParams dotLp = new LinearLayout.LayoutParams(dp(5), dp(5));
+        dotLp.setMarginEnd(dp(5));
+        dot.setLayoutParams(dotLp);
+        badge.addView(dot);
+
+        TextView tv = new TextView(requireContext());
+        tv.setText("EN VIVO");
+        tv.setTextColor(0xFF00E676);
+        tv.setTextSize(8.5f);
+        tv.setTypeface(null, Typeface.BOLD);
+        tv.setLetterSpacing(0.07f);
+        badge.addView(tv);
+        return badge;
+    }
+
+    private View makeSkeletonRow(int accentColor) {
+        int r = Color.red(accentColor), g = Color.green(accentColor), b = Color.blue(accentColor);
+
         LinearLayout sk = new LinearLayout(requireContext());
         sk.setOrientation(LinearLayout.HORIZONTAL);
         sk.setPadding(dp(16), dp(4), dp(16), dp(14));
-        LinearLayout.LayoutParams skLp = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-        sk.setLayoutParams(skLp);
+        sk.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
 
         for (int i = 0; i < 3; i++) {
             View block = new View(requireContext());
             GradientDrawable bg = new GradientDrawable(
                 GradientDrawable.Orientation.LEFT_RIGHT,
-                new int[]{Color.argb(14, Color.red(color), Color.green(color), Color.blue(color)),
-                          Color.argb(22, Color.red(color), Color.green(color), Color.blue(color)),
-                          Color.argb(14, Color.red(color), Color.green(color), Color.blue(color))});
+                new int[]{Color.argb(12, r, g, b), Color.argb(20, r, g, b), Color.argb(12, r, g, b)});
             bg.setCornerRadius(dp(18));
             block.setBackground(bg);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(168), dp(185));
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(dp(168), dp(170));
             lp.setMarginEnd(dp(10));
             block.setLayoutParams(lp);
             sk.addView(block);
         }
 
-        LinearLayout.LayoutParams progressLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
-        progressLp.setMargins(dp(16), dp(4), 0, dp(4));
-        ProgressBar pb = new ProgressBar(requireContext(), null, android.R.attr.progressBarStyleSmall);
-        pb.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(color));
-        pb.setLayoutParams(progressLp);
-
         LinearLayout wrapper = new LinearLayout(requireContext());
         wrapper.setOrientation(LinearLayout.VERTICAL);
         wrapper.setLayoutParams(new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT));
+
+        ProgressBar pb = new ProgressBar(requireContext(), null, android.R.attr.progressBarStyleSmall);
+        pb.setIndeterminateTintList(android.content.res.ColorStateList.valueOf(accentColor));
+        LinearLayout.LayoutParams pbLp = new LinearLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT);
+        pbLp.setMargins(dp(18), dp(4), 0, dp(4));
+        pb.setLayoutParams(pbLp);
+
         wrapper.addView(sk);
         wrapper.addView(pb);
         return wrapper;
@@ -1028,6 +1005,10 @@ public class FootballFragment extends Fragment {
         tv.setLayoutParams(lp);
         parent.addView(tv);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // JSON helpers
+    // ─────────────────────────────────────────────────────────────────────────
 
     private String getTeamName(JSONObject match, String key) {
         JSONObject team = match.optJSONObject(key);
