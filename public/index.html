@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ultragol — Panel de Control</title>
+<title>Ultragol1 — Panel de Control</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -18,19 +18,19 @@
   --red-dim: rgba(255,71,87,0.1);
   --blue: #3d8bff;
   --blue-dim: rgba(61,139,255,0.1);
+  --purple: #8b5cf6;
+  --purple-dim: rgba(139,92,246,0.1);
   --bg: #07070d;
-  --bg2: #0d0d18;
   --glass: rgba(255,255,255,0.04);
   --glass2: rgba(255,255,255,0.07);
   --glass-border: rgba(255,255,255,0.08);
-  --text-dim: rgba(255,255,255,0.4);
-  --text-mid: rgba(255,255,255,0.65);
-  --radius: 16px;
-  --radius-lg: 22px;
+  --text-dim: rgba(255,255,255,0.38);
+  --text-mid: rgba(255,255,255,0.62);
+  --radius: 14px;
+  --radius-lg: 20px;
 }
 
 html { scroll-behavior: smooth; }
-
 body {
   background: var(--bg);
   color: #fff;
@@ -47,131 +47,134 @@ body {
   content: '';
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 700px 500px at -10% -10%, rgba(255,107,0,0.13) 0%, transparent 70%),
-    radial-gradient(ellipse 500px 400px at 110% 110%, rgba(109,40,217,0.1) 0%, transparent 70%),
-    radial-gradient(ellipse 300px 300px at 60% 40%, rgba(255,107,0,0.04) 0%, transparent 70%);
+    radial-gradient(ellipse 700px 500px at -10% -10%, rgba(255,107,0,0.12) 0%, transparent 65%),
+    radial-gradient(ellipse 500px 400px at 110% 110%, rgba(109,40,217,0.09) 0%, transparent 65%);
 }
-.grid-lines {
+.bg-grid {
   position: absolute; inset: 0;
   background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 60px 60px;
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 56px 56px;
 }
 
 /* ── SIDEBAR ── */
 .sidebar {
-  position: fixed; left: 0; top: 0; bottom: 0; width: 240px;
-  background: rgba(10,10,18,0.92);
+  position: fixed; left: 0; top: 0; bottom: 0; width: 232px;
+  background: rgba(9,9,17,0.94);
   border-right: 1px solid var(--glass-border);
-  backdrop-filter: blur(24px);
-  z-index: 100;
+  backdrop-filter: blur(28px);
+  z-index: 200;
   display: flex; flex-direction: column;
-  transition: transform 0.3s;
+  transition: transform 0.28s cubic-bezier(0.4,0,0.2,1);
 }
 .sidebar-logo {
-  display: flex; align-items: center; gap: 10px;
-  padding: 24px 20px 20px;
+  display: flex; align-items: center; gap: 11px;
+  padding: 22px 18px 18px;
   border-bottom: 1px solid var(--glass-border);
 }
 .logo-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--orange), #e05d00);
+  width: 36px; height: 36px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--orange), #c44d00);
   display: flex; align-items: center; justify-content: center;
-  font-size: 18px;
-  box-shadow: 0 4px 16px rgba(255,107,0,0.4);
+  font-size: 17px; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(255,107,0,0.4);
 }
-.logo-text { font-size: 17px; font-weight: 900; color: #fff; letter-spacing: -0.3px; }
+.logo-text { font-size: 16px; font-weight: 900; letter-spacing: -0.3px; }
 .logo-text span { color: var(--orange); }
-.logo-badge {
-  margin-left: auto;
-  font-size: 9px; font-weight: 800; letter-spacing: 1px;
+.logo-pill {
+  margin-left: auto; font-size: 9px; font-weight: 800;
   color: var(--orange); background: var(--orange-dim);
   border: 1px solid var(--orange-border);
-  border-radius: 4px; padding: 2px 6px;
+  border-radius: 5px; padding: 2px 7px; letter-spacing: 1px; flex-shrink: 0;
 }
 
-.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-.nav-section-label {
+.sidebar-nav { flex: 1; padding: 14px 10px; overflow-y: auto; }
+.nav-label {
   font-size: 9px; font-weight: 700; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 1.5px;
-  padding: 0 8px; margin: 16px 0 6px;
+  text-transform: uppercase; letter-spacing: 1.6px;
+  padding: 0 8px; margin: 14px 0 5px;
 }
-.nav-section-label:first-child { margin-top: 0; }
-
+.nav-label:first-child { margin-top: 0; }
 .nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 12px; border-radius: 11px;
+  display: flex; align-items: center; gap: 9px;
+  padding: 9px 11px; border-radius: 10px;
   font-size: 13px; font-weight: 600; color: var(--text-mid);
-  cursor: pointer; transition: all 0.18s;
-  border: 1px solid transparent; margin-bottom: 2px;
+  cursor: pointer; transition: all 0.15s;
+  border: 1px solid transparent; margin-bottom: 1px;
   background: none; width: 100%; text-align: left;
 }
 .nav-item:hover { background: var(--glass2); color: #fff; border-color: var(--glass-border); }
-.nav-item.active {
-  background: var(--orange-dim); color: var(--orange);
-  border-color: var(--orange-border);
-}
-.nav-icon { font-size: 15px; width: 18px; text-align: center; }
+.nav-item.active { background: var(--orange-dim); color: var(--orange); border-color: var(--orange-border); }
+.nav-icon { font-size: 14px; width: 16px; text-align: center; }
 .nav-dot {
-  margin-left: auto; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green); animation: pulse-green 1.8s infinite;
+  margin-left: auto; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); animation: pulse-dot 1.8s infinite;
 }
-@keyframes pulse-green {
-  0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.6); }
-  50%      { box-shadow: 0 0 0 6px rgba(0,230,118,0); }
+@keyframes pulse-dot {
+  0%,100% { box-shadow: 0 0 0 0 rgba(0,230,118,0.55); }
+  50%      { box-shadow: 0 0 0 5px rgba(0,230,118,0); }
+}
+.nav-badge {
+  margin-left: auto; background: var(--orange); color: #fff;
+  font-size: 10px; font-weight: 800; min-width: 18px; height: 18px;
+  border-radius: 9px; padding: 0 5px;
+  display: flex; align-items: center; justify-content: center;
 }
 
 .sidebar-footer {
-  padding: 14px 16px;
+  padding: 12px 16px;
   border-top: 1px solid var(--glass-border);
-}
-.server-status {
-  display: flex; align-items: center; gap: 8px;
+  display: flex; align-items: center; gap: 7px;
   font-size: 11px; color: var(--text-mid);
 }
 .status-dot {
-  width: 7px; height: 7px; border-radius: 50%; background: var(--green);
-  animation: pulse-green 1.8s infinite;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+  animation: pulse-dot 1.8s infinite; flex-shrink: 0;
 }
 
-/* ── MAIN CONTENT ── */
-.main {
-  margin-left: 240px;
-  position: relative; z-index: 1;
-  min-height: 100vh;
-}
+/* ── MAIN ── */
+.main { margin-left: 232px; position: relative; z-index: 1; min-height: 100vh; }
 
-/* ── TOP BAR ── */
+/* ── TOPBAR ── */
 .topbar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 32px;
+  padding: 16px 28px;
   border-bottom: 1px solid var(--glass-border);
-  background: rgba(7,7,13,0.6);
-  backdrop-filter: blur(16px);
+  background: rgba(7,7,13,0.65);
+  backdrop-filter: blur(18px);
   position: sticky; top: 0; z-index: 50;
 }
-.page-title { font-size: 18px; font-weight: 800; }
-.page-sub { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
-.topbar-actions { display: flex; align-items: center; gap: 10px; }
-.topbar-btn {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 15px; border-radius: 10px;
+.page-info { display: flex; align-items: center; gap: 12px; }
+.menu-btn {
+  display: none; background: none; border: none;
+  color: var(--text-mid); font-size: 20px; cursor: pointer;
+}
+.page-title { font-size: 17px; font-weight: 800; }
+.page-sub   { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; }
+.tb-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 9px;
   font-size: 12px; font-weight: 700; cursor: pointer;
-  transition: all 0.18s; border: 1px solid transparent;
+  transition: all 0.15s; border: 1px solid var(--glass-border);
   background: var(--glass2); color: var(--text-mid);
-  border-color: var(--glass-border);
 }
-.topbar-btn:hover { background: var(--glass-border); color: #fff; }
-.topbar-btn.primary {
-  background: var(--orange); color: #fff; border-color: transparent;
-}
-.topbar-btn.primary:hover { background: #e05d00; box-shadow: 0 4px 18px rgba(255,107,0,0.35); }
+.tb-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
+.tb-btn.orange { background: var(--orange); color: #fff; border-color: transparent; }
+.tb-btn.orange:hover { background: #e05d00; box-shadow: 0 4px 18px rgba(255,107,0,0.35); }
 
-/* ── CONTENT SECTIONS ── */
-.content { padding: 28px 32px 60px; }
+/* ── CONTENT ── */
+.content { padding: 26px 28px 60px; }
 .section { display: none; }
 .section.active { display: block; }
+
+/* ── SECTION HEADING ── */
+.sec-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.sec-hdr-left { display: flex; align-items: center; gap: 10px; }
+.sec-hdr-icon { font-size: 20px; }
+.sec-hdr-title { font-size: 16px; font-weight: 800; }
+.sec-hdr-sub   { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
 
 /* ── LOGIN GATE ── */
 .login-gate {
@@ -180,516 +183,443 @@ body {
 }
 .login-card {
   background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg); padding: 40px;
-  width: 100%; max-width: 400px;
-  backdrop-filter: blur(20px);
-  box-shadow: 0 40px 80px rgba(0,0,0,0.5);
+  border-radius: var(--radius-lg); padding: 38px 36px;
+  width: 100%; max-width: 390px;
+  backdrop-filter: blur(24px);
+  box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 60px rgba(255,107,0,0.05);
   text-align: center;
 }
-.login-icon {
-  width: 64px; height: 64px; border-radius: 18px;
-  background: linear-gradient(135deg, var(--orange), #e05d00);
-  margin: 0 auto 20px;
+.login-icon-wrap {
+  width: 62px; height: 62px; border-radius: 18px;
+  background: linear-gradient(135deg, var(--orange), #c44d00);
+  margin: 0 auto 18px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 28px;
-  box-shadow: 0 8px 32px rgba(255,107,0,0.4);
+  font-size: 26px;
+  box-shadow: 0 8px 30px rgba(255,107,0,0.4);
 }
-.login-title { font-size: 22px; font-weight: 900; margin-bottom: 6px; }
-.login-sub { font-size: 13px; color: var(--text-dim); margin-bottom: 28px; }
+.login-title { font-size: 21px; font-weight: 900; margin-bottom: 5px; }
+.login-sub   { font-size: 12px; color: var(--text-dim); margin-bottom: 26px; }
 
-/* ── STATS GRID ── */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px; margin-bottom: 28px;
-}
-.stat-card {
+/* ── CARDS ── */
+.card {
   background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius); padding: 20px;
+  border-radius: var(--radius-lg); padding: 22px;
   backdrop-filter: blur(12px);
   transition: border-color 0.2s, transform 0.2s;
 }
-.stat-card:hover { border-color: rgba(255,255,255,0.15); transform: translateY(-2px); }
-.stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.card:hover { border-color: rgba(255,255,255,0.13); }
+
+/* ── STATS ── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--glass); border: 1px solid var(--glass-border);
+  border-radius: var(--radius); padding: 18px 16px;
+  backdrop-filter: blur(12px); transition: all 0.18s;
+}
+.stat-card:hover { border-color: rgba(255,255,255,0.14); transform: translateY(-2px); }
+.stat-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .stat-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center; font-size: 17px;
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
 }
-.stat-icon.orange { background: var(--orange-dim); border: 1px solid var(--orange-border); }
-.stat-icon.green  { background: var(--green-dim);  border: 1px solid rgba(0,230,118,0.28); }
-.stat-icon.blue   { background: var(--blue-dim);   border: 1px solid rgba(61,139,255,0.28); }
-.stat-icon.purple { background: rgba(139,92,246,0.1); border: 1px solid rgba(139,92,246,0.28); }
-.stat-badge {
-  font-size: 9px; font-weight: 800; letter-spacing: 1px; padding: 3px 8px;
-  border-radius: 50px; text-transform: uppercase;
+.stat-icon.o { background: var(--orange-dim); border: 1px solid var(--orange-border); }
+.stat-icon.g { background: var(--green-dim);  border: 1px solid rgba(0,230,118,0.25); }
+.stat-icon.b { background: var(--blue-dim);   border: 1px solid rgba(61,139,255,0.25); }
+.stat-icon.p { background: var(--purple-dim); border: 1px solid rgba(139,92,246,0.25); }
+.stat-pill {
+  font-size: 9px; font-weight: 800; letter-spacing: 0.8px;
+  padding: 2px 7px; border-radius: 50px; text-transform: uppercase;
 }
-.stat-badge.ok    { background: var(--green-dim); color: var(--green); border: 1px solid rgba(0,230,118,0.28); }
-.stat-badge.warn  { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-border); }
-.stat-badge.off   { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--glass-border); }
-.stat-value { font-size: 26px; font-weight: 900; margin-bottom: 3px; }
-.stat-label { font-size: 12px; color: var(--text-dim); }
+.stat-pill.ok  { background: var(--green-dim);  color: var(--green); border: 1px solid rgba(0,230,118,0.25); }
+.stat-pill.war { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-border); }
+.stat-pill.off { background: var(--glass);      color: var(--text-dim); border: 1px solid var(--glass-border); }
+.stat-value { font-size: 24px; font-weight: 900; margin-bottom: 2px; }
+.stat-label { font-size: 11px; color: var(--text-dim); }
 
-/* ── APK CARDS ── */
-.apk-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 28px; }
-
+/* ── APK CARD ── */
 .apk-card {
   background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg); overflow: hidden;
-  backdrop-filter: blur(12px);
-  transition: border-color 0.22s, box-shadow 0.22s, transform 0.22s;
+  border-radius: var(--radius-lg); overflow: hidden; backdrop-filter: blur(12px);
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 .apk-card:hover {
   border-color: var(--orange-border);
-  box-shadow: 0 16px 48px rgba(0,0,0,0.4), 0 0 28px rgba(255,107,0,0.08);
-  transform: translateY(-3px);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.4), 0 0 24px rgba(255,107,0,0.07);
+  transform: translateY(-2px);
 }
-
-.apk-card-header {
-  padding: 20px 22px 16px;
+.apk-header {
+  padding: 18px 20px 14px;
   border-bottom: 1px solid var(--glass-border);
   display: flex; align-items: center; gap: 14px;
 }
-.apk-app-icon {
-  width: 46px; height: 46px; border-radius: 12px;
-  background: linear-gradient(135deg, var(--orange), #c24a00);
+.apk-icon {
+  width: 46px; height: 46px; border-radius: 13px;
+  background: linear-gradient(135deg, var(--orange), #c44d00);
   display: flex; align-items: center; justify-content: center;
-  font-size: 21px; flex-shrink: 0;
-  box-shadow: 0 4px 14px rgba(255,107,0,0.35);
+  font-size: 22px; flex-shrink: 0;
+  box-shadow: 0 4px 14px rgba(255,107,0,0.38);
 }
-.apk-app-name { font-size: 15px; font-weight: 800; margin-bottom: 3px; }
-.apk-app-id   { font-size: 11px; color: var(--text-dim); font-family: monospace; }
-.apk-version-badge {
+.apk-name    { font-size: 15px; font-weight: 800; margin-bottom: 2px; }
+.apk-pkg     { font-size: 10px; color: var(--text-dim); font-family: monospace; }
+.apk-ver-badge {
   margin-left: auto; flex-shrink: 0;
   background: var(--orange-dim); border: 1px solid var(--orange-border);
   border-radius: 8px; padding: 4px 10px;
   font-size: 12px; font-weight: 800; color: var(--orange);
 }
-
-.apk-card-body { padding: 18px 22px; }
-
+.apk-body { padding: 16px 20px 18px; }
 .info-row {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
-  font-size: 13px;
+  padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+  font-size: 12px;
 }
-.info-row:last-of-type { border-bottom: none; margin-bottom: 16px; }
-.info-key   { color: var(--text-dim); }
-.info-value { font-weight: 600; color: #fff; text-align: right; max-width: 60%; word-break: break-all; }
-.info-value.green  { color: var(--green); }
-.info-value.orange { color: var(--orange); }
-.info-value.red    { color: var(--red); }
-
+.info-row:last-of-type { border-bottom: none; margin-bottom: 14px; }
+.info-k { color: var(--text-dim); }
+.info-v { font-weight: 600; text-align: right; max-width: 58%; word-break: break-all; }
+.info-v.g { color: var(--green); }
+.info-v.r { color: var(--red); }
+.info-v.o { color: var(--orange); }
 .apk-actions { display: flex; gap: 8px; }
-.action-btn {
-  flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 10px; border-radius: 10px;
+.act-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 9px 10px; border-radius: 9px;
   font-size: 12px; font-weight: 700; cursor: pointer;
-  transition: all 0.18s; border: 1px solid transparent;
-  text-decoration: none;
+  transition: all 0.15s; border: 1px solid transparent; text-decoration: none;
 }
-.action-btn.primary { background: var(--orange); color: #fff; }
-.action-btn.primary:hover { background: #e05d00; box-shadow: 0 4px 18px rgba(255,107,0,0.4); }
-.action-btn.secondary { background: var(--glass2); color: var(--text-mid); border-color: var(--glass-border); }
-.action-btn.secondary:hover { background: var(--glass-border); color: #fff; }
-.action-btn.download { background: var(--green-dim); color: var(--green); border-color: rgba(0,230,118,0.25); }
-.action-btn.download:hover { background: rgba(0,230,118,0.18); }
+.act-btn.primary  { background: var(--orange); color: #fff; }
+.act-btn.primary:hover  { background: #e05d00; box-shadow: 0 4px 16px rgba(255,107,0,0.38); }
+.act-btn.dl  { background: var(--green-dim); color: var(--green); border-color: rgba(0,230,118,0.22); }
+.act-btn.dl:hover  { background: rgba(0,230,118,0.18); }
+.act-btn.sec { background: var(--glass2); color: var(--text-mid); border-color: var(--glass-border); }
+.act-btn.sec:hover { color: #fff; }
+.act-btn[disabled] { opacity: 0.4; cursor: not-allowed; }
 
-/* ── UPDATE PANEL ── */
-.update-panel {
-  background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg); padding: 28px;
-  backdrop-filter: blur(12px);
-}
-.panel-title { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
-.panel-sub   { font-size: 12px; color: var(--text-dim); margin-bottom: 24px; }
-
-.app-selector {
-  display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap;
-}
-.app-tab {
-  display: flex; align-items: center; gap: 7px;
-  padding: 8px 14px; border-radius: 10px;
-  font-size: 12px; font-weight: 700; cursor: pointer;
-  background: var(--glass2); color: var(--text-mid);
-  border: 1px solid var(--glass-border); transition: all 0.18s;
-}
-.app-tab:hover { color: #fff; background: var(--glass-border); }
-.app-tab.active { background: var(--orange-dim); color: var(--orange); border-color: var(--orange-border); }
-
+/* ── FORM ELEMENTS ── */
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-full  { grid-column: 1/-1; }
-
-.field { display: flex; flex-direction: column; gap: 6px; }
+.form-full  { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 5px; }
 .field label {
   font-size: 10px; font-weight: 700; color: var(--text-dim);
-  text-transform: uppercase; letter-spacing: 1px;
+  text-transform: uppercase; letter-spacing: 0.9px;
 }
 .field input, .field textarea, .field select {
   background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-  border-radius: 10px; color: #fff; padding: 11px 14px;
+  border-radius: 9px; color: #fff; padding: 10px 13px;
   font-size: 13px; outline: none; font-family: inherit;
-  transition: border-color 0.2s, box-shadow 0.2s;
-  width: 100%;
+  transition: border-color 0.18s, box-shadow 0.18s; width: 100%;
 }
 .field input:focus, .field textarea:focus, .field select:focus {
   border-color: var(--orange);
-  box-shadow: 0 0 0 3px rgba(255,107,0,0.12);
+  box-shadow: 0 0 0 3px rgba(255,107,0,0.1);
 }
 .field select { appearance: none; cursor: pointer; }
-.field textarea { resize: vertical; min-height: 90px; }
-
-.checkbox-row {
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer;
-}
-.checkbox-row input[type=checkbox] {
-  width: 16px; height: 16px; accent-color: var(--orange);
-  cursor: pointer; flex-shrink: 0;
-}
+.field textarea { resize: vertical; min-height: 86px; }
+.checkbox-row { display: flex; align-items: center; gap: 9px; cursor: pointer; }
+.checkbox-row input { width: 15px; height: 15px; accent-color: var(--orange); cursor: pointer; flex-shrink: 0; }
 .checkbox-row span { font-size: 13px; color: var(--text-mid); }
 
 .file-drop {
-  border: 1.5px dashed rgba(255,255,255,0.14);
-  border-radius: 12px; padding: 22px;
+  border: 1.5px dashed rgba(255,255,255,0.13);
+  border-radius: 11px; padding: 20px;
   text-align: center; cursor: pointer;
-  transition: all 0.2s; background: rgba(255,255,255,0.02);
+  transition: all 0.18s; background: rgba(255,255,255,0.02);
 }
 .file-drop:hover, .file-drop.drag { border-color: var(--orange); background: var(--orange-dim); }
-.file-drop-icon { font-size: 28px; margin-bottom: 8px; }
-.file-drop-text { font-size: 13px; color: var(--text-mid); margin-bottom: 4px; }
+.file-drop-icon { font-size: 26px; margin-bottom: 7px; }
+.file-drop-txt  { font-size: 13px; color: var(--text-mid); margin-bottom: 3px; }
 .file-drop-hint { font-size: 11px; color: var(--text-dim); }
-.file-drop-name { font-size: 13px; color: var(--orange); font-weight: 700; margin-top: 6px; }
+.file-name-tag  { font-size: 12px; color: var(--orange); font-weight: 700; margin-top: 5px; display: none; }
 .file-drop input[type=file] { display: none; }
 
-.submit-btn {
-  width: 100%; background: linear-gradient(135deg, var(--orange), #e05d00);
-  color: #fff; border: none; border-radius: 12px;
-  padding: 14px; font-size: 14px; font-weight: 800;
-  cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 4px 18px rgba(255,107,0,0.3);
-  display: flex; align-items: center; justify-content: center; gap: 8px;
+.divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(255,107,0,0.18),transparent); margin: 20px 0; }
+
+.big-btn {
+  width: 100%; background: linear-gradient(135deg, var(--orange), #d85500);
+  color: #fff; border: none; border-radius: 11px;
+  padding: 13px; font-size: 14px; font-weight: 800;
+  cursor: pointer; transition: all 0.18s;
+  box-shadow: 0 4px 18px rgba(255,107,0,0.28);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
 }
-.submit-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(255,107,0,0.45); }
-.submit-btn:active { transform: scale(0.99); }
-.submit-btn:disabled { background: #222; box-shadow: none; cursor: not-allowed; transform: none; }
+.big-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 26px rgba(255,107,0,0.42); }
+.big-btn:active { transform: scale(0.99); }
+.big-btn:disabled { background: #1e1e2a; box-shadow: none; cursor: not-allowed; transform: none; color: var(--text-dim); }
 
 .msg-box {
-  padding: 12px 16px; border-radius: 10px; font-size: 13px;
-  display: none; margin-top: 12px; font-weight: 600;
+  padding: 11px 15px; border-radius: 9px; font-size: 12px; font-weight: 600;
+  display: none; margin-top: 11px;
 }
-.msg-box.success { background: rgba(0,200,80,0.1); border: 1px solid rgba(0,200,80,0.28); color: #4dff99; }
-.msg-box.error   { background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.28); color: #ff7070; }
+.msg-box.ok  { background: rgba(0,200,80,0.1);  border: 1px solid rgba(0,200,80,0.28); color: #4dff99; }
+.msg-box.err { background: rgba(255,50,50,0.1); border: 1px solid rgba(255,50,50,0.28); color: #ff7070; }
 
-/* ── KEY FIELD ── */
-.key-row { display: flex; gap: 10px; }
-.key-row .field { flex: 1; }
-.verify-btn {
-  align-self: flex-end;
-  padding: 11px 18px; border-radius: 10px;
-  background: var(--orange-dim); border: 1px solid var(--orange-border);
-  color: var(--orange); font-size: 12px; font-weight: 700;
-  cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0;
-}
-.verify-btn:hover { background: rgba(255,107,0,0.2); }
-
-/* ── DIVIDER ── */
-.divider { height: 1px; background: linear-gradient(90deg,transparent,rgba(255,107,0,0.2),transparent); margin: 22px 0; }
-
-/* ── CHANGELOG ── */
-.changelog-card {
+/* ── NOTIFICATION ITEMS ── */
+.notif-list { display: flex; flex-direction: column; gap: 10px; }
+.notif-item {
+  display: flex; align-items: flex-start; gap: 13px;
   background: var(--glass); border: 1px solid var(--glass-border);
-  border-radius: var(--radius-lg); padding: 24px;
-  backdrop-filter: blur(12px);
+  border-radius: var(--radius); padding: 14px 16px;
+  transition: border-color 0.15s;
 }
-.changelog-title { font-size: 15px; font-weight: 800; margin-bottom: 16px; }
-.log-item {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+.notif-item:hover { border-color: rgba(255,255,255,0.13); }
+.notif-item.update { border-left: 3px solid var(--orange); }
+.notif-item.alert  { border-left: 3px solid var(--red);    }
+.notif-item.info   { border-left: 3px solid var(--blue);   }
+.notif-type-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.notif-body { flex: 1; min-width: 0; }
+.notif-title   { font-size: 13px; font-weight: 800; margin-bottom: 3px; }
+.notif-message { font-size: 12px; color: var(--text-mid); line-height: 1.5; word-break: break-word; }
+.notif-meta    { font-size: 10px; color: var(--text-dim); margin-top: 5px; }
+.notif-del {
+  background: none; border: none; color: var(--text-dim); font-size: 17px;
+  cursor: pointer; transition: color 0.15s; flex-shrink: 0; padding: 2px 4px;
 }
-.log-item:last-child { border-bottom: none; }
-.log-dot  { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); margin-top: 5px; flex-shrink: 0; }
-.log-text { font-size: 13px; color: var(--text-mid); line-height: 1.5; }
-.log-time { font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+.notif-del:hover { color: var(--red); }
+.notif-pill {
+  font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 50px;
+  text-transform: uppercase; letter-spacing: 0.8px; display: inline-flex; margin-left: 7px;
+}
+.notif-pill.update { background: var(--orange-dim); color: var(--orange); border: 1px solid var(--orange-border); }
+.notif-pill.alert  { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(255,71,87,0.28); }
+.notif-pill.info   { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(61,139,255,0.28); }
 
-/* ── SECTION HEADER ── */
-.section-hdr { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.section-hdr-left { display: flex; align-items: center; gap: 10px; }
-.section-hdr-icon { font-size: 18px; }
-.section-hdr-title { font-size: 17px; font-weight: 800; }
-.section-hdr-sub   { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+/* ── PUSH SUBSCRIBE BANNER ── */
+.push-banner {
+  display: flex; align-items: center; gap: 14px;
+  background: linear-gradient(135deg, rgba(255,107,0,0.1), rgba(255,107,0,0.05));
+  border: 1px solid var(--orange-border); border-radius: var(--radius);
+  padding: 14px 18px; margin-bottom: 20px;
+}
+.push-banner-icon { font-size: 24px; flex-shrink: 0; }
+.push-banner-text { flex: 1; }
+.push-banner-title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.push-banner-sub   { font-size: 11px; color: var(--text-mid); }
+.push-sub-btn {
+  background: var(--orange); color: #fff;
+  border: none; border-radius: 9px; padding: 9px 16px;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+}
+.push-sub-btn:hover { background: #e05d00; box-shadow: 0 4px 14px rgba(255,107,0,0.35); }
+.push-sub-btn.unsub { background: var(--glass2); color: var(--text-mid); border: 1px solid var(--glass-border); }
+.push-sub-btn.unsub:hover { color: var(--red); border-color: rgba(255,71,87,0.3); }
+
+/* ── COPY FIELD ── */
+.copy-field-wrap { position: relative; }
+.copy-field-wrap input { cursor: pointer; color: var(--orange); padding-right: 80px; font-family: monospace; font-size: 12px; }
+.copy-tag {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 10px; font-weight: 700; color: var(--text-dim);
+  background: var(--glass2); border: 1px solid var(--glass-border);
+  border-radius: 5px; padding: 2px 7px; cursor: pointer; transition: all 0.15s;
+}
+.copy-tag:hover { color: var(--orange); border-color: var(--orange-border); }
 
 /* ── TOAST ── */
-.toast-wrap { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast-wrap { position: fixed; bottom: 22px; right: 22px; z-index: 9999; display: flex; flex-direction: column; gap: 9px; }
 .toast {
-  background: rgba(15,15,25,0.95); border: 1px solid var(--glass-border);
-  border-radius: 12px; padding: 13px 18px;
-  font-size: 13px; font-weight: 600; backdrop-filter: blur(20px);
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-  display: flex; align-items: center; gap: 10px;
-  animation: slideIn 0.3s cubic-bezier(0.34,1.56,0.64,1);
-  max-width: 320px;
+  background: rgba(13,13,24,0.96); border: 1px solid var(--glass-border);
+  border-radius: 11px; padding: 12px 16px;
+  font-size: 12px; font-weight: 600; backdrop-filter: blur(22px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+  display: flex; align-items: center; gap: 9px;
+  animation: slideIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 300px;
 }
-.toast.success { border-color: rgba(0,230,118,0.3); color: #4dff99; }
-.toast.error   { border-color: rgba(255,71,87,0.3);  color: #ff7070; }
-.toast.info    { border-color: var(--orange-border);  color: var(--orange); }
+.toast.ok  { border-color: rgba(0,230,118,0.3);  color: #4dff99; }
+.toast.err { border-color: rgba(255,71,87,0.3);   color: #ff7070; }
+.toast.inf { border-color: var(--orange-border);  color: var(--orange); }
 @keyframes slideIn {
   from { transform: translateX(110%); opacity: 0; }
   to   { transform: translateX(0);    opacity: 1; }
 }
 
-/* ── LOADING SPINNER ── */
-.spinner {
-  display: inline-block; width: 14px; height: 14px;
-  border: 2px solid rgba(255,255,255,0.2);
-  border-top-color: #fff;
-  border-radius: 50%; animation: spin 0.7s linear infinite;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
+/* ── SPINNER ── */
+.spin { display:inline-block; width:13px; height:13px; border:2px solid rgba(255,255,255,0.2); border-top-color:#fff; border-radius:50%; animation:_spin 0.65s linear infinite; }
+@keyframes _spin { to { transform: rotate(360deg); } }
 
-/* ── SKELETON ── */
-.skel {
-  background: linear-gradient(90deg,rgba(255,255,255,0.04) 25%,rgba(255,255,255,0.08) 50%,rgba(255,255,255,0.04) 75%);
-  background-size: 200% 100%; animation: shimmer 1.5s infinite;
-  border-radius: 8px;
-}
-@keyframes shimmer { to { background-position: -200% 0; } }
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+.empty-ico { font-size: 36px; margin-bottom: 10px; }
+.empty-txt { font-size: 13px; line-height: 1.6; }
 
-/* ── MOBILE ── */
-.menu-toggle {
-  display: none; background: none; border: none; color: #fff;
-  font-size: 22px; cursor: pointer; padding: 4px;
-}
-@media (max-width: 768px) {
+/* ── RESPONSIVE ── */
+.sidebar-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:199; }
+@media (max-width: 800px) {
   .sidebar { transform: translateX(-100%); }
   .sidebar.open { transform: translateX(0); }
+  .sidebar-overlay.open { display: block; }
   .main { margin-left: 0; }
-  .menu-toggle { display: block; }
-  .content { padding: 20px 16px 60px; }
-  .topbar { padding: 14px 16px; }
-  .stats-grid { grid-template-columns: 1fr 1fr; }
-  .apk-grid { grid-template-columns: 1fr; }
+  .menu-btn { display: block; }
+  .content { padding: 18px 14px 60px; }
+  .topbar { padding: 12px 14px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
   .form-grid { grid-template-columns: 1fr; }
-  .key-row { flex-direction: column; }
-  .verify-btn { align-self: stretch; }
-  .sidebar-overlay { display: block; }
+  .push-banner { flex-wrap: wrap; }
 }
-.sidebar-overlay {
-  display: none; position: fixed; inset: 0;
-  background: rgba(0,0,0,0.6); z-index: 99;
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
 }
-.sidebar-overlay.open { display: block; }
 </style>
 </head>
 <body>
 
-<div class="bg-mesh"><div class="grid-lines"></div></div>
+<div class="bg-mesh"><div class="bg-grid"></div></div>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-<!-- SIDEBAR OVERLAY (MOBILE) -->
-<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-<!-- SIDEBAR -->
+<!-- ════════════════════ SIDEBAR ════════════════════ -->
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-logo">
-    <div class="logo-icon">⚽</div>
-    <div class="logo-text">Ultra<span>gol</span></div>
-    <div class="logo-badge">ADMIN</div>
+    <div class="logo-icon">📱</div>
+    <div class="logo-text">Ultra<span>gol1</span></div>
+    <div class="logo-pill">ADMIN</div>
   </div>
 
   <nav class="sidebar-nav">
-    <div class="nav-section-label">General</div>
-    <button class="nav-item active" onclick="showSection('dashboard')" id="nav-dashboard">
+    <div class="nav-label">General</div>
+    <button class="nav-item active" onclick="nav('dashboard')" id="ni-dashboard">
       <span class="nav-icon">📊</span> Dashboard
       <span class="nav-dot"></span>
     </button>
 
-    <div class="nav-section-label">Aplicaciones</div>
-    <button class="nav-item" onclick="showSection('apks')" id="nav-apks">
-      <span class="nav-icon">📦</span> Mis APKs
+    <div class="nav-label">Aplicación</div>
+    <button class="nav-item" onclick="nav('apk')" id="ni-apk">
+      <span class="nav-icon">📦</span> Mi APK
     </button>
-    <button class="nav-item" onclick="showSection('update')" id="nav-update">
+    <button class="nav-item" onclick="nav('update')" id="ni-update">
       <span class="nav-icon">🚀</span> Publicar Actualización
     </button>
 
-    <div class="nav-section-label">Sistema</div>
-    <button class="nav-item" onclick="showSection('changelog')" id="nav-changelog">
-      <span class="nav-icon">📋</span> Historial
+    <div class="nav-label">Comunicación</div>
+    <button class="nav-item" onclick="nav('notifications')" id="ni-notifications">
+      <span class="nav-icon">🔔</span> Notificaciones
+      <span class="nav-badge" id="notifBadge" style="display:none">0</span>
     </button>
-    <button class="nav-item" onclick="showSection('settings')" id="nav-settings">
+
+    <div class="nav-label">Sistema</div>
+    <button class="nav-item" onclick="nav('settings')" id="ni-settings">
       <span class="nav-icon">⚙️</span> Configuración
     </button>
   </nav>
 
   <div class="sidebar-footer">
-    <div class="server-status">
-      <div class="status-dot"></div>
-      Servidor activo
-    </div>
+    <div class="status-dot"></div>
+    Servidor activo
   </div>
 </aside>
 
-<!-- MAIN -->
+<!-- ════════════════════ MAIN ════════════════════ -->
 <div class="main">
 
-  <!-- TOP BAR -->
   <header class="topbar">
-    <div style="display:flex;align-items:center;gap:12px">
-      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+    <div class="page-info">
+      <button class="menu-btn" onclick="toggleSidebar()">☰</button>
       <div>
         <div class="page-title" id="pageTitle">Dashboard</div>
-        <div class="page-sub" id="pageSub">Bienvenido al panel de control</div>
+        <div class="page-sub"   id="pageSub">Bienvenido al panel de control</div>
       </div>
     </div>
-    <div class="topbar-actions">
-      <button class="topbar-btn" onclick="refreshAll()" id="refreshBtn">
-        <span id="refreshIcon">⟳</span> Actualizar
-      </button>
-      <button class="topbar-btn primary" onclick="showSection('update')">
-        🚀 Publicar
-      </button>
+    <div class="topbar-right">
+      <button class="tb-btn" onclick="doRefresh()" id="refreshBtn">⟳ Actualizar</button>
+      <button class="tb-btn orange" onclick="nav('update')">🚀 Publicar</button>
     </div>
   </header>
 
   <div class="content">
 
-    <!-- ═══════════════════ DASHBOARD ═══════════════════ -->
-    <div class="section active" id="section-dashboard">
+    <!-- ══════════ DASHBOARD ══════════ -->
+    <div class="section active" id="sec-dashboard">
 
       <!-- LOGIN GATE -->
       <div class="login-gate" id="loginGate">
         <div class="login-card">
-          <div class="login-icon">🔐</div>
+          <div class="login-icon-wrap">🔐</div>
           <div class="login-title">Acceso al Panel</div>
           <div class="login-sub">Ingresa tu clave de administrador para continuar</div>
-
-          <div class="field" style="margin-bottom:14px">
+          <div class="field" style="margin-bottom:14px;text-align:left">
             <label>Clave de administrador</label>
             <input type="password" id="loginKey" placeholder="••••••••••••"
                    onkeydown="if(event.key==='Enter')doLogin()" />
           </div>
-          <button class="submit-btn" onclick="doLogin()" id="loginBtn">
-            <span id="loginBtnText">🔓 Ingresar</span>
-          </button>
+          <button class="big-btn" onclick="doLogin()" id="loginBtn">🔓 Ingresar</button>
           <div class="msg-box" id="loginMsg"></div>
         </div>
       </div>
 
-      <!-- DASHBOARD CONTENT (hidden until login) -->
+      <!-- DASHBOARD CONTENT -->
       <div id="dashContent" style="display:none">
-        <!-- STATS -->
-        <div class="section-hdr">
-          <div class="section-hdr-left">
-            <span class="section-hdr-icon">📊</span>
+
+        <div class="sec-hdr">
+          <div class="sec-hdr-left">
+            <span class="sec-hdr-icon">📊</span>
             <div>
-              <div class="section-hdr-title">Resumen General</div>
-              <div class="section-hdr-sub">Estado actual de todas las aplicaciones</div>
+              <div class="sec-hdr-title">Resumen</div>
+              <div class="sec-hdr-sub">Estado actual de Ultragol1</div>
             </div>
           </div>
         </div>
 
-        <div class="stats-grid" id="statsGrid">
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon orange">📦</div>
-              <span class="stat-badge ok">Activo</span>
-            </div>
-            <div class="stat-value skel" style="width:80px;height:30px;margin-bottom:6px">&nbsp;</div>
-            <div class="stat-label">Apps desplegadas</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon green">✅</div>
-              <span class="stat-badge ok">Online</span>
-            </div>
-            <div class="stat-value skel" style="width:80px;height:30px;margin-bottom:6px">&nbsp;</div>
-            <div class="stat-label">APKs disponibles</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon blue">🕐</div>
-              <span class="stat-badge warn">Hoy</span>
-            </div>
-            <div class="stat-value" id="statTime">—</div>
-            <div class="stat-label">Última actualización</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-header">
-              <div class="stat-icon purple">🌐</div>
-              <span class="stat-badge ok">En línea</span>
-            </div>
-            <div class="stat-value">v4.0</div>
-            <div class="stat-label">Servidor</div>
-          </div>
+        <div class="stats-row" id="statsRow">
+          <!-- rendered by JS -->
         </div>
 
-        <!-- APK CARDS PREVIEW -->
-        <div class="section-hdr" style="margin-top:8px">
-          <div class="section-hdr-left">
-            <span class="section-hdr-icon">📱</span>
+        <div class="sec-hdr" style="margin-top:4px">
+          <div class="sec-hdr-left">
+            <span class="sec-hdr-icon">📱</span>
             <div>
-              <div class="section-hdr-title">Aplicaciones</div>
-              <div class="section-hdr-sub">Versiones publicadas actualmente</div>
+              <div class="sec-hdr-title">Ultragol1</div>
+              <div class="sec-hdr-sub">Versión actualmente publicada</div>
             </div>
           </div>
-          <button class="topbar-btn" onclick="showSection('apks')">Ver todas →</button>
+          <button class="tb-btn" onclick="nav('apk')">Ver detalle →</button>
         </div>
+        <div id="dashApkCard"></div>
 
-        <div class="apk-grid" id="dashApkGrid">
-          <!-- Filled by JS -->
-        </div>
       </div>
     </div>
 
-    <!-- ═══════════════════ APKs ═══════════════════ -->
-    <div class="section" id="section-apks">
-      <div class="section-hdr">
-        <div class="section-hdr-left">
-          <span class="section-hdr-icon">📦</span>
+    <!-- ══════════ APK ══════════ -->
+    <div class="section" id="sec-apk">
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <span class="sec-hdr-icon">📦</span>
           <div>
-            <div class="section-hdr-title">Mis APKs</div>
-            <div class="section-hdr-sub">Gestiona todas tus aplicaciones</div>
+            <div class="sec-hdr-title">Mi APK — Ultragol1</div>
+            <div class="sec-hdr-sub">Información detallada del paquete</div>
           </div>
         </div>
       </div>
-      <div class="apk-grid" id="apkGrid">
-        <!-- Filled by JS -->
-      </div>
+      <div id="apkDetail"></div>
     </div>
 
-    <!-- ═══════════════════ PUBLISH ═══════════════════ -->
-    <div class="section" id="section-update">
-      <div class="section-hdr">
-        <div class="section-hdr-left">
-          <span class="section-hdr-icon">🚀</span>
+    <!-- ══════════ PUBLISH ══════════ -->
+    <div class="section" id="sec-update">
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <span class="sec-hdr-icon">🚀</span>
           <div>
-            <div class="section-hdr-title">Publicar Actualización</div>
-            <div class="section-hdr-sub">Sube una nueva versión de tu APK</div>
+            <div class="sec-hdr-title">Publicar Actualización</div>
+            <div class="sec-hdr-sub">Sube una nueva versión de Ultragol1</div>
           </div>
         </div>
       </div>
 
-      <div class="update-panel">
-        <div class="app-selector" id="appTabs">
-          <button class="app-tab active" onclick="selectApp('ultragol')" data-app="ultragol">⚽ Ultragol</button>
-          <button class="app-tab" onclick="selectApp('ultragol1')" data-app="ultragol1">📱 Ultragol1</button>
-          <button class="app-tab" onclick="selectApp('ultra1')" data-app="ultra1">⚡ Ultra1</button>
-        </div>
-
+      <div class="card">
         <div class="form-grid">
           <div class="field">
             <label>Número de versión (versionCode)</label>
-            <input type="number" id="upVersionCode" placeholder="Ej: 5" min="1" />
+            <input type="number" id="upCode" placeholder="Ej: 5" min="1" />
           </div>
           <div class="field">
             <label>Nombre de versión (versionName)</label>
-            <input type="text" id="upVersionName" placeholder="Ej: 1.5.0" />
+            <input type="text" id="upName" placeholder="Ej: 1.5.0" />
           </div>
           <div class="field form-full">
-            <label>Novedades de la versión (changelog)</label>
-            <textarea id="upChangelog" placeholder="- Nueva función X&#10;- Mejoras de rendimiento&#10;- Corrección de errores"></textarea>
+            <label>Novedades de la versión</label>
+            <textarea id="upLog" placeholder="- Nueva función X&#10;- Mejoras de rendimiento&#10;- Corrección de errores"></textarea>
           </div>
           <div class="field form-full">
             <label class="checkbox-row" style="text-transform:none;letter-spacing:0">
-              <input type="checkbox" id="upForceUpdate" />
+              <input type="checkbox" id="upForce" />
               <span>Actualización obligatoria — el usuario no puede ignorarla</span>
             </label>
           </div>
@@ -697,93 +627,140 @@ body {
             <label>Archivo APK <span style="font-weight:400;color:var(--text-dim)">(opcional — solo si cambió el binario)</span></label>
             <label class="file-drop" id="fileDrop">
               <div class="file-drop-icon">📦</div>
-              <div class="file-drop-text">Arrastra tu archivo .apk aquí</div>
-              <div class="file-drop-hint">o haz clic para seleccionar</div>
-              <div class="file-drop-name" id="upFileName" style="display:none"></div>
-              <input type="file" id="upApkFile" accept=".apk" onchange="onFileChange(this)" />
+              <div class="file-drop-txt">Arrastra tu .apk aquí o haz clic</div>
+              <div class="file-drop-hint">Máximo 500 MB — solo archivos .apk</div>
+              <div class="file-name-tag" id="fileNameTag"></div>
+              <input type="file" id="upFile" accept=".apk" onchange="onFileChange(this)" />
             </label>
           </div>
         </div>
-
         <div class="divider"></div>
-
-        <button class="submit-btn" id="publishBtn" onclick="submitUpdate()">
-          🚀 Publicar Actualización
-        </button>
+        <button class="big-btn" id="publishBtn" onclick="submitUpdate()">🚀 Publicar Actualización</button>
         <div class="msg-box" id="publishMsg"></div>
       </div>
     </div>
 
-    <!-- ═══════════════════ CHANGELOG ═══════════════════ -->
-    <div class="section" id="section-changelog">
-      <div class="section-hdr">
-        <div class="section-hdr-left">
-          <span class="section-hdr-icon">📋</span>
+    <!-- ══════════ NOTIFICATIONS ══════════ -->
+    <div class="section" id="sec-notifications">
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <span class="sec-hdr-icon">🔔</span>
           <div>
-            <div class="section-hdr-title">Historial de Actualizaciones</div>
-            <div class="section-hdr-sub">Registro de versiones publicadas</div>
+            <div class="sec-hdr-title">Notificaciones</div>
+            <div class="sec-hdr-sub">Envía mensajes a los usuarios de tu app</div>
           </div>
         </div>
       </div>
-      <div class="changelog-card" id="changelogCard">
-        <div class="changelog-title">Versiones publicadas</div>
-        <div id="changelogList">
-          <div style="color:var(--text-dim);font-size:13px">Cargando historial…</div>
+
+      <!-- Web push subscribe banner -->
+      <div class="push-banner" id="pushBanner">
+        <span class="push-banner-icon">📲</span>
+        <div class="push-banner-text">
+          <div class="push-banner-title">Recibir notificaciones en este navegador</div>
+          <div class="push-banner-sub">Activa las notificaciones para recibir alertas cuando se publique algo nuevo.</div>
         </div>
+        <button class="push-sub-btn" id="pushSubBtn" onclick="togglePushSub()">Activar</button>
+      </div>
+
+      <!-- Compose -->
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:14px;font-weight:800;margin-bottom:4px">Enviar Notificación</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:18px">Llega a todos los usuarios que tengan las notificaciones activadas</div>
+        <div class="form-grid">
+          <div class="field form-full">
+            <label>Título</label>
+            <input type="text" id="nTitle" placeholder="Ej: Nueva versión disponible" maxlength="80" />
+          </div>
+          <div class="field form-full">
+            <label>Mensaje</label>
+            <textarea id="nMsg" placeholder="Ej: Actualiza tu app para disfrutar las novedades 🚀" style="min-height:70px" maxlength="300"></textarea>
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="nType">
+              <option value="info">ℹ️ Información</option>
+              <option value="update">🚀 Actualización</option>
+              <option value="alert">⚠️ Alerta</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Expirar en (horas, dejar vacío = sin expiración)</label>
+            <input type="number" id="nExpire" placeholder="Ej: 24" min="1" />
+          </div>
+        </div>
+        <div class="divider"></div>
+        <button class="big-btn" id="sendNotifBtn" onclick="sendNotification()">🔔 Enviar Notificación</button>
+        <div class="msg-box" id="notifMsg"></div>
+      </div>
+
+      <!-- Active notifications -->
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <span class="sec-hdr-icon">📋</span>
+          <div>
+            <div class="sec-hdr-title">Notificaciones Activas</div>
+            <div class="sec-hdr-sub">Visibles para los usuarios de la app ahora mismo</div>
+          </div>
+        </div>
+        <button class="tb-btn" onclick="loadNotifications()">⟳ Refrescar</button>
+      </div>
+      <div class="notif-list" id="notifList">
+        <div class="empty"><div class="empty-ico">🔔</div><div class="empty-txt">Cargando…</div></div>
       </div>
     </div>
 
-    <!-- ═══════════════════ SETTINGS ═══════════════════ -->
-    <div class="section" id="section-settings">
-      <div class="section-hdr">
-        <div class="section-hdr-left">
-          <span class="section-hdr-icon">⚙️</span>
+    <!-- ══════════ SETTINGS ══════════ -->
+    <div class="section" id="sec-settings">
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <span class="sec-hdr-icon">⚙️</span>
           <div>
-            <div class="section-hdr-title">Configuración</div>
-            <div class="section-hdr-sub">Ajustes del servidor y la cuenta</div>
+            <div class="sec-hdr-title">Configuración</div>
+            <div class="sec-hdr-sub">Endpoints para conectar tu APK con el servidor</div>
           </div>
         </div>
       </div>
 
-      <div class="update-panel">
-        <div class="panel-title">URLs de descarga</div>
-        <div class="panel-sub">Endpoints públicos de tu servidor para conectar con la APK</div>
+      <div class="card" style="margin-bottom:20px">
+        <div style="font-size:14px;font-weight:800;margin-bottom:4px">URLs del Servidor</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:18px">Copia estas URLs y pégalas en tu app Android</div>
 
         <div class="form-grid">
           <div class="field form-full">
-            <label>Ultragol — versión</label>
-            <input type="text" readonly id="cfgUrl1" style="cursor:pointer;color:var(--orange)" onclick="copyField(this)" />
+            <label>Verificar versión (llamar al abrir la app)</label>
+            <div class="copy-field-wrap">
+              <input type="text" readonly id="cfgVersion" onclick="copyField(this)" />
+              <span class="copy-tag" onclick="copyField(document.getElementById('cfgVersion'))">Copiar</span>
+            </div>
           </div>
           <div class="field form-full">
-            <label>Ultragol — descarga</label>
-            <input type="text" readonly id="cfgUrl2" style="cursor:pointer;color:var(--orange)" onclick="copyField(this)" />
+            <label>Descargar APK</label>
+            <div class="copy-field-wrap">
+              <input type="text" readonly id="cfgDownload" onclick="copyField(this)" />
+              <span class="copy-tag" onclick="copyField(document.getElementById('cfgDownload'))">Copiar</span>
+            </div>
           </div>
           <div class="field form-full">
-            <label>Ultragol1 — versión</label>
-            <input type="text" readonly id="cfgUrl3" style="cursor:pointer;color:var(--orange)" onclick="copyField(this)" />
-          </div>
-          <div class="field form-full">
-            <label>Ultra1 — versión</label>
-            <input type="text" readonly id="cfgUrl4" style="cursor:pointer;color:var(--orange)" onclick="copyField(this)" />
+            <label>Obtener notificaciones activas</label>
+            <div class="copy-field-wrap">
+              <input type="text" readonly id="cfgNotif" onclick="copyField(this)" />
+              <span class="copy-tag" onclick="copyField(document.getElementById('cfgNotif'))">Copiar</span>
+            </div>
           </div>
         </div>
+      </div>
 
-        <div class="divider"></div>
-
-        <div class="panel-title">Código de integración Android</div>
-        <div class="panel-sub">Pega esto en tu app para conectarla con el servidor de actualizaciones</div>
-
-        <div class="field form-full">
-          <label>URL base (pegar en strings.xml o BuildConfig)</label>
-          <input type="text" readonly id="cfgBaseUrl" style="cursor:pointer;color:var(--orange);font-family:monospace;font-size:12px" onclick="copyField(this)" />
-        </div>
-
-        <div style="margin-top:16px;padding:16px;background:rgba(255,107,0,0.06);border:1px solid var(--orange-border);border-radius:12px;font-size:12px;color:var(--text-mid);line-height:1.7">
-          <strong style="color:var(--orange)">📱 Cómo conectar tu APK:</strong><br>
-          1. Copia la URL base de arriba.<br>
-          2. En tu app, llama a <code style="color:var(--orange)">[URL_BASE]/version</code> al iniciar.<br>
-          3. Si el servidor devuelve un <code style="color:var(--orange)">versionCode</code> mayor al actual → muestra el diálogo de actualización.<br>
-          4. El enlace de descarga viene incluido en la respuesta JSON (<code style="color:var(--orange)">downloadUrl</code>).
+      <div class="card">
+        <div style="font-size:14px;font-weight:800;margin-bottom:12px">📱 Cómo integrar en tu APK Android</div>
+        <div style="font-size:12px;color:var(--text-mid);line-height:1.9">
+          <strong style="color:var(--orange)">1. Verificar actualizaciones:</strong><br>
+          Al abrir la app, llama a <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">GET /ultragol1/version</code>.
+          Si el <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">versionCode</code> del servidor es mayor al tuyo → muestra diálogo de actualización.<br><br>
+          <strong style="color:var(--orange)">2. Mostrar notificaciones:</strong><br>
+          Llama a <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">GET /notifications</code>.
+          El JSON devuelve un array con <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">title</code>, <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">message</code> y <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">type</code>.<br><br>
+          <strong style="color:var(--orange)">3. Descargar APK:</strong><br>
+          El campo <code style="color:var(--orange);background:var(--orange-dim);padding:1px 5px;border-radius:4px">downloadUrl</code> en la respuesta de versión ya contiene el enlace directo.
         </div>
       </div>
     </div>
@@ -791,43 +768,42 @@ body {
   </div>
 </div>
 
-<!-- TOAST CONTAINER -->
 <div class="toast-wrap" id="toastWrap"></div>
 
 <script>
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let adminKey   = '';
-let currentApp = 'ultragol';
-let appsData   = {};
-let isLoggedIn = false;
+// ─── CONSTANTS ────────────────────────────────────────────────────────────────
+const APP_ID   = 'ultragol1';
+const VER_URL  = '/ultragol1/version';
+const DL_URL   = '/ultragol1/download';
+const INFO_URL = '/admin/info?app=ultragol1';
 
-const APPS = [
-  { id: 'ultragol',  name: 'Ultragol',  icon: '⚽', versionEndpoint: '/version',         downloadEndpoint: '/download' },
-  { id: 'ultragol1', name: 'Ultragol1', icon: '📱', versionEndpoint: '/ultragol1/version', downloadEndpoint: '/ultragol1/download' },
-  { id: 'ultra1',    name: 'Ultra1',    icon: '⚡', versionEndpoint: '/ultra1/version',    downloadEndpoint: '/ultra1/download' },
-];
-
-// ─── NAV ──────────────────────────────────────────────────────────────────────
-const PAGE_INFO = {
-  dashboard: ['Dashboard',              'Bienvenido al panel de control'],
-  apks:      ['Mis APKs',              'Gestiona todas tus aplicaciones'],
-  update:    ['Publicar Actualización', 'Sube una nueva versión de tu APK'],
-  changelog: ['Historial',             'Registro de versiones publicadas'],
-  settings:  ['Configuración',         'Ajustes del servidor y la cuenta'],
+const PAGE_META = {
+  dashboard:     ['Dashboard',              'Bienvenido al panel de control'],
+  apk:           ['Mi APK',                'Ultragol1 — detalle del paquete'],
+  update:        ['Publicar Actualización', 'Sube una nueva versión de Ultragol1'],
+  notifications: ['Notificaciones',        'Envía mensajes a los usuarios'],
+  settings:      ['Configuración',         'Endpoints y guía de integración'],
 };
 
-function showSection(id) {
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let adminKey   = '';
+let appData    = {};
+let pushSub    = null;
+let notifCount = 0;
+
+// ─── NAV ──────────────────────────────────────────────────────────────────────
+function nav(id) {
   document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('section-' + id).classList.add('active');
-  const nav = document.getElementById('nav-' + id);
-  if (nav) nav.classList.add('active');
-  const [title, sub] = PAGE_INFO[id] || [id, ''];
-  document.getElementById('pageTitle').textContent = title;
-  document.getElementById('pageSub').textContent   = sub;
-  if (window.innerWidth <= 768) closeSidebar();
-  if (id === 'settings' && isLoggedIn) populateSettings();
-  if (id === 'changelog' && isLoggedIn) renderChangelog();
+  document.getElementById('sec-' + id).classList.add('active');
+  const ni = document.getElementById('ni-' + id);
+  if (ni) ni.classList.add('active');
+  const [t, s] = PAGE_META[id] || [id, ''];
+  document.getElementById('pageTitle').textContent = t;
+  document.getElementById('pageSub').textContent   = s;
+  if (id === 'notifications') loadNotifications();
+  if (id === 'settings')      fillSettings();
+  closeSidebar();
 }
 
 // ─── SIDEBAR ──────────────────────────────────────────────────────────────────
@@ -843,334 +819,404 @@ function closeSidebar() {
 // ─── LOGIN ────────────────────────────────────────────────────────────────────
 async function doLogin() {
   const key = document.getElementById('loginKey').value.trim();
-  if (!key) return showMsg('loginMsg', 'Ingresa tu clave de administrador', 'error');
+  if (!key) return showMsg('loginMsg', 'Ingresa tu clave de administrador', 'err');
   const btn = document.getElementById('loginBtn');
-  document.getElementById('loginBtnText').innerHTML = '<span class="spinner"></span> Verificando…';
-  btn.disabled = true;
-
+  btn.innerHTML = '<span class="spin"></span> Verificando…';
+  btn.disabled  = true;
   try {
-    const r = await fetch('/admin/info?app=ultragol', { headers: { 'x-admin-key': key } });
+    const r = await fetch(INFO_URL, { headers: { 'x-admin-key': key } });
     if (!r.ok) {
-      showMsg('loginMsg', 'Clave incorrecta. Intenta de nuevo.', 'error');
-      document.getElementById('loginBtnText').textContent = '🔓 Ingresar';
-      btn.disabled = false;
-      return;
+      showMsg('loginMsg', '❌ Clave incorrecta. Intenta de nuevo.', 'err');
+      btn.innerHTML = '🔓 Ingresar'; btn.disabled = false; return;
     }
+    const d = await r.json();
     adminKey = key;
-    isLoggedIn = true;
+    appData  = { version: d.version, info: d };
     document.getElementById('loginGate').style.display   = 'none';
     document.getElementById('dashContent').style.display = 'block';
-    toast('Acceso concedido ✓', 'success');
-    await refreshAll();
+    toast('Acceso concedido ✓', 'ok');
+    renderStats();
+    renderApkCard('dashApkCard', false);
+    renderApkCard('apkDetail', true);
+    fillSettings();
+    registerSW();
   } catch {
-    showMsg('loginMsg', 'Error de conexión', 'error');
-    document.getElementById('loginBtnText').textContent = '🔓 Ingresar';
-    btn.disabled = false;
+    showMsg('loginMsg', '❌ Error de conexión', 'err');
+    btn.innerHTML = '🔓 Ingresar'; btn.disabled = false;
   }
 }
 
-// ─── FETCH ALL DATA ───────────────────────────────────────────────────────────
-async function refreshAll() {
-  const icon = document.getElementById('refreshIcon');
-  icon.style.animation = 'spin 0.7s linear infinite';
-
-  await Promise.all(APPS.map(app => fetchAppData(app)));
-  renderDashStats();
-  renderDashApks();
-  renderApkGrid();
-
-  icon.style.animation = '';
-}
-
-async function fetchAppData(app) {
+// ─── REFRESH ──────────────────────────────────────────────────────────────────
+async function doRefresh() {
+  if (!adminKey) return;
+  const btn = document.getElementById('refreshBtn');
+  btn.textContent = '⟳ …';
   try {
-    const [verRes, infoRes] = await Promise.all([
-      fetch(app.versionEndpoint),
-      adminKey ? fetch(`/admin/info?app=${app.id}`, { headers: { 'x-admin-key': adminKey } }) : Promise.resolve(null),
+    const [vr, ir] = await Promise.all([
+      fetch(VER_URL),
+      fetch(INFO_URL, { headers: { 'x-admin-key': adminKey } }),
     ]);
-    const verData  = verRes.ok  ? await verRes.json() : {};
-    const infoData = infoRes && infoRes.ok ? await infoRes.json() : {};
-    appsData[app.id] = { ...app, version: verData, info: infoData };
-  } catch {
-    appsData[app.id] = { ...app, version: {}, info: {} };
-  }
+    const vd = vr.ok ? await vr.json() : {};
+    const id = ir.ok ? await ir.json() : {};
+    appData = { version: vd, info: id };
+    renderStats();
+    renderApkCard('dashApkCard', false);
+    renderApkCard('apkDetail', true);
+    toast('Datos actualizados', 'inf');
+  } catch { toast('Error al actualizar', 'err'); }
+  btn.textContent = '⟳ Actualizar';
 }
 
 // ─── RENDER STATS ─────────────────────────────────────────────────────────────
-function renderDashStats() {
-  const apkCount = APPS.filter(a => appsData[a.id]?.info?.apkExists).length;
-  const lastUpdate = (() => {
-    const dates = APPS.map(a => appsData[a.id]?.version?.updatedAt).filter(Boolean);
-    if (!dates.length) return '—';
-    const latest = new Date(Math.max(...dates.map(d => new Date(d))));
-    return latest.toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric' });
-  })();
+function renderStats() {
+  const v   = appData.version || {};
+  const inf = appData.info    || {};
+  const ver = v.versionName   ? `v${v.versionName}` : '—';
+  const apk = inf.apkExists;
+  const upd = v.updatedAt ? new Date(v.updatedAt).toLocaleDateString('es',{day:'2-digit',month:'short'}) : '—';
 
-  document.getElementById('statTime').textContent = lastUpdate;
-
-  const grid = document.getElementById('statsGrid');
-  grid.innerHTML = `
+  document.getElementById('statsRow').innerHTML = `
     <div class="stat-card">
-      <div class="stat-header">
-        <div class="stat-icon orange">📦</div>
-        <span class="stat-badge ok">Activo</span>
-      </div>
-      <div class="stat-value">${APPS.length}</div>
-      <div class="stat-label">Apps desplegadas</div>
+      <div class="stat-top"><div class="stat-icon o">📱</div><span class="stat-pill ok">Activo</span></div>
+      <div class="stat-value">${h(ver)}</div>
+      <div class="stat-label">Versión publicada</div>
     </div>
     <div class="stat-card">
-      <div class="stat-header">
-        <div class="stat-icon green">✅</div>
-        <span class="stat-badge ${apkCount > 0 ? 'ok' : 'off'}">
-          ${apkCount > 0 ? 'Disponible' : 'Sin APK'}
-        </span>
-      </div>
-      <div class="stat-value">${apkCount}</div>
-      <div class="stat-label">APKs disponibles</div>
+      <div class="stat-top"><div class="stat-icon g">✅</div><span class="stat-pill ${apk ? 'ok' : 'off'}">${apk ? 'Disponible' : 'Sin APK'}</span></div>
+      <div class="stat-value">${apk ? inf.apkSize || '—' : '—'}</div>
+      <div class="stat-label">APK en servidor</div>
     </div>
     <div class="stat-card">
-      <div class="stat-header">
-        <div class="stat-icon blue">🕐</div>
-        <span class="stat-badge warn">Reciente</span>
-      </div>
-      <div class="stat-value">${lastUpdate}</div>
-      <div class="stat-label">Última actualización</div>
+      <div class="stat-top"><div class="stat-icon b">🕐</div><span class="stat-pill war">Última</span></div>
+      <div class="stat-value" style="font-size:18px">${upd}</div>
+      <div class="stat-label">Actualización</div>
     </div>
     <div class="stat-card">
-      <div class="stat-header">
-        <div class="stat-icon purple">🌐</div>
-        <span class="stat-badge ok">Online</span>
-      </div>
-      <div class="stat-value">v4.0</div>
-      <div class="stat-label">Servidor</div>
+      <div class="stat-top"><div class="stat-icon p">🔔</div><span class="stat-pill ok">Online</span></div>
+      <div class="stat-value">${notifCount}</div>
+      <div class="stat-label">Notif. activas</div>
     </div>
   `;
 }
 
-// ─── RENDER APK CARDS ─────────────────────────────────────────────────────────
-function apkCardHTML(data, showActions = true) {
-  const v   = data.version || {};
-  const inf = data.info    || {};
-  const ver = v.versionName ? `v${v.versionName}` : '—';
-  const code = v.versionCode || '—';
-  const apkOk = inf.apkExists;
-  const size  = inf.apkSize || '—';
-  const updated = v.updatedAt ? new Date(v.updatedAt).toLocaleString('es') : '—';
-  const force   = v.forceUpdate ? '<span style="color:var(--red)">Sí ⚠️</span>' : '<span style="color:var(--green)">No</span>';
-  const origin  = window.location.origin;
+// ─── RENDER APK CARD ──────────────────────────────────────────────────────────
+function renderApkCard(containerId, showActions) {
+  const v   = appData.version || {};
+  const inf = appData.info    || {};
+  const ver    = v.versionName ? `v${v.versionName}` : '—';
+  const code   = v.versionCode || '—';
+  const apkOk  = inf.apkExists;
+  const size   = inf.apkSize || '—';
+  const upd    = v.updatedAt ? new Date(v.updatedAt).toLocaleString('es') : '—';
+  const force  = v.forceUpdate
+    ? '<span class="info-v r">Sí ⚠️</span>'
+    : '<span class="info-v g">No</span>';
+  const origin = window.location.origin;
 
-  return `
+  document.getElementById(containerId).innerHTML = `
     <div class="apk-card">
-      <div class="apk-card-header">
-        <div class="apk-app-icon">${data.icon}</div>
+      <div class="apk-header">
+        <div class="apk-icon">📱</div>
         <div>
-          <div class="apk-app-name">${h(data.name)}</div>
-          <div class="apk-app-id">app=${data.id}</div>
+          <div class="apk-name">Ultragol1</div>
+          <div class="apk-pkg">com.ultragol.app · ${APP_ID}</div>
         </div>
-        <div class="apk-version-badge">${ver}</div>
+        <div class="apk-ver-badge">${ver}</div>
       </div>
-      <div class="apk-card-body">
-        <div class="info-row"><span class="info-key">Version Code</span><span class="info-value">${code}</span></div>
-        <div class="info-row"><span class="info-key">APK en servidor</span><span class="info-value ${apkOk ? 'green' : 'red'}">${apkOk ? '✅ ' + size : '❌ No subido'}</span></div>
-        <div class="info-row"><span class="info-key">Forzar actualiz.</span><span class="info-value">${force}</span></div>
-        <div class="info-row"><span class="info-key">Actualizado</span><span class="info-value" style="font-size:11px">${updated}</span></div>
+      <div class="apk-body">
+        <div class="info-row"><span class="info-k">Version Code</span><span class="info-v">${code}</span></div>
+        <div class="info-row"><span class="info-k">APK en servidor</span>${apkOk ? `<span class="info-v g">✅ ${h(size)}</span>` : '<span class="info-v r">❌ No subido</span>'}</div>
+        <div class="info-row"><span class="info-k">Forzar actualización</span>${force}</div>
+        <div class="info-row"><span class="info-k">Actualizado</span><span class="info-v" style="font-size:11px">${h(upd)}</span></div>
+        ${v.changelog ? `<div class="info-row"><span class="info-k">Changelog</span><span class="info-v" style="font-size:11px;white-space:pre-line;text-align:left;max-width:70%">${h(v.changelog)}</span></div>` : ''}
         ${showActions ? `
         <div class="apk-actions">
-          <button class="action-btn primary" onclick="goUpdate('${data.id}')">🚀 Actualizar</button>
+          <button class="act-btn primary" onclick="nav('update')">🚀 Actualizar</button>
           ${apkOk
-            ? `<a class="action-btn download" href="${origin}${data.downloadEndpoint}" target="_blank" download>⬇️ Descargar</a>`
-            : `<button class="action-btn secondary" disabled>⬇️ Sin APK</button>`
-          }
+            ? `<a class="act-btn dl" href="${origin}${DL_URL}" target="_blank" download>⬇️ Descargar APK</a>`
+            : `<button class="act-btn sec" disabled>⬇️ Sin APK</button>`}
         </div>` : ''}
       </div>
     </div>
   `;
 }
 
-function renderDashApks() {
-  document.getElementById('dashApkGrid').innerHTML = APPS.map(a => apkCardHTML(appsData[a.id] || a, false)).join('');
-}
-
-function renderApkGrid() {
-  document.getElementById('apkGrid').innerHTML = APPS.map(a => apkCardHTML(appsData[a.id] || a, true)).join('');
-}
-
-function goUpdate(appId) {
-  selectApp(appId);
-  showSection('update');
-}
-
-// ─── APP SELECTOR ─────────────────────────────────────────────────────────────
-function selectApp(id) {
-  currentApp = id;
-  document.querySelectorAll('.app-tab').forEach(t => t.classList.toggle('active', t.dataset.app === id));
-  const data = appsData[id];
-  if (data && data.version) {
-    const v = data.version;
-    document.getElementById('upVersionCode').value   = v.versionCode  || '';
-    document.getElementById('upVersionName').value   = v.versionName  || '';
-    document.getElementById('upChangelog').value     = v.changelog    || '';
-    document.getElementById('upForceUpdate').checked = v.forceUpdate  || false;
-  } else {
-    document.getElementById('upVersionCode').value   = '';
-    document.getElementById('upVersionName').value   = '';
-    document.getElementById('upChangelog').value     = '';
-    document.getElementById('upForceUpdate').checked = false;
-  }
-  document.getElementById('upFileName').style.display = 'none';
-  document.getElementById('upApkFile').value = '';
-}
-
 // ─── FILE DRAG & DROP ─────────────────────────────────────────────────────────
 function onFileChange(input) {
-  const name = input.files[0]?.name;
-  const el   = document.getElementById('upFileName');
-  if (name) { el.textContent = '📦 ' + name; el.style.display = 'block'; }
-  else      { el.style.display = 'none'; }
+  const el = document.getElementById('fileNameTag');
+  if (input.files[0]) { el.textContent = '📦 ' + input.files[0].name; el.style.display = 'block'; }
+  else { el.style.display = 'none'; }
 }
-
 const fileDrop = document.getElementById('fileDrop');
 fileDrop.addEventListener('dragover',  e => { e.preventDefault(); fileDrop.classList.add('drag'); });
-fileDrop.addEventListener('dragleave', ()=> fileDrop.classList.remove('drag'));
+fileDrop.addEventListener('dragleave', ()  => fileDrop.classList.remove('drag'));
 fileDrop.addEventListener('drop', e => {
   e.preventDefault(); fileDrop.classList.remove('drag');
-  const file = e.dataTransfer.files[0];
-  if (file && file.name.endsWith('.apk')) {
-    const dt = new DataTransfer(); dt.items.add(file);
-    document.getElementById('upApkFile').files = dt.files;
-    onFileChange(document.getElementById('upApkFile'));
-  } else {
-    toast('Solo se aceptan archivos .apk', 'error');
-  }
+  const f = e.dataTransfer.files[0];
+  if (f?.name.endsWith('.apk')) {
+    const dt = new DataTransfer(); dt.items.add(f);
+    document.getElementById('upFile').files = dt.files;
+    onFileChange(document.getElementById('upFile'));
+  } else { toast('Solo se aceptan archivos .apk', 'err'); }
 });
 
-// ─── SUBMIT UPDATE ────────────────────────────────────────────────────────────
+// ─── PUBLISH UPDATE ───────────────────────────────────────────────────────────
 async function submitUpdate() {
-  if (!adminKey) { toast('Primero inicia sesión', 'error'); return; }
-  const code = document.getElementById('upVersionCode').value;
-  const name = document.getElementById('upVersionName').value.trim();
-  if (!code || !name) { showMsg('publishMsg', 'Completa versionCode y versionName', 'error'); return; }
+  if (!adminKey) { toast('Primero inicia sesión', 'err'); return; }
+  const code = document.getElementById('upCode').value;
+  const name = document.getElementById('upName').value.trim();
+  if (!code || !name) { showMsg('publishMsg', 'Completa versionCode y versionName', 'err'); return; }
 
   const btn = document.getElementById('publishBtn');
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span> Publicando…';
+  btn.innerHTML = '<span class="spin"></span> Publicando…';
+  btn.disabled  = true;
 
   const form = new FormData();
   form.append('versionCode', code);
   form.append('versionName', name);
-  form.append('changelog',   document.getElementById('upChangelog').value);
-  form.append('forceUpdate', document.getElementById('upForceUpdate').checked);
-  const apk = document.getElementById('upApkFile').files[0];
+  form.append('changelog',   document.getElementById('upLog').value);
+  form.append('forceUpdate', document.getElementById('upForce').checked);
+  const apk = document.getElementById('upFile').files[0];
   if (apk) form.append('apk', apk);
 
   try {
-    const r = await fetch(`/admin/update?app=${currentApp}`, {
-      method: 'POST',
-      headers: { 'x-admin-key': adminKey },
-      body: form,
+    const r = await fetch(`/admin/update?app=${APP_ID}`, {
+      method: 'POST', headers: { 'x-admin-key': adminKey }, body: form,
     });
     const d = await r.json();
-    if (!r.ok) { showMsg('publishMsg', d.error || 'Error al publicar', 'error'); }
+    if (!r.ok) { showMsg('publishMsg', d.error || 'Error al publicar', 'err'); }
     else {
-      showMsg('publishMsg', `✅ ${h(d.version?.versionName)} (${d.version?.versionCode}) publicada correctamente`, 'success');
-      toast(`${currentApp} actualizado a v${d.version?.versionName}`, 'success');
-      await fetchAppData(APPS.find(a => a.id === currentApp));
-      renderDashApks();
-      renderApkGrid();
+      showMsg('publishMsg', `✅ v${h(d.version?.versionName)} publicada correctamente`, 'ok');
+      toast(`Ultragol1 actualizado a v${d.version?.versionName}`, 'ok');
+      appData.version = d.version;
+      renderStats();
+      renderApkCard('dashApkCard', false);
+      renderApkCard('apkDetail', true);
     }
-  } catch { showMsg('publishMsg', 'Error de red', 'error'); }
+  } catch { showMsg('publishMsg', 'Error de red', 'err'); }
 
-  btn.disabled = false;
   btn.innerHTML = '🚀 Publicar Actualización';
+  btn.disabled  = false;
 }
 
-// ─── CHANGELOG ────────────────────────────────────────────────────────────────
-function renderChangelog() {
-  const items = APPS.map(app => {
-    const d = appsData[app.id];
-    if (!d || !d.version || !d.version.versionName) return null;
-    const v = d.version;
-    return { app: app.name, icon: app.icon, version: v.versionName, code: v.versionCode, changelog: v.changelog, updated: v.updatedAt };
-  }).filter(Boolean);
+// ─── NOTIFICATIONS ────────────────────────────────────────────────────────────
+async function loadNotifications() {
+  const list = document.getElementById('notifList');
+  list.innerHTML = '<div class="empty"><div class="empty-ico">⏳</div><div class="empty-txt">Cargando…</div></div>';
+  try {
+    const r    = adminKey
+      ? await fetch('/admin/notifications', { headers: { 'x-admin-key': adminKey } })
+      : await fetch('/notifications');
+    const data = r.ok ? await r.json() : { notifications: [] };
+    const notifs = data.notifications || [];
+    notifCount = notifs.length;
+    updateNotifBadge(notifCount);
+    renderStats();
 
-  if (!items.length) {
-    document.getElementById('changelogList').innerHTML = '<div style="color:var(--text-dim);font-size:13px">Sin datos. Inicia sesión primero.</div>';
+    if (!notifs.length) {
+      list.innerHTML = '<div class="empty"><div class="empty-ico">🔕</div><div class="empty-txt">No hay notificaciones activas.</div></div>';
+      return;
+    }
+    const icons = { update: '🚀', alert: '⚠️', info: 'ℹ️' };
+    list.innerHTML = notifs.map(n => `
+      <div class="notif-item ${h(n.type)}" id="ni-${h(n.id)}">
+        <div class="notif-type-icon">${icons[n.type] || 'ℹ️'}</div>
+        <div class="notif-body">
+          <div class="notif-title">
+            ${h(n.title)}
+            <span class="notif-pill ${h(n.type)}">${h(n.type)}</span>
+          </div>
+          <div class="notif-message">${h(n.message)}</div>
+          <div class="notif-meta">
+            Enviada: ${new Date(n.createdAt).toLocaleString('es')}
+            ${n.expiresAt ? ` · Expira: ${new Date(n.expiresAt).toLocaleString('es')}` : ''}
+          </div>
+        </div>
+        ${adminKey ? `<button class="notif-del" onclick="deleteNotif('${h(n.id)}')" title="Eliminar">✕</button>` : ''}
+      </div>
+    `).join('');
+  } catch {
+    list.innerHTML = '<div class="empty"><div class="empty-ico">❌</div><div class="empty-txt">Error al cargar notificaciones.</div></div>';
+  }
+}
+
+async function sendNotification() {
+  if (!adminKey) { toast('Primero inicia sesión', 'err'); return; }
+  const title   = document.getElementById('nTitle').value.trim();
+  const message = document.getElementById('nMsg').value.trim();
+  if (!title || !message) { showMsg('notifMsg', 'Completa título y mensaje', 'err'); return; }
+
+  const btn = document.getElementById('sendNotifBtn');
+  btn.innerHTML = '<span class="spin"></span> Enviando…';
+  btn.disabled  = true;
+
+  try {
+    const r = await fetch('/admin/notify', {
+      method: 'POST',
+      headers: { 'x-admin-key': adminKey, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title,
+        message,
+        type:      document.getElementById('nType').value,
+        expiresIn: document.getElementById('nExpire').value || null,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) { showMsg('notifMsg', d.error || 'Error al enviar', 'err'); }
+    else {
+      showMsg('notifMsg', `✅ Notificación enviada a ${d.sent} suscriptor(es)`, 'ok');
+      toast('Notificación enviada ✓', 'ok');
+      document.getElementById('nTitle').value   = '';
+      document.getElementById('nMsg').value     = '';
+      document.getElementById('nExpire').value  = '';
+      await loadNotifications();
+    }
+  } catch { showMsg('notifMsg', 'Error de red', 'err'); }
+
+  btn.innerHTML = '🔔 Enviar Notificación';
+  btn.disabled  = false;
+}
+
+async function deleteNotif(id) {
+  if (!adminKey) return;
+  try {
+    const r = await fetch(`/admin/notify/${id}`, {
+      method: 'DELETE', headers: { 'x-admin-key': adminKey },
+    });
+    if (r.ok) { toast('Notificación eliminada', 'inf'); await loadNotifications(); }
+    else toast('Error al eliminar', 'err');
+  } catch { toast('Error de red', 'err'); }
+}
+
+function updateNotifBadge(count) {
+  const badge = document.getElementById('notifBadge');
+  badge.style.display = count > 0 ? 'flex' : 'none';
+  badge.textContent   = count;
+}
+
+// ─── WEB PUSH ─────────────────────────────────────────────────────────────────
+async function registerSW() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
+  try {
+    await navigator.serviceWorker.register('/sw.js');
+    checkPushState();
+  } catch (e) { console.warn('SW:', e); }
+}
+
+async function checkPushState() {
+  const reg  = await navigator.serviceWorker.ready;
+  pushSub    = await reg.pushManager.getSubscription();
+  const btn  = document.getElementById('pushSubBtn');
+  const banner = document.getElementById('pushBanner');
+  if (pushSub) {
+    btn.textContent  = 'Desactivar';
+    btn.className    = 'push-sub-btn unsub';
+    document.querySelector('.push-banner-title').textContent = 'Notificaciones activadas en este navegador';
+    document.querySelector('.push-banner-sub').textContent   = 'Recibirás alertas cuando se publique algo nuevo.';
+  }
+  if (Notification.permission === 'denied') {
+    banner.style.display = 'none';
+  }
+}
+
+async function togglePushSub() {
+  if (!('serviceWorker' in navigator)) {
+    toast('Tu navegador no soporta notificaciones push', 'err'); return;
+  }
+  if (pushSub) {
+    await pushSub.unsubscribe();
+    await fetch('/push/subscribe', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ endpoint: pushSub.endpoint }),
+    });
+    pushSub = null;
+    toast('Notificaciones desactivadas', 'inf');
+    checkPushState();
     return;
   }
+  const perm = await Notification.requestPermission();
+  if (perm !== 'granted') { toast('Permiso denegado', 'err'); return; }
 
-  document.getElementById('changelogList').innerHTML = items.map(it => `
-    <div class="log-item">
-      <div class="log-dot"></div>
-      <div>
-        <div style="font-size:13px;font-weight:700;margin-bottom:4px">
-          ${it.icon} ${h(it.app)} — <span style="color:var(--orange)">v${h(it.version)}</span>
-          <span style="font-size:11px;color:var(--text-dim);margin-left:6px">(code ${it.code})</span>
-        </div>
-        ${it.changelog ? `<div class="log-text">${h(it.changelog).replace(/\n/g,'<br>')}</div>` : ''}
-        ${it.updated   ? `<div class="log-time">Actualizado: ${new Date(it.updated).toLocaleString('es')}</div>` : ''}
-      </div>
-    </div>
-  `).join('');
+  try {
+    const kr  = await fetch('/push/vapid-public-key');
+    const { key } = await kr.json();
+    const reg = await navigator.serviceWorker.ready;
+    pushSub   = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array(key),
+    });
+    await fetch('/push/subscribe', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(pushSub),
+    });
+    toast('¡Notificaciones activadas! ✓', 'ok');
+    checkPushState();
+  } catch (e) { toast('Error al activar notificaciones', 'err'); console.error(e); }
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 // ─── SETTINGS ────────────────────────────────────────────────────────────────
-function populateSettings() {
-  const origin = window.location.origin;
-  document.getElementById('cfgUrl1').value = origin + '/version';
-  document.getElementById('cfgUrl2').value = origin + '/download';
-  document.getElementById('cfgUrl3').value = origin + '/ultragol1/version';
-  document.getElementById('cfgUrl4').value = origin + '/ultra1/version';
-  document.getElementById('cfgBaseUrl').value = origin;
+function fillSettings() {
+  const o = window.location.origin;
+  document.getElementById('cfgVersion').value  = o + '/ultragol1/version';
+  document.getElementById('cfgDownload').value = o + '/ultragol1/download';
+  document.getElementById('cfgNotif').value    = o + '/notifications';
 }
 
+// ─── POPULATE UPDATE FORM FROM CURRENT VERSION ────────────────────────────────
+function prefillUpdateForm() {
+  const v = appData.version || {};
+  if (v.versionCode) document.getElementById('upCode').value = v.versionCode;
+  if (v.versionName) document.getElementById('upName').value = v.versionName;
+  if (v.changelog)   document.getElementById('upLog').value  = v.changelog;
+  if (v.forceUpdate) document.getElementById('upForce').checked = v.forceUpdate;
+}
+
+// Override nav for update section to prefill form
+const _origNav = nav;
+function nav(id) {
+  _origNav(id);
+  if (id === 'update' && adminKey) prefillUpdateForm();
+}
+
+// ─── COPY FIELD ───────────────────────────────────────────────────────────────
 function copyField(el) {
-  navigator.clipboard.writeText(el.value).then(() => toast('Copiado al portapapeles ✓', 'info'));
-}
-
-// ─── REFRESH BTN ─────────────────────────────────────────────────────────────
-async function refreshAll() {
-  if (!isLoggedIn) return;
-  const icon = document.getElementById('refreshIcon');
-  icon.style.display = 'inline-block';
-  icon.style.animation = 'spin 0.7s linear infinite';
-  await Promise.all(APPS.map(a => fetchAppData(a)));
-  renderDashStats();
-  renderDashApks();
-  renderApkGrid();
-  if (document.getElementById('section-changelog').classList.contains('active')) renderChangelog();
-  icon.style.animation = '';
-  toast('Datos actualizados', 'info');
+  navigator.clipboard.writeText(el.value)
+    .then(() => toast('Copiado ✓', 'inf'))
+    .catch(() => { el.select(); document.execCommand('copy'); toast('Copiado ✓', 'inf'); });
 }
 
 // ─── TOAST ────────────────────────────────────────────────────────────────────
-function toast(msg, type = 'info') {
+function toast(msg, type = 'inf') {
+  const ico = { ok: '✅', err: '❌', inf: '💡' };
   const el  = document.createElement('div');
   el.className = `toast ${type}`;
-  const icons = { success: '✅', error: '❌', info: '💡' };
-  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span> ${h(msg)}`;
+  el.innerHTML = `<span>${ico[type]}</span> ${h(msg)}`;
   document.getElementById('toastWrap').appendChild(el);
-  setTimeout(() => el.remove(), 3800);
+  setTimeout(() => el.remove(), 3600);
 }
 
-// ─── SHOW MSG ─────────────────────────────────────────────────────────────────
 function showMsg(id, text, type) {
   const el = document.getElementById(id);
-  el.textContent = text;
-  el.className = 'msg-box ' + type;
-  el.style.display = 'block';
+  el.textContent = text; el.className = 'msg-box ' + type; el.style.display = 'block';
   setTimeout(() => { el.style.display = 'none'; }, 5000);
 }
 
 // ─── HELPERS ─────────────────────────────────────────────────────────────────
 function h(s) {
-  return String(s || '')
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
-window.addEventListener('DOMContentLoaded', () => {
-  populateSettings();
-});
+fillSettings();
 </script>
 </body>
 </html>
