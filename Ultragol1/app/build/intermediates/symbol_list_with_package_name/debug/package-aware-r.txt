@@ -2963,6 +2963,9 @@ drawable detail_type_badge_bg
 drawable divider_vertical_glass
 drawable dot_active
 drawable dot_inactive
+drawable ep_badge_bg
+drawable ep_duration_bg
+drawable ep_thumb_gradient
 drawable episode_card_bg
 drawable genre_chip_bg
 drawable glass_card_bg
@@ -2976,6 +2979,7 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_arrow_back_black_24
+drawable ic_back
 drawable ic_call_answer
 drawable ic_call_answer_low
 drawable ic_call_answer_video
@@ -3245,14 +3249,17 @@ id btnBannerPlay
 id btnBell
 id btnClearAll
 id btnDetailBack
+id btnEpBack
 id btnEpMinus
 id btnEpPlus
 id btnFavorite
 id btnLoadEpisode
 id btnMenu
 id btnMyList
+id btnNextSeason
 id btnPlay
 id btnPlayerBack
+id btnPrevSeason
 id btnRefresh
 id btnSearch
 id btnSeasonMinus
@@ -3374,6 +3381,7 @@ id end
 id endToStart
 id enterAlways
 id enterAlwaysCollapsed
+id epLoading
 id episodeSection
 id errorServers
 id exitUntilCollapsed
@@ -3440,6 +3448,7 @@ id inward
 id is_pooling_container_tag
 id italic
 id item_touch_helper_previous_elevation
+id ivEpStill
 id jumpToEnd
 id jumpToStart
 id labeled
@@ -3618,6 +3627,7 @@ id rowTrending
 id rowTrendingCarousel
 id rowVerTodos
 id row_index_key
+id rvEpisodes
 id save_non_transition_alpha
 id save_overlay_view
 id sawtooth
@@ -3653,6 +3663,7 @@ id search_view_status_bar_spacer
 id search_view_toolbar
 id search_view_toolbar_container
 id search_voice_btn
+id seasonCard
 id select_dialog_listview
 id selected
 id selection_type
@@ -3760,8 +3771,15 @@ id trendingRating
 id trendingTitle
 id trendingYear
 id triangle
+id tvEpBadge
+id tvEpCode
+id tvEpDuration
+id tvEpOverview
+id tvEpSeriesTitle
+id tvEpTitle
 id tvEpisode
 id tvSeason
+id tvSeasonLabel
 id unchecked
 id uniform
 id unlabeled
@@ -3902,6 +3920,7 @@ layout abc_search_view
 layout abc_select_dialog_material
 layout abc_tooltip
 layout activity_detail
+layout activity_episode_picker
 layout activity_main
 layout activity_player
 layout activity_search
@@ -3924,6 +3943,7 @@ layout design_text_input_end_icon
 layout design_text_input_start_icon
 layout dialog_server_select
 layout dialog_update
+layout episode_item
 layout fragment_football
 layout fragment_grid
 layout fragment_home

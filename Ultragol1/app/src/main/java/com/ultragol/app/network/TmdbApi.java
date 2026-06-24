@@ -132,6 +132,41 @@ public class TmdbApi {
             + "&page=1";
         return parse(new JSONObject(fetch(path)).getJSONArray("results"), type);
     }
+    // ── Episode data ──────────────────────────────────────────────────────────
+    public static class EpisodeInfo {
+        public final int season, number, runtime;
+        public final String name, overview, stillUrl;
+        public EpisodeInfo(int season, int number, String name, String overview, String stillUrl, int runtime) {
+            this.season = season; this.number = number; this.name = name;
+            this.overview = overview; this.stillUrl = stillUrl; this.runtime = runtime;
+        }
+    }
+
+    public static List<EpisodeInfo> fetchSeasonEpisodes(int seriesId, int season) throws Exception {
+        JSONObject root = new JSONObject(fetch("/tv/" + seriesId + "/season/" + season + "?language=es-MX"));
+        JSONArray arr = root.optJSONArray("episodes");
+        List<EpisodeInfo> list = new ArrayList<>();
+        if (arr == null) return list;
+        for (int i = 0; i < arr.length(); i++) {
+            try {
+                JSONObject o = arr.getJSONObject(i);
+                int epNum = o.optInt("episode_number", i + 1);
+                String name = o.optString("name", "Episodio " + epNum);
+                String overview = o.optString("overview", "");
+                String stillPath = o.optString("still_path", "");
+                String stillUrl = stillPath.isEmpty() ? "" : "https://image.tmdb.org/t/p/w300" + stillPath;
+                int runtime = o.optInt("runtime", 0);
+                list.add(new EpisodeInfo(season, epNum, name, overview, stillUrl, runtime));
+            } catch (Exception ignored) {}
+        }
+        return list;
+    }
+
+    public static int fetchSeriesSeasonCount(int seriesId) throws Exception {
+        JSONObject root = new JSONObject(fetch("/tv/" + seriesId + "?language=es-MX"));
+        return Math.max(1, root.optInt("number_of_seasons", 1));
+    }
+
     public static List<ContentItem> searchMulti(String query) throws Exception {
         String enc = java.net.URLEncoder.encode(query, "UTF-8");
         JSONArray arr = new JSONObject(fetch("/search/multi?query=" + enc + "&language=es-MX&page=1")).getJSONArray("results");

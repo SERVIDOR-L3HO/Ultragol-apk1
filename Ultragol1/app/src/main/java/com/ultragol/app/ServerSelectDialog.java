@@ -19,6 +19,10 @@ import java.util.concurrent.*;
 public class ServerSelectDialog {
 
     public static void show(Context context, ContentItem item) {
+        show(context, item, 1, 1);
+    }
+
+    public static void show(Context context, ContentItem item, int initSeason, int initEpisode) {
         Dialog dialog = new Dialog(context, R.style.FullScreenServerDialog);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.dialog_server_select);
@@ -60,8 +64,8 @@ public class ServerSelectDialog {
         View episodeSection = dialog.findViewById(R.id.episodeSection);
         if (episodeSection != null) episodeSection.setVisibility(isTV ? View.VISIBLE : View.GONE);
 
-        final int[] season  = {1};
-        final int[] episode = {1};
+        final int[] season  = {initSeason};
+        final int[] episode = {initEpisode};
 
         if (isTV) {
             TextView tvS = dialog.findViewById(R.id.tvSeason);
@@ -71,6 +75,8 @@ public class ServerSelectDialog {
             View bEM = dialog.findViewById(R.id.btnEpMinus);
             View bEP = dialog.findViewById(R.id.btnEpPlus);
             View bLoad = dialog.findViewById(R.id.btnLoadEpisode);
+            if (tvS != null) tvS.setText(String.valueOf(season[0]));
+            if (tvE != null) tvE.setText(String.valueOf(episode[0]));
             if (bSM != null) bSM.setOnClickListener(v -> { if (season[0]>1) { season[0]--; if(tvS!=null) tvS.setText(String.valueOf(season[0])); }});
             if (bSP != null) bSP.setOnClickListener(v -> { if (season[0]<30){ season[0]++; if(tvS!=null) tvS.setText(String.valueOf(season[0])); }});
             if (bEM != null) bEM.setOnClickListener(v -> { if (episode[0]>1){ episode[0]--; if(tvE!=null) tvE.setText(String.valueOf(episode[0])); }});
