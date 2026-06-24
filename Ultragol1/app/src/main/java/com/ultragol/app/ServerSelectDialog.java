@@ -189,11 +189,10 @@ public class ServerSelectDialog {
 
     /**
      * Row structure (children by index):
-     *   0 — spacer (weight=1, pushes content right)
-     *   1 — textCol LinearLayout
+     *   0 — radio View  (left side)
+     *   1 — textCol LinearLayout (fills remaining space)
      *         0: tvName
      *         1: tvStream
-     *   2 — radio View
      */
     private static View buildRow(Context ctx, StreamingApi.Server srv, boolean selected) {
         LinearLayout row = new LinearLayout(ctx);
@@ -202,93 +201,86 @@ public class ServerSelectDialog {
         row.setClickable(true);
         row.setFocusable(true);
 
-        // Fixed height for all rows — animation handles the visual "weight"
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 62));
         lp.setMargins(0, dp(ctx, 4), 0, dp(ctx, 4));
         row.setLayoutParams(lp);
 
         row.setBackgroundResource(selected ? R.drawable.server_row_active : R.drawable.server_row);
-        row.setPadding(dp(ctx, 18), dp(ctx, 10), dp(ctx, 18), dp(ctx, 10));
+        row.setPadding(dp(ctx, 14), dp(ctx, 10), dp(ctx, 14), dp(ctx, 10));
 
-        // Initial scale: selected = full, unselected = slightly shrunk
         if (!selected) {
             row.setScaleX(0.96f);
             row.setScaleY(0.96f);
             row.setAlpha(0.75f);
         }
 
-        // Spacer (child 0)
-        View spacer = new View(ctx);
-        row.addView(spacer, new LinearLayout.LayoutParams(0, 0, 1f));
+        // Radio indicator (child 0) — LEFT side
+        View radio = new View(ctx);
+        int radioSize = dp(ctx, selected ? 20 : 10);
+        LinearLayout.LayoutParams radioLp = new LinearLayout.LayoutParams(radioSize, radioSize);
+        radioLp.setMarginEnd(dp(ctx, 12));
+        radio.setLayoutParams(radioLp);
+        radio.setBackgroundResource(selected ? R.drawable.server_radio_ring : R.drawable.server_radio_dot);
+        row.addView(radio);     // child 0
 
-        // Text column (child 1)
+        // Text column (child 1) — fills space, LEFT aligned
         LinearLayout textCol = new LinearLayout(ctx);
         textCol.setOrientation(LinearLayout.VERTICAL);
-        textCol.setGravity(android.view.Gravity.END);
-        LinearLayout.LayoutParams tcLp = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        tcLp.setMarginEnd(dp(ctx, 16));
-        textCol.setLayoutParams(tcLp);
+        textCol.setGravity(android.view.Gravity.START | android.view.Gravity.CENTER_VERTICAL);
+        textCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView tvName = new TextView(ctx);
         tvName.setText(srv.name);
-        tvName.setGravity(android.view.Gravity.END);
-        tvName.setTextColor(selected ? 0xFFFFFFFF : 0x88FFFFFF);
-        tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, selected ? 20f : 15f);
+        tvName.setGravity(android.view.Gravity.START);
+        tvName.setTextColor(selected ? 0xFFFFFFFF : 0x99FFFFFF);
+        tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, selected ? 16f : 14f);
         tvName.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+        tvName.setMaxLines(1);
+        tvName.setEllipsize(android.text.TextUtils.TruncateAt.END);
         textCol.addView(tvName);
 
         TextView tvStream = new TextView(ctx);
-        tvStream.setText("STREAM");
-        tvStream.setGravity(android.view.Gravity.END);
-        tvStream.setTextColor(selected ? 0xCCFFFFFF : 0x44FFFFFF);
-        tvStream.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 10f);
+        tvStream.setText(srv.tipo != null && srv.tipo.equals("directo") ? "DIRECTO" : "STREAM");
+        tvStream.setGravity(android.view.Gravity.START);
+        tvStream.setTextColor(selected ? 0xAAFF6B00 : 0x44FFFFFF);
+        tvStream.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 9f);
         tvStream.setLetterSpacing(0.12f);
         tvStream.setTypeface(null, Typeface.BOLD);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        slp.setMargins(0, dp(ctx, 2), 0, 0);
+        slp.setMargins(0, dp(ctx, 1), 0, 0);
         tvStream.setLayoutParams(slp);
         textCol.addView(tvStream);
 
         row.addView(textCol);   // child 1
 
-        // Radio indicator (child 2)
-        View radio = new View(ctx);
-        int radioSize = dp(ctx, selected ? 22 : 10);
-        radio.setLayoutParams(new LinearLayout.LayoutParams(radioSize, radioSize));
-        radio.setBackgroundResource(selected ? R.drawable.server_radio_ring : R.drawable.server_radio_dot);
-        row.addView(radio);     // child 2
-
         return row;
     }
 
-    /** Animate a row into the selected state (scale up, full opacity, swap visuals). */
+    /** Animate a row into the selected state. Row: child0=radio, child1=textCol */
     private static void animateSelect(View row) {
         if (!(row instanceof LinearLayout)) return;
         LinearLayout ll = (LinearLayout) row;
 
-        // Swap background and text immediately
         row.setBackgroundResource(R.drawable.server_row_active);
-        if (ll.getChildCount() >= 3) {
-            LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
-            if (textCol.getChildCount() >= 2) {
-                ((TextView) textCol.getChildAt(0)).setTextColor(0xFFFFFFFF);
-                ((TextView) textCol.getChildAt(0)).setTextSize(
-                    android.util.TypedValue.COMPLEX_UNIT_SP, 20f);
-                ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.BOLD);
-                ((TextView) textCol.getChildAt(1)).setTextColor(0xCCFFFFFF);
-            }
-            View radio = ll.getChildAt(2);
-            int size = dp(row.getContext(), 22);
+        if (ll.getChildCount() >= 2) {
+            View radio = ll.getChildAt(0);
+            int size = dp(row.getContext(), 20);
             android.view.ViewGroup.LayoutParams rLp = radio.getLayoutParams();
             rLp.width = size; rLp.height = size;
             radio.setLayoutParams(rLp);
             radio.setBackgroundResource(R.drawable.server_radio_ring);
+
+            LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
+            if (textCol.getChildCount() >= 2) {
+                ((TextView) textCol.getChildAt(0)).setTextColor(0xFFFFFFFF);
+                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f);
+                ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.BOLD);
+                ((TextView) textCol.getChildAt(1)).setTextColor(0xAAFF6B00);
+            }
         }
 
-        // Spring-like scale + fade in
         row.setScaleX(0.88f);
         row.setScaleY(0.88f);
         row.setAlpha(0.5f);
@@ -304,31 +296,29 @@ public class ServerSelectDialog {
             .start();
     }
 
-    /** Animate a row into the deselected state (scale down, dim, swap visuals). */
+    /** Animate a row into the deselected state. Row: child0=radio, child1=textCol */
     private static void animateDeselect(View row) {
         if (!(row instanceof LinearLayout)) return;
         LinearLayout ll = (LinearLayout) row;
 
-        // Swap background and text immediately
         row.setBackgroundResource(R.drawable.server_row);
-        if (ll.getChildCount() >= 3) {
-            LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
-            if (textCol.getChildCount() >= 2) {
-                ((TextView) textCol.getChildAt(0)).setTextColor(0x88FFFFFF);
-                ((TextView) textCol.getChildAt(0)).setTextSize(
-                    android.util.TypedValue.COMPLEX_UNIT_SP, 15f);
-                ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.NORMAL);
-                ((TextView) textCol.getChildAt(1)).setTextColor(0x44FFFFFF);
-            }
-            View radio = ll.getChildAt(2);
+        if (ll.getChildCount() >= 2) {
+            View radio = ll.getChildAt(0);
             int size = dp(row.getContext(), 10);
             android.view.ViewGroup.LayoutParams rLp = radio.getLayoutParams();
             rLp.width = size; rLp.height = size;
             radio.setLayoutParams(rLp);
             radio.setBackgroundResource(R.drawable.server_radio_dot);
+
+            LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
+            if (textCol.getChildCount() >= 2) {
+                ((TextView) textCol.getChildAt(0)).setTextColor(0x99FFFFFF);
+                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f);
+                ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.NORMAL);
+                ((TextView) textCol.getChildAt(1)).setTextColor(0x44FFFFFF);
+            }
         }
 
-        // Shrink and dim
         row.animate()
             .scaleX(0.96f).scaleY(0.96f).alpha(0.75f)
             .setDuration(180)

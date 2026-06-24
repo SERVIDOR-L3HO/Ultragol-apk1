@@ -2963,6 +2963,7 @@ drawable detail_type_badge_bg
 drawable divider_vertical_glass
 drawable dot_active
 drawable dot_inactive
+drawable episode_card_bg
 drawable genre_chip_bg
 drawable glass_card_bg
 drawable glass_dialog_panel_bg
