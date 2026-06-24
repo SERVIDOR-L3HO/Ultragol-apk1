@@ -3265,7 +3265,6 @@ id btnRefresh
 id btnSearch
 id btnSeasonMinus
 id btnSeasonPlus
-id btnWatched
 id buttonPanel
 id cache_measures
 id callMeasure

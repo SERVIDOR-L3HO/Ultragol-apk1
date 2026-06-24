@@ -162,7 +162,6 @@ id btnRefresh
 id btnSearch
 id btnSeasonMinus
 id btnSeasonPlus
-id btnWatched
 id cardBadge
 id cardCta
 id cardLeague

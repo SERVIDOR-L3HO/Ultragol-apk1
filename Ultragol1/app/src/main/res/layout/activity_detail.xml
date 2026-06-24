@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#080810">
+    android:background="#000000">
 
     <!-- Backdrop full width -->
     <ImageView
@@ -35,7 +35,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Poster centered over backdrop -->
+            <!-- Poster area: sits over backdrop -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="290dp">
@@ -49,18 +49,18 @@
                     android:elevation="6dp"/>
             </FrameLayout>
 
-            <!-- Info section -->
+            <!-- Info section — plain black background -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#080810"
+                android:background="#000000"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="18dp"
+                android:paddingTop="16dp"
                 android:paddingBottom="8dp">
 
-                <!-- Type badge + NEW badge -->
+                <!-- Type badge + C rating badge -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -87,10 +87,10 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:background="@drawable/badge_new"
-                        android:text="NUEVO"
-                        android:textColor="#FFFFFF"
-                        android:textSize="10sp"
+                        android:background="@drawable/badge_rating_pill"
+                        android:text="C"
+                        android:textColor="#AAFFFFFF"
+                        android:textSize="11sp"
                         android:fontFamily="sans-serif-bold"
                         android:paddingStart="8dp"
                         android:paddingEnd="8dp"
@@ -105,11 +105,11 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:textColor="#FFFFFF"
-                    android:textSize="28sp"
+                    android:textSize="26sp"
                     android:fontFamily="sans-serif-black"
                     android:lineSpacingMultiplier="1.1"/>
 
-                <!-- Meta: year · rating · lang -->
+                <!-- Meta: year · duration · lang -->
                 <TextView
                     android:id="@+id/detailMeta"
                     android:layout_width="wrap_content"
@@ -119,7 +119,7 @@
                     android:textSize="13sp"
                     android:letterSpacing="0.02"/>
 
-                <!-- Rating pill -->
+                <!-- ◆ Rating pill -->
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
                         android:fontFamily="sans-serif-bold"/>
                 </LinearLayout>
 
-                <!-- Genre chips -->
+                <!-- Genre chips row -->
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -168,50 +168,23 @@
                     android:layout_marginTop="16dp"
                     android:background="#1AFFFFFF"/>
 
-                <!-- Synopsis -->
+                <!-- Synopsis text -->
                 <TextView
                     android:id="@+id/detailOverview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="14dp"
-                    android:textColor="#CCFFFFFF"
+                    android:textColor="#DDFFFFFF"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.7"
+                    android:lineSpacingMultiplier="1.65"
                     android:fontFamily="sans-serif"/>
 
-                <!-- ▶ Ver ahora — primary orange CTA -->
-                <LinearLayout
-                    android:id="@+id/btnPlay"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginTop="22dp"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="@drawable/btn_ver_ahora_bg"
-                    android:clickable="true"
-                    android:focusable="true"
-                    android:elevation="2dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="▶  "
-                        android:textColor="#FFFFFF"
-                        android:textSize="16sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Ver ahora"
-                        android:textColor="#FFFFFF"
-                        android:textSize="15sp"
-                        android:fontFamily="sans-serif-bold"/>
-                </LinearLayout>
-
-                <!-- Secondary buttons row -->
+                <!-- Action buttons -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="10dp">
+                    android:layout_marginTop="22dp">
 
                     <LinearLayout
                         android:id="@+id/btnFavorite"
@@ -227,13 +200,13 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="♡  "
-                            android:textColor="#FF6B6B"
-                            android:textSize="15sp"/>
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Favorito"
-                            android:textColor="#DDFFFFFF"
+                            android:textColor="#FFFFFF"
                             android:textSize="13sp"
                             android:fontFamily="sans-serif-medium"/>
                     </LinearLayout>
@@ -253,41 +226,39 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="⊟  "
-                            android:textColor="#4FC3F7"
-                            android:textSize="15sp"/>
+                            android:textColor="#FFFFFF"
+                            android:textSize="14sp"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Mi Lista"
-                            android:textColor="#DDFFFFFF"
+                            android:textColor="#FFFFFF"
                             android:textSize="13sp"
                             android:fontFamily="sans-serif-medium"/>
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Watched button -->
                 <LinearLayout
-                    android:id="@+id/btnWatched"
+                    android:id="@+id/btnPlay"
                     android:layout_width="match_parent"
-                    android:layout_height="44dp"
+                    android:layout_height="46dp"
                     android:layout_marginTop="8dp"
                     android:orientation="horizontal"
                     android:gravity="center"
                     android:background="@drawable/action_btn_bg"
                     android:clickable="true"
-                    android:focusable="true"
-                    android:visibility="gone">
+                    android:focusable="true">
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="◎  "
-                        android:textColor="#AAFFFFFF"
+                        android:textColor="#FFFFFF"
                         android:textSize="14sp"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="Vista"
-                        android:textColor="#AAFFFFFF"
+                        android:textColor="#FFFFFF"
                         android:textSize="13sp"
                         android:fontFamily="sans-serif-medium"/>
                 </LinearLayout>
@@ -303,7 +274,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:background="#080810"
+                android:background="#000000"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:paddingTop="32dp"
@@ -342,16 +313,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="Tu plataforma de streaming en español Latino."
-                    android:textColor="#44FFFFFF"
-                    android:textSize="12sp"
+                    android:text="Tu plataforma de streaming en español Latino para ver\npelículas, series y animes online gratis."
+                    android:textColor="#66FFFFFF"
+                    android:textSize="13sp"
                     android:lineSpacingMultiplier="1.5"/>
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Back button — rendered on top -->
+    <!-- Back button — LAST so it renders on top of scroll content -->
     <FrameLayout
         android:id="@+id/btnDetailBack"
         android:layout_width="42dp"
