@@ -180,6 +180,7 @@ id channelLogo
 id channelName
 id channelsGrid
 id contentGrid
+id deportesWebView
 id detailBackdrop
 id detailBadge
 id detailMeta
@@ -313,6 +314,7 @@ layout activity_splash
 layout dialog_server_select
 layout dialog_update
 layout episode_item
+layout fragment_deportes_web
 layout fragment_football
 layout fragment_grid
 layout fragment_home
