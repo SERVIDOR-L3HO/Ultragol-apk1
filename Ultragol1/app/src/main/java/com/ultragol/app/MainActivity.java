@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
         if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
-        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new FootballFragment()));
+        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
         if (navSearch    != null) navSearch.setOnClickListener(v    -> {
@@ -162,9 +162,13 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
         if (drawerOverlay != null && drawerOverlay.getVisibility() == View.VISIBLE) {
             hideMenu();
-        } else {
-            super.onBackPressed();
+            return;
         }
+        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
+        if (current instanceof DeportesWebFragment) {
+            if (((DeportesWebFragment) current).onBackPressed()) return;
+        }
+        super.onBackPressed();
     }
 
     private void requestNotificationPermission() {
