@@ -66,3 +66,9 @@ id = "vl69a0xpPChyRzxaz5fbC"
 uri = "file://apks/ultragol1_debug.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Fix ANR + Diseño Profesional"
+
+[[outputs]]
+id = "UtPAWRlJwY8ro8I2-3qII"
+uri = "file://apks/ultragol1.zip"
+type = "unspecified"
+title = "Ultragol1.apk — Deportes reemplazado con ultrax"
