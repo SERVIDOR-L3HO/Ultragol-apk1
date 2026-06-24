@@ -34,7 +34,7 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
  */
 public class FootballFragment extends Fragment {
 
-    private static final String API          = "https://ultragol-api-3--maricarmen43549.replit.app";
+    private static final String API          = "https://ultrago-xi.vercel.app";
     private static final int    MAX_MATCHES  = 8;   // per league
     private static final int    MAX_CHANNELS = 25;  // IPTV list
     private static final long   UI_STAGGER   = 80L; // ms between heavy UI posts

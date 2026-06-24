@@ -39,7 +39,7 @@ public class HomeFragment extends Fragment {
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
     private View rowLiveGlass;
 
-    private static final String GOL3_API = "https://ultragol-api-3--maricarmen43549.replit.app/gol-3";
+    private static final String GOL3_API = "https://ultrago-xi.vercel.app/gol-3";
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup parent, @Nullable Bundle state) {

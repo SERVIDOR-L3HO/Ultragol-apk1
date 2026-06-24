@@ -270,7 +270,7 @@ app.get('/push/vapid-public-key', (req, res) => {
 });
 
 // ── GOL API PROXY ─────────────────────────────────────────────────────────────
-const GOL_API = 'https://ultragol-api-3--maricarmen43549.replit.app/gol-3';
+const GOL_API = 'https://ultrago-xi.vercel.app/gol-3';
 
 app.get('/api/gol', async (req, res) => {
     try {

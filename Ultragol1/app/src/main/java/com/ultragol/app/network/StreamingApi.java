@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class StreamingApi {
-    private static final String BASE = "https://ultragol-api-3--maricarmen43549.replit.app";
+    private static final String BASE = "https://ultrago-xi.vercel.app";
 
     public static class Server {
         public final String name, url, tipo;
@@ -72,7 +72,7 @@ public class StreamingApi {
     }
 
     public static ServerData fetchSeriesServers(int tmdbId, int season, int ep) throws Exception {
-        return parseServerData(fetch("/api/unlimplay/m3u8/tv/" + tmdbId + "/" + season + "/" + ep));
+        return parseServerData(fetch("/api/unlimplay/m3u8-all/tv/" + tmdbId + "/" + season + "/" + ep));
     }
 
     public static ServerData parseServerData(String json) throws Exception {
