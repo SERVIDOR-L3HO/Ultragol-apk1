@@ -145,6 +145,7 @@ id btnBannerInfo
 id btnBannerPlay
 id btnBell
 id btnClearAll
+id btnDeportesBack
 id btnDetailBack
 id btnEpBack
 id btnEpMinus
@@ -161,6 +162,7 @@ id btnRefresh
 id btnSearch
 id btnSeasonMinus
 id btnSeasonPlus
+id btnWatched
 id cardBadge
 id cardCta
 id cardLeague

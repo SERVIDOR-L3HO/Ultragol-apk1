@@ -27,6 +27,17 @@ public class DeportesWebFragment extends Fragment {
 
         webView = view.findViewById(R.id.deportesWebView);
 
+        View backBtn = view.findViewById(R.id.btnDeportesBack);
+        if (backBtn != null) {
+            backBtn.setOnClickListener(v -> {
+                if (webView != null && webView.canGoBack()) {
+                    webView.goBack();
+                } else if (getActivity() != null) {
+                    getActivity().onBackPressed();
+                }
+            });
+        }
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
