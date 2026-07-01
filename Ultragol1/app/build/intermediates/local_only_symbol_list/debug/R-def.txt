@@ -85,6 +85,7 @@ drawable live_server_btn_bg
 drawable live_server_number_bg
 drawable live_server_row_premium_bg
 drawable logo_ultragol
+drawable logo_ultragol_splash
 drawable nav_bg
 drawable nav_card_bg
 drawable poster_glass_bg
@@ -273,9 +274,6 @@ id playerProgress
 id playerTitle
 id playerWebView
 id resultsGrid
-id ringInner
-id ringMid
-id ringOuter
 id rowAnime
 id rowDoramas
 id rowLiveGlass
@@ -301,6 +299,7 @@ id sectionRv
 id sectionSubLabel
 id serverContainer
 id serverDialogTitle
+id splashDivider
 id splashLogo
 id splashProgress
 id splashTagline

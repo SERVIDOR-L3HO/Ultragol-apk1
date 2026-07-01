@@ -2,34 +2,15 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="#000000">
 
+    <!-- Fondo radial sutil -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/gradient_radial_splash"/>
 
-    <View
-        android:id="@+id/ringOuter"
-        android:layout_width="380dp"
-        android:layout_height="380dp"
-        android:layout_gravity="center"
-        android:background="@drawable/splash_ring_outer"/>
-
-    <View
-        android:id="@+id/ringMid"
-        android:layout_width="280dp"
-        android:layout_height="280dp"
-        android:layout_gravity="center"
-        android:background="@drawable/splash_ring_mid"/>
-
-    <View
-        android:id="@+id/ringInner"
-        android:layout_width="190dp"
-        android:layout_height="190dp"
-        android:layout_gravity="center"
-        android:background="@drawable/splash_ring_inner"/>
-
+    <!-- Contenido central -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -37,112 +18,78 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <FrameLayout
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_gravity="center"
-            android:background="@drawable/splash_icon_bg">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="⚽"
-                android:textSize="28sp"/>
-        </FrameLayout>
-
-        <LinearLayout
+        <!-- Logo Ultragol -->
+        <ImageView
             android:id="@+id/splashLogo"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ULTRA"
-                android:textColor="#FFFFFF"
-                android:textSize="44sp"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.06"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="GOL"
-                android:textColor="@color/orange_primary"
-                android:textSize="44sp"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.06"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1"
-                android:textColor="#CCFFFFFF"
-                android:textSize="30sp"
-                android:fontFamily="sans-serif-black"
-                android:layout_marginStart="2dp"/>
-        </LinearLayout>
+            android:layout_width="280dp"
+            android:layout_height="90dp"
+            android:src="@drawable/logo_ultragol_splash"
+            android:scaleType="fitCenter"
+            android:alpha="0"/>
 
+        <!-- Línea divisoria elegante -->
         <View
-            android:layout_width="48dp"
-            android:layout_height="2dp"
-            android:layout_marginTop="14dp"
+            android:id="@+id/splashDivider"
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="28dp"
             android:layout_gravity="center"
-            android:background="@color/orange_primary"/>
+            android:background="#40FFFFFF"
+            android:alpha="0"/>
 
+        <!-- Tagline -->
         <TextView
             android:id="@+id/splashTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:text="Streaming sin límites"
             android:textColor="#80FFFFFF"
-            android:textSize="14sp"
-            android:letterSpacing="0.12"
-            android:visibility="invisible"/>
+            android:textSize="13sp"
+            android:letterSpacing="0.18"
+            android:fontFamily="sans-serif-light"
+            android:alpha="0"/>
 
+        <!-- Dots de carga -->
         <LinearLayout
             android:id="@+id/splashProgress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="56dp"
             android:orientation="horizontal"
             android:gravity="center"
-            android:visibility="invisible">
+            android:alpha="0">
             <View
                 android:id="@+id/dot1"
-                android:layout_width="7dp"
-                android:layout_height="7dp"
-                android:layout_marginEnd="6dp"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginEnd="7dp"
                 android:background="@drawable/splash_dot"/>
             <View
                 android:id="@+id/dot2"
-                android:layout_width="7dp"
-                android:layout_height="7dp"
-                android:layout_marginEnd="6dp"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:layout_marginEnd="7dp"
                 android:background="@drawable/splash_dot_dim"/>
             <View
                 android:id="@+id/dot3"
-                android:layout_width="7dp"
-                android:layout_height="7dp"
+                android:layout_width="6dp"
+                android:layout_height="6dp"
                 android:background="@drawable/splash_dot_dim"/>
         </LinearLayout>
+
     </LinearLayout>
 
-    <LinearLayout
+    <!-- Versión abajo -->
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="40dp"
-        android:orientation="vertical"
-        android:gravity="center">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="v1.0"
-            android:textColor="#33FFFFFF"
-            android:textSize="11sp"
-            android:letterSpacing="0.1"/>
-    </LinearLayout>
+        android:layout_marginBottom="38dp"
+        android:text="ULTRAGOL1"
+        android:textColor="#22FFFFFF"
+        android:textSize="10sp"
+        android:letterSpacing="0.25"
+        android:fontFamily="sans-serif-medium"/>
 
 </FrameLayout>

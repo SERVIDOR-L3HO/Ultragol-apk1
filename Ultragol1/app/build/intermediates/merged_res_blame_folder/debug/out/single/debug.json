@@ -28,6 +28,10 @@
         "source": "com.ultragol.app-main-35:/drawable/gradient_hero.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_logo_ultragol_splash.png.flat",
+        "source": "com.ultragol.app-main-35:/drawable/logo_ultragol_splash.png"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_btn_play_bg.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/btn_play_bg.xml"
     },
@@ -392,12 +396,12 @@
         "source": "com.ultragol.app-main-35:/drawable/sport_league_tab_active.xml"
     },
     {
-        "merged": "com.ultragol.app-merged_res-33:/drawable_badge_type_bg.xml.flat",
-        "source": "com.ultragol.app-main-35:/drawable/badge_type_bg.xml"
-    },
-    {
         "merged": "com.ultragol.app-merged_res-33:/menu_bottom_nav.xml.flat",
         "source": "com.ultragol.app-main-35:/menu/bottom_nav.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_badge_type_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/badge_type_bg.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_badge_live.xml.flat",

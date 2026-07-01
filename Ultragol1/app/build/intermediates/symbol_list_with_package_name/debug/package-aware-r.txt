@@ -3016,6 +3016,7 @@ drawable live_server_btn_bg
 drawable live_server_number_bg
 drawable live_server_row_premium_bg
 drawable logo_ultragol
+drawable logo_ultragol_splash
 drawable m3_appbar_background
 drawable m3_avd_hide_password
 drawable m3_avd_show_password
@@ -3629,9 +3630,6 @@ id right
 id rightToLeft
 id right_icon
 id right_side
-id ringInner
-id ringMid
-id ringOuter
 id rounded
 id rowAnime
 id rowDoramas
@@ -3713,6 +3711,7 @@ id snapMargins
 id south
 id spacer
 id special_effects_controller_view_tag
+id splashDivider
 id splashLogo
 id splashProgress
 id splashTagline
