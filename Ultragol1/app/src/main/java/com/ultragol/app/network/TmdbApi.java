@@ -122,6 +122,28 @@ public class TmdbApi {
         return parse(new JSONObject(fetch("/movie/now_playing?language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
 
+    public static List<ContentItem> fetchTopSeries() throws Exception {
+        return parse(new JSONObject(fetch("/tv/top_rated?language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+    public static List<ContentItem> fetchSeriesSpanish() throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_original_language=es&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+    public static List<ContentItem> fetchSeriesByGenre(int genreId) throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=" + genreId + "&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+    public static List<ContentItem> fetchTopAnime() throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=16&with_origin_country=JP&sort_by=vote_average.desc&vote_count.gte=200&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_ANIME);
+    }
+    public static List<ContentItem> fetchAnimeByGenre(int genreId) throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=" + genreId + "&with_origin_country=JP&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_ANIME);
+    }
+    public static List<ContentItem> fetchDoramasByCountry(String countryCode) throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_origin_country=" + countryCode + "&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_DORAMA);
+    }
+    public static List<ContentItem> fetchDoramasByGenre(int genreId) throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_origin_country=KR&with_genres=" + genreId + "&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_DORAMA);
+    }
+
     public static List<ContentItem> fetchByProvider(int providerId, String mediaType) throws Exception {
         int type = "movie".equals(mediaType) ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
         String path = "/discover/" + mediaType
