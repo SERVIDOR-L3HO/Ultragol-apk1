@@ -14,7 +14,7 @@ import org.json.JSONObject;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final long SPLASH_DURATION = 2400;
+    private static final long SPLASH_DURATION = 2800;
 
     private View dot1, dot2, dot3;
     private int dotStep = 0;
@@ -23,15 +23,14 @@ public class SplashActivity extends AppCompatActivity {
         @Override
         public void run() {
             animateDots();
-            dotHandler.postDelayed(this, 350);
+            dotHandler.postDelayed(this, 380);
         }
     };
 
-    // Update check result (set from background thread, read on main thread)
-    private boolean updateCheckDone   = false;
-    private boolean splashDone        = false;
-    private boolean updateAvailable   = false;
-    private JSONObject updateData     = null;
+    private boolean updateCheckDone = false;
+    private boolean splashDone      = false;
+    private boolean updateAvailable = false;
+    private JSONObject updateData   = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,72 +38,96 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
 
         View logo     = findViewById(R.id.splashLogo);
+        View divider  = findViewById(R.id.splashDivider);
         View tagline  = findViewById(R.id.splashTagline);
         View progress = findViewById(R.id.splashProgress);
-        View ringO    = findViewById(R.id.ringOuter);
-        View ringM    = findViewById(R.id.ringMid);
-        View ringI    = findViewById(R.id.ringInner);
         dot1 = findViewById(R.id.dot1);
         dot2 = findViewById(R.id.dot2);
         dot3 = findViewById(R.id.dot3);
 
-        // Rings fade in
-        animateFadeIn(ringO, 0, 800);
-        animateFadeIn(ringM, 150, 800);
-        animateFadeIn(ringI, 300, 800);
+        // ── Logo: escala suave + fade-in estilo Disney+ ──
+        if (logo != null) {
+            AnimationSet anim = new AnimationSet(true);
+            ScaleAnimation scale = new ScaleAnimation(
+                0.88f, 1f, 0.88f, 1f,
+                Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+            scale.setDuration(900);
+            AlphaAnimation alpha = new AlphaAnimation(0f, 1f);
+            alpha.setDuration(900);
+            anim.addAnimation(scale);
+            anim.addAnimation(alpha);
+            anim.setFillAfter(true);
+            logo.startAnimation(anim);
+            logo.setAlpha(1f);
+        }
 
-        // Logo scale + fade
-        AnimationSet anim = new AnimationSet(true);
-        ScaleAnimation scale = new ScaleAnimation(0.6f, 1f, 0.6f, 1f,
-            Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        scale.setDuration(700);
-        AlphaAnimation alpha = new AlphaAnimation(0f, 1f);
-        alpha.setDuration(700);
-        anim.addAnimation(scale);
-        anim.addAnimation(alpha);
-        if (logo != null) logo.startAnimation(anim);
+        // ── Divider: aparece después del logo ──
+        new Handler().postDelayed(() -> {
+            if (divider != null) {
+                // Animar expansión del divider
+                divider.setAlpha(0f);
+                divider.getLayoutParams().width = 0;
+                divider.requestLayout();
 
-        // Tagline
+                AlphaAnimation fadeDiv = new AlphaAnimation(0f, 1f);
+                fadeDiv.setDuration(600);
+                fadeDiv.setFillAfter(true);
+                divider.startAnimation(fadeDiv);
+                divider.setAlpha(1f);
+
+                // Expandir ancho a 160dp
+                android.animation.ValueAnimator widthAnim = android.animation.ValueAnimator.ofInt(0, (int)(160 * getResources().getDisplayMetrics().density));
+                widthAnim.setDuration(600);
+                widthAnim.addUpdateListener(animation -> {
+                    divider.getLayoutParams().width = (int) animation.getAnimatedValue();
+                    divider.requestLayout();
+                });
+                widthAnim.start();
+            }
+        }, 750);
+
+        // ── Tagline: aparece después ──
         new Handler().postDelayed(() -> {
             if (tagline != null) {
                 AlphaAnimation a2 = new AlphaAnimation(0f, 1f);
-                a2.setDuration(500);
-                tagline.setVisibility(View.VISIBLE);
+                a2.setDuration(600);
+                a2.setFillAfter(true);
                 tagline.startAnimation(a2);
+                tagline.setAlpha(1f);
             }
-        }, 600);
+        }, 1100);
 
-        // Dots
+        // ── Dots de carga ──
         new Handler().postDelayed(() -> {
             if (progress != null) {
                 AlphaAnimation a3 = new AlphaAnimation(0f, 1f);
-                a3.setDuration(300);
-                progress.setVisibility(View.VISIBLE);
+                a3.setDuration(400);
+                a3.setFillAfter(true);
                 progress.startAnimation(a3);
+                progress.setAlpha(1f);
                 dotHandler.post(dotRunnable);
             }
-        }, 900);
+        }, 1400);
 
-        // ── Start update check in parallel with the splash animation ──
+        // ── Verificar actualización en paralelo ──
         UpdateChecker.check(this, (needsUpdate, data) -> {
             updateAvailable = needsUpdate;
             updateData      = data;
             updateCheckDone = true;
-            if (splashDone) proceed(); // splash already finished → go now
+            if (splashDone) proceed();
         });
 
-        // ── Splash timer ──
+        // ── Timer del splash ──
         new Handler().postDelayed(() -> {
             dotHandler.removeCallbacks(dotRunnable);
             splashDone = true;
-            if (updateCheckDone) proceed(); // check already done → go now
-            // else wait for check callback above
+            if (updateCheckDone) proceed();
         }, SPLASH_DURATION);
     }
 
     private void proceed() {
         if (updateAvailable && updateData != null) {
-            // Show update dialog — then go to MainActivity when user decides
             boolean force = updateData.optBoolean("forceUpdate", false);
             showUpdateAndProceed(force);
         } else {
@@ -113,14 +136,13 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     private void showUpdateAndProceed(boolean force) {
-        // Show dialog; on dismiss (if not forced) go to main
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_update, null);
         android.widget.TextView tvVersion   = dialogView.findViewById(R.id.updateVersion);
         android.widget.TextView tvChangelog = dialogView.findViewById(R.id.updateChangelog);
 
-        String version  = updateData.optString("versionName", "");
+        String version   = updateData.optString("versionName", "");
         String changelog = updateData.optString("changelog", "");
-        String dlUrl    = updateData.optString("downloadUrl", "");
+        String dlUrl     = updateData.optString("downloadUrl", "");
 
         if (tvVersion != null)
             tvVersion.setText("Versión " + version + " disponible");
@@ -164,15 +186,6 @@ public class SplashActivity extends AppCompatActivity {
         startActivity(new Intent(this, MainActivity.class));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
-    }
-
-    private void animateFadeIn(View v, long delay, long duration) {
-        if (v == null) return;
-        new Handler().postDelayed(() -> {
-            AlphaAnimation a = new AlphaAnimation(0f, 1f);
-            a.setDuration(duration);
-            v.startAnimation(a);
-        }, delay);
     }
 
     private void animateDots() {
