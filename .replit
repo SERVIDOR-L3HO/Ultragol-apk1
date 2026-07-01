@@ -1,4 +1,4 @@
-modules = ["java-graalvm22.3", "web", "nodejs-20", "bash", "python-3.11"]
+modules = ["nodejs-20", "web", "java-graalvm22.3", "bash", "python-3.11"]
 [agent]
 expertMode = true
 stack = "BEST_EFFORT_FALLBACK"
@@ -41,5 +41,5 @@ localPort = 5000
 externalPort = 80
 
 [deployment]
-run = ["sh", "-c", "/nix/store/c8hr2f0b0dm685yx1dkp6bw24bpx495n-graalvm19-ce-22.3.1/bin/java -classpath .:target/dependency/* Main"]
-deploymentTarget = "cloudrun"
+run = ["node", "server.js"]
+deploymentTarget = "vm"
