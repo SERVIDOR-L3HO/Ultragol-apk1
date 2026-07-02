@@ -59,7 +59,6 @@ drawable glass_card_bg
 drawable glass_dialog_panel_bg
 drawable glass_fade_left_right
 drawable glass_live_card_bg
-drawable glass_stepper_bg
 drawable gradient_banner_overlay
 drawable gradient_detail_bottom
 drawable gradient_detail_overlay

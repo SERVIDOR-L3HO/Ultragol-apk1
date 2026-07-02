@@ -164,10 +164,6 @@
         "source": "com.ultragol.app-main-35:/layout/fragment_deportes_web.xml"
     },
     {
-        "merged": "com.ultragol.app-merged_res-33:/drawable_glass_stepper_bg.xml.flat",
-        "source": "com.ultragol.app-main-35:/drawable/glass_stepper_bg.xml"
-    },
-    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_badge_inactive.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/badge_inactive.xml"
     },
