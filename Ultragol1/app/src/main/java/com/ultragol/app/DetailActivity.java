@@ -454,9 +454,54 @@ public class DetailActivity extends AppCompatActivity {
 
         card.addView(col);
 
-        // Click → open server dialog for this episode
+        // ── Watched indicator (✓) — top-right corner overlay ─────────────────
         final int s = season, e = epNum;
-        card.setOnClickListener(v -> ServerSelectDialog.show(this, item, s, e));
+        boolean watched = WatchedManager.isWatched(this, item.getTmdbId(), s, e);
+
+        TextView checkBadge = new TextView(this);
+        checkBadge.setText("✓ Vista");
+        checkBadge.setTextColor(0xFF4CAF50);
+        checkBadge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 9f);
+        checkBadge.setTypeface(null, Typeface.BOLD);
+        checkBadge.setLetterSpacing(0.04f);
+        GradientDrawable checkBg = new GradientDrawable();
+        checkBg.setColor(0x1A4CAF50);
+        checkBg.setStroke(dp(1), 0x554CAF50);
+        checkBg.setCornerRadius(dp(4));
+        checkBadge.setBackground(checkBg);
+        checkBadge.setPadding(dp(5), dp(2), dp(5), dp(2));
+
+        LinearLayout.LayoutParams checkLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        checkLp.setMargins(dp(6), 0, 0, 0);
+        checkBadge.setLayoutParams(checkLp);
+        checkBadge.setVisibility(watched ? View.VISIBLE : View.GONE);
+
+        // Insert check badge into the badge row (after episode title)
+        badgeRow.addView(checkBadge);
+
+        // Dim thumbnail overlay if watched
+        thumb.setAlpha(watched ? 0.55f : 1.0f);
+
+        // Click → mark watched + open server dialog
+        card.setOnClickListener(v -> {
+            WatchedManager.markWatched(this, item.getTmdbId(), s, e);
+            checkBadge.setVisibility(View.VISIBLE);
+            thumb.setAlpha(0.55f);
+            ServerSelectDialog.show(this, item, s, e);
+        });
+
+        // Long-press → toggle watched without opening player
+        card.setOnLongClickListener(v -> {
+            WatchedManager.toggle(this, item.getTmdbId(), s, e);
+            boolean nowWatched = WatchedManager.isWatched(this, item.getTmdbId(), s, e);
+            checkBadge.setVisibility(nowWatched ? View.VISIBLE : View.GONE);
+            thumb.setAlpha(nowWatched ? 0.55f : 1.0f);
+            Toast.makeText(this,
+                nowWatched ? "Marcado como vista" : "Desmarcado",
+                Toast.LENGTH_SHORT).show();
+            return true;
+        });
 
         parent.addView(card);
     }

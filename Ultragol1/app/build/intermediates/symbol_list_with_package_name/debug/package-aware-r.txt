@@ -2964,7 +2964,9 @@ drawable divider_vertical_glass
 drawable dot_active
 drawable dot_inactive
 drawable ep_badge_bg
+drawable ep_card_glass
 drawable ep_duration_bg
+drawable ep_season_pill_bg
 drawable ep_thumb_gradient
 drawable episode_card_bg
 drawable genre_chip_bg
@@ -3252,10 +3254,7 @@ id btnClearAll
 id btnDeportesBack
 id btnDetailBack
 id btnEpBack
-id btnEpMinus
-id btnEpPlus
 id btnFavorite
-id btnLoadEpisode
 id btnMenu
 id btnMyList
 id btnNextSeason
@@ -3264,8 +3263,6 @@ id btnPlayerBack
 id btnPrevSeason
 id btnRefresh
 id btnSearch
-id btnSeasonMinus
-id btnSeasonPlus
 id buttonPanel
 id cache_measures
 id callMeasure
@@ -3393,7 +3390,11 @@ id endToStart
 id enterAlways
 id enterAlwaysCollapsed
 id epLoading
-id episodeSection
+id epLoadingDetail
+id epLoadingFrame
+id episodeListContainer
+id episodeSectionDetail
+id episodeTabContent
 id errorServers
 id exitUntilCollapsed
 id expand_activities_button
@@ -3464,6 +3465,7 @@ id immediateStop
 id included
 id indeterminate
 id info
+id infoTabContent
 id invisible
 id inward
 id is_pooling_container_tag
@@ -3682,6 +3684,7 @@ id search_view_toolbar
 id search_view_toolbar_container
 id search_voice_btn
 id seasonCard
+id seasonSelector
 id sectionAccentBar
 id sectionMainTitle
 id sectionNavNext
@@ -3739,7 +3742,10 @@ id stretch
 id submenuarrow
 id submit_area
 id supportScrollUp
+id tabEpisodios
 id tabEspanol
+id tabIndicatorEp
+id tabInformacion
 id tabLatino
 id tabMode
 id tabSubtitulado
@@ -3803,9 +3809,9 @@ id tvEpDuration
 id tvEpOverview
 id tvEpSeriesTitle
 id tvEpTitle
-id tvEpisode
-id tvSeason
+id tvInfoOverview
 id tvSeasonLabel
+id tvSeasonPill
 id unchecked
 id uniform
 id unlabeled

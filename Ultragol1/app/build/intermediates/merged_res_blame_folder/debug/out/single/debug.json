@@ -436,6 +436,10 @@
         "source": "com.ultragol.app-main-35:/drawable/sport_match_live_card.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_ep_season_pill_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/ep_season_pill_bg.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_sport_score_live_bg.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/sport_score_live_bg.xml"
     },
@@ -498,6 +502,10 @@
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_sport_section_chip_inactive.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/sport_section_chip_inactive.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_ep_card_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/ep_card_glass.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_poster_glass_bg.xml.flat",

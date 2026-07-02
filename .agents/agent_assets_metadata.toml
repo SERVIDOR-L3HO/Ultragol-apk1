@@ -72,3 +72,9 @@ id = "UtPAWRlJwY8ro8I2-3qII"
 uri = "file://apks/ultragol1.zip"
 type = "unspecified"
 title = "Ultragol1.apk — Splash Screen Nuevo"
+
+[[outputs]]
+id = "2N5-iEmfyTMJNiamyuWBa"
+uri = "file://apks/ultragol1_glass_update.zip"
+type = "unspecified"
+title = "Ultragol1 APK — Panel de episodios glass + Vista"
