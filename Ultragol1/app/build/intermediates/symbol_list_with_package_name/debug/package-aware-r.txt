@@ -3079,6 +3079,7 @@ drawable mtrl_switch_track_decoration
 drawable mtrl_tabs_default_indicator
 drawable nav_bg
 drawable nav_card_bg
+drawable nav_profile_switch_bg
 drawable navigation_empty_icon
 drawable notification_action_background
 drawable notification_bg
@@ -3097,11 +3098,18 @@ drawable pin_dot_filled
 drawable pin_key_bg
 drawable poster_glass_bg
 drawable profile_add_ring
+drawable profile_add_ring_v2
 drawable profile_avatar_circle
+drawable profile_avatar_glow_ring
 drawable profile_card_glass
+drawable profile_card_glass_v2
 drawable profile_card_selected
+drawable profile_card_selected_v2
 drawable profile_color_circle
 drawable profile_color_selected
+drawable profile_dialog_bg
+drawable profile_name_input_bg
+drawable profile_save_btn
 drawable progress_orange
 drawable rating_pill_bg
 drawable search_bg
@@ -3232,6 +3240,7 @@ id autoComplete
 id autoCompleteToEnd
 id autoCompleteToStart
 id avatarCircle
+id avatarGlowRing
 id avatarInitialPreview
 id avatarPreview
 id badgeKids
@@ -3596,6 +3605,7 @@ id navMovies
 id navMyList
 id navSearch
 id navSeries
+id navSwitchProfile
 id nav_anime
 id nav_home
 id nav_movies
@@ -3849,6 +3859,7 @@ id trendingRating
 id trendingTitle
 id trendingYear
 id triangle
+id tvCurrentProfileName
 id tvEpBadge
 id tvEpCode
 id tvEpDuration

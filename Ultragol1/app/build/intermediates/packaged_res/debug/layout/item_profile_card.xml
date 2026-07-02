@@ -4,15 +4,33 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="10dp">
+    android:padding="8dp">
 
     <!-- Glass card -->
     <FrameLayout
         android:id="@+id/cardContainer"
         android:layout_width="match_parent"
-        android:layout_height="130dp"
-        android:background="@drawable/profile_card_glass"
+        android:layout_height="145dp"
+        android:background="@drawable/profile_card_glass_v2"
         android:gravity="center">
+
+        <!-- Subtle top-left glare -->
+        <View
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_gravity="top|start"
+            android:background="@drawable/gradient_radial_splash"
+            android:alpha="0.06"/>
+
+        <!-- Avatar glow ring (visible on selected via tint/alpha logic in Java) -->
+        <View
+            android:id="@+id/avatarGlowRing"
+            android:layout_width="88dp"
+            android:layout_height="88dp"
+            android:layout_gravity="center"
+            android:background="@drawable/profile_avatar_glow_ring"
+            android:alpha="0"
+            android:visibility="visible"/>
 
         <!-- Avatar circle -->
         <FrameLayout
@@ -33,21 +51,28 @@
                 android:fontFamily="sans-serif-black"/>
         </FrameLayout>
 
-        <!-- Delete × top-right — visible in manage mode -->
-        <TextView
+        <!-- Delete × top-right — visible en modo gestionar -->
+        <FrameLayout
             android:id="@+id/btnDelete"
-            android:layout_width="26dp"
-            android:layout_height="26dp"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             android:layout_gravity="top|end"
             android:layout_margin="8dp"
-            android:text="×"
-            android:textColor="#FFFFFF"
-            android:textSize="16sp"
-            android:gravity="center"
             android:background="@drawable/back_btn_glass"
             android:visibility="gone"
             android:clickable="true"
-            android:focusable="true"/>
+            android:focusable="true"
+            android:gravity="center">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="✕"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:fontFamily="sans-serif-bold"
+                android:gravity="center"/>
+        </FrameLayout>
 
         <!-- Kids badge top-left -->
         <TextView
@@ -62,8 +87,8 @@
             android:fontFamily="sans-serif-black"
             android:letterSpacing="0.06"
             android:background="@drawable/ep_season_pill_bg"
-            android:paddingStart="6dp"
-            android:paddingEnd="6dp"
+            android:paddingStart="7dp"
+            android:paddingEnd="7dp"
             android:paddingTop="3dp"
             android:paddingBottom="3dp"
             android:visibility="gone"/>
@@ -74,7 +99,7 @@
         android:id="@+id/tvName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="9dp"
         android:gravity="center"
         android:text="Nombre"
         android:textColor="#EEFFFFFF"
@@ -87,7 +112,7 @@
     <TextView
         android:id="@+id/tvPinBadge"
         android:layout_width="wrap_content"
-        android:layout_height="16dp"
+        android:layout_height="18dp"
         android:layout_gravity="center"
         android:layout_marginTop="3dp"
         android:text="🔒 PIN"
