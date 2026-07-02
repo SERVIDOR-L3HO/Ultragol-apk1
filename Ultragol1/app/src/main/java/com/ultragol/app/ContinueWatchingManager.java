@@ -1,15 +1,17 @@
 package com.ultragol.app;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import com.ultragol.app.models.ContentItem;
 import org.json.*;
 import java.util.*;
 
 public class ContinueWatchingManager {
-    private static final String PREFS = "continue_watching";
-    private static final String KEY   = "entries";
-    private static final int    MAX   = 10;
+    private static final String KEY = "entries";
+    private static final int    MAX = 10;
+
+    private static String prefsName(Context ctx) {
+        return ProfileManager.dataKey(ctx, "continue_watching");
+    }
 
     public static class Entry {
         public final ContentItem item;
@@ -38,7 +40,8 @@ public class ContinueWatchingManager {
     public static List<Entry> getAll(Context ctx) {
         List<Entry> list = new ArrayList<>();
         try {
-            String json = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "[]");
+            String json = ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)
+                .getString(KEY, "[]");
             JSONArray arr = new JSONArray(json);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject o = arr.getJSONObject(i);
@@ -75,7 +78,7 @@ public class ContinueWatchingManager {
                 o.put("ts",         e.timestamp);
                 arr.put(o);
             }
-            ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+            ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)
                .edit().putString(KEY, arr.toString()).apply();
         } catch (Exception ignored) {}
     }

@@ -33,6 +33,10 @@
         <activity android:name=".MainActivity" android:exported="false"
             android:screenOrientation="portrait" android:windowSoftInputMode="adjustResize" />
 
+        <activity android:name=".ProfileSelectorActivity" android:exported="false"
+            android:screenOrientation="portrait" android:theme="@style/Theme.Ultragol"
+            android:windowSoftInputMode="adjustResize"/>
+
         <activity android:name=".SearchActivity" android:exported="false"
             android:screenOrientation="portrait" android:windowSoftInputMode="stateVisible|adjustResize" />
 

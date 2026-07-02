@@ -68,6 +68,29 @@ public class HomeFragment extends Fragment {
     }
 
     private void setupTopBar(View view) {
+        // ── Profile avatar button ──────────────────────────────────────────────
+        FrameLayout btnProfile = view.findViewById(R.id.btnProfile);
+        TextView tvProfileInitial = view.findViewById(R.id.tvProfileInitial);
+        if (btnProfile != null) {
+            ProfileManager.Profile profile = ProfileManager.getCurrentProfile(requireContext());
+            if (profile != null && tvProfileInitial != null) {
+                tvProfileInitial.setText(profile.getInitial());
+                try {
+                    android.graphics.drawable.GradientDrawable gd =
+                        new android.graphics.drawable.GradientDrawable();
+                    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+                    gd.setColor(android.graphics.Color.parseColor(profile.avatarColor));
+                    btnProfile.setBackground(gd);
+                } catch (Exception ignored) {}
+            }
+            btnProfile.setOnClickListener(v -> {
+                startActivity(new android.content.Intent(
+                    requireContext(), ProfileSelectorActivity.class));
+                requireActivity().overridePendingTransition(
+                    android.R.anim.fade_in, android.R.anim.fade_out);
+            });
+        }
+
         View search = view.findViewById(R.id.btnSearch);
         if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));

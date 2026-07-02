@@ -84,3 +84,9 @@ id = "AVhFmsrQiA4DP0WxLC1bu"
 uri = "file://apks/ultragol1_continuar_viendo.zip"
 type = "unspecified"
 title = "Ultragol1 — Continuar viendo + Widget"
+
+[[outputs]]
+id = "W7cVEMv7gKfJUfcpeWaCM"
+uri = "file://apks/ultragol1_perfiles.zip"
+type = "unspecified"
+title = "Ultragol1 — Sistema de Perfiles + Continuar Viendo + Widget"

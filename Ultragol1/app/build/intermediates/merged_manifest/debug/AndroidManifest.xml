@@ -62,6 +62,12 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize" />
         <activity
+            android:name="com.ultragol.app.ProfileSelectorActivity"
+            android:exported="false"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Ultragol"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name="com.ultragol.app.SearchActivity"
             android:exported="false"
             android:screenOrientation="portrait"

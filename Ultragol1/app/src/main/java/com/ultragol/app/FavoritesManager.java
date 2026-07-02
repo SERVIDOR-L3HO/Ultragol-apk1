@@ -1,7 +1,6 @@
 package com.ultragol.app;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import com.ultragol.app.models.ContentItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -9,8 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class FavoritesManager {
-    private static final String PREFS = "favorites";
-    private static final String KEY   = "items";
+    private static final String KEY = "items";
+
+    private static String prefsName(Context ctx) {
+        return ProfileManager.dataKey(ctx, "favorites");
+    }
 
     public static void toggle(Context ctx, ContentItem item) {
         if (isFav(ctx, item)) remove(ctx, item); else add(ctx, item);
@@ -36,7 +38,8 @@ public class FavoritesManager {
     public static List<ContentItem> getAll(Context ctx) {
         List<ContentItem> list = new ArrayList<>();
         try {
-            String json = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getString(KEY, "[]");
+            String json = ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)
+                .getString(KEY, "[]");
             JSONArray arr = new JSONArray(json);
             for (int i = 0; i < arr.length(); i++) {
                 JSONObject o = arr.getJSONObject(i);
@@ -64,7 +67,8 @@ public class FavoritesManager {
                 o.put("backdropUrl", item.getBackdropUrl());
                 arr.put(o);
             }
-            ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE).edit().putString(KEY, arr.toString()).apply();
+            ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)
+                .edit().putString(KEY, arr.toString()).apply();
         } catch (Exception ignored) {}
     }
 }
