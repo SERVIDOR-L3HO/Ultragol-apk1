@@ -146,8 +146,11 @@ public class DetailActivity extends AppCompatActivity {
             finish();
             overridePendingTransition(0, android.R.anim.fade_out);
         });
-        if (btnPlay != null) btnPlay.setOnClickListener(v ->
-            ServerSelectDialog.show(this, item));
+        if (btnPlay != null) btnPlay.setOnClickListener(v -> {
+            ContinueWatchingManager.save(this, item, 0, 0);
+            ContinueWatchingWidget.refresh(this);
+            ServerSelectDialog.show(this, item);
+        });
 
         // ── Favorito button ───────────────────────────────────────────────────
         if (btnFavorite != null) {
@@ -483,9 +486,11 @@ public class DetailActivity extends AppCompatActivity {
         // Dim thumbnail overlay if watched
         thumb.setAlpha(watched ? 0.55f : 1.0f);
 
-        // Click → mark watched + open server dialog
+        // Click → mark watched + save continue watching + open server dialog
         card.setOnClickListener(v -> {
             WatchedManager.markWatched(this, item.getTmdbId(), s, e);
+            ContinueWatchingManager.save(this, item, s, e);
+            ContinueWatchingWidget.refresh(this);
             checkBadge.setVisibility(View.VISIBLE);
             thumb.setAlpha(0.55f);
             ServerSelectDialog.show(this, item, s, e);

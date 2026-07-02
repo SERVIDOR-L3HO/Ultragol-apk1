@@ -39,6 +39,10 @@ public class HomeFragment extends Fragment {
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
     private View rowLiveGlass;
 
+    // Continue watching
+    private View sectionContinueWatching;
+    private RecyclerView rvContinueWatching;
+
     private static final String GOL3_API = "https://ultrago-xi.vercel.app/gol-3";
 
     @Nullable @Override
@@ -52,8 +56,15 @@ public class HomeFragment extends Fragment {
         setupTopBar(view);
         setupHero(view);
         setupTrendingCarousel(view);
+        setupContinueWatching(view);
         setupRows(view);
         loadAll();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (getView() != null) refreshContinueWatching();
     }
 
     private void setupTopBar(View view) {
@@ -153,6 +164,35 @@ public class HomeFragment extends Fragment {
                     trendingPager.setCurrentItem(trendingPage + 1, true);
             });
         } catch (Exception ignored) {}
+    }
+
+    // ── Continuar viendo ─────────────────────────────────────────────────────
+
+    private void setupContinueWatching(View view) {
+        sectionContinueWatching = view.findViewById(R.id.sectionContinueWatching);
+        rvContinueWatching      = view.findViewById(R.id.rvContinueWatching);
+        if (rvContinueWatching != null) {
+            rvContinueWatching.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        }
+        refreshContinueWatching();
+    }
+
+    private void refreshContinueWatching() {
+        if (!isAdded() || sectionContinueWatching == null || rvContinueWatching == null) return;
+        List<ContinueWatchingManager.Entry> entries =
+            ContinueWatchingManager.getAll(requireContext());
+        if (entries.isEmpty()) {
+            sectionContinueWatching.setVisibility(View.GONE);
+            return;
+        }
+        sectionContinueWatching.setVisibility(View.VISIBLE);
+        ContinueWatchingAdapter adapter =
+            new ContinueWatchingAdapter(requireContext(), entries);
+        adapter.setOnChangedListener(() -> {
+            if (entries.isEmpty()) sectionContinueWatching.setVisibility(View.GONE);
+        });
+        rvContinueWatching.setAdapter(adapter);
     }
 
     // ── Content rows ─────────────────────────────────────────────────────────

@@ -85,6 +85,53 @@
                 android:gravity="center"/>
         </FrameLayout>
 
+        <!-- ── Continuar viendo ── -->
+        <LinearLayout
+            android:id="@+id/sectionContinueWatching"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:visibility="gone">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingStart="16dp"
+                android:paddingEnd="12dp"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="10dp">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="22dp"
+                    android:background="#FF6B00"
+                    android:layout_marginEnd="10dp"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="CONTINUAR VIENDO"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:fontFamily="sans-serif-black"
+                    android:letterSpacing="0.04"/>
+            </LinearLayout>
+
+            <!-- Horizontal scroll of cards -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvContinueWatching"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:clipToPadding="false"
+                android:overScrollMode="never"/>
+        </LinearLayout>
+
         <!-- ── Trending Carousel ── -->
         <include android:id="@+id/rowTrendingCarousel" layout="@layout/row_trending_carousel"/>
 

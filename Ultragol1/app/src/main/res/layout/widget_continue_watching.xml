@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#E5000000"
+    android:padding="12dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="▶"
+            android:textColor="#FF6B00"
+            android:textSize="12sp"
+            android:layout_marginEnd="6dp"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Continuar viendo"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.03"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ULTRAGOL1"
+            android:textColor="#44FFFFFF"
+            android:textSize="9sp"
+            android:fontFamily="sans-serif-bold"
+            android:letterSpacing="0.08"/>
+    </LinearLayout>
+
+    <!-- Items row -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <!-- Slot 1 -->
+        <LinearLayout
+            android:id="@+id/wSlot1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/wThumb1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:background="#1AFFFFFF"/>
+
+            <TextView
+                android:id="@+id/wTitle1"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#DDFFFFFF"
+                android:textSize="9sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/wEp1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF6B00"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+
+        <!-- Slot 2 -->
+        <LinearLayout
+            android:id="@+id/wSlot2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:layout_marginEnd="6dp"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/wThumb2"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:background="#1AFFFFFF"/>
+
+            <TextView
+                android:id="@+id/wTitle2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#DDFFFFFF"
+                android:textSize="9sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/wEp2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF6B00"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+
+        <!-- Slot 3 -->
+        <LinearLayout
+            android:id="@+id/wSlot3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/wThumb3"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:scaleType="centerCrop"
+                android:background="#1AFFFFFF"/>
+
+            <TextView
+                android:id="@+id/wTitle3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textColor="#DDFFFFFF"
+                android:textSize="9sp"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+
+            <TextView
+                android:id="@+id/wEp3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FF6B00"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+
+        <!-- Empty state -->
+        <TextView
+            android:id="@+id/wEmpty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Abre la app y empieza a ver contenido"
+            android:textColor="#44FFFFFF"
+            android:textSize="11sp"
+            android:gravity="center"
+            android:visibility="visible"/>
+    </LinearLayout>
+
+</LinearLayout>

@@ -78,3 +78,9 @@ id = "2N5-iEmfyTMJNiamyuWBa"
 uri = "file://apks/ultragol1_glass_update.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Panel de episodios glass + Vista"
+
+[[outputs]]
+id = "AVhFmsrQiA4DP0WxLC1bu"
+uri = "file://apks/ultragol1_continuar_viendo.zip"
+type = "unspecified"
+title = "Ultragol1 — Continuar viendo + Widget"

@@ -44,6 +44,18 @@
         <activity android:name=".DetailActivity" android:exported="false"
             android:screenOrientation="portrait" android:theme="@style/Theme.Ultragol" />
 
+        <!-- Continue Watching Widget -->
+        <receiver android:name=".ContinueWatchingWidget"
+            android:exported="true"
+            android:label="Continuar viendo">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/continue_watching_widget_info"/>
+        </receiver>
+
         <provider android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
             android:exported="false" android:grantUriPermissions="true">

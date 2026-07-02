@@ -3329,6 +3329,10 @@ id currentState
 id custom
 id customPanel
 id cut
+id cwEpBadge
+id cwRemove
+id cwThumb
+id cwTitle
 id date_picker_actions
 id decelerate
 id decelerateAndComplete
@@ -3647,6 +3651,7 @@ id rowTrending
 id rowTrendingCarousel
 id rowVerTodos
 id row_index_key
+id rvContinueWatching
 id rvEpisodes
 id save_non_transition_alpha
 id save_overlay_view
@@ -3686,6 +3691,7 @@ id search_voice_btn
 id seasonCard
 id seasonSelector
 id sectionAccentBar
+id sectionContinueWatching
 id sectionMainTitle
 id sectionNavNext
 id sectionNavPrev
@@ -3828,6 +3834,19 @@ id view_tree_saved_state_registry_owner
 id view_tree_view_model_store_owner
 id visible
 id visible_removing_fragment_view_tag
+id wEmpty
+id wEp1
+id wEp2
+id wEp3
+id wSlot1
+id wSlot2
+id wSlot3
+id wThumb1
+id wThumb2
+id wThumb3
+id wTitle1
+id wTitle2
+id wTitle3
 id webviewContainer
 id west
 id withText
@@ -3990,6 +4009,7 @@ layout item_cine_hero_header
 layout item_cine_section
 layout item_content_card
 layout item_content_grid
+layout item_continue_card
 layout item_live_glass_card
 layout item_notification_card
 layout item_trending_card
@@ -4058,6 +4078,7 @@ layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout sheet_notifications
 layout support_simple_spinner_dropdown_item
+layout widget_continue_watching
 menu bottom_nav
 mipmap ic_launcher
 mipmap ic_launcher_round
@@ -5497,4 +5518,5 @@ styleable ViewPager2 android_orientation
 styleable ViewStubCompat android_id android_layout android_inflatedId
 styleable ViewTransition android_id SharedValue SharedValueId clearsTag duration ifTagNotSet ifTagSet motionInterpolator motionTarget onStateTransition pathMotionArc setsTag transitionDisable upDuration viewTransitionMode
 styleable include constraintSet
+xml continue_watching_widget_info
 xml file_paths

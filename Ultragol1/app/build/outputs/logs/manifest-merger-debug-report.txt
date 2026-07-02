@@ -1,20 +1,20 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:47:9-52:20
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:59:9-64:20
 	android:grantUriPermissions
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:49:38-72
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:61:38-72
 	android:authorities
 		INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:48:13-64
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:60:13-64
 	android:exported
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:49:13-37
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:61:13-37
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:47:19-68
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:59:19-68
 manifest
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-54:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-54:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-54:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-54:12
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-66:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-66:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-66:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-66:12
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/runner/.gradle/caches/transforms-3/cb18eaec7a5810faf7aebcde5b32381b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/runner/.gradle/caches/transforms-3/0886aa54eb4715b41f375791fc439636/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
@@ -109,8 +109,8 @@ ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:12:
 	android:name
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:12:19-62
 application
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-53:19
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-53:19
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-65:19
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-65:19
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/runner/.gradle/caches/transforms-3/cb18eaec7a5810faf7aebcde5b32381b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -215,12 +215,32 @@ ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:44:
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:45:50-87
 	android:name
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:44:19-49
-meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:50:13-51:54
-	android:resource
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:51:17-51
+receiver#com.ultragol.app.ContinueWatchingWidget
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:48:9-57:20
+	android:label
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:50:13-45
+	android:exported
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:49:13-36
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:50:24-74
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:48:19-57
+intent-filter#action:name:android.appwidget.action.APPWIDGET_UPDATE
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:51:13-53:29
+action#android.appwidget.action.APPWIDGET_UPDATE
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:52:17-83
+	android:name
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:52:25-81
+meta-data#android.appwidget.provider
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:54:13-56:72
+	android:resource
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:56:17-70
+	android:name
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:55:17-58
+meta-data#android.support.FILE_PROVIDER_PATHS
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:62:13-63:54
+	android:resource
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:63:17-51
+	android:name
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:62:24-74
 uses-sdk
 INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml

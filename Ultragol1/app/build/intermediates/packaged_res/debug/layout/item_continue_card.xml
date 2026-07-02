@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="130dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginStart="6dp"
+    android:layout_marginEnd="6dp">
+
+    <!-- Thumbnail + overlays -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="78dp"
+        android:background="@drawable/ep_card_glass">
+
+        <ImageView
+            android:id="@+id/cwThumb"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="@drawable/glass_card_bg"/>
+
+        <!-- Bottom gradient for badge legibility -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="36dp"
+            android:layout_gravity="bottom"
+            android:background="@drawable/gradient_detail_bottom"/>
+
+        <!-- T1 · E3 badge bottom-left -->
+        <TextView
+            android:id="@+id/cwEpBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="6dp"
+            android:text="T1 · E1"
+            android:textColor="#FFFFFF"
+            android:textSize="9sp"
+            android:fontFamily="sans-serif-bold"
+            android:letterSpacing="0.04"
+            android:background="@drawable/ep_season_pill_bg"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"/>
+
+        <!-- Play icon center -->
+        <TextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:text="▶"
+            android:textColor="#CCFFFFFF"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:background="@drawable/glass_card_bg"/>
+
+        <!-- Remove × top-right -->
+        <TextView
+            android:id="@+id/cwRemove"
+            android:layout_width="22dp"
+            android:layout_height="22dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="4dp"
+            android:text="×"
+            android:textColor="#CCFFFFFF"
+            android:textSize="14sp"
+            android:gravity="center"
+            android:background="@drawable/back_btn_glass"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
+
+    <!-- Title below thumbnail -->
+    <TextView
+        android:id="@+id/cwTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:text="Título"
+        android:textColor="#DDFFFFFF"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:lineSpacingMultiplier="1.2"/>
+
+</LinearLayout>
