@@ -93,10 +93,17 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         h.btnDelete.setVisibility(manageMode ? View.VISIBLE : View.GONE);
         h.btnDelete.setOnClickListener(v -> listener.onDeleteClick(p));
 
-        // Card glass — highlight current profile
+        // Card glass — highlight current profile with orange glow
         String currentId = ProfileManager.getCurrentId(ctx);
+        boolean isCurrent = p.id.equals(currentId);
         h.cardContainer.setBackgroundResource(
-            p.id.equals(currentId) ? R.drawable.profile_card_selected : R.drawable.profile_card_glass);
+            isCurrent ? R.drawable.profile_card_selected_v2 : R.drawable.profile_card_glass_v2);
+
+        // Glow ring on selected avatar
+        View glowRing = h.itemView.findViewById(R.id.avatarGlowRing);
+        if (glowRing != null) {
+            glowRing.setAlpha(isCurrent ? 1f : 0f);
+        }
 
         // Clicks
         h.itemView.setOnClickListener(v -> { if (!manageMode) listener.onProfileClick(p); });
@@ -110,7 +117,8 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     class ProfileVH extends RecyclerView.ViewHolder {
         FrameLayout cardContainer, avatarCircle;
-        TextView tvInitial, tvName, tvPinBadge, badgeKids, btnDelete;
+        TextView tvInitial, tvName, tvPinBadge, badgeKids;
+        View btnDelete; // FrameLayout in layout — kept as View for flexibility
         ProfileVH(View v) {
             super(v);
             cardContainer = v.findViewById(R.id.cardContainer);

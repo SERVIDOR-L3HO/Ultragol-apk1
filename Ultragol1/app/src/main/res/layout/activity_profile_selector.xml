@@ -4,24 +4,32 @@
     android:layout_height="match_parent"
     android:background="#080810">
 
-    <!-- Background glow blobs -->
+    <!-- Background glow blobs — posicionados creativamente -->
     <View
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="320dp"
+        android:layout_height="320dp"
         android:layout_gravity="top|start"
-        android:layout_marginStart="-80dp"
-        android:layout_marginTop="-80dp"
+        android:layout_marginStart="-100dp"
+        android:layout_marginTop="-100dp"
         android:background="@drawable/gradient_radial_splash"
-        android:alpha="0.22"/>
+        android:alpha="0.28"/>
 
     <View
-        android:layout_width="250dp"
-        android:layout_height="250dp"
+        android:layout_width="260dp"
+        android:layout_height="260dp"
         android:layout_gravity="bottom|end"
-        android:layout_marginEnd="-60dp"
-        android:layout_marginBottom="-60dp"
+        android:layout_marginEnd="-70dp"
+        android:layout_marginBottom="-70dp"
         android:background="@drawable/gradient_radial_splash"
-        android:alpha="0.14"/>
+        android:alpha="0.18"/>
+
+    <View
+        android:layout_width="180dp"
+        android:layout_height="180dp"
+        android:layout_gravity="center|end"
+        android:layout_marginEnd="-40dp"
+        android:background="@drawable/gradient_radial_splash"
+        android:alpha="0.10"/>
 
     <!-- Main content -->
     <LinearLayout
@@ -30,16 +38,16 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- Top bar with logo + manage button -->
+        <!-- Top bar: logo + gestionar -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="56dp"
+            android:layout_height="60dp"
             android:paddingStart="20dp"
             android:paddingEnd="20dp">
 
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="28dp"
+                android:layout_height="30dp"
                 android:layout_gravity="center_vertical|start"
                 android:src="@drawable/logo_ultragol"
                 android:scaleType="fitStart"
@@ -55,7 +63,10 @@
                 android:textColor="#FF6B00"
                 android:textSize="13sp"
                 android:fontFamily="sans-serif-medium"
-                android:padding="8dp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
                 android:clickable="true"
                 android:focusable="true"/>
         </FrameLayout>
@@ -64,7 +75,7 @@
         <View
             android:layout_width="match_parent"
             android:layout_height="1dp"
-            android:background="#12FFFFFF"/>
+            android:background="#10FFFFFF"/>
 
         <!-- Title section -->
         <LinearLayout
@@ -72,23 +83,34 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
-            android:layout_marginTop="36dp"
-            android:layout_marginBottom="32dp">
+            android:layout_marginTop="38dp"
+            android:layout_marginBottom="30dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="¿Quién está viendo?"
                 android:textColor="#FFFFFF"
-                android:textSize="26sp"
+                android:textSize="28sp"
                 android:fontFamily="sans-serif-black"
                 android:letterSpacing="-0.02"/>
 
+            <!-- Orange underline accent -->
             <View
-                android:layout_width="40dp"
+                android:layout_width="48dp"
                 android:layout_height="3dp"
                 android:layout_marginTop="12dp"
-                android:background="#FF6B00"/>
+                android:background="@drawable/profile_save_btn"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Selecciona tu perfil para continuar"
+                android:textColor="#55FFFFFF"
+                android:textSize="12sp"
+                android:fontFamily="sans-serif"
+                android:gravity="center"/>
         </LinearLayout>
 
         <!-- Profile grid -->
@@ -97,8 +119,8 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
             android:paddingBottom="24dp"
             android:clipToPadding="false"
             android:overScrollMode="never"/>
@@ -108,12 +130,13 @@
             android:id="@+id/tvManageHint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="32dp"
-            android:text="Mantén pulsado un perfil para opciones"
-            android:textColor="#44FFFFFF"
+            android:layout_marginBottom="36dp"
+            android:text="Mantén pulsado un perfil para editarlo"
+            android:textColor="#33FFFFFF"
             android:textSize="11sp"
             android:fontFamily="sans-serif"
-            android:gravity="center"/>
+            android:gravity="center"
+            android:drawablePadding="6dp"/>
 
     </LinearLayout>
 

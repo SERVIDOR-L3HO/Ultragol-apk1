@@ -54,8 +54,10 @@ public class MainActivity extends AppCompatActivity {
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
         View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
-        View navFavorites = drawerOverlay.findViewById(R.id.navFavorites);
-        View navMyList    = drawerOverlay.findViewById(R.id.navMyList);
+        View navFavorites     = drawerOverlay.findViewById(R.id.navFavorites);
+        View navMyList        = drawerOverlay.findViewById(R.id.navMyList);
+        View navSwitchProfile = drawerOverlay.findViewById(R.id.navSwitchProfile);
+        android.widget.TextView tvCurrentProfileName = drawerOverlay.findViewById(R.id.tvCurrentProfileName);
 
         if (navInicio    != null) navInicio.setOnClickListener(v    -> navigate(new HomeFragment()));
         if (navSeries    != null) navSeries.setOnClickListener(v    -> navigate(new SeriesFragment()));
@@ -65,6 +67,10 @@ public class MainActivity extends AppCompatActivity {
         if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
+        if (navSwitchProfile != null) navSwitchProfile.setOnClickListener(v -> {
+            hideMenu();
+            startActivity(new Intent(this, ProfileSelectorActivity.class));
+        });
         if (navSearch    != null) navSearch.setOnClickListener(v    -> {
             hideMenu();
             startActivity(new Intent(this, SearchActivity.class));
@@ -138,6 +144,12 @@ public class MainActivity extends AppCompatActivity {
 
     public void showMenu() {
         if (drawerOverlay == null) return;
+        // Refresh current profile name
+        android.widget.TextView tvPName = drawerOverlay.findViewById(R.id.tvCurrentProfileName);
+        if (tvPName != null) {
+            ProfileManager.Profile p = ProfileManager.getCurrentProfile(this);
+            tvPName.setText(p != null ? p.name : "Sin perfil activo");
+        }
         drawerOverlay.setVisibility(View.VISIBLE);
         AlphaAnimation anim = new AlphaAnimation(0f, 1f);
         anim.setDuration(200);
