@@ -59,32 +59,7 @@ public class ServerSelectDialog {
                 .centerCrop().into(poster);
         }
 
-        // Episode section (series only)
-        boolean isTV = item.getContentType() != ContentItem.TYPE_MOVIE;
-        View episodeSection = dialog.findViewById(R.id.episodeSection);
-        if (episodeSection != null) episodeSection.setVisibility(isTV ? View.VISIBLE : View.GONE);
-
-        final int[] season  = {initSeason};
-        final int[] episode = {initEpisode};
-
-        if (isTV) {
-            TextView tvS = dialog.findViewById(R.id.tvSeason);
-            TextView tvE = dialog.findViewById(R.id.tvEpisode);
-            View bSM = dialog.findViewById(R.id.btnSeasonMinus);
-            View bSP = dialog.findViewById(R.id.btnSeasonPlus);
-            View bEM = dialog.findViewById(R.id.btnEpMinus);
-            View bEP = dialog.findViewById(R.id.btnEpPlus);
-            View bLoad = dialog.findViewById(R.id.btnLoadEpisode);
-            if (tvS != null) tvS.setText(String.valueOf(season[0]));
-            if (tvE != null) tvE.setText(String.valueOf(episode[0]));
-            if (bSM != null) bSM.setOnClickListener(v -> { if (season[0]>1) { season[0]--; if(tvS!=null) tvS.setText(String.valueOf(season[0])); }});
-            if (bSP != null) bSP.setOnClickListener(v -> { if (season[0]<30){ season[0]++; if(tvS!=null) tvS.setText(String.valueOf(season[0])); }});
-            if (bEM != null) bEM.setOnClickListener(v -> { if (episode[0]>1){ episode[0]--; if(tvE!=null) tvE.setText(String.valueOf(episode[0])); }});
-            if (bEP != null) bEP.setOnClickListener(v -> { if (episode[0]<200){episode[0]++; if(tvE!=null) tvE.setText(String.valueOf(episode[0])); }});
-            if (bLoad != null) bLoad.setOnClickListener(v -> loadServers(context, dialog, item, season[0], episode[0]));
-        }
-
-        loadServers(context, dialog, item, season[0], episode[0]);
+        loadServers(context, dialog, item, initSeason, initEpisode);
         dialog.show();
     }
 

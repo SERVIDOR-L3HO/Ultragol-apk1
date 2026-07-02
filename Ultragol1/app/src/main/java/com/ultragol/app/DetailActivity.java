@@ -1,6 +1,8 @@
 package com.ultragol.app;
 
+import android.app.AlertDialog;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
@@ -20,6 +22,8 @@ import java.util.concurrent.*;
 public class DetailActivity extends AppCompatActivity {
 
     private ContentItem item;
+    private int currentSeason = 1;
+    private int totalSeasons  = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +174,8 @@ public class DetailActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
             });
         }
+
+        setupEpisodeSection();
     }
 
     private void updateFavoriteBtn(LinearLayout btn) {
@@ -195,6 +201,267 @@ public class DetailActivity extends AppCompatActivity {
             label.setTextColor(inList ? Color.parseColor("#4FC3F7") : Color.WHITE);
         }
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  EPISODE SECTION — glass UI
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void setupEpisodeSection() {
+        View section = findViewById(R.id.episodeSectionDetail);
+        if (section == null) return;
+
+        boolean isTV = item.getContentType() != ContentItem.TYPE_MOVIE;
+        section.setVisibility(isTV ? View.VISIBLE : View.GONE);
+        if (!isTV) return;
+
+        // Wire overview into Información tab
+        TextView tvInfoOv = findViewById(R.id.tvInfoOverview);
+        if (tvInfoOv != null) tvInfoOv.setText(item.getOverview());
+
+        // Tab switching
+        TextView tabEp   = findViewById(R.id.tabEpisodios);
+        TextView tabInfo = findViewById(R.id.tabInformacion);
+        View     epContent   = findViewById(R.id.episodeTabContent);
+        View     infoContent = findViewById(R.id.infoTabContent);
+        View     indicator   = findViewById(R.id.tabIndicatorEp);
+
+        if (tabEp != null) tabEp.setOnClickListener(v -> {
+            setTabActive(tabEp, tabInfo, indicator, true);
+            if (epContent   != null) epContent.setVisibility(View.VISIBLE);
+            if (infoContent != null) infoContent.setVisibility(View.GONE);
+        });
+        if (tabInfo != null) tabInfo.setOnClickListener(v -> {
+            setTabActive(tabInfo, tabEp, indicator, false);
+            if (epContent   != null) epContent.setVisibility(View.GONE);
+            if (infoContent != null) infoContent.setVisibility(View.VISIBLE);
+        });
+
+        // Season selector pill
+        View seasonSel = findViewById(R.id.seasonSelector);
+        if (seasonSel != null) seasonSel.setOnClickListener(v -> showSeasonPicker());
+
+        // Fetch season count then load season 1
+        loadSeasonCount();
+    }
+
+    private void setTabActive(TextView active, TextView inactive, View indicator, boolean isEpisodes) {
+        if (active   != null) { active.setTextColor(0xFFFFFFFF);   active.setTypeface(null, Typeface.BOLD); }
+        if (inactive != null) { inactive.setTextColor(0x44FFFFFF); inactive.setTypeface(null, Typeface.NORMAL); }
+        if (indicator != null) indicator.setVisibility(isEpisodes ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadSeasonCount() {
+        Handler h = new Handler(android.os.Looper.getMainLooper());
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        pool.execute(() -> {
+            try {
+                int seasons = TmdbApi.fetchSeriesSeasonCount(item.getTmdbId());
+                h.post(() -> {
+                    if (isFinishing()) return;
+                    totalSeasons = Math.max(1, seasons);
+                    updateSeasonPill();
+                    loadEpisodes(currentSeason);
+                });
+            } catch (Exception e) {
+                h.post(() -> {
+                    if (!isFinishing()) loadEpisodes(1);
+                });
+            }
+        });
+        pool.shutdown();
+    }
+
+    private void updateSeasonPill() {
+        TextView pill = findViewById(R.id.tvSeasonPill);
+        if (pill != null) {
+            String label = totalSeasons > 1
+                ? "Temporada " + currentSeason + " de " + totalSeasons
+                : "Temporada " + currentSeason;
+            pill.setText(label);
+        }
+    }
+
+    private void showSeasonPicker() {
+        if (totalSeasons <= 1) return;
+        String[] items = new String[totalSeasons];
+        for (int i = 0; i < totalSeasons; i++) items[i] = "Temporada " + (i + 1);
+
+        new AlertDialog.Builder(this)
+            .setTitle("Seleccionar temporada")
+            .setItems(items, (d, which) -> {
+                currentSeason = which + 1;
+                updateSeasonPill();
+                loadEpisodes(currentSeason);
+            })
+            .show();
+    }
+
+    private void loadEpisodes(int season) {
+        View loadFrame  = findViewById(R.id.epLoadingFrame);
+        LinearLayout cnt = findViewById(R.id.episodeListContainer);
+        if (loadFrame != null) loadFrame.setVisibility(View.VISIBLE);
+        if (cnt       != null) { cnt.setVisibility(View.GONE); cnt.removeAllViews(); }
+
+        Handler h = new Handler(android.os.Looper.getMainLooper());
+        ExecutorService pool = Executors.newSingleThreadExecutor();
+        pool.execute(() -> {
+            try {
+                List<TmdbApi.EpisodeInfo> eps = TmdbApi.fetchSeasonEpisodes(item.getTmdbId(), season);
+                h.post(() -> {
+                    if (isFinishing()) return;
+                    if (loadFrame != null) loadFrame.setVisibility(View.GONE);
+                    buildEpisodeCards(eps, season);
+                });
+            } catch (Exception e) {
+                h.post(() -> {
+                    if (isFinishing()) return;
+                    if (loadFrame != null) loadFrame.setVisibility(View.GONE);
+                    buildEpisodeCards(null, season);
+                });
+            }
+        });
+        pool.shutdown();
+    }
+
+    private void buildEpisodeCards(List<TmdbApi.EpisodeInfo> eps, int season) {
+        LinearLayout cnt = findViewById(R.id.episodeListContainer);
+        if (cnt == null) return;
+        cnt.removeAllViews();
+        cnt.setVisibility(View.VISIBLE);
+
+        if (eps == null || eps.isEmpty()) {
+            // Fallback: show E1..E12 placeholder cards
+            for (int i = 1; i <= 12; i++) {
+                addEpisodeCard(cnt, season, i, "Episodio " + i, "", "", 0);
+            }
+            return;
+        }
+
+        for (TmdbApi.EpisodeInfo ep : eps) {
+            addEpisodeCard(cnt, season, ep.number, ep.name, ep.overview, ep.stillUrl, ep.runtime);
+        }
+    }
+
+    private void addEpisodeCard(LinearLayout parent, int season, int epNum,
+                                String name, String overview, String stillUrl, int runtime) {
+        // Card container
+        LinearLayout card = new LinearLayout(this);
+        card.setOrientation(LinearLayout.HORIZONTAL);
+        card.setClickable(true);
+        card.setFocusable(true);
+        card.setBackgroundResource(R.drawable.ep_card_glass);
+
+        LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        cardLp.setMargins(0, 0, 0, dp(10));
+        card.setLayoutParams(cardLp);
+
+        // Thumbnail
+        ImageView thumb = new ImageView(this);
+        int thumbW = dp(120), thumbH = dp(76);
+        LinearLayout.LayoutParams thumbLp = new LinearLayout.LayoutParams(thumbW, thumbH);
+        thumb.setLayoutParams(thumbLp);
+        thumb.setScaleType(ImageView.ScaleType.CENTER_CROP);
+
+        GradientDrawable thumbBg = new GradientDrawable();
+        thumbBg.setColor(0x1AFFFFFF);
+        thumbBg.setCornerRadii(new float[]{dp(12), dp(12), 0, 0, 0, 0, dp(12), dp(12)});
+        thumb.setBackground(thumbBg);
+
+        String imageUrl = (stillUrl != null && !stillUrl.isEmpty()) ? stillUrl : item.getPosterUrl();
+        if (!imageUrl.isEmpty()) {
+            Glide.with(this).load(imageUrl)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop().into(thumb);
+        }
+        card.addView(thumb);
+
+        // Right column
+        LinearLayout col = new LinearLayout(this);
+        col.setOrientation(LinearLayout.VERTICAL);
+        col.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        col.setLayoutParams(new LinearLayout.LayoutParams(0, thumbH, 1f));
+        col.setPadding(dp(12), dp(10), dp(10), dp(10));
+
+        // Episode badge row
+        LinearLayout badgeRow = new LinearLayout(this);
+        badgeRow.setOrientation(LinearLayout.HORIZONTAL);
+        badgeRow.setGravity(android.view.Gravity.CENTER_VERTICAL);
+        badgeRow.setLayoutParams(new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+
+        // E-number badge
+        TextView badge = new TextView(this);
+        badge.setText("E" + epNum);
+        badge.setTextColor(0xFFFF6B00);
+        badge.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f);
+        badge.setTypeface(null, Typeface.BOLD);
+        badge.setLetterSpacing(0.06f);
+        GradientDrawable badgeBg = new GradientDrawable();
+        badgeBg.setColor(0x22FF6B00);
+        badgeBg.setStroke(dp(1), 0x55FF6B00);
+        badgeBg.setCornerRadius(dp(4));
+        badge.setBackground(badgeBg);
+        int bPadH = dp(6), bPadV = dp(2);
+        badge.setPadding(bPadH, bPadV, bPadH, bPadV);
+        LinearLayout.LayoutParams badgeLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        badgeLp.setMarginEnd(dp(7));
+        badge.setLayoutParams(badgeLp);
+        badgeRow.addView(badge);
+
+        // Episode title
+        TextView tvName = new TextView(this);
+        tvName.setText(name);
+        tvName.setTextColor(0xFFFFFFFF);
+        tvName.setTextSize(TypedValue.COMPLEX_UNIT_SP, 13f);
+        tvName.setTypeface(null, Typeface.BOLD);
+        tvName.setMaxLines(1);
+        tvName.setEllipsize(android.text.TextUtils.TruncateAt.END);
+        tvName.setLayoutParams(new LinearLayout.LayoutParams(0,
+            ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+        badgeRow.addView(tvName);
+        col.addView(badgeRow);
+
+        // Overview
+        if (overview != null && !overview.isEmpty()) {
+            TextView tvOv = new TextView(this);
+            tvOv.setText(overview);
+            tvOv.setTextColor(0x88FFFFFF);
+            tvOv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 11f);
+            tvOv.setMaxLines(2);
+            tvOv.setEllipsize(android.text.TextUtils.TruncateAt.END);
+            tvOv.setLineSpacing(0, 1.3f);
+            LinearLayout.LayoutParams ovLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            ovLp.setMargins(0, dp(4), 0, 0);
+            tvOv.setLayoutParams(ovLp);
+            col.addView(tvOv);
+        }
+
+        // Runtime chip (if available)
+        if (runtime > 0) {
+            TextView tvTime = new TextView(this);
+            tvTime.setText(runtime + " min");
+            tvTime.setTextColor(0x55FFFFFF);
+            tvTime.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10f);
+            LinearLayout.LayoutParams timeLp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            timeLp.setMargins(0, dp(3), 0, 0);
+            tvTime.setLayoutParams(timeLp);
+            col.addView(tvTime);
+        }
+
+        card.addView(col);
+
+        // Click → open server dialog for this episode
+        final int s = season, e = epNum;
+        card.setOnClickListener(v -> ServerSelectDialog.show(this, item, s, e));
+
+        parent.addView(card);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
 
     private void loadRelated() {
         View rowRelated = findViewById(R.id.rowRelated);
