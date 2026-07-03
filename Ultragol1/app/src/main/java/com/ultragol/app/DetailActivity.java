@@ -7,10 +7,12 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -854,114 +856,26 @@ public class DetailActivity extends AppCompatActivity {
         }, 2500);
     }
 
-    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    /**
+     * Opens the trailer in the YouTube app. If the app is not installed,
+     * falls back to the system browser. This avoids embed errors (150/152/153)
+     * that YouTube enforces on restricted videos in WebViews.
+     */
     private void showTrailerModal(String key) {
-        Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_trailer);
+        // Try YouTube app first (deep link)
+        Intent ytApp = new Intent(Intent.ACTION_VIEW,
+            Uri.parse("vnd.youtube:" + key));
+        ytApp.putExtra("force_fullscreen", true);
 
-        Window win = dialog.getWindow();
-        int screenW = getResources().getDisplayMetrics().widthPixels;
-        int margin  = dp(20);
-        int dlgW    = screenW - margin * 2;
+        // Fallback: open watch URL in browser/YouTube app
+        Intent ytWeb = new Intent(Intent.ACTION_VIEW,
+            Uri.parse("https://www.youtube.com/watch?v=" + key));
 
-        if (win != null) {
-            win.setBackgroundDrawableResource(android.R.color.transparent);
-            win.setLayout(dlgW, WindowManager.LayoutParams.WRAP_CONTENT);
-            win.setGravity(Gravity.CENTER);
-            win.setDimAmount(0.75f);
+        try {
+            startActivity(ytApp);
+        } catch (android.content.ActivityNotFoundException e) {
+            startActivity(ytWeb);
         }
-
-        // Title
-        TextView tvTitle = dialog.findViewById(R.id.trailerTitle);
-        if (tvTitle != null) tvTitle.setText(item.getTitle() + " — Tráiler");
-
-        // Resize WebView height to 16:9
-        WebView wv = dialog.findViewById(R.id.trailerWebView);
-        if (wv != null) {
-            int videoH = dlgW * 9 / 16;
-            wv.getLayoutParams().height = videoH;
-            wv.requestLayout();
-
-            android.webkit.CookieManager cm = android.webkit.CookieManager.getInstance();
-            cm.setAcceptCookie(true);
-            cm.setAcceptThirdPartyCookies(wv, true);
-
-            WebSettings ws = wv.getSettings();
-            ws.setJavaScriptEnabled(true);
-            ws.setMediaPlaybackRequiresUserGesture(false);
-            ws.setDomStorageEnabled(true);
-            ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
-            ws.setUserAgentString(CHROME_UA);
-            ws.setLoadWithOverviewMode(true);
-            ws.setUseWideViewPort(true);
-            wv.setBackgroundColor(Color.BLACK);
-            wv.setWebChromeClient(new WebChromeClient());
-
-            // Load via HTML iframe with youtube-nocookie to avoid Error 150/153
-            String html = "<!DOCTYPE html><html>"
-                + "<head><style>*{margin:0;padding:0;background:#000}"
-                + "html,body,iframe{width:100%;height:100%;border:none}</style></head>"
-                + "<body><iframe"
-                + " src='https://www.youtube-nocookie.com/embed/" + key
-                + "?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1'"
-                + " allow='autoplay;encrypted-media;fullscreen'"
-                + " allowfullscreen></iframe></body></html>";
-            wv.loadDataWithBaseURL(
-                "https://www.youtube.com", html, "text/html", "utf-8", null);
-        }
-
-        // Close button
-        View closeBtn = dialog.findViewById(R.id.trailerClose);
-        if (closeBtn != null) closeBtn.setOnClickListener(v -> {
-            if (wv != null) { wv.stopLoading(); wv.loadUrl("about:blank"); }
-            dialog.dismiss();
-        });
-
-        // Expand / fullscreen toggle
-        final boolean[] isFullscreen = {false};
-        TextView expandIcon = dialog.findViewById(R.id.trailerExpandIcon);
-        View expandBtn = dialog.findViewById(R.id.trailerExpand);
-        if (expandBtn != null) expandBtn.setOnClickListener(v -> {
-            isFullscreen[0] = !isFullscreen[0];
-            if (win != null) {
-                if (isFullscreen[0]) {
-                    win.setLayout(
-                        WindowManager.LayoutParams.MATCH_PARENT,
-                        WindowManager.LayoutParams.MATCH_PARENT);
-                    if (wv != null) {
-                        wv.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
-                        wv.requestLayout();
-                    }
-                    if (expandIcon != null) expandIcon.setText("⊡");
-                } else {
-                    win.setLayout(dlgW, WindowManager.LayoutParams.WRAP_CONTENT);
-                    if (wv != null) {
-                        wv.getLayoutParams().height = dlgW * 9 / 16;
-                        wv.requestLayout();
-                    }
-                    if (expandIcon != null) expandIcon.setText("⛶");
-                }
-            }
-        });
-
-        // Animate in
-        View root = dialog.findViewById(android.R.id.content);
-        dialog.show();
-        if (win != null) {
-            View decor = win.getDecorView();
-            decor.setAlpha(0f);
-            decor.setScaleX(0.92f);
-            decor.setScaleY(0.92f);
-            decor.animate().alpha(1f).scaleX(1f).scaleY(1f)
-                .setDuration(280)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .start();
-        }
-
-        dialog.setOnDismissListener(d -> {
-            if (wv != null) { wv.stopLoading(); wv.loadUrl("about:blank"); wv.destroy(); }
-        });
     }
 
     private int dp(int value) {
