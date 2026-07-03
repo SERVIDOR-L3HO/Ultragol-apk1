@@ -796,9 +796,18 @@ public class DetailActivity extends AppCompatActivity {
         exec.shutdown();
     }
 
-    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private static final String CHROME_UA =
+        "Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 " +
+        "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+
+    @android.annotation.SuppressLint({"SetJavaScriptEnabled","RequiresFeature"})
     private void setupBackdropWebView(String key) {
         if (backdropWebView == null) return;
+
+        // Accept cookies so YouTube can authenticate the embed
+        android.webkit.CookieManager cm = android.webkit.CookieManager.getInstance();
+        cm.setAcceptCookie(true);
+        cm.setAcceptThirdPartyCookies(backdropWebView, true);
 
         WebSettings ws = backdropWebView.getSettings();
         ws.setJavaScriptEnabled(true);
@@ -806,6 +815,8 @@ public class DetailActivity extends AppCompatActivity {
         ws.setLoadWithOverviewMode(true);
         ws.setUseWideViewPort(true);
         ws.setDomStorageEnabled(true);
+        ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        ws.setUserAgentString(CHROME_UA);
         backdropWebView.setBackgroundColor(Color.BLACK);
 
         String html = "<!DOCTYPE html><html>"
@@ -872,16 +883,32 @@ public class DetailActivity extends AppCompatActivity {
             wv.getLayoutParams().height = videoH;
             wv.requestLayout();
 
+            android.webkit.CookieManager cm = android.webkit.CookieManager.getInstance();
+            cm.setAcceptCookie(true);
+            cm.setAcceptThirdPartyCookies(wv, true);
+
             WebSettings ws = wv.getSettings();
             ws.setJavaScriptEnabled(true);
             ws.setMediaPlaybackRequiresUserGesture(false);
             ws.setDomStorageEnabled(true);
+            ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
+            ws.setUserAgentString(CHROME_UA);
+            ws.setLoadWithOverviewMode(true);
+            ws.setUseWideViewPort(true);
             wv.setBackgroundColor(Color.BLACK);
             wv.setWebChromeClient(new WebChromeClient());
 
-            String url = "https://www.youtube.com/embed/" + key
-                + "?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1";
-            wv.loadUrl(url);
+            // Load via HTML iframe with youtube-nocookie to avoid Error 150/153
+            String html = "<!DOCTYPE html><html>"
+                + "<head><style>*{margin:0;padding:0;background:#000}"
+                + "html,body,iframe{width:100%;height:100%;border:none}</style></head>"
+                + "<body><iframe"
+                + " src='https://www.youtube-nocookie.com/embed/" + key
+                + "?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1'"
+                + " allow='autoplay;encrypted-media;fullscreen'"
+                + " allowfullscreen></iframe></body></html>";
+            wv.loadDataWithBaseURL(
+                "https://www.youtube.com", html, "text/html", "utf-8", null);
         }
 
         // Close button
