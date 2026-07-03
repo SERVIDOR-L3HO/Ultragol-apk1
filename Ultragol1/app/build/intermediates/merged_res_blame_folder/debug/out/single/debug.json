@@ -132,6 +132,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/live_accent_bar.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_trailer_btn_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/trailer_btn_glass.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_live_card_main_bg.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/live_card_main_bg.xml"
     },
@@ -198,10 +202,6 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_glass_card_bg.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/glass_card_bg.xml"
-    },
-    {
-        "merged": "com.ultragol.app-merged_res-33:/drawable_loading_servers_card_bg.xml.flat",
-        "source": "com.ultragol.app-main-35:/drawable/loading_servers_card_bg.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_poster_glass_bg.xml.flat",
@@ -356,6 +356,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/sport_section_chip_inactive.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/layout_dialog_trailer.xml.flat",
+        "source": "com.ultragol.app-main-35:/layout/dialog_trailer.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_item_banner.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/item_banner.xml"
     },
@@ -382,6 +386,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_update_dialog_bg.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/update_dialog_bg.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_loading_servers_card_bg.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/loading_servers_card_bg.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_sheet_notifications.xml.flat",
@@ -452,6 +460,10 @@
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/dialog_pin_entry.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_trailer_modal_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/trailer_modal_bg.xml"
+    },
+    {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/layout_item_content_card.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/layout/item_content_card.xml"
     },
@@ -502,10 +514,6 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_agenda_match_card.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/agenda_match_card.xml"
-    },
-    {
-        "merged": "com.ultragol.app-merged_res-33:/drawable_btn_play_shimmer.xml.flat",
-        "source": "com.ultragol.app-main-35:/drawable/btn_play_shimmer.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_sport_section_chip_active.xml.flat",
@@ -642,6 +650,10 @@
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_dot_active.xml.flat",
         "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/dot_active.xml"
+    },
+    {
+        "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_btn_play_shimmer.xml.flat",
+        "source": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-main-35:/drawable/btn_play_shimmer.xml"
     },
     {
         "merged": "/home/runner/.gradle/daemon/8.4/com.ultragol.app-merged_res-33:/drawable_ic_notification.xml.flat",

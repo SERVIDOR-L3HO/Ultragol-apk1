@@ -12,11 +12,45 @@
         android:layout_height="290dp"
         android:scaleType="centerCrop"/>
 
+    <!-- Trailer auto-play WebView (muted, fades in over backdrop) -->
+    <WebView
+        android:id="@+id/trailerBackdropWebView"
+        android:layout_width="match_parent"
+        android:layout_height="290dp"
+        android:alpha="0"
+        android:background="#000000"/>
+
     <!-- Backdrop bottom gradient -->
     <View
         android:layout_width="match_parent"
         android:layout_height="290dp"
         android:background="@drawable/gradient_detail_overlay"/>
+
+    <!-- Trailer sound-off badge (shown when trailer is playing) -->
+    <FrameLayout
+        android:id="@+id/trailerMutedBadge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|end"
+        android:layout_marginTop="56dp"
+        android:layout_marginEnd="12dp"
+        android:background="@drawable/trailer_btn_glass"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:visibility="gone"
+        android:elevation="8dp"
+        android:clickable="true"
+        android:focusable="true">
+        <TextView
+            android:id="@+id/tvMutedIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="🔇"
+            android:textSize="14sp"/>
+    </FrameLayout>
 
     <!-- Top bar shadow -->
     <View
@@ -39,6 +73,7 @@
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="290dp">
+
                 <ImageView
                     android:id="@+id/detailPoster"
                     android:layout_width="155dp"
@@ -47,6 +82,41 @@
                     android:scaleType="centerCrop"
                     android:background="@drawable/poster_glass_bg"
                     android:elevation="6dp"/>
+
+                <!-- "Ver Tráiler" glass button — bottom-center, hidden until trailer is ready -->
+                <LinearLayout
+                    android:id="@+id/btnTrailer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_gravity="bottom|center_horizontal"
+                    android:layout_marginBottom="14dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/trailer_btn_glass"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:elevation="10dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="▶"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:layout_marginEnd="7dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ver Tráiler"
+                        android:textColor="#FFFFFF"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.02"/>
+                </LinearLayout>
             </FrameLayout>
 
             <!-- Info section — plain black background -->
