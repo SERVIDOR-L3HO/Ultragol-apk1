@@ -1,13 +1,21 @@
 package com.ultragol.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.util.TypedValue;
 import android.view.*;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
@@ -16,6 +24,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -24,6 +33,10 @@ public class DetailActivity extends AppCompatActivity {
     private ContentItem item;
     private int currentSeason = 1;
     private int totalSeasons  = 1;
+
+    // Loading-servers overlay
+    private final Handler loadingHandler = new Handler(Looper.getMainLooper());
+    private final List<Animator> dotAnimators = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,10 +159,15 @@ public class DetailActivity extends AppCompatActivity {
             finish();
             overridePendingTransition(0, android.R.anim.fade_out);
         });
+        // ── REPRODUCIR: pulse + shimmer animation ────────────────────────────
+        startReproducirAnimations(btnPlay);
+
         if (btnPlay != null) btnPlay.setOnClickListener(v -> {
-            ContinueWatchingManager.save(this, item, 0, 0);
-            ContinueWatchingWidget.refresh(this);
-            ServerSelectDialog.show(this, item);
+            showLoadingServers(() -> {
+                ContinueWatchingManager.save(this, item, 0, 0);
+                ContinueWatchingWidget.refresh(this);
+                ServerSelectDialog.show(this, item);
+            });
         });
 
         // ── Favorito button ───────────────────────────────────────────────────
@@ -548,6 +566,127 @@ public class DetailActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
         });
         pool.shutdown();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  REPRODUCIR — continuous pulse + shimmer sweep
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void startReproducirAnimations(View btn) {
+        if (btn == null) return;
+
+        // Subtle scale pulse
+        ObjectAnimator scaleX = ObjectAnimator.ofFloat(btn, "scaleX", 1f, 1.025f, 1f);
+        ObjectAnimator scaleY = ObjectAnimator.ofFloat(btn, "scaleY", 1f, 1.025f, 1f);
+        scaleX.setDuration(1800);
+        scaleY.setDuration(1800);
+        scaleX.setRepeatCount(ObjectAnimator.INFINITE);
+        scaleY.setRepeatCount(ObjectAnimator.INFINITE);
+        scaleX.setInterpolator(new AccelerateDecelerateInterpolator());
+        scaleY.setInterpolator(new AccelerateDecelerateInterpolator());
+        scaleX.start();
+        scaleY.start();
+
+        // Shimmer sweep across button
+        View shimmer = btn.findViewById(R.id.btnPlayShimmer);
+        if (shimmer != null && btn instanceof FrameLayout) {
+            btn.post(() -> {
+                float btnW = btn.getWidth();
+                shimmer.setTranslationX(-80f);
+                ObjectAnimator sweep = ObjectAnimator.ofFloat(shimmer, "translationX", -80f, btnW + 80f);
+                sweep.setDuration(1600);
+                sweep.setStartDelay(600);
+                sweep.setRepeatCount(ObjectAnimator.INFINITE);
+                sweep.setRepeatMode(ObjectAnimator.RESTART);
+                sweep.setInterpolator(new LinearInterpolator());
+
+                ObjectAnimator shimmerAlpha = ObjectAnimator.ofFloat(shimmer, "alpha", 0f, 0.5f, 0f);
+                shimmerAlpha.setDuration(1600);
+                shimmerAlpha.setStartDelay(600);
+                shimmerAlpha.setRepeatCount(ObjectAnimator.INFINITE);
+                shimmerAlpha.setRepeatMode(ObjectAnimator.RESTART);
+                shimmerAlpha.setInterpolator(new LinearInterpolator());
+
+                sweep.start();
+                shimmerAlpha.start();
+            });
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  CARGANDO SERVIDORES overlay
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void showLoadingServers(Runnable onReady) {
+        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
+        if (overlay == null) { onReady.run(); return; }
+
+        // Cancel previous dot animators if any
+        for (Animator a : dotAnimators) a.cancel();
+        dotAnimators.clear();
+
+        // Fade in overlay
+        overlay.setAlpha(0f);
+        overlay.setVisibility(View.VISIBLE);
+        overlay.animate().alpha(1f).setDuration(220).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+
+        // Text shimmer: "CARGANDO" alpha pulse
+        TextView tvTitle    = overlay.findViewById(R.id.tvLoadingTitle);
+        TextView tvSubtitle = overlay.findViewById(R.id.tvLoadingSubtitle);
+        if (tvTitle != null) {
+            ObjectAnimator titleAnim = ObjectAnimator.ofFloat(tvTitle, "alpha", 1f, 0.4f, 1f);
+            titleAnim.setDuration(900);
+            titleAnim.setRepeatCount(ObjectAnimator.INFINITE);
+            titleAnim.start();
+            dotAnimators.add(titleAnim);
+        }
+        if (tvSubtitle != null) {
+            ObjectAnimator subAnim = ObjectAnimator.ofFloat(tvSubtitle, "alpha", 0.6f, 1f, 0.6f);
+            subAnim.setDuration(900);
+            subAnim.setRepeatCount(ObjectAnimator.INFINITE);
+            subAnim.start();
+            dotAnimators.add(subAnim);
+        }
+
+        // Staggered dot animations
+        animateDot(overlay, R.id.loadingDot1, 0);
+        animateDot(overlay, R.id.loadingDot2, 250);
+        animateDot(overlay, R.id.loadingDot3, 500);
+
+        // Spinner entrance scale
+        View spinner = overlay.findViewById(R.id.loadingSpinner);
+        if (spinner != null) {
+            spinner.setScaleX(0f);
+            spinner.setScaleY(0f);
+            spinner.animate().scaleX(1f).scaleY(1f)
+                .setDuration(400)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        }
+
+        // After 1.9 seconds → fade out and run callback
+        loadingHandler.postDelayed(() -> {
+            if (isFinishing()) return;
+            overlay.animate().alpha(0f).setDuration(220)
+                .withEndAction(() -> {
+                    overlay.setVisibility(View.GONE);
+                    for (Animator a : dotAnimators) a.cancel();
+                    dotAnimators.clear();
+                    onReady.run();
+                }).start();
+        }, 1900);
+    }
+
+    private void animateDot(View parent, int dotId, long delay) {
+        View dot = parent.findViewById(dotId);
+        if (dot == null) return;
+        ObjectAnimator anim = ObjectAnimator.ofFloat(dot, "alpha", 0.15f, 1f, 0.15f);
+        anim.setDuration(750);
+        anim.setStartDelay(delay);
+        anim.setRepeatCount(ObjectAnimator.INFINITE);
+        anim.setInterpolator(new AccelerateDecelerateInterpolator());
+        anim.start();
+        dotAnimators.add(anim);
     }
 
     private int dp(int value) {
