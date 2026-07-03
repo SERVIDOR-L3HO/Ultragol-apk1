@@ -48,8 +48,6 @@ public class DetailActivity extends AppCompatActivity {
 
     // Trailer
     private String trailerKey = "";
-    private WebView backdropWebView;
-    private boolean backdropMuted = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,32 +57,14 @@ public class DetailActivity extends AppCompatActivity {
         item = (ContentItem) getIntent().getSerializableExtra("item");
         if (item == null) { finish(); return; }
 
-        backdropWebView = findViewById(R.id.trailerBackdropWebView);
         bindViews();
         loadRelated();
         loadTrailer();
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (backdropWebView != null) backdropWebView.onPause();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (backdropWebView != null) backdropWebView.onResume();
-    }
-
-    @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (backdropWebView != null) {
-            backdropWebView.stopLoading();
-            backdropWebView.destroy();
-            backdropWebView = null;
-        }
         loadingHandler.removeCallbacksAndMessages(null);
     }
 
@@ -210,17 +190,6 @@ public class DetailActivity extends AppCompatActivity {
             if (!trailerKey.isEmpty()) showTrailerModal(trailerKey);
         });
 
-        // ── Muted badge toggle (tap to unmute/mute backdrop) ─────────────────
-        View mutedBadge = findViewById(R.id.trailerMutedBadge);
-        TextView tvMutedIcon = findViewById(R.id.tvMutedIcon);
-        if (mutedBadge != null) mutedBadge.setOnClickListener(v -> {
-            backdropMuted = !backdropMuted;
-            String js = backdropMuted
-                ? "document.getElementById('yt').contentWindow.postMessage('{\"event\":\"command\",\"func\":\"mute\",\"args\":\"\"}','*')"
-                : "document.getElementById('yt').contentWindow.postMessage('{\"event\":\"command\",\"func\":\"unMute\",\"args\":\"\"}','*')";
-            if (backdropWebView != null) backdropWebView.evaluateJavascript(js, null);
-            if (tvMutedIcon != null) tvMutedIcon.setText(backdropMuted ? "🔇" : "🔊");
-        });
 
         // ── Favorito button ───────────────────────────────────────────────────
         if (btnFavorite != null) {
@@ -790,70 +759,10 @@ public class DetailActivity extends AppCompatActivity {
                         btn.setAlpha(0f);
                         btn.animate().alpha(1f).setDuration(500).start();
                     }
-                    // Start backdrop autoplay (muted)
-                    setupBackdropWebView(key);
                 }
             });
         });
         exec.shutdown();
-    }
-
-    private static final String CHROME_UA =
-        "Mozilla/5.0 (Linux; Android 11; Mobile) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
-
-    @android.annotation.SuppressLint({"SetJavaScriptEnabled","RequiresFeature"})
-    private void setupBackdropWebView(String key) {
-        if (backdropWebView == null) return;
-
-        // Accept cookies so YouTube can authenticate the embed
-        android.webkit.CookieManager cm = android.webkit.CookieManager.getInstance();
-        cm.setAcceptCookie(true);
-        cm.setAcceptThirdPartyCookies(backdropWebView, true);
-
-        WebSettings ws = backdropWebView.getSettings();
-        ws.setJavaScriptEnabled(true);
-        ws.setMediaPlaybackRequiresUserGesture(false);
-        ws.setLoadWithOverviewMode(true);
-        ws.setUseWideViewPort(true);
-        ws.setDomStorageEnabled(true);
-        ws.setCacheMode(WebSettings.LOAD_NO_CACHE);
-        ws.setUserAgentString(CHROME_UA);
-        backdropWebView.setBackgroundColor(Color.BLACK);
-
-        String html = "<!DOCTYPE html><html>"
-            + "<head><style>*{margin:0;padding:0;overflow:hidden;background:#000}"
-            + "html,body{width:100%;height:100%}iframe{width:100%;height:200%}"
-            + "</style></head><body>"
-            + "<iframe id='yt'"
-            + " src='https://www.youtube-nocookie.com/embed/" + key
-            + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + key
-            + "&playsinline=1&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&fs=0'"
-            + " frameborder='0'"
-            + " allow='autoplay;encrypted-media'></iframe>"
-            + "</body></html>";
-
-        backdropWebView.loadDataWithBaseURL(
-            "https://www.youtube.com", html, "text/html", "utf-8", null);
-
-        // Crossfade backdrop image → trailer WebView after short delay
-        loadingHandler.postDelayed(() -> {
-            if (isFinishing() || backdropWebView == null) return;
-            backdropWebView.animate().alpha(1f).setDuration(1200)
-                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-
-            ImageView backdrop = findViewById(R.id.detailBackdrop);
-            if (backdrop != null) {
-                backdrop.animate().alpha(0f).setDuration(1200).start();
-            }
-
-            View mutedBadge = findViewById(R.id.trailerMutedBadge);
-            if (mutedBadge != null) {
-                mutedBadge.setVisibility(View.VISIBLE);
-                mutedBadge.setAlpha(0f);
-                mutedBadge.animate().alpha(1f).setDuration(600).start();
-            }
-        }, 2500);
     }
 
     /**
