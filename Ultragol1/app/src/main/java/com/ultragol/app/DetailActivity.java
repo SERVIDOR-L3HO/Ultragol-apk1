@@ -6,6 +6,8 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -16,6 +18,9 @@ import android.util.TypedValue;
 import android.view.*;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.webkit.WebChromeClient;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
@@ -39,6 +44,11 @@ public class DetailActivity extends AppCompatActivity {
     private final Handler loadingHandler = new Handler(Looper.getMainLooper());
     private final List<Animator> dotAnimators = new ArrayList<>();
 
+    // Trailer
+    private String trailerKey = "";
+    private WebView backdropWebView;
+    private boolean backdropMuted = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,8 +57,33 @@ public class DetailActivity extends AppCompatActivity {
         item = (ContentItem) getIntent().getSerializableExtra("item");
         if (item == null) { finish(); return; }
 
+        backdropWebView = findViewById(R.id.trailerBackdropWebView);
         bindViews();
         loadRelated();
+        loadTrailer();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (backdropWebView != null) backdropWebView.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (backdropWebView != null) backdropWebView.onResume();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (backdropWebView != null) {
+            backdropWebView.stopLoading();
+            backdropWebView.destroy();
+            backdropWebView = null;
+        }
+        loadingHandler.removeCallbacksAndMessages(null);
     }
 
     private void bindViews() {
@@ -165,6 +200,24 @@ public class DetailActivity extends AppCompatActivity {
 
         if (btnPlay != null) btnPlay.setOnClickListener(v -> {
             fetchAndPlay(item, 1, 1);
+        });
+
+        // ── Ver Tráiler button ────────────────────────────────────────────────
+        View btnTrailer = findViewById(R.id.btnTrailer);
+        if (btnTrailer != null) btnTrailer.setOnClickListener(v -> {
+            if (!trailerKey.isEmpty()) showTrailerModal(trailerKey);
+        });
+
+        // ── Muted badge toggle (tap to unmute/mute backdrop) ─────────────────
+        View mutedBadge = findViewById(R.id.trailerMutedBadge);
+        TextView tvMutedIcon = findViewById(R.id.tvMutedIcon);
+        if (mutedBadge != null) mutedBadge.setOnClickListener(v -> {
+            backdropMuted = !backdropMuted;
+            String js = backdropMuted
+                ? "document.getElementById('yt').contentWindow.postMessage('{\"event\":\"command\",\"func\":\"mute\",\"args\":\"\"}','*')"
+                : "document.getElementById('yt').contentWindow.postMessage('{\"event\":\"command\",\"func\":\"unMute\",\"args\":\"\"}','*')";
+            if (backdropWebView != null) backdropWebView.evaluateJavascript(js, null);
+            if (tvMutedIcon != null) tvMutedIcon.setText(backdropMuted ? "🔇" : "🔊");
         });
 
         // ── Favorito button ───────────────────────────────────────────────────
@@ -712,6 +765,176 @@ public class DetailActivity extends AppCompatActivity {
         anim.setInterpolator(new AccelerateDecelerateInterpolator());
         anim.start();
         dotAnimators.add(anim);
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  TRAILER — fetch key → backdrop autoplay → modal
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void loadTrailer() {
+        if (item.getTmdbId() == 0) return;
+        boolean isMovie = item.getContentType() == ContentItem.TYPE_MOVIE;
+        ExecutorService exec = Executors.newSingleThreadExecutor();
+        exec.execute(() -> {
+            String key = TmdbApi.fetchYouTubeTrailerKey(item.getTmdbId(), isMovie);
+            loadingHandler.post(() -> {
+                if (isFinishing()) return;
+                trailerKey = key;
+                if (!key.isEmpty()) {
+                    // Show "Ver Tráiler" button
+                    View btn = findViewById(R.id.btnTrailer);
+                    if (btn != null) {
+                        btn.setVisibility(View.VISIBLE);
+                        btn.setAlpha(0f);
+                        btn.animate().alpha(1f).setDuration(500).start();
+                    }
+                    // Start backdrop autoplay (muted)
+                    setupBackdropWebView(key);
+                }
+            });
+        });
+        exec.shutdown();
+    }
+
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private void setupBackdropWebView(String key) {
+        if (backdropWebView == null) return;
+
+        WebSettings ws = backdropWebView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setMediaPlaybackRequiresUserGesture(false);
+        ws.setLoadWithOverviewMode(true);
+        ws.setUseWideViewPort(true);
+        ws.setDomStorageEnabled(true);
+        backdropWebView.setBackgroundColor(Color.BLACK);
+
+        String html = "<!DOCTYPE html><html>"
+            + "<head><style>*{margin:0;padding:0;overflow:hidden;background:#000}"
+            + "html,body{width:100%;height:100%}iframe{width:100%;height:200%}"
+            + "</style></head><body>"
+            + "<iframe id='yt'"
+            + " src='https://www.youtube-nocookie.com/embed/" + key
+            + "?autoplay=1&mute=1&controls=0&loop=1&playlist=" + key
+            + "&playsinline=1&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&fs=0'"
+            + " frameborder='0'"
+            + " allow='autoplay;encrypted-media'></iframe>"
+            + "</body></html>";
+
+        backdropWebView.loadDataWithBaseURL(
+            "https://www.youtube.com", html, "text/html", "utf-8", null);
+
+        // Crossfade backdrop image → trailer WebView after short delay
+        loadingHandler.postDelayed(() -> {
+            if (isFinishing() || backdropWebView == null) return;
+            backdropWebView.animate().alpha(1f).setDuration(1200)
+                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+
+            ImageView backdrop = findViewById(R.id.detailBackdrop);
+            if (backdrop != null) {
+                backdrop.animate().alpha(0f).setDuration(1200).start();
+            }
+
+            View mutedBadge = findViewById(R.id.trailerMutedBadge);
+            if (mutedBadge != null) {
+                mutedBadge.setVisibility(View.VISIBLE);
+                mutedBadge.setAlpha(0f);
+                mutedBadge.animate().alpha(1f).setDuration(600).start();
+            }
+        }, 2500);
+    }
+
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private void showTrailerModal(String key) {
+        Dialog dialog = new Dialog(this, android.R.style.Theme_Black_NoTitleBar);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_trailer);
+
+        Window win = dialog.getWindow();
+        int screenW = getResources().getDisplayMetrics().widthPixels;
+        int margin  = dp(20);
+        int dlgW    = screenW - margin * 2;
+
+        if (win != null) {
+            win.setBackgroundDrawableResource(android.R.color.transparent);
+            win.setLayout(dlgW, WindowManager.LayoutParams.WRAP_CONTENT);
+            win.setGravity(Gravity.CENTER);
+            win.setDimAmount(0.75f);
+        }
+
+        // Title
+        TextView tvTitle = dialog.findViewById(R.id.trailerTitle);
+        if (tvTitle != null) tvTitle.setText(item.getTitle() + " — Tráiler");
+
+        // Resize WebView height to 16:9
+        WebView wv = dialog.findViewById(R.id.trailerWebView);
+        if (wv != null) {
+            int videoH = dlgW * 9 / 16;
+            wv.getLayoutParams().height = videoH;
+            wv.requestLayout();
+
+            WebSettings ws = wv.getSettings();
+            ws.setJavaScriptEnabled(true);
+            ws.setMediaPlaybackRequiresUserGesture(false);
+            ws.setDomStorageEnabled(true);
+            wv.setBackgroundColor(Color.BLACK);
+            wv.setWebChromeClient(new WebChromeClient());
+
+            String url = "https://www.youtube.com/embed/" + key
+                + "?autoplay=1&controls=1&playsinline=1&rel=0&modestbranding=1";
+            wv.loadUrl(url);
+        }
+
+        // Close button
+        View closeBtn = dialog.findViewById(R.id.trailerClose);
+        if (closeBtn != null) closeBtn.setOnClickListener(v -> {
+            if (wv != null) { wv.stopLoading(); wv.loadUrl("about:blank"); }
+            dialog.dismiss();
+        });
+
+        // Expand / fullscreen toggle
+        final boolean[] isFullscreen = {false};
+        TextView expandIcon = dialog.findViewById(R.id.trailerExpandIcon);
+        View expandBtn = dialog.findViewById(R.id.trailerExpand);
+        if (expandBtn != null) expandBtn.setOnClickListener(v -> {
+            isFullscreen[0] = !isFullscreen[0];
+            if (win != null) {
+                if (isFullscreen[0]) {
+                    win.setLayout(
+                        WindowManager.LayoutParams.MATCH_PARENT,
+                        WindowManager.LayoutParams.MATCH_PARENT);
+                    if (wv != null) {
+                        wv.getLayoutParams().height = WindowManager.LayoutParams.MATCH_PARENT;
+                        wv.requestLayout();
+                    }
+                    if (expandIcon != null) expandIcon.setText("⊡");
+                } else {
+                    win.setLayout(dlgW, WindowManager.LayoutParams.WRAP_CONTENT);
+                    if (wv != null) {
+                        wv.getLayoutParams().height = dlgW * 9 / 16;
+                        wv.requestLayout();
+                    }
+                    if (expandIcon != null) expandIcon.setText("⛶");
+                }
+            }
+        });
+
+        // Animate in
+        View root = dialog.findViewById(android.R.id.content);
+        dialog.show();
+        if (win != null) {
+            View decor = win.getDecorView();
+            decor.setAlpha(0f);
+            decor.setScaleX(0.92f);
+            decor.setScaleY(0.92f);
+            decor.animate().alpha(1f).scaleX(1f).scaleY(1f)
+                .setDuration(280)
+                .setInterpolator(new AccelerateDecelerateInterpolator())
+                .start();
+        }
+
+        dialog.setOnDismissListener(d -> {
+            if (wv != null) { wv.stopLoading(); wv.loadUrl("about:blank"); wv.destroy(); }
+        });
     }
 
     private int dp(int value) {

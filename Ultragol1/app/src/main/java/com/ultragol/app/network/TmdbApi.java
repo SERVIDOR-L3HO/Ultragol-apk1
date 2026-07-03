@@ -216,4 +216,31 @@ public class TmdbApi {
         }
         return list;
     }
+
+    /**
+     * Returns the YouTube video key for the official trailer of a movie or TV show.
+     * Tries Spanish first, falls back to English. Returns "" if nothing found.
+     */
+    public static String fetchYouTubeTrailerKey(int tmdbId, boolean isMovie) {
+        String base = isMovie ? "/movie/" + tmdbId : "/tv/" + tmdbId;
+        String[] paths = { base + "/videos?language=es", base + "/videos" };
+        for (String path : paths) {
+            try {
+                JSONObject root = new JSONObject(fetch(path));
+                JSONArray arr = root.optJSONArray("results");
+                if (arr == null) continue;
+                String fallback = "";
+                for (int i = 0; i < arr.length(); i++) {
+                    JSONObject v = arr.getJSONObject(i);
+                    if (!"YouTube".equals(v.optString("site"))) continue;
+                    String key  = v.optString("key", "");
+                    if (key.isEmpty()) continue;
+                    if ("Trailer".equals(v.optString("type"))) return key;
+                    if (fallback.isEmpty()) fallback = key;
+                }
+                if (!fallback.isEmpty()) return fallback;
+            } catch (Exception ignored) {}
+        }
+        return "";
+    }
 }
