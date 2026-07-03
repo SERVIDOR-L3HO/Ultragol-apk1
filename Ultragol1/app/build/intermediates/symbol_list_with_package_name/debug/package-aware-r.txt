@@ -2946,6 +2946,7 @@ drawable btn_checkbox_unchecked_to_checked_mtrl_animation
 drawable btn_info_bg
 drawable btn_mas_info_bg
 drawable btn_play_bg
+drawable btn_play_shimmer
 drawable btn_play_white_bg
 drawable btn_radio_off_mtrl
 drawable btn_radio_off_to_on_mtrl_animation
@@ -3017,6 +3018,7 @@ drawable live_section_glow_bg
 drawable live_server_btn_bg
 drawable live_server_number_bg
 drawable live_server_row_premium_bg
+drawable loading_servers_card_bg
 drawable logo_ultragol
 drawable logo_ultragol_splash
 drawable m3_appbar_background
@@ -3284,6 +3286,7 @@ id btnMyList
 id btnNextSeason
 id btnPinCancel
 id btnPlay
+id btnPlayShimmer
 id btnPlayerBack
 id btnPrevSeason
 id btnProfile
@@ -3534,8 +3537,13 @@ id linear
 id listMode
 id list_item
 id liveCarouselRv
+id loadingDot1
+id loadingDot2
+id loadingDot3
 id loadingSearch
 id loadingServers
+id loadingServersOverlay
+id loadingSpinner
 id m3_side_sheet
 id marquee
 id masked
@@ -3868,6 +3876,8 @@ id tvEpSeriesTitle
 id tvEpTitle
 id tvInfoOverview
 id tvInitial
+id tvLoadingSubtitle
+id tvLoadingTitle
 id tvManageHint
 id tvName
 id tvPinBadge

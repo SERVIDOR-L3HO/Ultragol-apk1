@@ -238,30 +238,50 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <LinearLayout
+                <!-- ── REPRODUCIR button — orange + animated ── -->
+                <FrameLayout
                     android:id="@+id/btnPlay"
                     android:layout_width="match_parent"
-                    android:layout_height="46dp"
-                    android:layout_marginTop="8dp"
-                    android:orientation="horizontal"
-                    android:gravity="center"
-                    android:background="@drawable/action_btn_bg"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/btn_play_bg"
                     android:clickable="true"
-                    android:focusable="true">
-                    <TextView
+                    android:focusable="true"
+                    android:elevation="4dp">
+
+                    <!-- Shimmer sweep overlay -->
+                    <View
+                        android:id="@+id/btnPlayShimmer"
+                        android:layout_width="60dp"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/btn_play_shimmer"
+                        android:alpha="0"/>
+
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="◎  "
-                        android:textColor="#FFFFFF"
-                        android:textSize="14sp"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Vista"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"/>
-                </LinearLayout>
+                        android:layout_gravity="center"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="▶"
+                            android:textColor="#FFFFFF"
+                            android:textSize="17sp"
+                            android:layout_marginEnd="10dp"/>
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="REPRODUCIR"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:fontFamily="sans-serif-black"
+                            android:letterSpacing="0.07"/>
+                    </LinearLayout>
+                </FrameLayout>
 
                 <View android:layout_width="match_parent" android:layout_height="8dp"/>
             </LinearLayout>
@@ -477,6 +497,103 @@
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
+    <!-- ══ CARGANDO SERVIDORES overlay ══════════════════════════════════════ -->
+    <FrameLayout
+        android:id="@+id/loadingServersOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:visibility="gone"
+        android:elevation="20dp"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- Glass card — centered -->
+        <LinearLayout
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="@drawable/loading_servers_card_bg"
+            android:paddingTop="36dp"
+            android:paddingBottom="36dp"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp">
+
+            <!-- Orange ring spinner -->
+            <ProgressBar
+                android:id="@+id/loadingSpinner"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:indeterminateTint="#FF6B00"
+                android:layout_marginBottom="24dp"/>
+
+            <!-- "CARGANDO" text -->
+            <TextView
+                android:id="@+id/tvLoadingTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CARGANDO"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="2dp"/>
+
+            <!-- "SERVIDORES" in orange -->
+            <TextView
+                android:id="@+id/tvLoadingSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SERVIDORES"
+                android:textColor="#FF6B00"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.15"
+                android:layout_marginBottom="28dp"/>
+
+            <!-- Animated dots row -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/loadingDot1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="●"
+                    android:textColor="#FF6B00"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="8dp"
+                    android:alpha="0.2"/>
+
+                <TextView
+                    android:id="@+id/loadingDot2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="●"
+                    android:textColor="#FF6B00"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="8dp"
+                    android:alpha="0.2"/>
+
+                <TextView
+                    android:id="@+id/loadingDot3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="●"
+                    android:textColor="#FF6B00"
+                    android:textSize="10sp"
+                    android:alpha="0.2"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+    <!-- ══════════════════════════════════════════════════════════════════════ -->
 
     <!-- Back button — LAST so it renders on top of scroll content -->
     <FrameLayout

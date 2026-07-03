@@ -42,6 +42,7 @@ drawable btn_action_glass
 drawable btn_info_bg
 drawable btn_mas_info_bg
 drawable btn_play_bg
+drawable btn_play_shimmer
 drawable btn_play_white_bg
 drawable btn_round_dark
 drawable btn_ver_ahora_bg
@@ -86,6 +87,7 @@ drawable live_section_glow_bg
 drawable live_server_btn_bg
 drawable live_server_number_bg
 drawable live_server_row_premium_bg
+drawable loading_servers_card_bg
 drawable logo_ultragol
 drawable logo_ultragol_splash
 drawable nav_bg
@@ -181,6 +183,7 @@ id btnMyList
 id btnNextSeason
 id btnPinCancel
 id btnPlay
+id btnPlayShimmer
 id btnPlayerBack
 id btnPrevSeason
 id btnProfile
@@ -289,8 +292,13 @@ id key9
 id keyDel
 id langTabs
 id liveCarouselRv
+id loadingDot1
+id loadingDot2
+id loadingDot3
 id loadingSearch
 id loadingServers
+id loadingServersOverlay
+id loadingSpinner
 id navAnime
 id navDeportes
 id navDoramas
@@ -389,6 +397,8 @@ id tvEpSeriesTitle
 id tvEpTitle
 id tvInfoOverview
 id tvInitial
+id tvLoadingSubtitle
+id tvLoadingTitle
 id tvManageHint
 id tvName
 id tvPinBadge
