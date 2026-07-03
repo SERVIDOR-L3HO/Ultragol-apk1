@@ -594,10 +594,15 @@ public class DetailActivity extends AppCompatActivity {
                 hideLoadingOverlay(() -> {
                     ContinueWatchingManager.save(this, ci, season, episode);
                     ContinueWatchingWidget.refresh(this);
-                    if (finalData != null) {
+                    if (finalData != null && (!finalData.latino.isEmpty()
+                            || !finalData.espanol.isEmpty() || !finalData.subtitulado.isEmpty())) {
                         ServerSelectDialog.showPreloaded(this, ci, finalData, season, episode);
                     } else {
-                        ServerSelectDialog.show(this, ci, season, episode);
+                        // Build fallback inline — no second network request
+                        StreamingApi.ServerData fallback = new StreamingApi.ServerData();
+                        fallback.latino.add(new StreamingApi.Server(
+                            "UnlimPlay", ci.getStreamUrl(), "embed"));
+                        ServerSelectDialog.showPreloaded(this, ci, fallback, season, episode);
                     }
                 });
             }, remaining);
