@@ -359,6 +359,16 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         dialog.setCanceledOnTouchOutside(isEdit);
         dialog.show();
+
+        // ── Forzar ancho completo con márgenes estilo Netflix ──────────────────
+        if (dialog.getWindow() != null) {
+            int screenW = getResources().getDisplayMetrics().widthPixels;
+            int margin  = (int)(20 * getResources().getDisplayMetrics().density);
+            dialog.getWindow().setLayout(screenW - margin * 2,
+                android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
+            // Eliminar el dimming raro y reemplazar por el del fondo ya existente
+            dialog.getWindow().setDimAmount(0.75f);
+        }
     }
 
     private void showInlineSetPin(ProfileManager.Profile profile, Runnable onDone, AlertDialog parent) {
