@@ -23,6 +23,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.StreamingApi;
 import com.ultragol.app.network.TmdbApi;
 import java.util.ArrayList;
 import java.util.List;
@@ -163,11 +164,7 @@ public class DetailActivity extends AppCompatActivity {
         startReproducirAnimations(btnPlay);
 
         if (btnPlay != null) btnPlay.setOnClickListener(v -> {
-            showLoadingServers(() -> {
-                ContinueWatchingManager.save(this, item, 0, 0);
-                ContinueWatchingWidget.refresh(this);
-                ServerSelectDialog.show(this, item);
-            });
+            fetchAndPlay(item, 1, 1);
         });
 
         // ── Favorito button ───────────────────────────────────────────────────
@@ -504,14 +501,12 @@ public class DetailActivity extends AppCompatActivity {
         // Dim thumbnail overlay if watched
         thumb.setAlpha(watched ? 0.55f : 1.0f);
 
-        // Click → mark watched + save continue watching + open server dialog
+        // Click → mark watched + prefetch servers in parallel with animation
         card.setOnClickListener(v -> {
             WatchedManager.markWatched(this, item.getTmdbId(), s, e);
-            ContinueWatchingManager.save(this, item, s, e);
-            ContinueWatchingWidget.refresh(this);
             checkBadge.setVisibility(View.VISIBLE);
             thumb.setAlpha(0.55f);
-            ServerSelectDialog.show(this, item, s, e);
+            fetchAndPlay(item, s, e);
         });
 
         // Long-press → toggle watched without opening player
@@ -569,6 +564,95 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     // ══════════════════════════════════════════════════════════════════════════
+    //  FETCH + PLAY — fetch servers in parallel with the loading animation
+    // ══════════════════════════════════════════════════════════════════════════
+
+    /**
+     * Shows the loading overlay immediately, starts the server fetch in parallel,
+     * then opens the dialog as soon as the data is ready (min 900ms for visual polish).
+     */
+    private void fetchAndPlay(ContentItem ci, int season, int episode) {
+        showLoadingOverlay();
+
+        long startMs = System.currentTimeMillis();
+        ExecutorService exec = Executors.newSingleThreadExecutor();
+        exec.execute(() -> {
+            StreamingApi.ServerData data = null;
+            try {
+                data = ci.getContentType() == ContentItem.TYPE_MOVIE
+                    ? StreamingApi.fetchMovieServers(ci.getTmdbId())
+                    : StreamingApi.fetchSeriesServers(ci.getTmdbId(), season, episode);
+            } catch (Exception ignored) {}
+
+            final StreamingApi.ServerData finalData = data;
+            long elapsed   = System.currentTimeMillis() - startMs;
+            long minShow   = 900L;  // keep overlay visible at least 900ms
+            long remaining = Math.max(0L, minShow - elapsed);
+
+            loadingHandler.postDelayed(() -> {
+                if (isFinishing()) return;
+                hideLoadingOverlay(() -> {
+                    ContinueWatchingManager.save(this, ci, season, episode);
+                    ContinueWatchingWidget.refresh(this);
+                    if (finalData != null) {
+                        ServerSelectDialog.showPreloaded(this, ci, finalData, season, episode);
+                    } else {
+                        ServerSelectDialog.show(this, ci, season, episode);
+                    }
+                });
+            }, remaining);
+        });
+        exec.shutdown();
+    }
+
+    private void showLoadingOverlay() {
+        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
+        if (overlay == null) return;
+
+        for (Animator a : dotAnimators) a.cancel();
+        dotAnimators.clear();
+
+        overlay.setAlpha(0f);
+        overlay.setVisibility(View.VISIBLE);
+        overlay.animate().alpha(1f).setDuration(200)
+            .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+
+        TextView tvTitle    = overlay.findViewById(R.id.tvLoadingTitle);
+        TextView tvSubtitle = overlay.findViewById(R.id.tvLoadingSubtitle);
+        if (tvTitle != null) {
+            ObjectAnimator a = ObjectAnimator.ofFloat(tvTitle, "alpha", 1f, 0.4f, 1f);
+            a.setDuration(900); a.setRepeatCount(ObjectAnimator.INFINITE); a.start();
+            dotAnimators.add(a);
+        }
+        if (tvSubtitle != null) {
+            ObjectAnimator a = ObjectAnimator.ofFloat(tvSubtitle, "alpha", 0.6f, 1f, 0.6f);
+            a.setDuration(900); a.setRepeatCount(ObjectAnimator.INFINITE); a.start();
+            dotAnimators.add(a);
+        }
+        animateDot(overlay, R.id.loadingDot1, 0);
+        animateDot(overlay, R.id.loadingDot2, 250);
+        animateDot(overlay, R.id.loadingDot3, 500);
+
+        View spinner = overlay.findViewById(R.id.loadingSpinner);
+        if (spinner != null) {
+            spinner.setScaleX(0f); spinner.setScaleY(0f);
+            spinner.animate().scaleX(1f).scaleY(1f).setDuration(350)
+                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
+        }
+    }
+
+    private void hideLoadingOverlay(Runnable onHidden) {
+        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
+        if (overlay == null) { onHidden.run(); return; }
+        overlay.animate().alpha(0f).setDuration(200).withEndAction(() -> {
+            overlay.setVisibility(View.GONE);
+            for (Animator a : dotAnimators) a.cancel();
+            dotAnimators.clear();
+            onHidden.run();
+        }).start();
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
     //  REPRODUCIR — continuous pulse + shimmer sweep
     // ══════════════════════════════════════════════════════════════════════════
 
@@ -611,70 +695,6 @@ public class DetailActivity extends AppCompatActivity {
                 shimmerAlpha.start();
             });
         }
-    }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  CARGANDO SERVIDORES overlay
-    // ══════════════════════════════════════════════════════════════════════════
-
-    private void showLoadingServers(Runnable onReady) {
-        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
-        if (overlay == null) { onReady.run(); return; }
-
-        // Cancel previous dot animators if any
-        for (Animator a : dotAnimators) a.cancel();
-        dotAnimators.clear();
-
-        // Fade in overlay
-        overlay.setAlpha(0f);
-        overlay.setVisibility(View.VISIBLE);
-        overlay.animate().alpha(1f).setDuration(220).setInterpolator(new AccelerateDecelerateInterpolator()).start();
-
-        // Text shimmer: "CARGANDO" alpha pulse
-        TextView tvTitle    = overlay.findViewById(R.id.tvLoadingTitle);
-        TextView tvSubtitle = overlay.findViewById(R.id.tvLoadingSubtitle);
-        if (tvTitle != null) {
-            ObjectAnimator titleAnim = ObjectAnimator.ofFloat(tvTitle, "alpha", 1f, 0.4f, 1f);
-            titleAnim.setDuration(900);
-            titleAnim.setRepeatCount(ObjectAnimator.INFINITE);
-            titleAnim.start();
-            dotAnimators.add(titleAnim);
-        }
-        if (tvSubtitle != null) {
-            ObjectAnimator subAnim = ObjectAnimator.ofFloat(tvSubtitle, "alpha", 0.6f, 1f, 0.6f);
-            subAnim.setDuration(900);
-            subAnim.setRepeatCount(ObjectAnimator.INFINITE);
-            subAnim.start();
-            dotAnimators.add(subAnim);
-        }
-
-        // Staggered dot animations
-        animateDot(overlay, R.id.loadingDot1, 0);
-        animateDot(overlay, R.id.loadingDot2, 250);
-        animateDot(overlay, R.id.loadingDot3, 500);
-
-        // Spinner entrance scale
-        View spinner = overlay.findViewById(R.id.loadingSpinner);
-        if (spinner != null) {
-            spinner.setScaleX(0f);
-            spinner.setScaleY(0f);
-            spinner.animate().scaleX(1f).scaleY(1f)
-                .setDuration(400)
-                .setInterpolator(new AccelerateDecelerateInterpolator())
-                .start();
-        }
-
-        // After 1.9 seconds → fade out and run callback
-        loadingHandler.postDelayed(() -> {
-            if (isFinishing()) return;
-            overlay.animate().alpha(0f).setDuration(220)
-                .withEndAction(() -> {
-                    overlay.setVisibility(View.GONE);
-                    for (Animator a : dotAnimators) a.cancel();
-                    dotAnimators.clear();
-                    onReady.run();
-                }).start();
-        }, 1900);
     }
 
     private void animateDot(View parent, int dotId, long delay) {

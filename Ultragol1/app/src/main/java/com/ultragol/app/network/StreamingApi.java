@@ -32,7 +32,7 @@ public class StreamingApi {
         HttpURLConnection c = (HttpURLConnection) u.openConnection();
         c.setRequestMethod("GET");
         c.setRequestProperty("Accept", "application/json");
-        c.setConnectTimeout(15000); c.setReadTimeout(20000);
+        c.setConnectTimeout(6000); c.setReadTimeout(8000);
         int code = c.getResponseCode();
         if (code != 200) throw new Exception("HTTP " + code);
         BufferedReader br = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));

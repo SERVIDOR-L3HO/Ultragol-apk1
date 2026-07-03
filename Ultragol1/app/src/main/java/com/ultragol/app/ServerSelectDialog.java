@@ -22,6 +22,57 @@ public class ServerSelectDialog {
         show(context, item, 1, 1);
     }
 
+    /** Show dialog with already-fetched data — skips the network step entirely. */
+    public static void showPreloaded(Context context, ContentItem item,
+                                     StreamingApi.ServerData data) {
+        showPreloaded(context, item, data, 1, 1);
+    }
+
+    public static void showPreloaded(Context context, ContentItem item,
+                                     StreamingApi.ServerData data, int initSeason, int initEpisode) {
+        Dialog dialog = new Dialog(context, R.style.FullScreenServerDialog);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_server_select);
+
+        Window win = dialog.getWindow();
+        if (win != null) {
+            win.setLayout(WindowManager.LayoutParams.MATCH_PARENT,
+                          WindowManager.LayoutParams.MATCH_PARENT);
+            win.setBackgroundDrawableResource(android.R.color.transparent);
+        }
+
+        View dismiss = dialog.findViewById(R.id.dialogDismiss);
+        if (dismiss != null) dismiss.setOnClickListener(v -> dialog.dismiss());
+
+        TextView tvTitle = dialog.findViewById(R.id.serverDialogTitle);
+        if (tvTitle != null) tvTitle.setText(item.getTitle());
+
+        TextView tvBadge = dialog.findViewById(R.id.dialogBadge);
+        if (tvBadge != null) {
+            switch (item.getContentType()) {
+                case ContentItem.TYPE_SERIES: tvBadge.setText("SERIE"); break;
+                case ContentItem.TYPE_ANIME:  tvBadge.setText("ANIME"); break;
+                case ContentItem.TYPE_DORAMA: tvBadge.setText("DORAMA"); break;
+                default:                      tvBadge.setText("FILM");  break;
+            }
+        }
+
+        ImageView poster = dialog.findViewById(R.id.dialogPoster);
+        if (poster != null && !item.getPosterUrl().isEmpty()) {
+            Glide.with(context).load(item.getPosterUrl())
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop().into(poster);
+        }
+
+        // Hide loading indicator — data already available
+        View loading = dialog.findViewById(R.id.loadingServers);
+        if (loading != null) loading.setVisibility(View.GONE);
+
+        dialog.show();
+        // Render immediately — no network wait
+        render(context, dialog, item, data);
+    }
+
     public static void show(Context context, ContentItem item, int initSeason, int initEpisode) {
         Dialog dialog = new Dialog(context, R.style.FullScreenServerDialog);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
