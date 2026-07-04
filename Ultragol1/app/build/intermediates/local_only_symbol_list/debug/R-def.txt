@@ -120,6 +120,7 @@ drawable server_row_active
 drawable sheet_handle
 drawable splash_dot
 drawable splash_dot_dim
+drawable splash_glow_inner
 drawable splash_glow_orb
 drawable splash_icon_bg
 drawable splash_progress_fill
@@ -371,10 +372,9 @@ id sectionRv
 id sectionSubLabel
 id serverContainer
 id serverDialogTitle
-id splashDivider
-id splashGlowOrb
+id splashGlowInner
 id splashLogo
-id splashProgressContainer
+id splashProgressBar
 id splashProgressFill
 id splashTagline
 id sportsEmpty
