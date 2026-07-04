@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="4dp"
+    android:clickable="true"
+    android:focusable="true">
+
+    <!-- Poster with download badge overlay -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="150dp">
+
+        <ImageView
+            android:id="@+id/downloadPoster"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"
+            android:background="#1A1A1A"/>
+
+        <!-- Download indicator badge -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="5dp"
+            android:text="⬇"
+            android:textColor="#4FC3F7"
+            android:textSize="12sp"
+            android:background="#AA000000"
+            android:padding="3dp"/>
+    </FrameLayout>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/downloadTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:textColor="#DDFFFFFF"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-medium"
+        android:maxLines="2"
+        android:ellipsize="end"/>
+
+    <!-- Year -->
+    <TextView
+        android:id="@+id/downloadYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#66FFFFFF"
+        android:textSize="10sp"/>
+
+</LinearLayout>

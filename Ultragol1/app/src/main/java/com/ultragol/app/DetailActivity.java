@@ -28,6 +28,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.StreamingApi;
@@ -78,10 +79,11 @@ public class DetailActivity extends AppCompatActivity {
         TextView  rating       = findViewById(R.id.detailRating);
         TextView  overview     = findViewById(R.id.detailOverview);
         LinearLayout genreChips = findViewById(R.id.genreChips);
-        View btnPlay           = findViewById(R.id.btnPlay);
-        View btnBack           = findViewById(R.id.btnDetailBack);
+        View btnPlay             = findViewById(R.id.btnPlay);
+        View btnBack             = findViewById(R.id.btnDetailBack);
         LinearLayout btnFavorite = findViewById(R.id.btnFavorite);
         LinearLayout btnMyList   = findViewById(R.id.btnMyList);
+        LinearLayout btnDownload = findViewById(R.id.btnDownload);
 
         // ── Title ──────────────────────────────────────────────────────────────
         if (title != null) title.setText(item.getTitle());
@@ -217,6 +219,35 @@ public class DetailActivity extends AppCompatActivity {
             });
         }
 
+        // ── Descargar button ──────────────────────────────────────────────────
+        if (btnDownload != null) {
+            updateDownloadBtn(btnDownload);
+            btnDownload.setOnClickListener(v -> {
+                if (DownloadsManager.isDownloaded(this, item)) {
+                    // Already downloaded → offer to remove
+                    new android.app.AlertDialog.Builder(this)
+                        .setTitle("Eliminar descarga")
+                        .setMessage("¿Eliminar \"" + item.getTitle() + "\" de tus descargas?")
+                        .setPositiveButton("Eliminar", (d, w) -> {
+                            DownloadsManager.remove(this, item);
+                            updateDownloadBtn(btnDownload);
+                            Toast.makeText(this, "Descarga eliminada", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+                } else {
+                    // Start download
+                    setDownloadBtnLoading(btnDownload, true);
+                    DownloadsManager.add(this, item, success -> {
+                        updateDownloadBtn(btnDownload);
+                        Toast.makeText(this,
+                            success ? "Descarga completada ✓" : "Error al descargar",
+                            Toast.LENGTH_SHORT).show();
+                    });
+                }
+            });
+        }
+
         setupEpisodeSection();
     }
 
@@ -242,6 +273,28 @@ public class DetailActivity extends AppCompatActivity {
             label.setText(inList ? "Mi Lista ✓" : "Mi Lista");
             label.setTextColor(inList ? Color.parseColor("#4FC3F7") : Color.WHITE);
         }
+    }
+
+    private void updateDownloadBtn(LinearLayout btn) {
+        boolean downloaded = DownloadsManager.isDownloaded(this, item);
+        TextView icon  = btn.findViewById(R.id.downloadIcon);
+        TextView label = btn.findViewById(R.id.downloadLabel);
+        if (icon != null) {
+            icon.setText(downloaded ? "✓  " : "⬇  ");
+            icon.setTextColor(downloaded ? Color.parseColor("#4CAF50") : Color.parseColor("#4FC3F7"));
+        }
+        if (label != null) {
+            label.setText(downloaded ? "Descargado" : "Descargar");
+            label.setTextColor(downloaded ? Color.parseColor("#4CAF50") : Color.parseColor("#4FC3F7"));
+        }
+    }
+
+    private void setDownloadBtnLoading(LinearLayout btn, boolean loading) {
+        TextView icon  = btn.findViewById(R.id.downloadIcon);
+        TextView label = btn.findViewById(R.id.downloadLabel);
+        if (icon  != null) { icon.setText("⏳  "); icon.setTextColor(0xFFAAAAAA); }
+        if (label != null) { label.setText("Descargando..."); label.setTextColor(0xFFAAAAAA); }
+        btn.setEnabled(!loading);
     }
 
     // ══════════════════════════════════════════════════════════════════════════

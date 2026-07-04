@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
+        View navDownloads = drawerOverlay.findViewById(R.id.navDownloads);
+        if (navDownloads != null) navDownloads.setOnClickListener(v -> navigate(new com.ultragol.app.fragments.DownloadsFragment()));
         if (navSwitchProfile != null) navSwitchProfile.setOnClickListener(v -> {
             hideMenu();
             startActivity(new Intent(this, ProfileSelectorActivity.class));

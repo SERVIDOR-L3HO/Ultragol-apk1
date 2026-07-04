@@ -215,7 +215,7 @@
                     android:lineSpacingMultiplier="1.65"
                     android:fontFamily="sans-serif"/>
 
-                <!-- Action buttons -->
+                <!-- Action buttons row 1: Favorito + Mi Lista -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -272,6 +272,36 @@
                             android:textSize="13sp"
                             android:fontFamily="sans-serif-medium"/>
                     </LinearLayout>
+                </LinearLayout>
+
+                <!-- Action buttons row 2: Descargar (full width) -->
+                <LinearLayout
+                    android:id="@+id/btnDownload"
+                    android:layout_width="match_parent"
+                    android:layout_height="46dp"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal"
+                    android:gravity="center"
+                    android:background="@drawable/action_btn_bg"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <TextView
+                        android:id="@+id/downloadIcon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="⬇  "
+                        android:textColor="#4FC3F7"
+                        android:textSize="14sp"/>
+
+                    <TextView
+                        android:id="@+id/downloadLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Descargar"
+                        android:textColor="#4FC3F7"
+                        android:textSize="13sp"
+                        android:fontFamily="sans-serif-medium"/>
                 </LinearLayout>
 
                 <!-- ── REPRODUCIR button — orange + animated ── -->

@@ -3289,6 +3289,7 @@ id btnClearAll
 id btnDelete
 id btnDeportesBack
 id btnDetailBack
+id btnDownload
 id btnEpBack
 id btnFavorite
 id btnManage
@@ -3415,6 +3416,14 @@ id dot1
 id dot2
 id dot3
 id dot4
+id downloadIcon
+id downloadLabel
+id downloadPoster
+id downloadTitle
+id downloadYear
+id downloadsBack
+id downloadsEmpty
+id downloadsGrid
 id dragAnticlockwise
 id dragClockwise
 id dragDown
@@ -3619,6 +3628,7 @@ id multiply
 id navAnime
 id navDeportes
 id navDoramas
+id navDownloads
 id navFavorites
 id navInicio
 id navMovies
@@ -4087,6 +4097,7 @@ layout dialog_update
 layout episode_item
 layout fragment_cine
 layout fragment_deportes_web
+layout fragment_downloads
 layout fragment_football
 layout fragment_grid
 layout fragment_home
@@ -4100,6 +4111,7 @@ layout item_cine_section
 layout item_content_card
 layout item_content_grid
 layout item_continue_card
+layout item_download_card
 layout item_live_glass_card
 layout item_notification_card
 layout item_profile_add

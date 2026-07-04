@@ -14,6 +14,7 @@ public class ContentItem implements Serializable {
     private int contentType, tmdbId;
     private boolean isNew, isLive;
     private String badge, streamUrl;
+    private String localPosterPath = "";
 
     public ContentItem(String title, String genre, String year, String rating,
                        String posterUrl, String overview, int contentType,
@@ -42,6 +43,9 @@ public class ContentItem implements Serializable {
             ? "https://unlimplay.com/play/embed/movie/" + tmdbId + p
             : "https://unlimplay.com/play/embed/tv/" + tmdbId + "/1/1" + p;
     }
+
+    public void   setLocalPosterPath(String v) { localPosterPath = v != null ? v : ""; }
+    public String getLocalPosterPath()         { return localPosterPath != null ? localPosterPath : ""; }
 
     public String getTitle()        { return title; }
     public String getGenre()        { return genre; }
