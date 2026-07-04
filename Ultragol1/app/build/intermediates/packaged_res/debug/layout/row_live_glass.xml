@@ -49,11 +49,11 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="EN VIVO AHORA"
+                android:text="DEPORTES"
                 android:textColor="#FFFFFFFF"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.06"
+                android:letterSpacing="0.08"
                 android:textAllCaps="true"/>
 
             <LinearLayout
@@ -72,8 +72,8 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Transmisiones en directo"
-                    android:textColor="#88FF6B00"
+                    android:text="En vivo · Fútbol · Deportes"
+                    android:textColor="#99FF6B00"
                     android:textSize="10sp"
                     android:letterSpacing="0.02"/>
             </LinearLayout>

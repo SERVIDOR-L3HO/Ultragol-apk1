@@ -534,12 +534,12 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- ══ CARGANDO SERVIDORES overlay ══════════════════════════════════════ -->
+    <!-- ══ CARGANDO SERVIDORES overlay — glassmorphism ═════════════════════ -->
     <FrameLayout
         android:id="@+id/loadingServersOverlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#CC000000"
+        android:background="#D8000000"
         android:visibility="gone"
         android:elevation="20dp"
         android:clickable="true"
@@ -547,85 +547,70 @@
 
         <!-- Glass card — centered -->
         <LinearLayout
-            android:layout_width="300dp"
+            android:layout_width="290dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center"
             android:background="@drawable/loading_servers_card_bg"
-            android:paddingTop="36dp"
-            android:paddingBottom="36dp"
+            android:paddingTop="44dp"
+            android:paddingBottom="40dp"
             android:paddingStart="32dp"
             android:paddingEnd="32dp">
 
-            <!-- Orange ring spinner -->
+            <!-- Orange spinner — único elemento de animación -->
             <ProgressBar
                 android:id="@+id/loadingSpinner"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
+                android:layout_width="52dp"
+                android:layout_height="52dp"
                 android:indeterminateTint="#FF6B00"
-                android:layout_marginBottom="24dp"/>
+                android:layout_marginBottom="32dp"/>
 
-            <!-- "CARGANDO" text -->
+            <!-- Label secundario: pequeño y sutil -->
             <TextView
                 android:id="@+id/tvLoadingTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="CARGANDO"
-                android:textColor="#FFFFFF"
-                android:textSize="22sp"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.15"
-                android:layout_marginBottom="2dp"/>
+                android:textColor="#45FFFFFF"
+                android:textSize="10sp"
+                android:fontFamily="sans-serif-medium"
+                android:letterSpacing="0.35"
+                android:layout_marginBottom="6dp"/>
 
-            <!-- "SERVIDORES" in orange -->
+            <!-- "SERVIDORES" — protagonista -->
             <TextView
                 android:id="@+id/tvLoadingSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SERVIDORES"
-                android:textColor="#FF6B00"
+                android:textColor="#FFFF6B00"
                 android:textSize="22sp"
                 android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.15"
-                android:layout_marginBottom="28dp"/>
+                android:letterSpacing="0.08"
+                android:layout_marginBottom="20dp"/>
 
-            <!-- Animated dots row -->
-            <LinearLayout
+            <!-- Hint de estado -->
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:text="Buscando el mejor servidor..."
+                android:textColor="#30FFFFFF"
+                android:textSize="11sp"
+                android:fontFamily="sans-serif-light"
+                android:letterSpacing="0.02"
+                android:layout_marginBottom="32dp"/>
 
-                <TextView
-                    android:id="@+id/loadingDot1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="●"
-                    android:textColor="#FF6B00"
-                    android:textSize="10sp"
-                    android:layout_marginEnd="8dp"
-                    android:alpha="0.2"/>
+            <!-- Línea glass inferior -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#12FFFFFF"/>
 
-                <TextView
-                    android:id="@+id/loadingDot2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="●"
-                    android:textColor="#FF6B00"
-                    android:textSize="10sp"
-                    android:layout_marginEnd="8dp"
-                    android:alpha="0.2"/>
-
-                <TextView
-                    android:id="@+id/loadingDot3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="●"
-                    android:textColor="#FF6B00"
-                    android:textSize="10sp"
-                    android:alpha="0.2"/>
-            </LinearLayout>
+            <!-- IDs fantasmas para compatibilidad con el código Java existente -->
+            <TextView android:id="@+id/loadingDot1" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+            <TextView android:id="@+id/loadingDot2" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
+            <TextView android:id="@+id/loadingDot3" android:layout_width="0dp" android:layout_height="0dp" android:visibility="gone"/>
 
         </LinearLayout>
     </FrameLayout>
