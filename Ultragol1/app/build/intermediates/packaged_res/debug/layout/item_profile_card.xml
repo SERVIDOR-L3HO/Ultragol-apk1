@@ -10,23 +10,24 @@
     <FrameLayout
         android:id="@+id/cardContainer"
         android:layout_width="match_parent"
-        android:layout_height="145dp"
+        android:layout_height="150dp"
         android:background="@drawable/profile_card_glass_v2"
         android:gravity="center">
 
-        <!-- Subtle top-left glare -->
+        <!-- Top glare shimmer -->
         <View
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_gravity="top|start"
-            android:background="@drawable/gradient_radial_splash"
-            android:alpha="0.06"/>
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="top"
+            android:background="@drawable/gradient_top_black"
+            android:alpha="0.04"
+            android:scaleY="-1"/>
 
-        <!-- Avatar glow ring (visible on selected via tint/alpha logic in Java) -->
+        <!-- Avatar glow ring -->
         <View
             android:id="@+id/avatarGlowRing"
-            android:layout_width="88dp"
-            android:layout_height="88dp"
+            android:layout_width="94dp"
+            android:layout_height="94dp"
             android:layout_gravity="center"
             android:background="@drawable/profile_avatar_glow_ring"
             android:alpha="0"
@@ -35,8 +36,8 @@
         <!-- Avatar circle -->
         <FrameLayout
             android:id="@+id/avatarCircle"
-            android:layout_width="72dp"
-            android:layout_height="72dp"
+            android:layout_width="76dp"
+            android:layout_height="76dp"
             android:layout_gravity="center"
             android:background="@drawable/profile_avatar_circle">
 
@@ -51,11 +52,11 @@
                 android:fontFamily="sans-serif-black"/>
         </FrameLayout>
 
-        <!-- Delete × top-right — visible en modo gestionar -->
+        <!-- Delete × top-right -->
         <FrameLayout
             android:id="@+id/btnDelete"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="top|end"
             android:layout_margin="8dp"
             android:background="@drawable/back_btn_glass"
@@ -74,24 +75,38 @@
                 android:gravity="center"/>
         </FrameLayout>
 
-        <!-- Kids badge top-left -->
-        <TextView
+        <!-- Kids badge top-left — professional pill with star icon -->
+        <LinearLayout
             android:id="@+id/badgeKids"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top|start"
             android:layout_margin="8dp"
-            android:text="KIDS"
-            android:textColor="#FFFFFF"
-            android:textSize="8sp"
-            android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.06"
-            android:background="@drawable/ep_season_pill_bg"
-            android:paddingStart="7dp"
-            android:paddingEnd="7dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/profile_kids_badge_bg"
+            android:paddingStart="6dp"
+            android:paddingEnd="8dp"
             android:paddingTop="3dp"
             android:paddingBottom="3dp"
-            android:visibility="gone"/>
+            android:visibility="gone">
+
+            <ImageView
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:src="@drawable/ic_profile_kids"
+                android:layout_marginEnd="3dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="KIDS"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.06"/>
+        </LinearLayout>
+
     </FrameLayout>
 
     <!-- Profile name -->
@@ -109,17 +124,30 @@
         android:ellipsize="end"/>
 
     <!-- PIN indicator -->
-    <TextView
+    <LinearLayout
         android:id="@+id/tvPinBadge"
         android:layout_width="wrap_content"
-        android:layout_height="18dp"
+        android:layout_height="20dp"
         android:layout_gravity="center"
         android:layout_marginTop="3dp"
-        android:text="🔒 PIN"
-        android:textColor="#FF6B00"
-        android:textSize="10sp"
-        android:fontFamily="sans-serif-bold"
-        android:gravity="center"
-        android:visibility="invisible"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:visibility="invisible">
+
+        <ImageView
+            android:layout_width="10dp"
+            android:layout_height="10dp"
+            android:src="@drawable/ic_profile_pin"
+            android:layout_marginEnd="3dp"
+            android:alpha="0.85"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PIN"
+            android:textColor="#FF6B00"
+            android:textSize="10sp"
+            android:fontFamily="sans-serif-bold"/>
+    </LinearLayout>
 
 </LinearLayout>

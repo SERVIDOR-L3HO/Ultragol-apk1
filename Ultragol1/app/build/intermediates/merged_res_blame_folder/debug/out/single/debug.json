@@ -336,6 +336,10 @@
         "source": "com.ultragol.app-main-35:/drawable/search_bg.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_ic_profile_person.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/ic_profile_person.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_btn_mas_info_bg.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/btn_mas_info_bg.xml"
     },
@@ -456,6 +460,10 @@
         "source": "com.ultragol.app-main-35:/layout/fragment_sports.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_profile_kids_badge_bg.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/profile_kids_badge_bg.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/drawable_pin_dot_empty.xml.flat",
         "source": "com.ultragol.app-main-35:/drawable/pin_dot_empty.xml"
     },
@@ -516,6 +524,10 @@
         "source": "com.ultragol.app-main-35:/drawable/badge_live.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_profile_row_glass.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/profile_row_glass.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_dialog_create_profile.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/dialog_create_profile.xml"
     },
@@ -572,6 +584,10 @@
         "source": "com.ultragol.app-main-35:/drawable/sport_channel_row_bg.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_ic_profile_kids.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/ic_profile_kids.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-33:/layout_item_live_glass_card.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/item_live_glass_card.xml"
     },
@@ -602,6 +618,10 @@
     {
         "merged": "com.ultragol.app-merged_res-33:/layout_item_profile_add.xml.flat",
         "source": "com.ultragol.app-main-35:/layout/item_profile_add.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-33:/drawable_ic_profile_pin.xml.flat",
+        "source": "com.ultragol.app-main-35:/drawable/ic_profile_pin.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-33:/drawable_gradient_radial_splash.xml.flat",

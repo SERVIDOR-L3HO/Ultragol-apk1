@@ -3001,6 +3001,9 @@ drawable ic_mtrl_chip_checked_black
 drawable ic_mtrl_chip_checked_circle
 drawable ic_mtrl_chip_close_circle
 drawable ic_notification
+drawable ic_profile_kids
+drawable ic_profile_person
+drawable ic_profile_pin
 drawable ic_search_black_24
 drawable league_pill_bg
 drawable league_pill_premium_bg
@@ -3110,7 +3113,9 @@ drawable profile_card_selected_v2
 drawable profile_color_circle
 drawable profile_color_selected
 drawable profile_dialog_bg
+drawable profile_kids_badge_bg
 drawable profile_name_input_bg
+drawable profile_row_glass
 drawable profile_save_btn
 drawable progress_orange
 drawable rating_pill_bg

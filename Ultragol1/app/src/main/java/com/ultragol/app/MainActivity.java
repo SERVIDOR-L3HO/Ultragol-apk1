@@ -144,16 +144,35 @@ public class MainActivity extends AppCompatActivity {
 
     public void showMenu() {
         if (drawerOverlay == null) return;
-        // Refresh current profile name
+        // Refresh current profile name and apply kids filter
+        ProfileManager.Profile p = ProfileManager.getCurrentProfile(this);
         android.widget.TextView tvPName = drawerOverlay.findViewById(R.id.tvCurrentProfileName);
-        if (tvPName != null) {
-            ProfileManager.Profile p = ProfileManager.getCurrentProfile(this);
-            tvPName.setText(p != null ? p.name : "Sin perfil activo");
-        }
+        if (tvPName != null) tvPName.setText(p != null ? p.name : "Sin perfil activo");
+        applyKidsDrawerFilter(p != null && p.isKids);
         drawerOverlay.setVisibility(View.VISIBLE);
         AlphaAnimation anim = new AlphaAnimation(0f, 1f);
         anim.setDuration(200);
         drawerOverlay.startAnimation(anim);
+    }
+
+    /**
+     * Show/hide nav items and platforms that are not appropriate for kids.
+     * Hides: Animes, Doramas, Deportes, Crunchyroll, At-X, Tokyo MX.
+     * Keeps: Inicio, Series, Películas, Buscar, Favoritos, Mi Lista, Netflix, Prime, Disney+, Apple TV+, Hulu, HBO Max.
+     */
+    private void applyKidsDrawerFilter(boolean isKids) {
+        int kidsGone = isKids ? View.GONE : View.VISIBLE;
+        setDrawerItemVisibility(R.id.navAnime,       kidsGone);
+        setDrawerItemVisibility(R.id.navDoramas,     kidsGone);
+        setDrawerItemVisibility(R.id.navDeportes,    kidsGone);
+        setDrawerItemVisibility(R.id.platCrunchyroll, kidsGone);
+        setDrawerItemVisibility(R.id.platAtx,        kidsGone);
+        setDrawerItemVisibility(R.id.platTokyoMx,    kidsGone);
+    }
+
+    private void setDrawerItemVisibility(int viewId, int visibility) {
+        View v = drawerOverlay.findViewById(viewId);
+        if (v != null) v.setVisibility(visibility);
     }
 
     public void hideMenu() {

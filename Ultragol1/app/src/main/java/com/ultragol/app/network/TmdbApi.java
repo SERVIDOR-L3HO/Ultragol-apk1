@@ -235,6 +235,71 @@ public class TmdbApi {
     }
 
     /**
+     * Kids-safe search: searches movies and TV shows, keeps only results
+     * that include Family (10751) or Animation (16) in their genre list.
+     */
+    public static List<ContentItem> searchMultiKids(String query) throws Exception {
+        String enc = java.net.URLEncoder.encode(query, "UTF-8");
+        List<ContentItem> list = new ArrayList<>();
+
+        // Search movies
+        JSONArray movies = new JSONObject(fetch("/search/movie?query=" + enc + "&language=es-MX&page=1")).getJSONArray("results");
+        for (int i = 0; i < movies.length(); i++) {
+            try {
+                JSONObject o = movies.getJSONObject(i);
+                JSONArray genreIds = o.optJSONArray("genre_ids");
+                if (!hasKidsGenre(genreIds)) continue;
+                String title = o.optString("title");
+                if (title == null || title.isEmpty()) continue;
+                int id = o.optInt("id", 0);
+                String g = genre(genreIds);
+                String y = year(o.optString("release_date"));
+                String r = rating(o.optDouble("vote_average", 7.0));
+                String post = poster(o.optString("poster_path"));
+                String back = backdrop(o.optString("backdrop_path"));
+                String ov = o.optString("overview", "");
+                ContentItem item = new ContentItem(title, g, y, r, post, ov, ContentItem.TYPE_MOVIE, false, false);
+                item.setTmdbId(id); item.setBackdropUrl(back);
+                list.add(item);
+            } catch (Exception ignored) {}
+        }
+
+        // Search TV series
+        JSONArray series = new JSONObject(fetch("/search/tv?query=" + enc + "&language=es-MX&page=1")).getJSONArray("results");
+        for (int i = 0; i < series.length(); i++) {
+            try {
+                JSONObject o = series.getJSONObject(i);
+                JSONArray genreIds = o.optJSONArray("genre_ids");
+                if (!hasKidsGenre(genreIds)) continue;
+                String title = o.optString("name");
+                if (title == null || title.isEmpty()) continue;
+                int id = o.optInt("id", 0);
+                String g = genre(genreIds);
+                String y = year(o.optString("first_air_date"));
+                String r = rating(o.optDouble("vote_average", 7.0));
+                String post = poster(o.optString("poster_path"));
+                String back = backdrop(o.optString("backdrop_path"));
+                String ov = o.optString("overview", "");
+                ContentItem item = new ContentItem(title, g, y, r, post, ov, ContentItem.TYPE_SERIES, false, false);
+                item.setTmdbId(id); item.setBackdropUrl(back);
+                list.add(item);
+            } catch (Exception ignored) {}
+        }
+
+        return list;
+    }
+
+    /** Returns true if genre_ids contains Family (10751) or Animation (16). */
+    private static boolean hasKidsGenre(JSONArray genreIds) {
+        if (genreIds == null) return false;
+        for (int i = 0; i < genreIds.length(); i++) {
+            int gid = genreIds.optInt(i, -1);
+            if (gid == 10751 || gid == 16) return true;
+        }
+        return false;
+    }
+
+    /**
      * Fetches content truly similar/recommended based on the given TMDB ID.
      * Uses TMDB's /recommendations endpoint first (curated), falls back to /similar.
      */

@@ -71,6 +71,9 @@ drawable gradient_top_black
 drawable ic_back
 drawable ic_channel_placeholder
 drawable ic_notification
+drawable ic_profile_kids
+drawable ic_profile_person
+drawable ic_profile_pin
 drawable league_pill_bg
 drawable league_pill_premium_bg
 drawable live_accent_bar
@@ -108,7 +111,9 @@ drawable profile_card_selected_v2
 drawable profile_color_circle
 drawable profile_color_selected
 drawable profile_dialog_bg
+drawable profile_kids_badge_bg
 drawable profile_name_input_bg
+drawable profile_row_glass
 drawable profile_save_btn
 drawable progress_orange
 drawable rating_pill_bg

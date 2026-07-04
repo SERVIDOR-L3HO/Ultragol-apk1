@@ -9,7 +9,7 @@
     <!-- Glass card — mismo tamaño que item_profile_card -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="145dp"
+        android:layout_height="150dp"
         android:background="@drawable/profile_card_glass_v2"
         android:gravity="center">
 
@@ -18,15 +18,17 @@
             android:layout_width="76dp"
             android:layout_height="76dp"
             android:layout_gravity="center"
-            android:background="@drawable/profile_add_ring_v2">
+            android:background="@drawable/profile_add_ring_v2"
+            android:gravity="center">
 
+            <!-- Plus icon drawn with text -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
                 android:text="+"
-                android:textColor="#88FF6B00"
-                android:textSize="38sp"
+                android:textColor="#99FF6B00"
+                android:textSize="36sp"
                 android:fontFamily="sans-serif-light"/>
         </FrameLayout>
     </FrameLayout>
@@ -37,11 +39,11 @@
         android:layout_marginTop="9dp"
         android:gravity="center"
         android:text="Añadir perfil"
-        android:textColor="#55FFFFFF"
+        android:textColor="#66FFFFFF"
         android:textSize="13sp"
-        android:fontFamily="sans-serif"/>
+        android:fontFamily="sans-serif-medium"/>
 
     <!-- Spacer para alinear con la fila del PIN badge -->
-    <View android:layout_width="1dp" android:layout_height="21dp"/>
+    <View android:layout_width="1dp" android:layout_height="23dp"/>
 
 </LinearLayout>

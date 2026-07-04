@@ -29,6 +29,7 @@ public class SearchActivity extends AppCompatActivity {
     private final List<ContentItem> results = new ArrayList<>();
     private final Handler handler = new Handler();
     private Runnable searchRunnable;
+    private boolean kidsMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,12 @@ public class SearchActivity extends AppCompatActivity {
         resultsGrid = findViewById(R.id.resultsGrid);
         emptyState  = findViewById(R.id.emptyState);
         loadingView = findViewById(R.id.loadingSearch);
+
+        // Detect kids profile
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(this);
+            kidsMode = prof != null && prof.isKids;
+        } catch (Exception ignored) {}
 
         View btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
@@ -68,7 +75,9 @@ public class SearchActivity extends AppCompatActivity {
         ExecutorService exec = Executors.newSingleThreadExecutor();
         exec.execute(() -> {
             try {
-                List<ContentItem> r = TmdbApi.searchMulti(query);
+                List<ContentItem> r = kidsMode
+                        ? TmdbApi.searchMultiKids(query)
+                        : TmdbApi.searchMulti(query);
                 runOnUiThread(() -> {
                     results.clear(); results.addAll(r);
                     adapter.notifyDataSetChanged();
