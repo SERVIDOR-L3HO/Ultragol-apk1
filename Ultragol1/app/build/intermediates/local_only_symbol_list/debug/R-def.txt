@@ -120,7 +120,10 @@ drawable server_row_active
 drawable sheet_handle
 drawable splash_dot
 drawable splash_dot_dim
+drawable splash_glow_orb
 drawable splash_icon_bg
+drawable splash_progress_fill
+drawable splash_progress_track
 drawable splash_ring_inner
 drawable splash_ring_mid
 drawable splash_ring_outer
@@ -369,8 +372,10 @@ id sectionSubLabel
 id serverContainer
 id serverDialogTitle
 id splashDivider
+id splashGlowOrb
 id splashLogo
-id splashProgress
+id splashProgressContainer
+id splashProgressFill
 id splashTagline
 id sportsEmpty
 id sportsLoading
@@ -382,11 +387,9 @@ id tabIndicatorEp
 id tabInformacion
 id tabLatino
 id tabSubtitulado
-id trailerBackdropWebView
 id trailerClose
 id trailerExpand
 id trailerExpandIcon
-id trailerMutedBadge
 id trailerTitle
 id trailerWebView
 id trendingBadge
@@ -410,7 +413,6 @@ id tvInitial
 id tvLoadingSubtitle
 id tvLoadingTitle
 id tvManageHint
-id tvMutedIcon
 id tvName
 id tvPinBadge
 id tvPinError
