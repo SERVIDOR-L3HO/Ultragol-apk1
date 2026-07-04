@@ -270,83 +270,172 @@ public class HomeFragment extends Fragment {
     // ── Load data ─────────────────────────────────────────────────────────────
 
     private void loadAll() {
+        // Detect kids profile
+        boolean isKids = false;
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(requireContext());
+            if (prof != null) isKids = prof.isKids;
+        } catch (Exception ignored) {}
+
+        final boolean kidsMode = isKids;
         ExecutorService pool = Executors.newFixedThreadPool(4);
         Handler h = new Handler(android.os.Looper.getMainLooper());
 
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchTrending();
+        if (kidsMode) {
+            // ── Kids mode: hide sports/anime/doramas rows, load family content ──
             h.post(() -> {
-                try {
-                    if (!isAdded()) return;
-                    // Hero banner (first 6)
-                    bannerItems.clear();
-                    bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
-                    if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
-                    bannerCount = bannerItems.size();
-                    buildDots();
-                    // Trending carousel (all results)
-                    trendingItems.clear();
-                    trendingItems.addAll(r);
-                    if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
-                    // Small cards row
-                    fillRow(rowTrending, r);
-                } catch (Exception ignored) {}
+                if (!isAdded()) return;
+                if (rowAnime != null)     rowAnime.setVisibility(View.GONE);
+                if (rowDoramas != null)   rowDoramas.setVisibility(View.GONE);
+                if (rowLiveGlass != null) rowLiveGlass.setVisibility(View.GONE);
+                if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
+                if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
+                if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
+                if (rowNew != null)       rowNew.setVisibility(View.VISIBLE);
+                if (rowTop10 != null)     rowTop10.setVisibility(View.VISIBLE);
+                // Relabel rows for kids
+                setRowTitle(rowTrending, "⭐ Más Populares");
+                setRowTitle(rowMovies,   "🎬 Películas Familiares");
+                setRowTitle(rowSeries,   "📺 Series para Niños");
+                setRowTitle(rowNew,      "✨ Animaciones");
+                setRowTitle(rowTop10,    "🏆 Top Favoritos");
             });
-        } catch (Exception ignored) {} });
 
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchNewMovies();
-            h.post(() -> { try { if (isAdded()) fillRow(rowNew, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchMovies();
-            h.post(() -> { try { if (isAdded()) fillRow(rowMovies, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchSeries();
-            h.post(() -> { try { if (isAdded()) fillRow(rowSeries, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchAnime();
-            h.post(() -> { try { if (isAdded()) fillRow(rowAnime, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchDoramas();
-            h.post(() -> { try { if (isAdded()) fillRow(rowDoramas, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        pool.execute(() -> { try {
-            List<ContentItem> r = TmdbApi.fetchTopMovies();
-            h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
-        } catch (Exception ignored) {} });
-
-        // Live glass carousel — independent, uses its own executor
-        Executors.newSingleThreadExecutor().execute(() -> {
-            try {
-                List<LiveMatchServerDialog.LiveMatch> matches = fetchAndParseGol3();
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchKidsTrending();
                 h.post(() -> {
                     try {
-                        if (!isAdded() || rowLiveGlass == null) return;
-                        RecyclerView rv = rowLiveGlass.findViewById(R.id.liveCarouselRv);
-                        if (rv == null) return;
-                        if (matches.isEmpty()) {
-                            rowLiveGlass.setVisibility(View.GONE);
-                        } else {
-                            rv.setAdapter(new GlassLiveAdapter(requireContext(), matches));
-                            rowLiveGlass.setVisibility(View.VISIBLE);
-                        }
+                        if (!isAdded()) return;
+                        bannerItems.clear();
+                        bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
+                        if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
+                        bannerCount = bannerItems.size();
+                        buildDots();
+                        trendingItems.clear(); trendingItems.addAll(r);
+                        if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
+                        fillRow(rowTrending, r);
                     } catch (Exception ignored) {}
                 });
-            } catch (Exception ignored) {
-                h.post(() -> { if (rowLiveGlass != null) rowLiveGlass.setVisibility(View.GONE); });
-            }
-        });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchKidsMovies();
+                h.post(() -> { try { if (isAdded()) fillRow(rowMovies, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchKidsSeries();
+                h.post(() -> { try { if (isAdded()) fillRow(rowSeries, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchKidsAnimation();
+                h.post(() -> { try { if (isAdded()) fillRow(rowNew, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchKidsAnimationSeries();
+                h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+        } else {
+            // ── Normal mode: explicitly restore all row visibilities ─────────
+            h.post(() -> {
+                if (!isAdded()) return;
+                if (rowAnime != null)     rowAnime.setVisibility(View.VISIBLE);
+                if (rowDoramas != null)   rowDoramas.setVisibility(View.VISIBLE);
+                if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
+                if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
+                if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
+                if (rowNew != null)       rowNew.setVisibility(View.VISIBLE);
+                if (rowTop10 != null)     rowTop10.setVisibility(View.VISIBLE);
+                // Restore default row titles
+                setRowTitle(rowTrending, "Tendencias");
+                setRowTitle(rowMovies,   "Películas Populares");
+                setRowTitle(rowSeries,   "Series Populares");
+                setRowTitle(rowNew,      "Últimos Estrenos");
+                setRowTitle(rowTop10,    "Top 10");
+                setRowTitle(rowAnime,    "Animes");
+                setRowTitle(rowDoramas,  "Doramas");
+            });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchTrending();
+                h.post(() -> {
+                    try {
+                        if (!isAdded()) return;
+                        bannerItems.clear();
+                        bannerItems.addAll(r.size() > 6 ? r.subList(0, 6) : r);
+                        if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
+                        bannerCount = bannerItems.size();
+                        buildDots();
+                        trendingItems.clear(); trendingItems.addAll(r);
+                        if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
+                        fillRow(rowTrending, r);
+                    } catch (Exception ignored) {}
+                });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchNewMovies();
+                h.post(() -> { try { if (isAdded()) fillRow(rowNew, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchMovies();
+                h.post(() -> { try { if (isAdded()) fillRow(rowMovies, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchSeries();
+                h.post(() -> { try { if (isAdded()) fillRow(rowSeries, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchAnime();
+                h.post(() -> { try { if (isAdded()) fillRow(rowAnime, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchDoramas();
+                h.post(() -> { try { if (isAdded()) fillRow(rowDoramas, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            pool.execute(() -> { try {
+                List<ContentItem> r = TmdbApi.fetchTopMovies();
+                h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
+            } catch (Exception ignored) {} });
+
+            // Live glass carousel
+            Executors.newSingleThreadExecutor().execute(() -> {
+                try {
+                    List<LiveMatchServerDialog.LiveMatch> matches = fetchAndParseGol3();
+                    h.post(() -> {
+                        try {
+                            if (!isAdded() || rowLiveGlass == null) return;
+                            RecyclerView rv = rowLiveGlass.findViewById(R.id.liveCarouselRv);
+                            if (rv == null) return;
+                            if (matches.isEmpty()) {
+                                rowLiveGlass.setVisibility(View.GONE);
+                            } else {
+                                rv.setAdapter(new GlassLiveAdapter(requireContext(), matches));
+                                rowLiveGlass.setVisibility(View.VISIBLE);
+                            }
+                        } catch (Exception ignored) {}
+                    });
+                } catch (Exception ignored) {
+                    h.post(() -> { if (rowLiveGlass != null) rowLiveGlass.setVisibility(View.GONE); });
+                }
+            });
+        }
 
         pool.shutdown();
+    }
+
+    private void setRowTitle(View row, String title) {
+        if (row == null) return;
+        TextView tv = row.findViewById(R.id.rowTitle);
+        if (tv != null) tv.setText(title);
     }
 
     // ── Gol-3 fetch & parse ───────────────────────────────────────────────────

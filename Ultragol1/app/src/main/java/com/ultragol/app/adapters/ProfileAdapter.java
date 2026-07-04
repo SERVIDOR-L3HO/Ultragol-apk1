@@ -84,10 +84,10 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         h.tvName.setText(p.name);
 
         // PIN badge
-        h.tvPinBadge.setVisibility(p.hasPin() ? View.VISIBLE : View.INVISIBLE);
+        if (h.tvPinBadge != null) h.tvPinBadge.setVisibility(p.hasPin() ? View.VISIBLE : View.INVISIBLE);
 
         // Kids badge
-        h.badgeKids.setVisibility(p.isKids ? View.VISIBLE : View.GONE);
+        if (h.badgeKids != null) h.badgeKids.setVisibility(p.isKids ? View.VISIBLE : View.GONE);
 
         // Delete button in manage mode
         h.btnDelete.setVisibility(manageMode ? View.VISIBLE : View.GONE);
@@ -117,8 +117,9 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     class ProfileVH extends RecyclerView.ViewHolder {
         FrameLayout cardContainer, avatarCircle;
-        TextView tvInitial, tvName, tvPinBadge, badgeKids;
-        View btnDelete; // FrameLayout in layout — kept as View for flexibility
+        TextView tvInitial, tvName;
+        View tvPinBadge, badgeKids;
+        View btnDelete;
         ProfileVH(View v) {
             super(v);
             cardContainer = v.findViewById(R.id.cardContainer);

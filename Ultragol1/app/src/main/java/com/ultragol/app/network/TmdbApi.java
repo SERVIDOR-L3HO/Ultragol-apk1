@@ -144,6 +144,23 @@ public class TmdbApi {
         return parse(new JSONObject(fetch("/discover/tv?with_origin_country=KR&with_genres=" + genreId + "&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_DORAMA);
     }
 
+    // ── Kids / Family content (genre 10751) ───────────────────────────────────
+    public static List<ContentItem> fetchKidsMovies() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?with_genres=10751&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+    public static List<ContentItem> fetchKidsSeries() throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=10751&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+    public static List<ContentItem> fetchKidsTrending() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?with_genres=10751&sort_by=vote_average.desc&vote_count.gte=100&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+    public static List<ContentItem> fetchKidsAnimation() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?with_genres=16&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+    public static List<ContentItem> fetchKidsAnimationSeries() throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=16,10751&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+
     public static List<ContentItem> fetchByProvider(int providerId, String mediaType) throws Exception {
         int type = "movie".equals(mediaType) ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
         String path = "/discover/" + mediaType

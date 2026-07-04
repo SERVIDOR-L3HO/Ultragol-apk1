@@ -121,7 +121,9 @@ public class ProfileSelectorActivity extends AppCompatActivity
     private void selectProfileAndContinue(ProfileManager.Profile profile) {
         ProfileManager.setCurrentId(this, profile.id);
         Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        // FLAG_ACTIVITY_NEW_TASK | FLAG_ACTIVITY_CLEAR_TASK forces MainActivity to fully
+        // recreate so HomeFragment.loadAll() runs fresh with the newly selected profile.
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();

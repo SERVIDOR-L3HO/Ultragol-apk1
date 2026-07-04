@@ -8,6 +8,7 @@ import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
+import com.ultragol.app.ProfileManager;
 import com.ultragol.app.R;
 import com.ultragol.app.adapters.ContentGridAdapter;
 import com.ultragol.app.models.ContentItem;
@@ -31,9 +32,19 @@ public class MoviesFragment extends Fragment {
         ContentGridAdapter adapter = new ContentGridAdapter(requireContext(), items);
         grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         grid.setAdapter(adapter);
+        // Detect kids profile
+        boolean isKids = false;
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(requireContext());
+            if (prof != null) isKids = prof.isKids;
+        } catch (Exception ignored) {}
+        final boolean kidsMode = isKids;
+        if (title != null) title.setText(kidsMode ? "🌟 Películas Infantiles" : "🎬 Películas");
+
         if (pb != null) pb.setVisibility(View.VISIBLE);
         Executors.newSingleThreadExecutor().execute(() -> {
-            try { List<ContentItem> r = TmdbApi.fetchMovies();
+            try {
+                List<ContentItem> r = kidsMode ? TmdbApi.fetchKidsMovies() : TmdbApi.fetchMovies();
                 requireActivity().runOnUiThread(() -> { items.addAll(r); adapter.notifyDataSetChanged(); if(pb!=null)pb.setVisibility(View.GONE); });
             } catch (Exception e) { requireActivity().runOnUiThread(() -> { if(pb!=null)pb.setVisibility(View.GONE); }); }
         });
