@@ -570,16 +570,22 @@ public class DetailActivity extends AppCompatActivity {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
             try {
-                List<ContentItem> related;
-                switch (item.getContentType()) {
-                    case ContentItem.TYPE_ANIME:  related = TmdbApi.fetchAnime();  break;
-                    case ContentItem.TYPE_SERIES: related = TmdbApi.fetchSeries(); break;
-                    case ContentItem.TYPE_DORAMA: related = TmdbApi.fetchDoramas(); break;
-                    default:                      related = TmdbApi.fetchMovies();  break;
+                // Use TMDB recommendations/similar for this specific title
+                List<ContentItem> related = TmdbApi.fetchSimilar(
+                        item.getTmdbId(), item.getContentType());
+                // Fallback to genre-based list if no results returned
+                if (related.isEmpty()) {
+                    switch (item.getContentType()) {
+                        case ContentItem.TYPE_ANIME:  related = TmdbApi.fetchAnime();  break;
+                        case ContentItem.TYPE_SERIES: related = TmdbApi.fetchSeries(); break;
+                        case ContentItem.TYPE_DORAMA: related = TmdbApi.fetchDoramas(); break;
+                        default:                      related = TmdbApi.fetchMovies();  break;
+                    }
                 }
+                final List<ContentItem> finalRelated = related;
                 h.post(() -> {
                     if (!isFinishing() && rv != null) {
-                        rv.setAdapter(new ContentRowAdapter(this, related));
+                        rv.setAdapter(new ContentRowAdapter(this, finalRelated));
                     }
                 });
             } catch (Exception ignored) {}

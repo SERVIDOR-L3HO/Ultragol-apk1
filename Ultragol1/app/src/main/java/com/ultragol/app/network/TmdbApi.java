@@ -218,6 +218,26 @@ public class TmdbApi {
     }
 
     /**
+     * Fetches content truly similar/recommended based on the given TMDB ID.
+     * Uses TMDB's /recommendations endpoint first (curated), falls back to /similar.
+     */
+    public static List<ContentItem> fetchSimilar(int tmdbId, int contentType) throws Exception {
+        boolean isMovie = contentType == ContentItem.TYPE_MOVIE;
+        String mediaType = isMovie ? "movie" : "tv";
+        // Recommendations are curated and more accurate
+        String recPath = "/" + mediaType + "/" + tmdbId + "/recommendations?language=es-MX&page=1";
+        try {
+            JSONArray arr = new JSONObject(fetch(recPath)).getJSONArray("results");
+            List<ContentItem> list = parse(arr, contentType);
+            if (!list.isEmpty()) return list;
+        } catch (Exception ignored) {}
+        // Fallback: similar items
+        String simPath = "/" + mediaType + "/" + tmdbId + "/similar?language=es-MX&page=1";
+        JSONArray arr = new JSONObject(fetch(simPath)).getJSONArray("results");
+        return parse(arr, contentType);
+    }
+
+    /**
      * Returns the YouTube video key for the official trailer of a movie or TV show.
      * Tries Spanish first, falls back to English. Returns "" if nothing found.
      */
