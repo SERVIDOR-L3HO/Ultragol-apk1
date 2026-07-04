@@ -8,6 +8,19 @@ const app  = express();
 const PORT = process.env.PORT || 5000;
 const ADMIN_KEY = process.env.ADMIN_KEY;
 
+// ── FAIL-CLOSED: refuse to serve admin routes without a key ───────────────────
+if (!ADMIN_KEY) {
+    console.warn('⚠️  ADVERTENCIA: ADMIN_KEY no está configurada. Las rutas /admin/* estarán deshabilitadas.');
+}
+
+// ── AUTH MIDDLEWARE ───────────────────────────────────────────────────────────
+function requireAdmin(req, res, next) {
+    if (!ADMIN_KEY) return res.status(503).json({ error: 'Servidor no configurado: ADMIN_KEY ausente' });
+    if (req.headers['x-admin-key'] !== ADMIN_KEY)
+        return res.status(401).json({ error: 'No autorizado' });
+    next();
+}
+
 // ── BASE URL (dominio Replit actual) ──────────────────────────────────────────
 function getBaseUrl() {
     const domains = process.env.REPLIT_DOMAINS;
@@ -21,14 +34,26 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // ── FILE STORAGE ───────────────────────────────────────────────────────────────
+const ALLOWED_APPS = new Set(['ultragol1', 'ultra1', 'ultragol']);
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'apks/'),
     filename:    (req, file, cb) => {
-        const app = req.query.app || 'ultragol1';
-        cb(null, `${app}.apk`);
+        const appName = ALLOWED_APPS.has(req.query.app) ? req.query.app : 'ultragol1';
+        cb(null, `${appName}.apk`);
     }
 });
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    limits: { fileSize: 100 * 1024 * 1024, files: 1 },  // 100 MB max
+    fileFilter: (req, file, cb) => {
+        if (file.mimetype === 'application/vnd.android.package-archive' ||
+            file.originalname.toLowerCase().endsWith('.apk')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Solo se permiten archivos APK'));
+        }
+    }
+});
 
 // ── DATA FILES ────────────────────────────────────────────────────────────────
 const VERSION_FILE        = path.join(__dirname, 'version.json');
@@ -136,15 +161,12 @@ app.get('/ultragol1/download', (req, res) => {
 });
 
 // ── ADMIN UPDATE ──────────────────────────────────────────────────────────────
-app.post('/admin/update', upload.single('apk'), (req, res) => {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY)
-        return res.status(401).json({ error: 'No autorizado' });
-
+app.post('/admin/update', requireAdmin, upload.single('apk'), (req, res) => {
     const { versionCode, versionName, changelog, forceUpdate } = req.body;
     if (!versionCode || !versionName)
         return res.status(400).json({ error: 'Faltan versionCode o versionName' });
 
-    const appName = req.query.app || 'ultragol1';
+    const appName = ALLOWED_APPS.has(req.query.app) ? req.query.app : 'ultragol1';
     const vFile   = getVersionFile(appName);
     const dlPath  = getDownloadPath(appName);
 
@@ -162,11 +184,8 @@ app.post('/admin/update', upload.single('apk'), (req, res) => {
 });
 
 // ── ADMIN INFO ────────────────────────────────────────────────────────────────
-app.get('/admin/info', (req, res) => {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY)
-        return res.status(401).json({ error: 'No autorizado' });
-
-    const appName  = req.query.app || 'ultragol1';
+app.get('/admin/info', requireAdmin, (req, res) => {
+    const appName  = ALLOWED_APPS.has(req.query.app) ? req.query.app : 'ultragol1';
     const vFile    = getVersionFile(appName);
     const apkFile  = getApkName(appName);
     const apkPath  = path.join(__dirname, 'apks', apkFile);
@@ -184,23 +203,24 @@ app.get('/notifications', (req, res) => {
 });
 
 // ── NOTIFICATIONS — ADMIN: CREATE ─────────────────────────────────────────────
-app.post('/admin/notify', async (req, res) => {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY)
-        return res.status(401).json({ error: 'No autorizado' });
-
+app.post('/admin/notify', requireAdmin, async (req, res) => {
     const { title, message, type, expiresIn } = req.body;
     if (!title || !message)
         return res.status(400).json({ error: 'Faltan title y message' });
+
+    const validTypes = new Set(['info', 'update', 'alert']);
+    const parsedExpiry = expiresIn ? parseInt(expiresIn, 10) : NaN;
+    const expiresAt = (!isNaN(parsedExpiry) && parsedExpiry > 0)
+        ? new Date(Date.now() + parsedExpiry * 60 * 60 * 1000).toISOString()
+        : null;
 
     const notif = {
         id:        Date.now().toString(),
         title:     title.trim(),
         message:   message.trim(),
-        type:      type || 'info',           // info | update | alert
+        type:      validTypes.has(type) ? type : 'info',
         createdAt: new Date().toISOString(),
-        expiresAt: expiresIn
-            ? new Date(Date.now() + parseInt(expiresIn) * 60 * 60 * 1000).toISOString()
-            : null,
+        expiresAt,
     };
 
     const notifs = readJSON(NOTIF_FILE, []);
@@ -229,9 +249,7 @@ app.post('/admin/notify', async (req, res) => {
 });
 
 // ── NOTIFICATIONS — ADMIN: DELETE ─────────────────────────────────────────────
-app.delete('/admin/notify/:id', (req, res) => {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY)
-        return res.status(401).json({ error: 'No autorizado' });
+app.delete('/admin/notify/:id', requireAdmin, (req, res) => {
 
     const notifs  = readJSON(NOTIF_FILE, []);
     const filtered = notifs.filter(n => n.id !== req.params.id);
@@ -240,19 +258,24 @@ app.delete('/admin/notify/:id', (req, res) => {
 });
 
 // ── NOTIFICATIONS — ADMIN: LIST ALL ───────────────────────────────────────────
-app.get('/admin/notifications', (req, res) => {
-    if (req.headers['x-admin-key'] !== ADMIN_KEY)
-        return res.status(401).json({ error: 'No autorizado' });
+app.get('/admin/notifications', requireAdmin, (req, res) => {
     res.json({ notifications: readJSON(NOTIF_FILE, []) });
 });
 
 // ── PUSH SUBSCRIBE ─────────────────────────────────────────────────────────────
+const MAX_SUBSCRIPTIONS = 10000;
 app.post('/push/subscribe', (req, res) => {
     const sub = req.body;
-    if (!sub || !sub.endpoint) return res.status(400).json({ error: 'Suscripción inválida' });
+    if (!sub || !sub.endpoint || typeof sub.endpoint !== 'string')
+        return res.status(400).json({ error: 'Suscripción inválida' });
     const subs = readJSON(SUBS_FILE, []);
     const exists = subs.some(s => s.endpoint === sub.endpoint);
-    if (!exists) { subs.push(sub); writeJSON(SUBS_FILE, subs); }
+    if (!exists) {
+        if (subs.length >= MAX_SUBSCRIPTIONS)
+            return res.status(429).json({ error: 'Límite de suscripciones alcanzado' });
+        subs.push(sub);
+        writeJSON(SUBS_FILE, subs);
+    }
     res.json({ ok: true });
 });
 
@@ -290,6 +313,16 @@ app.get('/api/gol', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: 'No se pudo obtener la cartelera', detail: err.message });
     }
+});
+
+// ── GLOBAL ERROR HANDLER ──────────────────────────────────────────────────────
+app.use((err, req, res, _next) => {
+    if (err.code === 'LIMIT_FILE_SIZE')
+        return res.status(413).json({ error: 'Archivo demasiado grande (máx 100 MB)' });
+    if (err.message && err.message.includes('APK'))
+        return res.status(400).json({ error: err.message });
+    console.error('Error inesperado:', err.message);
+    res.status(500).json({ error: 'Error interno del servidor' });
 });
 
 // ─────────────────────────────────────────────────────────────────────────────
