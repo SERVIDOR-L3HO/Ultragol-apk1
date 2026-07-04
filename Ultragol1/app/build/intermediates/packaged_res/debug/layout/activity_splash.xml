@@ -2,58 +2,58 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#070707">
+    android:background="#050505">
 
-    <!-- Spotlight amplio: naranja cálido desde arriba del centro -->
+    <!-- Spotlight amplio de fondo -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/gradient_radial_splash"/>
 
-    <!-- Núcleo del spotlight: más concentrado detrás del logo -->
+    <!-- Núcleo del glow: anima con pulso -->
     <View
         android:id="@+id/splashGlowInner"
-        android:layout_width="420dp"
-        android:layout_height="300dp"
+        android:layout_width="480dp"
+        android:layout_height="340dp"
         android:layout_gravity="center"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="100dp"
         android:background="@drawable/splash_glow_inner"
         android:alpha="0"/>
 
-    <!-- Logo + Tagline: centrado en pantalla -->
+    <!-- Logo + Tagline: ligeramente por encima del centro -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="80dp"
+        android:layout_marginBottom="100dp"
         android:orientation="vertical"
         android:gravity="center">
 
-        <!-- Logo grande y dominante -->
+        <!-- Logo: grande y dominante -->
         <ImageView
             android:id="@+id/splashLogo"
-            android:layout_width="320dp"
-            android:layout_height="104dp"
+            android:layout_width="360dp"
+            android:layout_height="116dp"
             android:src="@drawable/logo_ultragol_splash"
             android:scaleType="fitCenter"
             android:alpha="0"/>
 
-        <!-- Tagline: más visible, más aire -->
+        <!-- Tagline: aparece deslizándose desde abajo -->
         <TextView
             android:id="@+id/splashTagline"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
             android:text="Streaming sin límites"
-            android:textColor="#80FFFFFF"
-            android:textSize="14sp"
-            android:letterSpacing="0.20"
+            android:textColor="#90FFFFFF"
+            android:textSize="15sp"
+            android:letterSpacing="0.18"
             android:fontFamily="sans-serif-light"
             android:alpha="0"/>
 
     </LinearLayout>
 
-    <!-- Barra de progreso de pantalla completa — al fondo, estilo Netflix -->
+    <!-- Barra de progreso full-width pegada al fondo -->
     <FrameLayout
         android:id="@+id/splashProgressBar"
         android:layout_width="match_parent"
@@ -61,13 +61,11 @@
         android:layout_gravity="bottom"
         android:alpha="0">
 
-        <!-- Pista: fondo muy sutil -->
         <View
             android:layout_width="match_parent"
             android:layout_height="3dp"
-            android:background="#12FFFFFF"/>
+            android:background="#10FFFFFF"/>
 
-        <!-- Relleno animado -->
         <View
             android:id="@+id/splashProgressFill"
             android:layout_width="0dp"
@@ -76,14 +74,14 @@
 
     </FrameLayout>
 
-    <!-- Watermark discreta -->
+    <!-- Watermark mínima -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="18dp"
+        android:layout_marginBottom="16dp"
         android:text="ULTRAGOL1"
-        android:textColor="#18FFFFFF"
+        android:textColor="#15FFFFFF"
         android:textSize="9sp"
         android:letterSpacing="0.35"
         android:fontFamily="sans-serif-medium"/>

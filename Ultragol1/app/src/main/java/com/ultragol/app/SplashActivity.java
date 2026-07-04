@@ -1,5 +1,9 @@
 package com.ultragol.app;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,19 +11,22 @@ import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.view.animation.OvershootInterpolator;
 import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
 public class SplashActivity extends AppCompatActivity {
 
-    private static final long SPLASH_DURATION = 3000;
+    private static final long SPLASH_DURATION = 3200;
 
     private boolean updateCheckDone = false;
     private boolean splashDone      = false;
@@ -31,79 +38,90 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        View glowInner      = findViewById(R.id.splashGlowInner);
-        View logo           = findViewById(R.id.splashLogo);
-        View tagline        = findViewById(R.id.splashTagline);
-        View progressBar    = findViewById(R.id.splashProgressBar);
-        View progressFill   = findViewById(R.id.splashProgressFill);
+        final View glowInner    = findViewById(R.id.splashGlowInner);
+        final View logo         = findViewById(R.id.splashLogo);
+        final View tagline      = findViewById(R.id.splashTagline);
+        final View progressBar  = findViewById(R.id.splashProgressBar);
+        final View progressFill = findViewById(R.id.splashProgressFill);
 
-        // ── 1. Glow interno: fade-in lento y dramático ─────────────────────────
+        // ── 1. GLOW: aparece expandiéndose desde pequeño ───────────────────────
         if (glowInner != null) {
-            AlphaAnimation glowAnim = new AlphaAnimation(0f, 1f);
-            glowAnim.setDuration(1400);
-            glowAnim.setFillAfter(true);
-            glowInner.startAnimation(glowAnim);
-            glowInner.setAlpha(1f);
+            glowInner.setScaleX(0.4f);
+            glowInner.setScaleY(0.4f);
+            glowInner.setAlpha(0f);
+
+            glowInner.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(1200)
+                .setInterpolator(new DecelerateInterpolator(1.8f))
+                .withEndAction(() -> startGlowPulse(glowInner))
+                .start();
         }
 
-        // ── 2. Logo: aparece grande, escala suave (estilo Disney+) ─────────────
+        // ── 2. LOGO: overshoot bounce — llega, rebota levemente ────────────────
         if (logo != null) {
-            AnimationSet anim = new AnimationSet(true);
+            logo.setScaleX(0.5f);
+            logo.setScaleY(0.5f);
+            logo.setAlpha(0f);
 
-            ScaleAnimation scale = new ScaleAnimation(
-                0.82f, 1f, 0.82f, 1f,
-                Animation.RELATIVE_TO_SELF, 0.5f,
-                Animation.RELATIVE_TO_SELF, 0.5f);
-            scale.setDuration(1000);
-            scale.setInterpolator(new DecelerateInterpolator(2f));
-
-            AlphaAnimation alpha = new AlphaAnimation(0f, 1f);
-            alpha.setDuration(1000);
-
-            anim.addAnimation(scale);
-            anim.addAnimation(alpha);
-            anim.setFillAfter(true);
-            logo.startAnimation(anim);
-            logo.setAlpha(1f);
+            logo.animate()
+                .alpha(1f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setStartDelay(300)
+                .setDuration(900)
+                .setInterpolator(new OvershootInterpolator(1.6f))
+                .start();
         }
 
-        // ── 3. Tagline: aparece suavemente después del logo ────────────────────
+        // ── 3. TAGLINE: desliza desde abajo + fade ─────────────────────────────
         new Handler().postDelayed(() -> {
             if (tagline == null) return;
-            AlphaAnimation a = new AlphaAnimation(0f, 1f);
-            a.setDuration(700);
-            a.setFillAfter(true);
-            tagline.startAnimation(a);
+
+            AnimationSet anim = new AnimationSet(true);
+
+            TranslateAnimation slide = new TranslateAnimation(
+                0, 0, 40f, 0f);
+            slide.setDuration(700);
+            slide.setInterpolator(new DecelerateInterpolator(1.5f));
+
+            AlphaAnimation fade = new AlphaAnimation(0f, 1f);
+            fade.setDuration(700);
+
+            anim.addAnimation(slide);
+            anim.addAnimation(fade);
+            anim.setFillAfter(true);
+            tagline.startAnimation(anim);
             tagline.setAlpha(1f);
         }, 900);
 
-        // ── 4. Barra de progreso full-width al fondo (estilo Netflix) ──────────
+        // ── 4. BARRA PROGRESO: full-width, se llena con easing ─────────────────
         new Handler().postDelayed(() -> {
             if (progressBar == null || progressFill == null) return;
 
-            // Mostrar contenedor
-            AlphaAnimation showBar = new AlphaAnimation(0f, 1f);
-            showBar.setDuration(300);
-            showBar.setFillAfter(true);
-            progressBar.startAnimation(showBar);
-            progressBar.setAlpha(1f);
+            progressBar.animate()
+                .alpha(1f)
+                .setDuration(400)
+                .start();
 
-            // Obtener ancho real de pantalla
-            DisplayMetrics dm = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getMetrics(dm);
-            int screenWidth = dm.widthPixels;
+            progressBar.post(() -> {
+                DisplayMetrics dm = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getMetrics(dm);
+                int screenWidth = dm.widthPixels;
 
-            // Animar relleno de 0 a pantalla completa en ~2000ms
-            ValueAnimator fillAnim = ValueAnimator.ofInt(0, screenWidth);
-            fillAnim.setDuration(2000);
-            fillAnim.setInterpolator(new LinearInterpolator());
-            fillAnim.addUpdateListener(animation -> {
-                ViewGroup.LayoutParams lp = progressFill.getLayoutParams();
-                lp.width = (int) animation.getAnimatedValue();
-                progressFill.setLayoutParams(lp);
+                ValueAnimator fillAnim = ValueAnimator.ofInt(0, screenWidth);
+                fillAnim.setDuration(2200);
+                fillAnim.setInterpolator(new LinearInterpolator());
+                fillAnim.addUpdateListener(animation -> {
+                    ViewGroup.LayoutParams lp = progressFill.getLayoutParams();
+                    lp.width = (int) animation.getAnimatedValue();
+                    progressFill.setLayoutParams(lp);
+                });
+                fillAnim.start();
             });
-            fillAnim.start();
-        }, 800);
+        }, 700);
 
         // ── Verificar actualización en paralelo ────────────────────────────────
         UpdateChecker.check(this, (needsUpdate, data) -> {
@@ -113,11 +131,28 @@ public class SplashActivity extends AppCompatActivity {
             if (splashDone) proceed();
         });
 
-        // ── Timer del splash ───────────────────────────────────────────────────
         new Handler().postDelayed(() -> {
             splashDone = true;
             if (updateCheckDone) proceed();
         }, SPLASH_DURATION);
+    }
+
+    /** Pulso suave del glow: respira 0.85 ↔ 1.0 en loop */
+    private void startGlowPulse(View glow) {
+        if (glow == null || isFinishing() || isDestroyed()) return;
+        glow.animate()
+            .scaleX(0.85f).scaleY(0.85f)
+            .alpha(0.65f)
+            .setDuration(1100)
+            .setInterpolator(new AccelerateInterpolator(1.2f))
+            .withEndAction(() -> glow.animate()
+                .scaleX(1f).scaleY(1f)
+                .alpha(1f)
+                .setDuration(1100)
+                .setInterpolator(new DecelerateInterpolator(1.2f))
+                .withEndAction(() -> startGlowPulse(glow))
+                .start())
+            .start();
     }
 
     private void proceed() {
