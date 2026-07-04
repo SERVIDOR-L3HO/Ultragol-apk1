@@ -11,12 +11,6 @@
         android:layout_height="match_parent"
         android:scaleType="centerCrop"/>
 
-    <!-- Top gradient (logo area) -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:background="@drawable/gradient_top_black"/>
-
     <!-- Bottom-to-top dark gradient for text readability -->
     <View
         android:layout_width="match_parent"

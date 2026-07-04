@@ -481,55 +481,6 @@
             <!-- Related section -->
             <include android:id="@+id/rowRelated" layout="@layout/row_section"/>
 
-            <!-- Footer -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="#000000"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:paddingTop="32dp"
-                android:paddingBottom="40dp">
-
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ULTRA"
-                        android:textColor="#FFFFFF"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-black"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="GOL"
-                        android:textColor="@color/red_primary"
-                        android:textSize="18sp"
-                        android:fontFamily="sans-serif-black"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.NET"
-                        android:textColor="@color/red_primary"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_gravity="bottom"
-                        android:layout_marginBottom="2dp"/>
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="Tu plataforma de streaming en español Latino para ver\npelículas, series y animes online gratis."
-                    android:textColor="#66FFFFFF"
-                    android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.5"/>
-            </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
