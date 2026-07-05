@@ -212,6 +212,7 @@ public class ServerSelectDialog {
                 Intent intent = new Intent(ctx, PlayerActivity.class);
                 intent.putExtra("url", url);
                 intent.putExtra("title", item.getTitle());
+                intent.putExtra("item", item);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 ctx.startActivity(intent);
                 dialog.dismiss();
