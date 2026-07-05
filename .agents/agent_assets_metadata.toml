@@ -90,3 +90,9 @@ id = "W7cVEMv7gKfJUfcpeWaCM"
 uri = "file://apks/ultragol1_perfiles.zip"
 type = "unspecified"
 title = "Ultragol1 — Sistema de Perfiles + Continuar Viendo + Widget"
+
+[[outputs]]
+id = "kNSuvL65hrkwE9TEXuEmb"
+uri = "file://dist_apk/Ultragol1-debug.zip"
+type = "unspecified"
+title = "Ultragol1 - APK compilada (debug)"
