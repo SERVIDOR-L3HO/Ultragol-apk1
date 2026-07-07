@@ -8,6 +8,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -67,6 +69,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/continue_watching_widget_info"/>
         </receiver>
+
+        <!-- ExoPlayer offline download service -->
+        <service android:name=".VideoDownloadService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <provider android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

@@ -22,6 +22,8 @@
     <item name="rbQualityAuto" type="id"/>
     <item name="rbSubsOff" type="id"/>
     <string name="app_name">Ultragol</string>
+    <string name="download_channel_desc">Notificaciones de descarga de videos</string>
+    <string name="download_channel_name">Descargas Ultragol</string>
     <string name="nav_anime">Anime</string>
     <string name="nav_home">Inicio</string>
     <string name="nav_movies">Películas</string>

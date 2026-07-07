@@ -578,6 +578,8 @@ menu bottom_nav
 mipmap ic_launcher
 mipmap ic_launcher_round
 string app_name
+string download_channel_desc
+string download_channel_name
 string nav_anime
 string nav_home
 string nav_movies

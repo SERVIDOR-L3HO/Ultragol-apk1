@@ -1,9 +1,9 @@
 {
-  "versionCode": 7,
-  "versionName": "1.3",
+  "versionCode": 8,
+  "versionName": "1.4",
   "appName": "Ultragol1",
-  "changelog": "- Descargas reales de MP4: el botón Descargar ahora guarda el video en tu celular\n- Progreso de descarga en tiempo real con barra de avance\n- Reproducción offline: toca el video descargado para verlo sin internet\n- Portada guardada junto al video descargado",
+  "changelog": "- Descarga correcta de videos HLS y MP4 usando ExoPlayer Offline\n- Reproducción sin internet desde Mis Descargas\n- Progreso de descarga en tiempo real\n- Se corrige el error 'No se puede reproducir el video'",
   "downloadUrl": "https://d0abf4a1-4575-412c-b9bb-5c825dca9966-00-1gtuttsfmbqeo.riker.replit.dev/ultragol1/download",
   "forceUpdate": false,
-  "updatedAt": "2026-07-07T12:36:00.000Z"
+  "updatedAt": "2026-07-07T13:28:00.000Z"
 }

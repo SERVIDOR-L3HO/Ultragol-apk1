@@ -1,10 +1,6 @@
 package com.ultragol.app;
 
-import android.app.DownloadManager;
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
 import com.ultragol.app.models.ContentItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -15,8 +11,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manages real MP4 downloads via Android DownloadManager plus metadata/poster caching.
- * Stored per-profile using ProfileManager.
+ * Manages offline video downloads via ExoPlayer's DownloadManager (handles HLS + MP4).
+ * Stores metadata + poster locally; the actual video data lives in ExoPlayer's cache.
+ *
+ * Key fields persisted per item:
+ *  - localVideoPath : the captured stream URL (m3u8 or mp4) used for ExoPlayer download + playback
+ *  - videoState     : last known state (overridden on each getVideoState call by DownloadUtil)
  */
 public class DownloadsManager {
 
@@ -25,8 +25,6 @@ public class DownloadsManager {
     public interface DownloadCallback {
         void onComplete(boolean success);
     }
-
-    // ── Prefs ─────────────────────────────────────────────────────────────────
 
     private static String prefsName(Context ctx) {
         return ProfileManager.dataKey(ctx, "downloads");
@@ -43,100 +41,49 @@ public class DownloadsManager {
 
     /**
      * Returns "NONE" | "DOWNLOADING" | "COMPLETE" | "FAILED"
-     * Syncs state from Android DownloadManager if a downloadId is active.
+     * Always queries DownloadUtil for the live state.
      */
     public static String getVideoState(Context ctx, ContentItem item) {
         ContentItem stored = findStored(ctx, item.getTmdbId());
         if (stored == null) return "NONE";
-        String state = stored.getVideoState();
-        if ("DOWNLOADING".equals(state) && stored.getDownloadId() >= 0) {
-            // Check real status from system DownloadManager
-            int dmStatus = queryDmStatus(ctx, stored.getDownloadId());
-            if (dmStatus == DownloadManager.STATUS_SUCCESSFUL) {
-                updateStoredState(ctx, item.getTmdbId(), "COMPLETE");
-                return "COMPLETE";
-            } else if (dmStatus == DownloadManager.STATUS_FAILED) {
-                updateStoredState(ctx, item.getTmdbId(), "FAILED");
-                return "FAILED";
-            }
+        String live = DownloadUtil.getInstance(ctx)
+                .getState(String.valueOf(item.getTmdbId()));
+        if (!"NONE".equals(live) && !live.equals(stored.getVideoState())) {
+            updateStoredState(ctx, item.getTmdbId(), live);
         }
-        return state;
+        return "NONE".equals(live) ? stored.getVideoState() : live;
     }
 
     /**
-     * Returns 0–100 progress while downloading, 100 if complete, -1 if unknown.
+     * Returns 0–100 progress while downloading, or -1 if unknown.
      */
-    public static int getDownloadProgress(Context ctx, long downloadId) {
-        if (downloadId < 0) return -1;
-        DownloadManager dm = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Query q = new DownloadManager.Query().setFilterById(downloadId);
-        try (Cursor c = dm.query(q)) {
-            if (c != null && c.moveToFirst()) {
-                int status = c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-                if (status == DownloadManager.STATUS_SUCCESSFUL) return 100;
-                if (status == DownloadManager.STATUS_RUNNING) {
-                    long total = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_TOTAL_SIZE_BYTES));
-                    long done  = c.getLong(c.getColumnIndexOrThrow(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR));
-                    return (total > 0) ? (int) (done * 100L / total) : 0;
-                }
-            }
-        } catch (Exception ignored) {}
-        return -1;
+    public static int getDownloadProgress(Context ctx, int tmdbId) {
+        return DownloadUtil.getInstance(ctx).getProgress(String.valueOf(tmdbId));
     }
 
     /**
-     * Start real MP4 download via Android DownloadManager.
-     * Saves metadata immediately so it appears in the downloads list.
+     * Starts an ExoPlayer offline download for the given video URL.
+     * Works for both HLS (M3U8) and progressive MP4.
+     * Saves metadata immediately so the item appears in the downloads list.
      */
     public static void startVideoDownload(Context ctx, ContentItem item,
                                           String videoUrl, String referer) {
-        // Save metadata with DOWNLOADING state so it shows in the list immediately
+        // Save metadata immediately so the item shows in the list
         saveOrUpdateRecord(ctx, item, "", videoUrl, "DOWNLOADING", -1L);
 
-        try {
-            DownloadManager dm = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+        // Kick off ExoPlayer offline download
+        DownloadUtil.getInstance(ctx).startDownload(String.valueOf(item.getTmdbId()), videoUrl);
 
-            String safeName = item.getTitle()
-                    .replaceAll("[^a-zA-Z0-9\\-_ áéíóúÁÉÍÓÚñÑ]", "")
-                    .trim().replace(" ", "_");
-            if (safeName.isEmpty()) safeName = "video_" + item.getTmdbId();
-            String fileName = safeName + ".mp4";
-
-            File dir = new File(ctx.getExternalFilesDir(Environment.DIRECTORY_MOVIES), "Ultragol");
-            if (!dir.exists()) dir.mkdirs();
-            String localPath = new File(dir, fileName).getAbsolutePath();
-
-            DownloadManager.Request req = new DownloadManager.Request(Uri.parse(videoUrl));
-            req.setTitle(item.getTitle());
-            req.setDescription("Descargando video...");
-            req.setNotificationVisibility(
-                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-            req.addRequestHeader("User-Agent",
-                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
-            if (referer != null && !referer.isEmpty()) {
-                req.addRequestHeader("Referer", referer);
-            }
-            req.setDestinationInExternalFilesDir(ctx, Environment.DIRECTORY_MOVIES,
-                    "Ultragol/" + fileName);
-
-            long downloadId = dm.enqueue(req);
-            // Update record with real downloadId and local path
-            saveOrUpdateRecord(ctx, item, "", localPath, "DOWNLOADING", downloadId);
-
-            // Also download poster in background
-            new Thread(() -> {
-                String posterPath = downloadPoster(ctx, item);
-                if (!posterPath.isEmpty()) updatePosterPath(ctx, item.getTmdbId(), posterPath);
-            }).start();
-
-        } catch (Exception e) {
-            saveOrUpdateRecord(ctx, item, "", "", "FAILED", -1L);
-        }
+        // Also download poster in background
+        new Thread(() -> {
+            String posterPath = downloadPoster(ctx, item);
+            if (!posterPath.isEmpty()) updatePosterPath(ctx, item.getTmdbId(), posterPath);
+        }).start();
     }
 
     /**
-     * Legacy add — saves only metadata + poster (no real video file).
-     * Kept for backward compatibility.
+     * Legacy add — saves only metadata + poster (no video download).
+     * Used from PlayerActivity's bookmark-style save.
      */
     public static void add(Context ctx, ContentItem item, DownloadCallback callback) {
         if (isDownloaded(ctx, item)) {
@@ -154,25 +101,11 @@ public class DownloadsManager {
         }).start();
     }
 
-    /** Removes metadata, poster, and cancels/deletes the video download. */
+    /** Removes metadata, poster, and cancels the ExoPlayer download. */
     public static void remove(Context ctx, ContentItem item) {
-        ContentItem stored = findStored(ctx, item.getTmdbId());
-        if (stored != null) {
-            // Cancel DownloadManager download if active
-            long dlId = stored.getDownloadId();
-            if (dlId >= 0) {
-                try {
-                    DownloadManager dm = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-                    dm.remove(dlId);
-                } catch (Exception ignored) {}
-            }
-            // Delete local video file
-            String vPath = stored.getLocalVideoPath();
-            if (vPath != null && !vPath.isEmpty()) {
-                File f = new File(vPath);
-                if (f.exists()) f.delete();
-            }
-        }
+        // Cancel ExoPlayer download
+        DownloadUtil.getInstance(ctx).removeDownload(String.valueOf(item.getTmdbId()));
+
         // Delete poster file
         File posterFile = posterFile(ctx, item.getTmdbId());
         if (posterFile.exists()) posterFile.delete();
@@ -276,35 +209,24 @@ public class DownloadsManager {
             JSONArray arr = new JSONArray();
             for (ContentItem it : list) {
                 JSONObject o = new JSONObject();
-                o.put("title",          it.getTitle());
-                o.put("genre",          it.getGenre());
-                o.put("year",           it.getYear());
-                o.put("rating",         it.getRating());
-                o.put("posterUrl",      it.getPosterUrl());
-                o.put("overview",       it.getOverview());
-                o.put("type",           it.getContentType());
-                o.put("tmdbId",         it.getTmdbId());
-                o.put("backdropUrl",    it.getBackdropUrl());
-                o.put("localPosterPath",it.getLocalPosterPath());
-                o.put("localVideoPath", it.getLocalVideoPath());
-                o.put("downloadId",     it.getDownloadId());
-                o.put("videoState",     it.getVideoState());
+                o.put("title",           it.getTitle());
+                o.put("genre",           it.getGenre());
+                o.put("year",            it.getYear());
+                o.put("rating",          it.getRating());
+                o.put("posterUrl",       it.getPosterUrl());
+                o.put("overview",        it.getOverview());
+                o.put("type",            it.getContentType());
+                o.put("tmdbId",          it.getTmdbId());
+                o.put("backdropUrl",     it.getBackdropUrl());
+                o.put("localPosterPath", it.getLocalPosterPath());
+                o.put("localVideoPath",  it.getLocalVideoPath());
+                o.put("downloadId",      it.getDownloadId());
+                o.put("videoState",      it.getVideoState());
                 arr.put(o);
             }
             ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)
                     .edit().putString(KEY, arr.toString()).apply();
         } catch (Exception ignored) {}
-    }
-
-    private static int queryDmStatus(Context ctx, long downloadId) {
-        DownloadManager dm = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Query q = new DownloadManager.Query().setFilterById(downloadId);
-        try (Cursor c = dm.query(q)) {
-            if (c != null && c.moveToFirst()) {
-                return c.getInt(c.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS));
-            }
-        } catch (Exception ignored) {}
-        return -1;
     }
 
     private static String downloadPoster(Context ctx, ContentItem item) {

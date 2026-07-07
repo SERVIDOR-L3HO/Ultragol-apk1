@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.ultragol.app.DetailActivity;
+import com.ultragol.app.DownloadUtil;
 import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.MediaActivity;
 import com.ultragol.app.R;
@@ -145,7 +146,7 @@ public class DownloadsFragment extends Fragment {
                     break;
                 }
                 case "DOWNLOADING": {
-                    int pct = DownloadsManager.getDownloadProgress(ctx, item.getDownloadId());
+                    int pct = DownloadsManager.getDownloadProgress(ctx, item.getTmdbId());
                     h.progressBar.setVisibility(View.VISIBLE);
                     h.progressBar.setIndeterminate(pct < 0);
                     if (pct >= 0) h.progressBar.setProgress(pct);
@@ -170,17 +171,19 @@ public class DownloadsFragment extends Fragment {
                 }
             }
 
-            // Tap → play local file if ready, else open detail
+            // Tap → play offline if COMPLETE, else open detail
             h.itemView.setOnClickListener(v -> {
                 if ("COMPLETE".equals(state)) {
-                    String videoPath = item.getLocalVideoPath();
-                    if (videoPath != null && !videoPath.isEmpty() && new File(videoPath).exists()) {
-                        // Play the local MP4 file with MediaActivity
+                    // localVideoPath holds the captured stream URL (M3U8 or MP4)
+                    String streamUrl = item.getLocalVideoPath();
+                    if (streamUrl != null && !streamUrl.isEmpty()) {
+                        boolean isM3u8 = streamUrl.contains(".m3u8");
                         Intent intent = new Intent(ctx, MediaActivity.class);
-                        intent.putExtra("url",     Uri.fromFile(new File(videoPath)).toString());
-                        intent.putExtra("title",   item.getTitle());
-                        intent.putExtra("referer", "");
-                        intent.putExtra("is_m3u8", false);
+                        intent.putExtra("url",         streamUrl);
+                        intent.putExtra("title",       item.getTitle());
+                        intent.putExtra("referer",     streamUrl);
+                        intent.putExtra("is_m3u8",     isM3u8);
+                        intent.putExtra("use_offline", true);
                         ctx.startActivity(intent);
                         return;
                     }

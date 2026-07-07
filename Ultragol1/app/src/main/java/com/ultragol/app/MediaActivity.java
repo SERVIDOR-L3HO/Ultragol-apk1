@@ -53,6 +53,7 @@ import com.google.android.exoplayer2.trackselection.DefaultTrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectionOverride;
 import com.google.android.exoplayer2.ui.AspectRatioFrameLayout;
 import com.google.android.exoplayer2.ui.PlayerView;
+import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.google.android.material.snackbar.Snackbar;
 
@@ -173,6 +174,9 @@ public class MediaActivity extends AppCompatActivity {
     private Tracks.Group videoTrackGroup = null;
     private Tracks.Group textTrackGroup = null;
 
+    // Offline playback flag — uses ExoPlayer cache instead of network
+    private boolean useOffline = false;
+
     // Prefs
     private SharedPreferences prefs;
 
@@ -192,6 +196,7 @@ public class MediaActivity extends AppCompatActivity {
         videoTitle = getIntent().getStringExtra("title");
         referer    = getIntent().getStringExtra("referer");
         isM3u8     = getIntent().getBooleanExtra("is_m3u8", false);
+        useOffline = getIntent().getBooleanExtra("use_offline", false);
 
         if (videoUrl == null || videoUrl.isEmpty()) { finish(); return; }
 
@@ -413,16 +418,22 @@ public class MediaActivity extends AppCompatActivity {
         playerView.setPlayer(player);
         playerView.setUseController(false);
 
-        Map<String, String> headers = new HashMap<>();
         String ua = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
-        headers.put("User-Agent", ua);
-        if (referer != null && !referer.isEmpty()) headers.put("Referer", referer);
 
-        DefaultHttpDataSource.Factory dsFactory = new DefaultHttpDataSource.Factory()
-                .setUserAgent(ua)
-                .setDefaultRequestProperties(headers)
-                .setConnectTimeoutMs(15_000)
-                .setReadTimeoutMs(20_000);
+        DataSource.Factory dsFactory;
+        if (useOffline) {
+            // Serve from ExoPlayer's offline cache (downloaded segments / MP4)
+            dsFactory = DownloadUtil.getInstance(this).buildCacheDataSourceFactory();
+        } else {
+            Map<String, String> headers = new HashMap<>();
+            headers.put("User-Agent", ua);
+            if (referer != null && !referer.isEmpty()) headers.put("Referer", referer);
+            dsFactory = new DefaultHttpDataSource.Factory()
+                    .setUserAgent(ua)
+                    .setDefaultRequestProperties(headers)
+                    .setConnectTimeoutMs(15_000)
+                    .setReadTimeoutMs(20_000);
+        }
 
         com.google.android.exoplayer2.source.MediaSource src;
         if (isM3u8) {

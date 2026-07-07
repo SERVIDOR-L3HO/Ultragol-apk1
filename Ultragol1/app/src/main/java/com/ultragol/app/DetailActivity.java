@@ -214,27 +214,16 @@ public class DetailActivity extends AppCompatActivity {
         if (downloadingDialog != null && downloadingDialog.isShowing())
             downloadingDialog.dismiss();
 
-        if (capturedIsM3u8) {
-            // HLS stream — cannot be saved as a single file
-            destroyCaptureWebView();
-            if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
-            new AlertDialog.Builder(this)
-                .setTitle("No disponible para descarga")
-                .setMessage("Este video usa transmisión en vivo (HLS) y no se puede descargar directamente como archivo MP4.")
-                .setPositiveButton("Entendido", null)
-                .show();
-            return;
-        }
-
-        // MP4 — start real download
+        // Accept both M3U8 (HLS) and MP4 — ExoPlayer offline handles both
         String videoUrl = capturedDownloadUrl;
         String referer  = capturedDownloadRef;
         destroyCaptureWebView();
 
         DownloadsManager.startVideoDownload(this, item, videoUrl, referer);
         if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+        String fmt = capturedIsM3u8 ? "HLS" : "MP4";
         Toast.makeText(this,
-            "Descarga iniciada ⬇  Revisa tus Descargas",
+            "Descarga iniciada (" + fmt + ") ⬇  Revisa tus Descargas",
             Toast.LENGTH_LONG).show();
     }
 

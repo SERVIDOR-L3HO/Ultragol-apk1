@@ -4569,6 +4569,8 @@ string character_counter_content_description
 string character_counter_overflowed_content_description
 string character_counter_pattern
 string clear_text_end_icon_content_description
+string download_channel_desc
+string download_channel_name
 string error_a11y_label
 string error_icon_content_description
 string exo_controls_cc_disabled_description
