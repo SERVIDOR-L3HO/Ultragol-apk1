@@ -1,29 +1,33 @@
 -- Merging decision tree log ---
 provider#androidx.core.content.FileProvider
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:63:9-68:20
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:70:9-75:20
 	android:grantUriPermissions
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:65:38-72
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:72:38-72
 	android:authorities
 		INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:64:13-64
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:71:13-64
 	android:exported
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:65:13-37
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:72:13-37
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:63:19-68
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:70:19-68
 manifest
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-70:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-70:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-70:12
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-70:12
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-77:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-77:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-77:12
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:2:1-77:12
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/runner/.gradle/caches/transforms-3/cb18eaec7a5810faf7aebcde5b32381b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:2:1-11:12
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/runner/.gradle/caches/transforms-3/0886aa54eb4715b41f375791fc439636/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/runner/.gradle/caches/transforms-3/a577e8470c10c876d1d5c4227f67a139/transformed/appcompat-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [com.google.android.exoplayer:exoplayer-ui:2.18.7] /home/runner/.gradle/caches/transforms-3/f03a93d9889c5ad2a8ef91309c96a318/transformed/jetified-exoplayer-ui-2.18.7/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/runner/.gradle/caches/transforms-3/5ec5a6d20e32b25ae022952f0baf1f65/transformed/jetified-viewpager2-1.1.0-beta02/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.recyclerview:recyclerview:1.3.1] /home/runner/.gradle/caches/transforms-3/b50ec804991d1c246b8301662e436613/transformed/recyclerview-1.3.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.cardview:cardview:1.0.0] /home/runner/.gradle/caches/transforms-3/21c62c13b097cec44e5ce2804254bfa7/transformed/cardview-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /home/runner/.gradle/caches/transforms-3/b4c1949eec42f915ad546bac1afbd464/transformed/jetified-glide-4.16.0/AndroidManifest.xml:2:1-9:12
 MERGED from [androidx.fragment:fragment:1.6.1] /home/runner/.gradle/caches/transforms-3/b9fc230fd6420f5f3d9592fff53c633c/transformed/fragment-1.6.1/AndroidManifest.xml:17:1-22:12
+MERGED from [com.google.android.exoplayer:exoplayer-hls:2.18.7] /home/runner/.gradle/caches/transforms-3/2d3b2db255eb0b65002a370a063de949/transformed/jetified-exoplayer-hls-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-dash:2.18.7] /home/runner/.gradle/caches/transforms-3/1ae144388f800cfcc4c3821c050ee43f/transformed/jetified-exoplayer-dash-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-core:2.18.7] /home/runner/.gradle/caches/transforms-3/f76b518220d095ce01d590ea0e9e5069/transformed/jetified-exoplayer-core-2.18.7/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/runner/.gradle/caches/transforms-3/ce2b24e048d69c723400c841e397c7cd/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:17:1-35:12
 MERGED from [androidx.drawerlayout:drawerlayout:1.1.1] /home/runner/.gradle/caches/transforms-3/d26fc42c450084b96e6d0f3b7559c607/transformed/drawerlayout-1.1.1/AndroidManifest.xml:17:1-24:12
@@ -45,6 +49,7 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel:2.6.1] /home/runner/.gradle/
 MERGED from [androidx.lifecycle:lifecycle-runtime:2.6.1] /home/runner/.gradle/caches/transforms-3/fc50db5668ff7bc8adf5ca296bc7f0b2/transformed/lifecycle-runtime-2.6.1/AndroidManifest.xml:2:1-7:12
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /home/runner/.gradle/caches/transforms-3/97960f9054fd89232c34f68d8f3baf1c/transformed/jetified-lifecycle-viewmodel-savedstate-2.6.1/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.core:core-ktx:1.10.1] /home/runner/.gradle/caches/transforms-3/8f14ff18055d0cbac869998dc780b77a/transformed/jetified-core-ktx-1.10.1/AndroidManifest.xml:2:1-7:12
+MERGED from [androidx.media:media:1.6.0] /home/runner/.gradle/caches/transforms-3/16cd80d85fb89d4919c740ea57848675/transformed/media-1.6.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.customview:customview:1.1.0] /home/runner/.gradle/caches/transforms-3/30b2302c5c9d240b55d952f2e4ca45a2/transformed/customview-1.1.0/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:17:1-30:12
 MERGED from [androidx.cursoradapter:cursoradapter:1.0.0] /home/runner/.gradle/caches/transforms-3/34cc8bea7f4ce7ba6f026c3cc0f23ca5/transformed/cursoradapter-1.0.0/AndroidManifest.xml:17:1-22:12
@@ -55,6 +60,11 @@ MERGED from [com.github.bumptech.glide:gifdecoder:4.16.0] /home/runner/.gradle/c
 MERGED from [androidx.exifinterface:exifinterface:1.3.6] /home/runner/.gradle/caches/transforms-3/44994291cd077b1a5bd4ddf041e8258b/transformed/exifinterface-1.3.6/AndroidManifest.xml:17:1-24:12
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/runner/.gradle/caches/transforms-3/4d1e686e279bd3209b48912700bd8fe6/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:17:1-33:12
 MERGED from [androidx.tracing:tracing:1.0.0] /home/runner/.gradle/caches/transforms-3/8de2ccf4a74085e7a6ae87a08a188052/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-datasource:2.18.7] /home/runner/.gradle/caches/transforms-3/d1634ce96139cfbb379d729315254cdf/transformed/jetified-exoplayer-datasource-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-extractor:2.18.7] /home/runner/.gradle/caches/transforms-3/2563e6ace6a53acd73a03d1889cb1d11/transformed/jetified-exoplayer-extractor-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-decoder:2.18.7] /home/runner/.gradle/caches/transforms-3/508734541e8cd83c9201528521479cf1/transformed/jetified-exoplayer-decoder-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-database:2.18.7] /home/runner/.gradle/caches/transforms-3/d927ab153e3a835690a12fbf9d984090/transformed/jetified-exoplayer-database-2.18.7/AndroidManifest.xml:17:1-24:12
+MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.7] /home/runner/.gradle/caches/transforms-3/4434b5ac5447f5f2878b8aa688b7de59/transformed/jetified-exoplayer-common-2.18.7/AndroidManifest.xml:17:1-26:12
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/runner/.gradle/caches/transforms-3/ff1b369f9efaa17b93f6d25459ede875/transformed/core-runtime-2.2.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.documentfile:documentfile:1.0.0] /home/runner/.gradle/caches/transforms-3/bd9128db17064b820d0dd42b63c5e905/transformed/documentfile-1.0.0/AndroidManifest.xml:17:1-22:12
 MERGED from [androidx.localbroadcastmanager:localbroadcastmanager:1.0.0] /home/runner/.gradle/caches/transforms-3/9eb5c8a63fc75cba68d65e4ad3deb4cf/transformed/localbroadcastmanager-1.0.0/AndroidManifest.xml:17:1-22:12
@@ -74,6 +84,10 @@ ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:4:5
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:4:22-64
 uses-permission#android.permission.ACCESS_NETWORK_STATE
 ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:5:5-79
+MERGED from [com.google.android.exoplayer:exoplayer-core:2.18.7] /home/runner/.gradle/caches/transforms-3/f76b518220d095ce01d590ea0e9e5069/transformed/jetified-exoplayer-core-2.18.7/AndroidManifest.xml:24:5-79
+MERGED from [com.google.android.exoplayer:exoplayer-core:2.18.7] /home/runner/.gradle/caches/transforms-3/f76b518220d095ce01d590ea0e9e5069/transformed/jetified-exoplayer-core-2.18.7/AndroidManifest.xml:24:5-79
+MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.7] /home/runner/.gradle/caches/transforms-3/4434b5ac5447f5f2878b8aa688b7de59/transformed/jetified-exoplayer-common-2.18.7/AndroidManifest.xml:24:5-79
+MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.7] /home/runner/.gradle/caches/transforms-3/4434b5ac5447f5f2878b8aa688b7de59/transformed/jetified-exoplayer-common-2.18.7/AndroidManifest.xml:24:5-79
 	android:name
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:5:22-76
 uses-permission#android.permission.REQUEST_INSTALL_PACKAGES
@@ -109,8 +123,8 @@ ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:12:
 	android:name
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:12:19-62
 application
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-69:19
-INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-69:19
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-76:19
+INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:14:5-76:19
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [com.google.android.material:material:1.9.0] /home/runner/.gradle/caches/transforms-3/9d2e5d677a91ccd9dbd00cfe30113072/transformed/material-1.9.0/AndroidManifest.xml:24:5-20
 MERGED from [androidx.constraintlayout:constraintlayout:2.1.4] /home/runner/.gradle/caches/transforms-3/cb18eaec7a5810faf7aebcde5b32381b/transformed/constraintlayout-2.1.4/AndroidManifest.xml:9:5-20
@@ -227,32 +241,48 @@ ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:48:
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:49:50-87
 	android:name
 		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:48:19-49
-receiver#com.ultragol.app.ContinueWatchingWidget
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:52:9-61:20
-	android:label
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:54:13-45
+activity#com.ultragol.app.MediaActivity
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:51:9-56:64
+	android:screenOrientation
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:53:13-56
+	android:hardwareAccelerated
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:52:13-47
 	android:exported
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:53:13-36
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:51:49-73
+	android:supportsPictureInPicture
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:54:13-52
+	android:configChanges
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:55:13-106
+	android:theme
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:56:13-61
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:52:19-57
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:51:19-48
+receiver#com.ultragol.app.ContinueWatchingWidget
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:59:9-68:20
+	android:label
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:61:13-45
+	android:exported
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:60:13-36
+	android:name
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:59:19-57
 intent-filter#action:name:android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:55:13-57:29
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:62:13-64:29
 action#android.appwidget.action.APPWIDGET_UPDATE
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:56:17-83
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:63:17-83
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:56:25-81
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:63:25-81
 meta-data#android.appwidget.provider
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:58:13-60:72
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:65:13-67:72
 	android:resource
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:60:17-70
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:67:17-70
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:59:17-58
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:66:17-58
 meta-data#android.support.FILE_PROVIDER_PATHS
-ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:66:13-67:54
+ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:73:13-74:54
 	android:resource
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:67:17-51
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:74:17-51
 	android:name
-		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:66:24-74
+		ADDED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml:73:24-74
 uses-sdk
 INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /home/runner/workspace/Ultragol1/app/src/main/AndroidManifest.xml
@@ -265,6 +295,8 @@ MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/runner/.gradle/
 MERGED from [androidx.appcompat:appcompat-resources:1.6.1] /home/runner/.gradle/caches/transforms-3/0886aa54eb4715b41f375791fc439636/transformed/jetified-appcompat-resources-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/runner/.gradle/caches/transforms-3/a577e8470c10c876d1d5c4227f67a139/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.appcompat:appcompat:1.6.1] /home/runner/.gradle/caches/transforms-3/a577e8470c10c876d1d5c4227f67a139/transformed/appcompat-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.exoplayer:exoplayer-ui:2.18.7] /home/runner/.gradle/caches/transforms-3/f03a93d9889c5ad2a8ef91309c96a318/transformed/jetified-exoplayer-ui-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-ui:2.18.7] /home/runner/.gradle/caches/transforms-3/f03a93d9889c5ad2a8ef91309c96a318/transformed/jetified-exoplayer-ui-2.18.7/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/runner/.gradle/caches/transforms-3/5ec5a6d20e32b25ae022952f0baf1f65/transformed/jetified-viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
 MERGED from [androidx.viewpager2:viewpager2:1.1.0-beta02] /home/runner/.gradle/caches/transforms-3/5ec5a6d20e32b25ae022952f0baf1f65/transformed/jetified-viewpager2-1.1.0-beta02/AndroidManifest.xml:5:5-44
 MERGED from [androidx.recyclerview:recyclerview:1.3.1] /home/runner/.gradle/caches/transforms-3/b50ec804991d1c246b8301662e436613/transformed/recyclerview-1.3.1/AndroidManifest.xml:20:5-44
@@ -275,6 +307,12 @@ MERGED from [com.github.bumptech.glide:glide:4.16.0] /home/runner/.gradle/caches
 MERGED from [com.github.bumptech.glide:glide:4.16.0] /home/runner/.gradle/caches/transforms-3/b4c1949eec42f915ad546bac1afbd464/transformed/jetified-glide-4.16.0/AndroidManifest.xml:5:5-7:41
 MERGED from [androidx.fragment:fragment:1.6.1] /home/runner/.gradle/caches/transforms-3/b9fc230fd6420f5f3d9592fff53c633c/transformed/fragment-1.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.fragment:fragment:1.6.1] /home/runner/.gradle/caches/transforms-3/b9fc230fd6420f5f3d9592fff53c633c/transformed/fragment-1.6.1/AndroidManifest.xml:20:5-44
+MERGED from [com.google.android.exoplayer:exoplayer-hls:2.18.7] /home/runner/.gradle/caches/transforms-3/2d3b2db255eb0b65002a370a063de949/transformed/jetified-exoplayer-hls-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-hls:2.18.7] /home/runner/.gradle/caches/transforms-3/2d3b2db255eb0b65002a370a063de949/transformed/jetified-exoplayer-hls-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-dash:2.18.7] /home/runner/.gradle/caches/transforms-3/1ae144388f800cfcc4c3821c050ee43f/transformed/jetified-exoplayer-dash-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-dash:2.18.7] /home/runner/.gradle/caches/transforms-3/1ae144388f800cfcc4c3821c050ee43f/transformed/jetified-exoplayer-dash-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-core:2.18.7] /home/runner/.gradle/caches/transforms-3/f76b518220d095ce01d590ea0e9e5069/transformed/jetified-exoplayer-core-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-core:2.18.7] /home/runner/.gradle/caches/transforms-3/f76b518220d095ce01d590ea0e9e5069/transformed/jetified-exoplayer-core-2.18.7/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/runner/.gradle/caches/transforms-3/ce2b24e048d69c723400c841e397c7cd/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.emoji2:emoji2-views-helper:1.2.0] /home/runner/.gradle/caches/transforms-3/ce2b24e048d69c723400c841e397c7cd/transformed/jetified-emoji2-views-helper-1.2.0/AndroidManifest.xml:5:5-44
 MERGED from [androidx.emoji2:emoji2:1.2.0] /home/runner/.gradle/caches/transforms-3/7e018ad17737e3bbff7428485e891d69/transformed/jetified-emoji2-1.2.0/AndroidManifest.xml:21:5-44
@@ -317,6 +355,8 @@ MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /home/runn
 MERGED from [androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.1] /home/runner/.gradle/caches/transforms-3/97960f9054fd89232c34f68d8f3baf1c/transformed/jetified-lifecycle-viewmodel-savedstate-2.6.1/AndroidManifest.xml:20:5-44
 MERGED from [androidx.core:core-ktx:1.10.1] /home/runner/.gradle/caches/transforms-3/8f14ff18055d0cbac869998dc780b77a/transformed/jetified-core-ktx-1.10.1/AndroidManifest.xml:5:5-44
 MERGED from [androidx.core:core-ktx:1.10.1] /home/runner/.gradle/caches/transforms-3/8f14ff18055d0cbac869998dc780b77a/transformed/jetified-core-ktx-1.10.1/AndroidManifest.xml:5:5-44
+MERGED from [androidx.media:media:1.6.0] /home/runner/.gradle/caches/transforms-3/16cd80d85fb89d4919c740ea57848675/transformed/media-1.6.0/AndroidManifest.xml:20:5-22:41
+MERGED from [androidx.media:media:1.6.0] /home/runner/.gradle/caches/transforms-3/16cd80d85fb89d4919c740ea57848675/transformed/media-1.6.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.customview:customview:1.1.0] /home/runner/.gradle/caches/transforms-3/30b2302c5c9d240b55d952f2e4ca45a2/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.customview:customview:1.1.0] /home/runner/.gradle/caches/transforms-3/30b2302c5c9d240b55d952f2e4ca45a2/transformed/customview-1.1.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.core:core:1.10.1] /home/runner/.gradle/caches/transforms-3/bf0ca6bb16017f830b46538b1c4d3a05/transformed/core-1.10.1/AndroidManifest.xml:20:5-44
@@ -337,6 +377,16 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /home/runner/.gradle/caches
 MERGED from [androidx.startup:startup-runtime:1.1.1] /home/runner/.gradle/caches/transforms-3/4d1e686e279bd3209b48912700bd8fe6/transformed/jetified-startup-runtime-1.1.1/AndroidManifest.xml:21:5-23:41
 MERGED from [androidx.tracing:tracing:1.0.0] /home/runner/.gradle/caches/transforms-3/8de2ccf4a74085e7a6ae87a08a188052/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.tracing:tracing:1.0.0] /home/runner/.gradle/caches/transforms-3/8de2ccf4a74085e7a6ae87a08a188052/transformed/jetified-tracing-1.0.0/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-datasource:2.18.7] /home/runner/.gradle/caches/transforms-3/d1634ce96139cfbb379d729315254cdf/transformed/jetified-exoplayer-datasource-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-datasource:2.18.7] /home/runner/.gradle/caches/transforms-3/d1634ce96139cfbb379d729315254cdf/transformed/jetified-exoplayer-datasource-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-extractor:2.18.7] /home/runner/.gradle/caches/transforms-3/2563e6ace6a53acd73a03d1889cb1d11/transformed/jetified-exoplayer-extractor-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-extractor:2.18.7] /home/runner/.gradle/caches/transforms-3/2563e6ace6a53acd73a03d1889cb1d11/transformed/jetified-exoplayer-extractor-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-decoder:2.18.7] /home/runner/.gradle/caches/transforms-3/508734541e8cd83c9201528521479cf1/transformed/jetified-exoplayer-decoder-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-decoder:2.18.7] /home/runner/.gradle/caches/transforms-3/508734541e8cd83c9201528521479cf1/transformed/jetified-exoplayer-decoder-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-database:2.18.7] /home/runner/.gradle/caches/transforms-3/d927ab153e3a835690a12fbf9d984090/transformed/jetified-exoplayer-database-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-database:2.18.7] /home/runner/.gradle/caches/transforms-3/d927ab153e3a835690a12fbf9d984090/transformed/jetified-exoplayer-database-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.7] /home/runner/.gradle/caches/transforms-3/4434b5ac5447f5f2878b8aa688b7de59/transformed/jetified-exoplayer-common-2.18.7/AndroidManifest.xml:20:5-22:41
+MERGED from [com.google.android.exoplayer:exoplayer-common:2.18.7] /home/runner/.gradle/caches/transforms-3/4434b5ac5447f5f2878b8aa688b7de59/transformed/jetified-exoplayer-common-2.18.7/AndroidManifest.xml:20:5-22:41
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/runner/.gradle/caches/transforms-3/ff1b369f9efaa17b93f6d25459ede875/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.arch.core:core-runtime:2.2.0] /home/runner/.gradle/caches/transforms-3/ff1b369f9efaa17b93f6d25459ede875/transformed/core-runtime-2.2.0/AndroidManifest.xml:20:5-44
 MERGED from [androidx.documentfile:documentfile:1.0.0] /home/runner/.gradle/caches/transforms-3/bd9128db17064b820d0dd42b63c5e905/transformed/documentfile-1.0.0/AndroidManifest.xml:20:5-44

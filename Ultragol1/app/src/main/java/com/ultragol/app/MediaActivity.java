@@ -2,13 +2,23 @@ package com.ultragol.app;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.PendingIntent;
+import android.app.PictureInPictureParams;
+import android.app.RemoteAction;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.graphics.drawable.Icon;
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Rational;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
@@ -26,6 +36,8 @@ import androidx.cardview.widget.CardView;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
+
+import java.util.Collections;
 
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
@@ -89,6 +101,21 @@ public class MediaActivity extends AppCompatActivity {
     private boolean playerReady = false;
     private boolean consumedByButton = false;
 
+    // PiP
+    private boolean isInPipMode = false;
+    private static final String PIP_ACTION   = "com.ultragol.app.PIP_CTRL";
+    private static final String PIP_EXTRA    = "pip_ctrl";
+    private static final int    CTRL_PLAY_PAUSE = 1;
+    private final BroadcastReceiver pipReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context ctx, Intent intent) {
+            if (PIP_ACTION.equals(intent.getAction())
+                    && intent.getIntExtra(PIP_EXTRA, 0) == CTRL_PLAY_PAUSE) {
+                togglePlayPause();
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) updatePipActions();
+            }
+        }
+    };
+
     // Gesture
     private GestureDetector gestureDetector;
     private AudioManager audioManager;
@@ -149,9 +176,24 @@ public class MediaActivity extends AppCompatActivity {
         checkResumePosition();
     }
 
+    @Override protected void onStart() {
+        super.onStart();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            IntentFilter filter = new IntentFilter(PIP_ACTION);
+            registerReceiver(pipReceiver, filter);
+        }
+    }
+
+    @Override protected void onStop() {
+        super.onStop();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            try { unregisterReceiver(pipReceiver); } catch (Exception ignored) {}
+        }
+    }
+
     @Override protected void onPause() {
         super.onPause();
-        if (player != null) {
+        if (!isInPipMode && player != null) {
             saveProgress(player.getCurrentPosition());
             player.setPlayWhenReady(false);
         }
@@ -159,8 +201,10 @@ public class MediaActivity extends AppCompatActivity {
 
     @Override protected void onResume() {
         super.onResume();
-        hideSystemBars();
-        if (player != null) player.setPlayWhenReady(true);
+        if (!isInPipMode) {
+            hideSystemBars();
+            if (player != null) player.setPlayWhenReady(true);
+        }
     }
 
     @Override protected void onDestroy() {
@@ -175,8 +219,35 @@ public class MediaActivity extends AppCompatActivity {
 
     @Override public void onBackPressed() {
         if (settingsPanelVisible) { closeSettings(); return; }
+        // Si está en PiP, presionar Atrás lo cierra normalmente
         if (player != null) saveProgress(player.getCurrentPosition());
         super.onBackPressed();
+    }
+
+    /** Al presionar Home mientras reproduce → entra en PiP automáticamente */
+    @Override public void onUserLeaveHint() {
+        super.onUserLeaveHint();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                && player != null && player.isPlaying()) {
+            enterPipMode();
+        }
+    }
+
+    @Override
+    public void onPictureInPictureModeChanged(boolean isInPip, Configuration newConfig) {
+        super.onPictureInPictureModeChanged(isInPip, newConfig);
+        isInPipMode = isInPip;
+        if (isInPip) {
+            // Ocultar controles, gestos, card de reanudar
+            if (controlsOverlay != null) controlsOverlay.setVisibility(View.GONE);
+            if (resumeCard != null) resumeCard.setVisibility(View.GONE);
+            if (gestureIndicator != null) gestureIndicator.setVisibility(View.GONE);
+            mainHandler.removeCallbacks(hideControlsRunnable);
+        } else {
+            // Volver a pantalla completa
+            hideSystemBars();
+            if (player != null && !player.isPlaying()) showControls();
+        }
     }
 
     // ─── View binding ─────────────────────────────────────────────────────────
@@ -646,6 +717,43 @@ public class MediaActivity extends AppCompatActivity {
                 if (gestureActive) scheduleHideControls();
                 break;
         }
+    }
+
+    // ─── Picture-in-Picture ───────────────────────────────────────────────────
+
+    private void enterPipMode() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return;
+        try {
+            PictureInPictureParams params = buildPipParams();
+            enterPictureInPictureMode(params);
+        } catch (Exception ignored) {}
+    }
+
+    private void updatePipActions() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O || !isInPipMode) return;
+        try {
+            setPictureInPictureParams(buildPipParams());
+        } catch (Exception ignored) {}
+    }
+
+    private PictureInPictureParams buildPipParams() {
+        boolean playing = player != null && player.isPlaying();
+
+        Intent intent = new Intent(PIP_ACTION).putExtra(PIP_EXTRA, CTRL_PLAY_PAUSE);
+        int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
+        PendingIntent pi = PendingIntent.getBroadcast(this, CTRL_PLAY_PAUSE, intent, flags);
+
+        Icon icon = Icon.createWithResource(this,
+                playing ? R.drawable.ic_media_pause : R.drawable.ic_media_play);
+        String label = playing ? "Pausar" : "Reproducir";
+
+        RemoteAction action = new RemoteAction(icon, label, label, pi);
+
+        return new PictureInPictureParams.Builder()
+                .setAspectRatio(new Rational(16, 9))
+                .setActions(Collections.singletonList(action))
+                .build();
     }
 
     // ─── Brightness / volume ──────────────────────────────────────────────────

@@ -19,6 +19,8 @@
     <color name="text_hint">#55FFFFFF</color>
     <color name="text_primary">#FFFFFF</color>
     <color name="text_secondary">#AAFFFFFF</color>
+    <item name="rbQualityAuto" type="id"/>
+    <item name="rbSubsOff" type="id"/>
     <string name="app_name">Ultragol</string>
     <string name="nav_anime">Anime</string>
     <string name="nav_home">Inicio</string>
@@ -49,6 +51,12 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@color/bg_primary</item>
         <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="Theme.Ultragol.Fullscreen" parent="Theme.Ultragol">
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:statusBarColor">@android:color/black</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
     </style>
     <style name="Theme.Ultragol.Splash" parent="Theme.Ultragol">
         <item name="android:windowFullscreen">true</item>

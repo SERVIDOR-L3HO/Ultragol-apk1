@@ -84,6 +84,14 @@
             android:exported="false"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.Ultragol" />
+        <activity
+            android:name="com.ultragol.app.MediaActivity"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize|screenLayout"
+            android:exported="false"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="sensorLandscape"
+            android:supportsPictureInPicture="true"
+            android:theme="@style/Theme.Ultragol.Fullscreen" />
 
         <!-- Continue Watching Widget -->
         <receiver
