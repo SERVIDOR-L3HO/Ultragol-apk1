@@ -122,7 +122,8 @@ public class PlayerActivity extends AppCompatActivity {
         s.setBuiltInZoomControls(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
-        s.setUserAgentString("Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36");
+        // Desktop UA → el sitio siempre sirve la versión desktop con video directo (sin anuncios de mobile)
+        s.setUserAgentString("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
         s.setSupportMultipleWindows(true);
 
         // ── JavaScript interface to receive URLs extracted from JS ────────────
@@ -167,16 +168,35 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override public void onPageStarted(WebView v, String u, Bitmap f) {
                 if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+                // Forzar viewport desktop antes de que el sitio lo sobreescriba
+                v.evaluateJavascript(
+                    "javascript:(function(){" +
+                    "var m=document.querySelector('meta[name=viewport]');" +
+                    "if(!m){m=document.createElement('meta');m.name='viewport';" +
+                    "document.head&&document.head.appendChild(m);}" +
+                    "if(m)m.content='width=1280,initial-scale=1';" +
+                    "})();", null);
             }
 
             @Override public void onPageFinished(WebView v, String u) {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
 
-                // If shouldInterceptRequest didn't fire (URL hidden in JS),
-                // try to extract via JavaScript injection.
+                // Intento 1: inmediato
                 if (capturedVideoUrl == null) {
                     v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
                 }
+                // Intento 2: a los 2 s (algunos players cargan el src tarde)
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (capturedVideoUrl == null && !isFinishing()) {
+                        v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
+                    }
+                }, 2000);
+                // Intento 3: a los 5 s (para players lentos o con anuncio previo)
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (capturedVideoUrl == null && !isFinishing()) {
+                        v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
+                    }
+                }, 5000);
             }
         });
 
