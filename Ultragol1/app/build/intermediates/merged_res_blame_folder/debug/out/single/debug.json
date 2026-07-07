@@ -32,6 +32,10 @@
         "source": "com.ultragol.app-main-38:/layout/item_cine_card.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_ic_media_unlock.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/ic_media_unlock.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-36:/drawable_nav_bg.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/nav_bg.xml"
     },
@@ -182,6 +186,14 @@
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_ic_profile_kids.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/ic_profile_kids.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_glass_chip.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/glass_chip.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_glass_btn_circle.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/glass_btn_circle.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_detail_type_badge_bg.xml.flat",
@@ -404,6 +416,10 @@
         "source": "com.ultragol.app-main-38:/drawable/glass_fade_left_right.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_glass_btn_circle_accent.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/glass_btn_circle_accent.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-36:/drawable_pin_dot_filled.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/pin_dot_filled.xml"
     },
@@ -490,6 +506,10 @@
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_ic_profile_pin.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/ic_profile_pin.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_ic_media_pip.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/ic_media_pip.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_profile_save_btn.xml.flat",
@@ -672,6 +692,10 @@
         "source": "com.ultragol.app-main-38:/drawable/sport_league_tab_inactive.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_ic_media_server.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/ic_media_server.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-36:/drawable_loading_servers_card_bg.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/loading_servers_card_bg.xml"
     },
@@ -794,6 +818,10 @@
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_btn_play_white_bg.xml.flat",
         "source": "com.ultragol.app-main-38:/drawable/btn_play_white_bg.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-36:/drawable_ic_media_lock.xml.flat",
+        "source": "com.ultragol.app-main-38:/drawable/ic_media_lock.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-36:/drawable_btn_mas_info_bg.xml.flat",

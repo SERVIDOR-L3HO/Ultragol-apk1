@@ -81,7 +81,9 @@ public class MediaActivity extends AppCompatActivity {
     private View controlsOverlay;
     private ProgressBar pbLoading;
     private ImageButton btnBack, btnSettings, btnPlayPause, btnRewind, btnForward, btnFitCrop;
-    private TextView tvTitle, tvTime;
+    private ImageButton btnLock, btnServer, btnPip;
+    private View lockOverlay, unlockHint;
+    private TextView tvTitle, tvTime, btnSpeedChip, btnSleepTimerView, tvSleepTimerDisplay;
     private SeekBar seekBar;
     private ScrollView settingsPanel;
     private RadioGroup rgSpeed, rgQuality, rgSubtitles;
@@ -100,6 +102,34 @@ public class MediaActivity extends AppCompatActivity {
     private boolean isSeekBarDragging = false;
     private boolean playerReady = false;
     private boolean consumedByButton = false;
+    private boolean screenLocked = false;
+
+    // Speed cycling
+    private static final float[]  SPEEDS       = {0.5f, 0.75f, 1f, 1.25f, 1.5f, 2f};
+    private static final String[] SPEED_LABELS = {"0.5×", "0.75×", "1×", "1.25×", "1.5×", "2×"};
+    private int speedIndex = 2;
+
+    // Sleep timer
+    private long sleepTimerEndMs = 0;
+    private final Runnable hideUnlockHintRunnable = () -> {
+        if (unlockHint != null) unlockHint.animate().alpha(0f).setDuration(400)
+                .withEndAction(() -> unlockHint.setVisibility(View.GONE)).start();
+    };
+    private final Runnable sleepCountdownUpdater = new Runnable() {
+        @Override public void run() {
+            if (sleepTimerEndMs <= 0 || tvSleepTimerDisplay == null) return;
+            long remaining = sleepTimerEndMs - System.currentTimeMillis();
+            if (remaining <= 0) {
+                if (player != null) player.setPlayWhenReady(false);
+                cancelSleepTimer();
+                return;
+            }
+            long m = remaining / 60000;
+            long s = (remaining % 60000) / 1000;
+            tvSleepTimerDisplay.setText(String.format(Locale.US, "⏱ %d:%02d", m, s));
+            mainHandler.postDelayed(this, 1000);
+        }
+    };
 
     // PiP
     private boolean isInPipMode = false;
@@ -218,8 +248,8 @@ public class MediaActivity extends AppCompatActivity {
     }
 
     @Override public void onBackPressed() {
+        if (screenLocked) { showUnlockHint(); return; }
         if (settingsPanelVisible) { closeSettings(); return; }
-        // Si está en PiP, presionar Atrás lo cierra normalmente
         if (player != null) saveProgress(player.getCurrentPosition());
         super.onBackPressed();
     }
@@ -279,6 +309,15 @@ public class MediaActivity extends AppCompatActivity {
         tvTapLeft        = findViewById(R.id.tvTapLeft);
         tvTapRight       = findViewById(R.id.tvTapRight);
 
+        btnLock             = findViewById(R.id.btnLock);
+        btnServer           = findViewById(R.id.btnServer);
+        btnPip              = findViewById(R.id.btnPip);
+        lockOverlay         = findViewById(R.id.lockOverlay);
+        unlockHint          = findViewById(R.id.unlockHint);
+        btnSpeedChip        = findViewById(R.id.btnSpeedChip);
+        btnSleepTimerView   = findViewById(R.id.btnSleepTimer);
+        tvSleepTimerDisplay = findViewById(R.id.tvSleepTimer);
+
         if (tvTitle != null && videoTitle != null) tvTitle.setText(videoTitle);
     }
 
@@ -299,6 +338,32 @@ public class MediaActivity extends AppCompatActivity {
         btnRewind.setOnClickListener(v -> { consumedByButton = true; seekBy(-SEEK_INCREMENT_MS); });
         btnForward.setOnClickListener(v -> { consumedByButton = true; seekBy(SEEK_INCREMENT_MS); });
         btnFitCrop.setOnClickListener(v -> { consumedByButton = true; toggleFitCrop(); });
+
+        if (btnLock   != null) btnLock.setOnClickListener(v -> { consumedByButton = true; activateLock(); });
+        if (btnServer != null) btnServer.setOnClickListener(v -> { consumedByButton = true; changeServer(); });
+        if (btnPip    != null) btnPip.setOnClickListener(v -> {
+            consumedByButton = true;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) enterPipMode();
+        });
+        if (btnSpeedChip    != null) btnSpeedChip.setOnClickListener(v -> { consumedByButton = true; cycleSpeed(); });
+        if (btnSleepTimerView != null) btnSleepTimerView.setOnClickListener(v -> { consumedByButton = true; openSettings(); });
+
+        View btnClose = settingsPanel.findViewById(R.id.btnSettingsClose);
+        if (btnClose != null) btnClose.setOnClickListener(v -> closeSettings());
+
+        View btnServerSt = settingsPanel.findViewById(R.id.btnServerFromSettings);
+        if (btnServerSt != null) btnServerSt.setOnClickListener(v -> changeServer());
+
+        RadioGroup rgSleepTimer = settingsPanel.findViewById(R.id.rgSleepTimer);
+        if (rgSleepTimer != null) {
+            rgSleepTimer.setOnCheckedChangeListener((g, id) -> {
+                if      (id == R.id.rbTimerOff)  setSleepTimer(0);
+                else if (id == R.id.rbTimer15)   setSleepTimer(15 * 60 * 1000L);
+                else if (id == R.id.rbTimer30)   setSleepTimer(30 * 60 * 1000L);
+                else if (id == R.id.rbTimer60)   setSleepTimer(60 * 60 * 1000L);
+                else if (id == R.id.rbTimerEnd)  setSleepTimer(-1L);
+            });
+        }
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar s, int p, boolean fromUser) {
@@ -322,16 +387,17 @@ public class MediaActivity extends AppCompatActivity {
             }
         });
 
-        // Speed
+        // Speed — also syncs chip label
         rgSpeed.setOnCheckedChangeListener((group, id) -> {
-            float sp = 1f;
-            if      (id == R.id.rbSpeed050) sp = 0.5f;
-            else if (id == R.id.rbSpeed075) sp = 0.75f;
-            else if (id == R.id.rbSpeed100) sp = 1f;
-            else if (id == R.id.rbSpeed125) sp = 1.25f;
-            else if (id == R.id.rbSpeed150) sp = 1.5f;
-            else if (id == R.id.rbSpeed200) sp = 2f;
+            float sp = 1f; String lbl = "1×";
+            if      (id == R.id.rbSpeed050) { sp = 0.5f;  lbl = "0.5×";  speedIndex = 0; }
+            else if (id == R.id.rbSpeed075) { sp = 0.75f; lbl = "0.75×"; speedIndex = 1; }
+            else if (id == R.id.rbSpeed100) { sp = 1f;    lbl = "1×";    speedIndex = 2; }
+            else if (id == R.id.rbSpeed125) { sp = 1.25f; lbl = "1.25×"; speedIndex = 3; }
+            else if (id == R.id.rbSpeed150) { sp = 1.5f;  lbl = "1.5×";  speedIndex = 4; }
+            else if (id == R.id.rbSpeed200) { sp = 2f;    lbl = "2×";    speedIndex = 5; }
             if (player != null) player.setPlaybackParameters(new PlaybackParameters(sp));
+            if (btnSpeedChip != null) btnSpeedChip.setText(lbl);
         });
     }
 
@@ -507,6 +573,7 @@ public class MediaActivity extends AppCompatActivity {
     // ─── Controls visibility ──────────────────────────────────────────────────
 
     private void showControls() {
+        if (isInPipMode || screenLocked) return;
         controlsVisible = true;
         controlsOverlay.setVisibility(View.VISIBLE);
         controlsOverlay.animate().alpha(1f).setDuration(200).start();
@@ -717,6 +784,87 @@ public class MediaActivity extends AppCompatActivity {
                 if (gestureActive) scheduleHideControls();
                 break;
         }
+    }
+
+    // ─── Lock screen ──────────────────────────────────────────────────────────
+
+    private void activateLock() {
+        screenLocked = true;
+        hideControls();
+        if (lockOverlay != null) {
+            lockOverlay.setVisibility(View.VISIBLE);
+            lockOverlay.setOnClickListener(v -> showUnlockHint());
+        }
+        View btnUnlockBtn = unlockHint != null ? unlockHint.findViewById(R.id.btnUnlock) : null;
+        if (btnUnlockBtn != null) btnUnlockBtn.setOnClickListener(v -> deactivateLock());
+    }
+
+    private void deactivateLock() {
+        screenLocked = false;
+        if (lockOverlay != null) lockOverlay.setVisibility(View.GONE);
+        if (unlockHint  != null) { unlockHint.clearAnimation(); unlockHint.setVisibility(View.GONE); }
+        showControls();
+    }
+
+    private void showUnlockHint() {
+        if (unlockHint == null) return;
+        mainHandler.removeCallbacks(hideUnlockHintRunnable);
+        unlockHint.setAlpha(1f);
+        unlockHint.setVisibility(View.VISIBLE);
+        mainHandler.postDelayed(hideUnlockHintRunnable, 2200);
+    }
+
+    // ─── Change server ────────────────────────────────────────────────────────
+
+    private void changeServer() {
+        if (player != null) { saveProgress(player.getCurrentPosition()); player.pause(); }
+        setResult(RESULT_RETRY);
+        finish();
+    }
+
+    // ─── Speed cycling ────────────────────────────────────────────────────────
+
+    private void cycleSpeed() {
+        speedIndex = (speedIndex + 1) % SPEEDS.length;
+        float sp = SPEEDS[speedIndex];
+        if (player != null) player.setPlaybackParameters(new PlaybackParameters(sp));
+        if (btnSpeedChip != null) btnSpeedChip.setText(SPEED_LABELS[speedIndex]);
+        // Sync radio in settings
+        if (rgSpeed != null) {
+            int[] ids = {R.id.rbSpeed050, R.id.rbSpeed075, R.id.rbSpeed100,
+                         R.id.rbSpeed125, R.id.rbSpeed150, R.id.rbSpeed200};
+            if (speedIndex < ids.length) rgSpeed.check(ids[speedIndex]);
+        }
+        scheduleHideControls();
+    }
+
+    // ─── Sleep timer ──────────────────────────────────────────────────────────
+
+    private void setSleepTimer(long durationMs) {
+        mainHandler.removeCallbacks(sleepCountdownUpdater);
+        sleepTimerEndMs = 0;
+        if (tvSleepTimerDisplay != null) tvSleepTimerDisplay.setVisibility(View.GONE);
+        if (btnSleepTimerView != null) btnSleepTimerView.setTextColor(0xAAFFFFFF);
+        if (durationMs == 0) return;
+        if (durationMs < 0) {
+            if (tvSleepTimerDisplay != null) {
+                tvSleepTimerDisplay.setText("⏱ Fin");
+                tvSleepTimerDisplay.setVisibility(View.VISIBLE);
+            }
+            if (btnSleepTimerView != null) btnSleepTimerView.setTextColor(0xFFE50914);
+            return;
+        }
+        sleepTimerEndMs = System.currentTimeMillis() + durationMs;
+        if (tvSleepTimerDisplay != null) tvSleepTimerDisplay.setVisibility(View.VISIBLE);
+        if (btnSleepTimerView != null) btnSleepTimerView.setTextColor(0xFFE50914);
+        mainHandler.post(sleepCountdownUpdater);
+    }
+
+    private void cancelSleepTimer() {
+        mainHandler.removeCallbacks(sleepCountdownUpdater);
+        sleepTimerEndMs = 0;
+        if (tvSleepTimerDisplay != null) tvSleepTimerDisplay.setVisibility(View.GONE);
+        if (btnSleepTimerView != null) btnSleepTimerView.setTextColor(0xAAFFFFFF);
     }
 
     // ─── Picture-in-Picture ───────────────────────────────────────────────────
