@@ -15,6 +15,9 @@ public class ContentItem implements Serializable {
     private boolean isNew, isLive;
     private String badge, streamUrl;
     private String localPosterPath = "";
+    private String localVideoPath  = "";
+    private long   downloadId      = -1L;
+    private String videoState      = "NONE"; // NONE / DOWNLOADING / COMPLETE / FAILED
 
     public ContentItem(String title, String genre, String year, String rating,
                        String posterUrl, String overview, int contentType,
@@ -46,6 +49,15 @@ public class ContentItem implements Serializable {
 
     public void   setLocalPosterPath(String v) { localPosterPath = v != null ? v : ""; }
     public String getLocalPosterPath()         { return localPosterPath != null ? localPosterPath : ""; }
+
+    public void   setLocalVideoPath(String v)  { localVideoPath = v != null ? v : ""; }
+    public String getLocalVideoPath()          { return localVideoPath != null ? localVideoPath : ""; }
+
+    public void   setDownloadId(long v)        { downloadId = v; }
+    public long   getDownloadId()              { return downloadId; }
+
+    public void   setVideoState(String v)      { videoState = v != null ? v : "NONE"; }
+    public String getVideoState()              { return videoState != null ? videoState : "NONE"; }
 
     public String getTitle()        { return title; }
     public String getGenre()        { return genre; }

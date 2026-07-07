@@ -4,7 +4,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
@@ -13,12 +16,17 @@ import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.ultragol.app.DetailActivity;
 import com.ultragol.app.DownloadsManager;
+import com.ultragol.app.MediaActivity;
 import com.ultragol.app.R;
 import com.ultragol.app.models.ContentItem;
 import java.io.File;
 import java.util.List;
 
 public class DownloadsFragment extends Fragment {
+
+    private final Handler refreshHandler = new Handler(Looper.getMainLooper());
+    private Runnable       refreshRunnable;
+    private DownloadCardAdapter adapter;
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
@@ -28,10 +36,8 @@ public class DownloadsFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle s) {
         super.onViewCreated(view, s);
-
         View btnBack = view.findViewById(R.id.downloadsBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> requireActivity().onBackPressed());
-
         loadContent(view);
     }
 
@@ -40,6 +46,37 @@ public class DownloadsFragment extends Fragment {
         super.onResume();
         View view = getView();
         if (view != null) loadContent(view);
+        startProgressPolling();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopProgressPolling();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        stopProgressPolling();
+    }
+
+    private void startProgressPolling() {
+        stopProgressPolling();
+        refreshRunnable = new Runnable() {
+            @Override public void run() {
+                if (adapter != null) adapter.notifyDataSetChanged();
+                refreshHandler.postDelayed(this, 2000);
+            }
+        };
+        refreshHandler.postDelayed(refreshRunnable, 2000);
+    }
+
+    private void stopProgressPolling() {
+        if (refreshRunnable != null) {
+            refreshHandler.removeCallbacks(refreshRunnable);
+            refreshRunnable = null;
+        }
     }
 
     private void loadContent(View view) {
@@ -56,7 +93,8 @@ public class DownloadsFragment extends Fragment {
             grid.setVisibility(View.VISIBLE);
             if (empty != null) empty.setVisibility(View.GONE);
             grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
-            grid.setAdapter(new DownloadCardAdapter(requireContext(), items, () -> loadContent(view)));
+            adapter = new DownloadCardAdapter(requireContext(), items, () -> loadContent(view));
+            grid.setAdapter(adapter);
         }
     }
 
@@ -94,8 +132,60 @@ public class DownloadsFragment extends Fragment {
             h.title.setText(item.getTitle());
             h.year.setText(item.getYear());
 
-            // Tap → open detail
+            // Refresh state from DownloadManager
+            String state = DownloadsManager.getVideoState(ctx, item);
+            item.setVideoState(state);
+
+            switch (state) {
+                case "COMPLETE": {
+                    h.progressBar.setVisibility(View.GONE);
+                    h.statusBadge.setText("▶ Listo");
+                    h.statusBadge.setTextColor(0xFF4CAF50);
+                    h.statusBadge.setVisibility(View.VISIBLE);
+                    break;
+                }
+                case "DOWNLOADING": {
+                    int pct = DownloadsManager.getDownloadProgress(ctx, item.getDownloadId());
+                    h.progressBar.setVisibility(View.VISIBLE);
+                    h.progressBar.setIndeterminate(pct < 0);
+                    if (pct >= 0) h.progressBar.setProgress(pct);
+                    h.statusBadge.setText(pct >= 0 ? pct + "%" : "⏳");
+                    h.statusBadge.setTextColor(0xFF4FC3F7);
+                    h.statusBadge.setVisibility(View.VISIBLE);
+                    break;
+                }
+                case "FAILED": {
+                    h.progressBar.setVisibility(View.GONE);
+                    h.statusBadge.setText("✗ Error");
+                    h.statusBadge.setTextColor(0xFFFF5252);
+                    h.statusBadge.setVisibility(View.VISIBLE);
+                    break;
+                }
+                default: {
+                    h.progressBar.setVisibility(View.GONE);
+                    h.statusBadge.setText("⬇");
+                    h.statusBadge.setTextColor(0xFF4FC3F7);
+                    h.statusBadge.setVisibility(View.VISIBLE);
+                    break;
+                }
+            }
+
+            // Tap → play local file if ready, else open detail
             h.itemView.setOnClickListener(v -> {
+                if ("COMPLETE".equals(state)) {
+                    String videoPath = item.getLocalVideoPath();
+                    if (videoPath != null && !videoPath.isEmpty() && new File(videoPath).exists()) {
+                        // Play the local MP4 file with MediaActivity
+                        Intent intent = new Intent(ctx, MediaActivity.class);
+                        intent.putExtra("url",     Uri.fromFile(new File(videoPath)).toString());
+                        intent.putExtra("title",   item.getTitle());
+                        intent.putExtra("referer", "");
+                        intent.putExtra("is_m3u8", false);
+                        ctx.startActivity(intent);
+                        return;
+                    }
+                }
+                // Fallback: open detail page
                 Intent intent = new Intent(ctx, DetailActivity.class);
                 intent.putExtra("item", item);
                 ctx.startActivity(intent);
@@ -108,9 +198,12 @@ public class DownloadsFragment extends Fragment {
                         .setMessage("¿Eliminar \"" + item.getTitle() + "\" de tus descargas?")
                         .setPositiveButton("Eliminar", (d, w) -> {
                             DownloadsManager.remove(ctx, item);
-                            items.remove(pos);
-                            notifyItemRemoved(pos);
-                            notifyItemRangeChanged(pos, items.size());
+                            int adapterPos = h.getAdapterPosition();
+                            if (adapterPos != RecyclerView.NO_ID) {
+                                items.remove(adapterPos);
+                                notifyItemRemoved(adapterPos);
+                                notifyItemRangeChanged(adapterPos, items.size());
+                            }
                             if (items.isEmpty() && onDeleted != null) onDeleted.run();
                         })
                         .setNegativeButton("Cancelar", null)
@@ -123,12 +216,15 @@ public class DownloadsFragment extends Fragment {
 
         static class VH extends RecyclerView.ViewHolder {
             ImageView poster;
-            TextView title, year;
+            TextView  title, year, statusBadge;
+            ProgressBar progressBar;
             VH(View v) {
                 super(v);
-                poster = v.findViewById(R.id.downloadPoster);
-                title  = v.findViewById(R.id.downloadTitle);
-                year   = v.findViewById(R.id.downloadYear);
+                poster      = v.findViewById(R.id.downloadPoster);
+                title       = v.findViewById(R.id.downloadTitle);
+                year        = v.findViewById(R.id.downloadYear);
+                statusBadge = v.findViewById(R.id.downloadStatusBadge);
+                progressBar = v.findViewById(R.id.downloadProgressBar);
             }
         }
     }

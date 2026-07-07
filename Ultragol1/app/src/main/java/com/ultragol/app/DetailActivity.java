@@ -9,6 +9,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
@@ -21,8 +22,11 @@ import android.view.*;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.webkit.WebChromeClient;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.*;
@@ -50,6 +54,14 @@ public class DetailActivity extends AppCompatActivity {
     // Trailer
     private String trailerKey = "";
 
+    // Background WebView for real MP4 URL capture (download flow)
+    private WebView            captureWebView       = null;
+    private volatile String    capturedDownloadUrl  = null;
+    private volatile String    capturedDownloadRef  = null;
+    private volatile boolean   capturedIsM3u8       = false;
+    private AlertDialog        downloadingDialog    = null;
+    private LinearLayout       pendingDownloadBtn   = null;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,6 +79,171 @@ public class DetailActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         loadingHandler.removeCallbacksAndMessages(null);
+        destroyCaptureWebView();
+        if (downloadingDialog != null && downloadingDialog.isShowing()) {
+            downloadingDialog.dismiss();
+        }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  DOWNLOAD CAPTURE — hidden WebView intercepts real MP4/M3U8 URL
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @android.annotation.SuppressLint("SetJavaScriptEnabled")
+    private void startDownloadCapture() {
+        capturedDownloadUrl = null;
+        capturedDownloadRef = null;
+        capturedIsM3u8      = false;
+
+        // Build the capture WebView (invisible, not attached to hierarchy)
+        captureWebView = new WebView(this);
+        WebSettings ws = captureWebView.getSettings();
+        ws.setJavaScriptEnabled(true);
+        ws.setDomStorageEnabled(true);
+        ws.setMediaPlaybackRequiresUserGesture(false);
+        ws.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+        ws.setUserAgentString(
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+            + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36");
+
+        captureWebView.setWebViewClient(new WebViewClient() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest req) {
+                String url = req.getUrl().toString();
+                String ref = req.getRequestHeaders().get("Referer");
+                boolean m3u8 = url.contains(".m3u8");
+                boolean mp4  = url.contains(".mp4") || url.contains(".MP4");
+                if ((mp4 || m3u8) && capturedDownloadUrl == null) {
+                    capturedDownloadUrl = url;
+                    capturedDownloadRef = ref != null ? ref : item.getStreamUrl();
+                    capturedIsM3u8      = m3u8;
+                    new Handler(Looper.getMainLooper()).post(() -> onVideoUrlCapturedForDownload());
+                }
+                return null;
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                // JS extraction attempts at 2s and 5s — same as PlayerActivity
+                String JS =
+                    "(function(){try{"
+                    + "if(window.jwplayer&&jwplayer().getPlaylistItem()){"
+                    +   "var pi=jwplayer().getPlaylistItem();"
+                    +   "var src=pi.file||(pi.sources&&pi.sources[0]&&pi.sources[0].file);"
+                    +   "if(src){window.DLOAD.onUrl(src);return;}"
+                    + "}"
+                    + "var srcs=document.querySelectorAll('source[src]');"
+                    + "for(var j=0;j<srcs.length;j++){"
+                    +   "var s=srcs[j].src;"
+                    +   "if(s&&(s.includes('.m3u8')||s.includes('.mp4'))){"
+                    +     "window.DLOAD.onUrl(s);return;"
+                    +   "}"
+                    + "}"
+                    + "var scripts=document.querySelectorAll('script');"
+                    + "for(var k=0;k<scripts.length;k++){"
+                    +   "var t=scripts[k].innerText;"
+                    +   "var m=t.match(/[\"'](https?:\\/\\/[^\"']+\\.mp4[^\"']*)[\"']/);"
+                    +   "if(m){window.DLOAD.onUrl(m[1]);return;}"
+                    +   "var m2=t.match(/[\"'](https?:\\/\\/[^\"']+\\.m3u8[^\"']*)[\"']/);"
+                    +   "if(m2){window.DLOAD.onUrl(m2[1]);return;}"
+                    + "}"
+                    + "}catch(e){}})();";
+                captureWebView.addJavascriptInterface(new Object() {
+                    @android.webkit.JavascriptInterface
+                    public void onUrl(String url) {
+                        if (capturedDownloadUrl == null && url != null && !url.isEmpty()) {
+                            capturedDownloadUrl = url;
+                            capturedDownloadRef = item.getStreamUrl();
+                            capturedIsM3u8      = url.contains(".m3u8");
+                            new Handler(Looper.getMainLooper()).post(() -> onVideoUrlCapturedForDownload());
+                        }
+                    }
+                }, "DLOAD");
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (capturedDownloadUrl == null && !isFinishing() && captureWebView != null)
+                        captureWebView.evaluateJavascript("javascript:" + JS, null);
+                }, 2000);
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (capturedDownloadUrl == null && !isFinishing() && captureWebView != null)
+                        captureWebView.evaluateJavascript("javascript:" + JS, null);
+                }, 5000);
+            }
+
+            @Override public void onPageStarted(WebView v, String u, Bitmap f) {}
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+                String scheme = r.getUrl().getScheme();
+                if ("http".equals(scheme) || "https".equals(scheme)) {
+                    v.loadUrl(r.getUrl().toString()); return true;
+                }
+                return true;
+            }
+        });
+
+        // Show progress dialog
+        downloadingDialog = new AlertDialog.Builder(this)
+            .setTitle("Preparando descarga")
+            .setMessage("Buscando video... esto puede tardar unos segundos.")
+            .setCancelable(true)
+            .setNegativeButton("Cancelar", (d, w) -> {
+                destroyCaptureWebView();
+                if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+            })
+            .create();
+        downloadingDialog.show();
+
+        // Timeout: if no URL after 15s → give up
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (capturedDownloadUrl == null && !isFinishing()) {
+                destroyCaptureWebView();
+                if (downloadingDialog != null && downloadingDialog.isShowing())
+                    downloadingDialog.dismiss();
+                if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+                Toast.makeText(this,
+                    "No se pudo obtener el video para descargar.\nIntenta reproducirlo primero.",
+                    Toast.LENGTH_LONG).show();
+            }
+        }, 15000);
+
+        captureWebView.loadUrl(item.getStreamUrl());
+    }
+
+    private void onVideoUrlCapturedForDownload() {
+        if (isFinishing() || capturedDownloadUrl == null) return;
+
+        if (downloadingDialog != null && downloadingDialog.isShowing())
+            downloadingDialog.dismiss();
+
+        if (capturedIsM3u8) {
+            // HLS stream — cannot be saved as a single file
+            destroyCaptureWebView();
+            if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+            new AlertDialog.Builder(this)
+                .setTitle("No disponible para descarga")
+                .setMessage("Este video usa transmisión en vivo (HLS) y no se puede descargar directamente como archivo MP4.")
+                .setPositiveButton("Entendido", null)
+                .show();
+            return;
+        }
+
+        // MP4 — start real download
+        String videoUrl = capturedDownloadUrl;
+        String referer  = capturedDownloadRef;
+        destroyCaptureWebView();
+
+        DownloadsManager.startVideoDownload(this, item, videoUrl, referer);
+        if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+        Toast.makeText(this,
+            "Descarga iniciada ⬇  Revisa tus Descargas",
+            Toast.LENGTH_LONG).show();
+    }
+
+    private void destroyCaptureWebView() {
+        if (captureWebView != null) {
+            captureWebView.stopLoading();
+            captureWebView.destroy();
+            captureWebView = null;
+        }
     }
 
     private void bindViews() {
@@ -223,7 +400,8 @@ public class DetailActivity extends AppCompatActivity {
         if (btnDownload != null) {
             updateDownloadBtn(btnDownload);
             btnDownload.setOnClickListener(v -> {
-                if (DownloadsManager.isDownloaded(this, item)) {
+                String state = DownloadsManager.getVideoState(this, item);
+                if ("COMPLETE".equals(state)) {
                     // Already downloaded → offer to remove
                     new android.app.AlertDialog.Builder(this)
                         .setTitle("Eliminar descarga")
@@ -235,15 +413,13 @@ public class DetailActivity extends AppCompatActivity {
                         })
                         .setNegativeButton("Cancelar", null)
                         .show();
+                } else if ("DOWNLOADING".equals(state)) {
+                    Toast.makeText(this, "Ya se está descargando...", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Start download
+                    // Start real MP4 download via WebView capture
+                    pendingDownloadBtn = btnDownload;
                     setDownloadBtnLoading(btnDownload, true);
-                    DownloadsManager.add(this, item, success -> {
-                        updateDownloadBtn(btnDownload);
-                        Toast.makeText(this,
-                            success ? "Descarga completada ✓" : "Error al descargar",
-                            Toast.LENGTH_SHORT).show();
-                    });
+                    startDownloadCapture();
                 }
             });
         }
@@ -276,16 +452,28 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void updateDownloadBtn(LinearLayout btn) {
-        boolean downloaded = DownloadsManager.isDownloaded(this, item);
+        btn.setEnabled(true);
+        String state = DownloadsManager.getVideoState(this, item);
         TextView icon  = btn.findViewById(R.id.downloadIcon);
         TextView label = btn.findViewById(R.id.downloadLabel);
-        if (icon != null) {
-            icon.setText(downloaded ? "✓  " : "⬇  ");
-            icon.setTextColor(downloaded ? Color.parseColor("#4CAF50") : Color.parseColor("#4FC3F7"));
-        }
-        if (label != null) {
-            label.setText(downloaded ? "Descargado" : "Descargar");
-            label.setTextColor(downloaded ? Color.parseColor("#4CAF50") : Color.parseColor("#4FC3F7"));
+        switch (state) {
+            case "COMPLETE":
+                if (icon  != null) { icon.setText("✓  ");        icon.setTextColor(Color.parseColor("#4CAF50")); }
+                if (label != null) { label.setText("Descargado"); label.setTextColor(Color.parseColor("#4CAF50")); }
+                break;
+            case "DOWNLOADING":
+                if (icon  != null) { icon.setText("⏳  ");           icon.setTextColor(0xFFAAAAAA); }
+                if (label != null) { label.setText("Descargando..."); label.setTextColor(0xFFAAAAAA); }
+                btn.setEnabled(false);
+                break;
+            case "FAILED":
+                if (icon  != null) { icon.setText("⚠  ");       icon.setTextColor(Color.parseColor("#FF5252")); }
+                if (label != null) { label.setText("Reintentar"); label.setTextColor(Color.parseColor("#FF5252")); }
+                break;
+            default:
+                if (icon  != null) { icon.setText("⬇  ");       icon.setTextColor(Color.parseColor("#4FC3F7")); }
+                if (label != null) { label.setText("Descargar"); label.setTextColor(Color.parseColor("#4FC3F7")); }
+                break;
         }
     }
 

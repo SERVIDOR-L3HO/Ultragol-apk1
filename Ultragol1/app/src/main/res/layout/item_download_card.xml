@@ -7,7 +7,7 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- Poster with download badge overlay -->
+    <!-- Poster with overlay badges -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="150dp">
@@ -19,17 +19,35 @@
             android:scaleType="centerCrop"
             android:background="#1A1A1A"/>
 
-        <!-- Download indicator badge -->
+        <!-- Progress bar at bottom of poster while downloading -->
+        <ProgressBar
+            android:id="@+id/downloadProgressBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="4dp"
+            android:layout_gravity="bottom"
+            android:max="100"
+            android:progressTint="#4FC3F7"
+            android:progressBackgroundTint="#55FFFFFF"
+            android:visibility="gone"/>
+
+        <!-- Status badge: ▶ Listo / 45% / ⬇ / ✗ Error -->
         <TextView
+            android:id="@+id/downloadStatusBadge"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
             android:layout_margin="5dp"
             android:text="⬇"
             android:textColor="#4FC3F7"
-            android:textSize="12sp"
+            android:textSize="11sp"
+            android:fontFamily="sans-serif-medium"
             android:background="#AA000000"
-            android:padding="3dp"/>
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"/>
+
     </FrameLayout>
 
     <!-- Title -->
