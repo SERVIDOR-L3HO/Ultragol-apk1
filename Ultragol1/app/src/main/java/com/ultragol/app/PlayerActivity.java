@@ -15,24 +15,80 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
+
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class PlayerActivity extends AppCompatActivity {
+
     private WebView webView;
     private ProgressBar progressBar;
     private FrameLayout fullscreenContainer;
     private View webviewContainer, customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
-
     private ContentItem item;
+
+    // ── M3U8 / MP4 interception ───────────────────────────────────────────────
+    private volatile String capturedVideoUrl = null;
+    private volatile String capturedReferer  = null;
+    private volatile boolean capturedIsM3u8  = false;
+    private String currentEmbedUrl           = null;
+    private String videoTitle                = null;
+
+    private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
+
+    // ── JavaScript extracted from inject string for readability ───────────────
+    private static final String JS_EXTRACT =
+        "(function(){"
+        + "try{"
+        // JW Player
+        + "if(window.jwplayer&&jwplayer().getPlaylistItem()){"
+        +   "var pi=jwplayer().getPlaylistItem();"
+        +   "var src=pi.file||(pi.sources&&pi.sources[0]&&pi.sources[0].file);"
+        +   "if(src){window.HTMLOUT.onUrl(src,'jwplayer');return;}"
+        + "}"
+        // Video.js
+        + "if(window.videojs&&videojs.players){"
+        +   "var keys=Object.keys(videojs.players);"
+        +   "for(var i=0;i<keys.length;i++){"
+        +     "var p=videojs.players[keys[i]];"
+        +     "if(p&&p.currentSrc&&p.currentSrc()){"
+        +       "window.HTMLOUT.onUrl(p.currentSrc(),'videojs');return;"
+        +     "}"
+        +   "}"
+        + "}"
+        // HLS.js
+        + "if(window.Hls&&Hls.instances&&Hls.instances.length>0&&Hls.instances[0].url){"
+        +   "window.HTMLOUT.onUrl(Hls.instances[0].url,'hlsjs');return;"
+        + "}"
+        // DOM <source>
+        + "var srcs=document.querySelectorAll('source[src]');"
+        + "for(var j=0;j<srcs.length;j++){"
+        +   "var s=srcs[j].src;"
+        +   "if(s&&(s.includes('.m3u8')||s.includes('.mp4'))){"
+        +     "window.HTMLOUT.onUrl(s,'source');return;"
+        +   "}"
+        + "}"
+        // Inline scripts
+        + "var scripts=document.querySelectorAll('script');"
+        + "for(var k=0;k<scripts.length;k++){"
+        +   "var text=scripts[k].innerText;"
+        +   "var m=text.match(/[\"'](https?:\\/\\/[^\"']+\\.m3u8[^\"']*)[\"']/);"
+        +   "if(m){window.HTMLOUT.onUrl(m[1],'script');return;}"
+        +   "var mp=text.match(/[\"'](https?:\\/\\/[^\"']+\\.mp4[^\"']*)[\"']/);"
+        +   "if(mp){window.HTMLOUT.onUrl(mp[1],'script_mp4');return;}"
+        + "}"
+        + "}catch(e){}"
+        + "})();";
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -40,9 +96,9 @@ public class PlayerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        String url   = getIntent().getStringExtra("url");
-        String title = getIntent().getStringExtra("title");
-        item = (ContentItem) getIntent().getSerializableExtra("item");
+        String url = getIntent().getStringExtra("url");
+        videoTitle  = getIntent().getStringExtra("title");
+        item        = (ContentItem) getIntent().getSerializableExtra("item");
 
         setContentView(item != null ? R.layout.activity_player_detail : R.layout.activity_player);
 
@@ -52,28 +108,76 @@ public class PlayerActivity extends AppCompatActivity {
         webviewContainer    = findViewById(R.id.webviewContainer);
 
         TextView tvTitle = findViewById(R.id.playerTitle);
-        if (title != null && tvTitle != null) tvTitle.setText(title);
+        if (videoTitle != null && tvTitle != null) tvTitle.setText(videoTitle);
         View btnBack = findViewById(R.id.btnPlayerBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
         WebSettings s = webView.getSettings();
-        s.setJavaScriptEnabled(true); s.setDomStorageEnabled(true);
+        s.setJavaScriptEnabled(true);
+        s.setDomStorageEnabled(true);
         s.setMediaPlaybackRequiresUserGesture(false);
-        s.setLoadWithOverviewMode(true); s.setUseWideViewPort(true);
-        s.setSupportZoom(false); s.setBuiltInZoomControls(false);
+        s.setLoadWithOverviewMode(true);
+        s.setUseWideViewPort(true);
+        s.setSupportZoom(false);
+        s.setBuiltInZoomControls(false);
         s.setCacheMode(WebSettings.LOAD_DEFAULT);
         s.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         s.setUserAgentString("Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36");
         s.setSupportMultipleWindows(true);
 
+        // ── JavaScript interface to receive URLs extracted from JS ────────────
+        webView.addJavascriptInterface(new HtmlOutInterface(), "HTMLOUT");
+
         webView.setWebViewClient(new WebViewClient() {
-            @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+
+            // ── Intercept every network request from the WebView ──────────────
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                String reqUrl = request.getUrl().toString();
+                String ref    = request.getRequestHeaders().get("Referer");
+
+                boolean isM3u8 = reqUrl.contains(".m3u8");
+                boolean isMp4  = reqUrl.contains(".mp4") || reqUrl.contains(".MP4");
+
+                if ((isM3u8 || isMp4) && capturedVideoUrl == null) {
+                    // For MP4 try to check Content-Length header via a HEAD-like approach:
+                    // We trust the URL pattern — if it ends with .mp4 we capture it.
+                    // Large-size check is not possible without a blocking network call,
+                    // so we accept any mp4 URL and filter in the player if needed.
+                    capturedVideoUrl = reqUrl;
+                    capturedReferer  = ref != null ? ref : currentEmbedUrl;
+                    capturedIsM3u8   = isM3u8;
+
+                    new Handler(Looper.getMainLooper()).post(() ->
+                            onVideoUrlCaptured(capturedVideoUrl, capturedReferer, capturedIsM3u8));
+                }
+
+                return null; // never block the request
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
                 String scheme = r.getUrl().getScheme();
-                if ("http".equals(scheme) || "https".equals(scheme)) { v.loadUrl(r.getUrl().toString()); return true; }
+                if ("http".equals(scheme) || "https".equals(scheme)) {
+                    v.loadUrl(r.getUrl().toString());
+                    return true;
+                }
                 return true;
             }
-            @Override public void onPageStarted(WebView v, String u, Bitmap f) { if (progressBar != null) progressBar.setVisibility(View.VISIBLE); }
-            @Override public void onPageFinished(WebView v, String u) { if (progressBar != null) progressBar.setVisibility(View.GONE); }
+
+            @Override public void onPageStarted(WebView v, String u, Bitmap f) {
+                if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+            }
+
+            @Override public void onPageFinished(WebView v, String u) {
+                if (progressBar != null) progressBar.setVisibility(View.GONE);
+
+                // If shouldInterceptRequest didn't fire (URL hidden in JS),
+                // try to extract via JavaScript injection.
+                if (capturedVideoUrl == null) {
+                    v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
+                }
+            }
         });
 
         webView.setWebChromeClient(new WebChromeClient() {
@@ -95,23 +199,57 @@ public class PlayerActivity extends AppCompatActivity {
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
             }
             @Override public void onProgressChanged(WebView v, int p) {
-                if (progressBar != null) { progressBar.setProgress(p); progressBar.setVisibility(p == 100 ? View.GONE : View.VISIBLE); }
+                if (progressBar != null) {
+                    progressBar.setProgress(p);
+                    progressBar.setVisibility(p == 100 ? View.GONE : View.VISIBLE);
+                }
             }
             @Override public boolean onCreateWindow(WebView view, boolean isDialog, boolean isUserGesture, android.os.Message resultMsg) {
                 WebView popup = new WebView(PlayerActivity.this);
                 popup.getSettings().setJavaScriptEnabled(true);
                 popup.setWebViewClient(new WebViewClient() {
-                    @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) { webView.loadUrl(r.getUrl().toString()); return true; }
+                    @Override public boolean shouldOverrideUrlLoading(WebView v, WebResourceRequest r) {
+                        webView.loadUrl(r.getUrl().toString());
+                        return true;
+                    }
                 });
                 ((WebView.WebViewTransport) resultMsg.obj).setWebView(popup);
-                resultMsg.sendToTarget(); return true;
+                resultMsg.sendToTarget();
+                return true;
             }
         });
 
-        if (url != null) webView.loadUrl(url);
+        if (url != null) {
+            currentEmbedUrl = url;
+            webView.loadUrl(url);
+        }
 
         if (item != null) bindDetailPanel();
     }
+
+    // ── Called when a video URL is captured (from intercept or JS) ────────────
+    private void onVideoUrlCaptured(String url, String referer, boolean isM3u8) {
+        // Launch the native ExoPlayer
+        Intent intent = new Intent(this, MediaActivity.class);
+        intent.putExtra("url",      url);
+        intent.putExtra("title",    videoTitle != null ? videoTitle : "");
+        intent.putExtra("referer",  referer != null ? referer : "");
+        intent.putExtra("is_m3u8",  isM3u8);
+        startActivityForResult(intent, MediaActivity.REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == MediaActivity.REQUEST_CODE && resultCode == MediaActivity.RESULT_RETRY) {
+            // User wants to try another server — reset so next embed can be captured
+            capturedVideoUrl = null;
+            capturedReferer  = null;
+            Toast.makeText(this, "Selecciona otro servidor", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    // ── Detail panel ──────────────────────────────────────────────────────────
 
     private void bindDetailPanel() {
         TextView pdTitle    = findViewById(R.id.pdTitle);
@@ -137,10 +275,7 @@ public class PlayerActivity extends AppCompatActivity {
         LinearLayout btnLike = findViewById(R.id.pdBtnLike);
         if (btnLike != null) {
             updateLikeBtn(btnLike);
-            btnLike.setOnClickListener(v -> {
-                FavoritesManager.toggle(this, item);
-                updateLikeBtn(btnLike);
-            });
+            btnLike.setOnClickListener(v -> { FavoritesManager.toggle(this, item); updateLikeBtn(btnLike); });
         }
 
         LinearLayout btnDownload = findViewById(R.id.pdBtnDownload);
@@ -154,9 +289,7 @@ public class PlayerActivity extends AppCompatActivity {
                 } else {
                     DownloadsManager.add(this, item, success -> {
                         updateDownloadBtn(btnDownload);
-                        Toast.makeText(this,
-                            success ? "Descarga completada \u2713" : "Error al descargar",
-                            Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, success ? "Descarga completada \u2713" : "Error al descargar", Toast.LENGTH_SHORT).show();
                     });
                 }
             });
@@ -208,19 +341,12 @@ public class PlayerActivity extends AppCompatActivity {
     private void loadSimilar() {
         View row = findViewById(R.id.pdRowSimilar);
         if (row == null) return;
-
         TextView rowTitle = row.findViewById(R.id.rowTitle);
-        RecyclerView rv    = row.findViewById(R.id.rowRv);
-        if (rv != null) rv.setLayoutManager(
-            new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
-
-        String sectionTitle = item.getContentType() == ContentItem.TYPE_MOVIE
-            ? "Pel\u00edculas similares"
-            : item.getContentType() == ContentItem.TYPE_ANIME
-            ? "Animes similares"
-            : "Series similares";
+        RecyclerView rv   = row.findViewById(R.id.rowRv);
+        if (rv != null) rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        String sectionTitle = item.getContentType() == ContentItem.TYPE_MOVIE ? "Pel\u00edculas similares"
+                : item.getContentType() == ContentItem.TYPE_ANIME ? "Animes similares" : "Series similares";
         if (rowTitle != null) rowTitle.setText(sectionTitle);
-
         Handler h = new Handler(Looper.getMainLooper());
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
@@ -228,26 +354,26 @@ public class PlayerActivity extends AppCompatActivity {
                 List<ContentItem> related = TmdbApi.fetchSimilar(item.getTmdbId(), item.getContentType());
                 if (related.isEmpty()) {
                     switch (item.getContentType()) {
-                        case ContentItem.TYPE_ANIME:  related = TmdbApi.fetchAnime();  break;
+                        case ContentItem.TYPE_ANIME:  related = TmdbApi.fetchAnime(); break;
                         case ContentItem.TYPE_SERIES: related = TmdbApi.fetchSeries(); break;
                         case ContentItem.TYPE_DORAMA: related = TmdbApi.fetchDoramas(); break;
-                        default:                      related = TmdbApi.fetchMovies();  break;
+                        default:                      related = TmdbApi.fetchMovies(); break;
                     }
                 }
-                final List<ContentItem> finalRelated = related;
-                h.post(() -> {
-                    if (!isFinishing() && rv != null) {
-                        rv.setAdapter(new ContentRowAdapter(this, finalRelated));
-                    }
-                });
+                final List<ContentItem> fin = related;
+                h.post(() -> { if (!isFinishing() && rv != null) rv.setAdapter(new ContentRowAdapter(this, fin)); });
             } catch (Exception ignored) {}
         });
         pool.shutdown();
     }
 
+    // ── System UI ─────────────────────────────────────────────────────────────
+
     private void hideSystemUI() {
         getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+            View.SYSTEM_UI_FLAG_FULLSCREEN |
+            View.SYSTEM_UI_FLAG_HIDE_NAVIGATION |
+            View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
     }
 
     @Override public void onBackPressed() {
@@ -258,4 +384,23 @@ public class PlayerActivity extends AppCompatActivity {
     @Override protected void onPause()   { super.onPause();   webView.onPause(); }
     @Override protected void onResume()  { super.onResume();  webView.onResume(); }
     @Override protected void onDestroy() { webView.destroy(); super.onDestroy(); }
+
+    // ── Inner class: receives URLs from injected JavaScript ──────────────────
+
+    private final class HtmlOutInterface {
+        @JavascriptInterface
+        public void onUrl(final String url, final String source) {
+            if (url == null || url.isEmpty() || capturedVideoUrl != null) return;
+            boolean isM3u8 = url.contains(".m3u8") || url.contains("m3u8");
+            boolean isMp4  = url.contains(".mp4");
+            if (!isM3u8 && !isMp4) return;
+
+            capturedVideoUrl = url;
+            capturedReferer  = currentEmbedUrl;
+            capturedIsM3u8   = isM3u8;
+
+            new Handler(Looper.getMainLooper()).post(() ->
+                    onVideoUrlCaptured(url, currentEmbedUrl, isM3u8));
+        }
+    }
 }

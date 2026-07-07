@@ -48,6 +48,12 @@
         <activity android:name=".DetailActivity" android:exported="false"
             android:screenOrientation="portrait" android:theme="@style/Theme.Ultragol" />
 
+        <activity android:name=".MediaActivity" android:exported="false"
+            android:hardwareAccelerated="true"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize"
+            android:theme="@style/Theme.Ultragol.Fullscreen" />
+
         <!-- Continue Watching Widget -->
         <receiver android:name=".ContinueWatchingWidget"
             android:exported="true"
