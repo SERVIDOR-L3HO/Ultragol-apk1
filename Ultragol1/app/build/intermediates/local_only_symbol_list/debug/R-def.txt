@@ -287,6 +287,8 @@ id dot4
 id downloadIcon
 id downloadLabel
 id downloadPoster
+id downloadProgressBar
+id downloadStatusBadge
 id downloadTitle
 id downloadYear
 id downloadsBack
