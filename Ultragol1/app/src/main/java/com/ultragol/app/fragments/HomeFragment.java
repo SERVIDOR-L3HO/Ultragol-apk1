@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import androidx.viewpager2.widget.ViewPager2;
@@ -43,6 +44,11 @@ public class HomeFragment extends Fragment {
     private View sectionContinueWatching;
     private RecyclerView rvContinueWatching;
 
+    // Discover (infinite grid)
+    private InfiniteDiscoverAdapter discoverAdapter;
+    private int  discoverPage       = 0;
+    private boolean discoverLoading = false;
+
     private static final String GOL3_API = "https://ultrago-xi.vercel.app/gol-3";
 
     @Nullable @Override
@@ -58,6 +64,7 @@ public class HomeFragment extends Fragment {
         setupTrendingCarousel(view);
         setupContinueWatching(view);
         setupRows(view);
+        setupDiscover(view);
         loadAll();
     }
 
@@ -493,6 +500,75 @@ public class HomeFragment extends Fragment {
         if (row == null || !isAdded()) return;
         RecyclerView rv = row.findViewById(R.id.rowRv);
         if (rv != null) rv.setAdapter(new ContentRowAdapter(requireContext(), items));
+    }
+
+    // ── Discover infinite grid ────────────────────────────────────────────────
+
+    private void setupDiscover(View view) {
+        View rowDiscover = view.findViewById(R.id.rowDiscover);
+        if (rowDiscover == null) return;
+
+        RecyclerView discoverGrid = rowDiscover.findViewById(R.id.discoverGrid);
+        if (discoverGrid == null) return;
+
+        discoverAdapter = new InfiniteDiscoverAdapter(requireContext());
+
+        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int pos) {
+                return discoverAdapter != null ? discoverAdapter.getSpanSize(pos) : 1;
+            }
+        });
+
+        discoverGrid.setLayoutManager(glm);
+        discoverGrid.setNestedScrollingEnabled(false);
+        discoverGrid.setAdapter(discoverAdapter);
+
+        discoverAdapter.setOnLoadMoreListener(this::loadMoreDiscover);
+
+        // Listen on the NestedScrollView root to trigger load-more when near bottom
+        if (view instanceof NestedScrollView) {
+            NestedScrollView nsv = (NestedScrollView) view;
+            nsv.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
+                (v, scrollX, scrollY, oldX, oldY) -> {
+                    View child = v.getChildAt(0);
+                    if (child != null) {
+                        int diff = child.getHeight() - v.getHeight() - scrollY;
+                        if (diff < 600) loadMoreDiscover();
+                    }
+                });
+        }
+
+        // Load first page immediately
+        loadMoreDiscover();
+    }
+
+    private void loadMoreDiscover() {
+        if (discoverLoading || discoverAdapter == null || !isAdded()) return;
+        discoverLoading = true;
+        discoverPage++;
+        discoverAdapter.showLoading();
+
+        final int pageToLoad = discoverPage;
+        ExecutorService exec = Executors.newSingleThreadExecutor();
+        Handler h = new Handler(android.os.Looper.getMainLooper());
+        exec.execute(() -> {
+            List<ContentItem> result = new ArrayList<>();
+            try {
+                result = TmdbApi.fetchDiscoverMixed(pageToLoad);
+            } catch (Exception ignored) {}
+            final List<ContentItem> finalResult = result;
+            h.post(() -> {
+                // Always reset the flag so future loads can proceed
+                discoverLoading = false;
+                if (!isAdded() || discoverAdapter == null) return;
+                discoverAdapter.addPage(finalResult);
+                // Allow up to 40 pages (movies p1-p20 + series p1-p20)
+                discoverAdapter.setHasMore(discoverPage < 40);
+            });
+            exec.shutdown();
+        });
     }
 
     private int dp(int v) {

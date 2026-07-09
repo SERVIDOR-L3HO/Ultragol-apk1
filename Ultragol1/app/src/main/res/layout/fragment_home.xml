@@ -168,6 +168,9 @@
         <include android:id="@+id/rowDoramas"  layout="@layout/row_section"/>
         <include android:id="@+id/rowTop10"    layout="@layout/row_section"/>
 
-        <View android:layout_width="match_parent" android:layout_height="24dp"/>
+        <!-- ── Explorar Todo (infinite scroll grid) ── -->
+        <include android:id="@+id/rowDiscover" layout="@layout/row_discover_infinite"/>
+
+        <View android:layout_width="match_parent" android:layout_height="32dp"/>
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

@@ -55,6 +55,12 @@ public class ContinueWatchingAdapter extends RecyclerView.Adapter<ContinueWatchi
             h.epBadge.setText("T" + e.season + " · E" + e.episode);
         }
 
+        // Progress bar
+        if (h.cwProgress != null) {
+            int pct = e.progressPercent > 0 ? e.progressPercent : 10;
+            h.cwProgress.setProgress(pct);
+        }
+
         // Open detail on tap
         h.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(ctx, DetailActivity.class);
@@ -79,12 +85,14 @@ public class ContinueWatchingAdapter extends RecyclerView.Adapter<ContinueWatchi
     static class VH extends RecyclerView.ViewHolder {
         ImageView thumb;
         TextView title, epBadge, remove;
+        ProgressBar cwProgress;
         VH(View v) {
             super(v);
-            thumb   = v.findViewById(R.id.cwThumb);
-            title   = v.findViewById(R.id.cwTitle);
-            epBadge = v.findViewById(R.id.cwEpBadge);
-            remove  = v.findViewById(R.id.cwRemove);
+            thumb      = v.findViewById(R.id.cwThumb);
+            title      = v.findViewById(R.id.cwTitle);
+            epBadge    = v.findViewById(R.id.cwEpBadge);
+            remove     = v.findViewById(R.id.cwRemove);
+            cwProgress = v.findViewById(R.id.cwProgress);
         }
     }
 }

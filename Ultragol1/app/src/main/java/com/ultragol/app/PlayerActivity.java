@@ -24,6 +24,7 @@ import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.AirPlayManager;
 import com.ultragol.app.CastBottomSheet;
 import com.ultragol.app.CastDevice;
+import com.ultragol.app.ContinueWatchingManager;
 import com.ultragol.app.DLNAManager;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
@@ -249,6 +250,11 @@ public class PlayerActivity extends AppCompatActivity {
         }
 
         if (item != null) bindDetailPanel();
+
+        // ── Save to "Continuar Viendo" history when player opens ─────────────
+        if (item != null) {
+            ContinueWatchingManager.save(this, item, 1, 1);
+        }
     }
 
     // ── Called when a video URL is captured (from intercept or JS) ────────────

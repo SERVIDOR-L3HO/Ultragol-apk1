@@ -161,6 +161,27 @@ public class TmdbApi {
         return parse(new JSONObject(fetch("/discover/tv?with_genres=16,10751&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
     }
 
+    /**
+     * Paginated mixed discover feed (alternates movies / series pages).
+     * page 1 → popular movies p1, page 2 → popular series p1,
+     * page 3 → popular movies p2, page 4 → popular series p2, …
+     */
+    public static List<ContentItem> fetchDiscoverMixed(int page) throws Exception {
+        if (page % 2 == 1) {
+            int apiPage = (page + 1) / 2;
+            return parse(
+                new JSONObject(fetch("/discover/movie?sort_by=popularity.desc&language=es-MX&page=" + apiPage))
+                    .getJSONArray("results"),
+                ContentItem.TYPE_MOVIE);
+        } else {
+            int apiPage = page / 2;
+            return parse(
+                new JSONObject(fetch("/discover/tv?sort_by=popularity.desc&language=es-MX&page=" + apiPage))
+                    .getJSONArray("results"),
+                ContentItem.TYPE_SERIES);
+        }
+    }
+
     public static List<ContentItem> fetchByProvider(int providerId, String mediaType) throws Exception {
         int type = "movie".equals(mediaType) ? ContentItem.TYPE_MOVIE : ContentItem.TYPE_SERIES;
         String path = "/discover/" + mediaType

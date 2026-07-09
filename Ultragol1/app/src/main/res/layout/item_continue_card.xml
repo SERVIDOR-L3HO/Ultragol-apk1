@@ -69,6 +69,18 @@
             android:background="@drawable/back_btn_glass"
             android:clickable="true"
             android:focusable="true"/>
+
+        <!-- Watch progress bar at bottom -->
+        <ProgressBar
+            android:id="@+id/cwProgress"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom"
+            android:progressTint="#FF6B00"
+            android:progressBackgroundTint="#44FFFFFF"
+            android:max="100"
+            android:progress="10"/>
     </FrameLayout>
 
     <!-- Title below thumbnail -->
