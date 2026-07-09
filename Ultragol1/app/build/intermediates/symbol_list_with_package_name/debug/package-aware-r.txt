@@ -4141,6 +4141,7 @@ id custom
 id customPanel
 id cut
 id cwEpBadge
+id cwProgress
 id cwRemove
 id cwThumb
 id cwTitle
@@ -4177,6 +4178,10 @@ id disableHome
 id disableIntraAutoTransition
 id disablePostScroll
 id disableScroll
+id discoverBadge
+id discoverGrid
+id discoverPoster
+id discoverTitle
 id disjoint
 id dividerQuality
 id done_button
@@ -4284,6 +4289,9 @@ id expand_activities_button
 id expanded_controller_layout
 id expanded_menu
 id fade
+id featuredBackdrop
+id featuredMeta
+id featuredTitle
 id fill
 id fill_horizontal
 id fill_vertical
@@ -4658,6 +4666,7 @@ id right_icon
 id right_side
 id rounded
 id rowAnime
+id rowDiscover
 id rowDoramas
 id rowLiveGlass
 id rowMovies
@@ -5121,6 +5130,9 @@ layout item_cine_section
 layout item_content_card
 layout item_content_grid
 layout item_continue_card
+layout item_discover_card
+layout item_discover_featured
+layout item_discover_loading
 layout item_download_card
 layout item_live_glass_card
 layout item_notification_card
@@ -5209,6 +5221,7 @@ layout notification_template_media
 layout notification_template_media_custom
 layout notification_template_part_chronometer
 layout notification_template_part_time
+layout row_discover_infinite
 layout row_live_glass
 layout row_section
 layout row_trending_carousel

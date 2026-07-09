@@ -424,6 +424,10 @@
         "source": "com.ultragol.app-main-43:/layout/item_continue_card.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-41:/layout_item_discover_featured.xml.flat",
+        "source": "com.ultragol.app-main-43:/layout/item_discover_featured.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-41:/drawable_sheet_handle.xml.flat",
         "source": "com.ultragol.app-main-43:/drawable/sheet_handle.xml"
     },
@@ -604,8 +608,16 @@
         "source": "com.ultragol.app-main-43:/drawable/sport_play_pill_bg.xml"
     },
     {
+        "merged": "com.ultragol.app-merged_res-41:/layout_row_discover_infinite.xml.flat",
+        "source": "com.ultragol.app-main-43:/layout/row_discover_infinite.xml"
+    },
+    {
         "merged": "com.ultragol.app-merged_res-41:/drawable_tab_selected_bg.xml.flat",
         "source": "com.ultragol.app-main-43:/drawable/tab_selected_bg.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-41:/layout_item_discover_loading.xml.flat",
+        "source": "com.ultragol.app-main-43:/layout/item_discover_loading.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-41:/layout_activity_media.xml.flat",
@@ -802,6 +814,10 @@
     {
         "merged": "com.ultragol.app-merged_res-41:/drawable_pin_key_bg.xml.flat",
         "source": "com.ultragol.app-main-43:/drawable/pin_key_bg.xml"
+    },
+    {
+        "merged": "com.ultragol.app-merged_res-41:/layout_item_discover_card.xml.flat",
+        "source": "com.ultragol.app-main-43:/layout/item_discover_card.xml"
     },
     {
         "merged": "com.ultragol.app-merged_res-41:/drawable_sport_header_premium_bg.xml.flat",

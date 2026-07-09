@@ -1,9 +1,9 @@
 {
-  "versionCode": 9,
-  "versionName": "1.5",
+  "versionCode": 10,
+  "versionName": "1.6",
   "appName": "Ultragol1",
-  "changelog": "- Transmisión a cualquier TV (Chromecast, Smart TV DLNA, Apple TV)\n- Nuevo botón [⊡] Cast en el reproductor\n- Panel de selección de dispositivos en la red\n- Mini controlador mientras transmites\n- Soporte Chromecast, Samsung/LG/Sony via DLNA, Apple TV via AirPlay\n- Amazon Fire TV / Roku via Chromecast",
+  "changelog": "- ✅ Historial 'Continuar Viendo' ahora funcional — guarda automáticamente lo que ves\n- 📊 Barra de progreso naranja en cada tarjeta de historial\n- 🎬 Nueva sección 'Explorar Todo' con grid infinito debajo del Top 10\n- ∞ Desliza hacia abajo para descubrir cientos de películas y series sin límite\n- 🖼 Tarjetas destacadas de ancho completo mezcladas en el grid",
   "downloadUrl": "https://960732cd-e136-4311-8c9b-2369766687f9-00-2k4rdw94ku0kn.worf.replit.dev/ultragol1/download",
   "forceUpdate": false,
-  "updatedAt": "2026-07-09T00:31:00.000Z"
+  "updatedAt": "2026-07-09T17:20:00.000Z"
 }

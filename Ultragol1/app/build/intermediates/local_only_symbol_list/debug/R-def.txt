@@ -276,6 +276,7 @@ id colorPicker
 id contentGrid
 id controlsOverlay
 id cwEpBadge
+id cwProgress
 id cwRemove
 id cwThumb
 id cwTitle
@@ -292,6 +293,10 @@ id dialogBadge
 id dialogDismiss
 id dialogPoster
 id dialogTitle
+id discoverBadge
+id discoverGrid
+id discoverPoster
+id discoverTitle
 id dividerQuality
 id dot1
 id dot2
@@ -319,6 +324,9 @@ id episodeSectionDetail
 id episodeTabContent
 id errorServers
 id etName
+id featuredBackdrop
+id featuredMeta
+id featuredTitle
 id footballContent
 id footballError
 id footballLoading
@@ -447,6 +455,7 @@ id rgSleepTimer
 id rgSpeed
 id rgSubtitles
 id rowAnime
+id rowDiscover
 id rowDoramas
 id rowLiveGlass
 id rowMovies
@@ -585,6 +594,9 @@ layout item_cine_section
 layout item_content_card
 layout item_content_grid
 layout item_continue_card
+layout item_discover_card
+layout item_discover_featured
+layout item_discover_loading
 layout item_download_card
 layout item_live_glass_card
 layout item_notification_card
@@ -592,6 +604,7 @@ layout item_profile_add
 layout item_profile_card
 layout item_trending_card
 layout layout_mini_cast_controller
+layout row_discover_infinite
 layout row_live_glass
 layout row_section
 layout row_trending_carousel
