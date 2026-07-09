@@ -21,6 +21,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ultragol.app.adapters.ContentRowAdapter;
+import com.ultragol.app.AirPlayManager;
+import com.ultragol.app.CastBottomSheet;
+import com.ultragol.app.CastDevice;
+import com.ultragol.app.DLNAManager;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
 
@@ -315,9 +319,51 @@ public class PlayerActivity extends AppCompatActivity {
             });
         }
 
-        View btnReport = findViewById(R.id.pdBtnReport);
-        if (btnReport != null) btnReport.setOnClickListener(v ->
-            Toast.makeText(this, "Gracias por tu reporte, lo revisaremos pronto", Toast.LENGTH_SHORT).show());
+        View btnCastDetail = findViewById(R.id.pdBtnCast);
+        if (btnCastDetail != null) btnCastDetail.setOnClickListener(v -> {
+            String castUrl   = capturedVideoUrl != null ? capturedVideoUrl : "";
+            String castTitle = videoTitle != null ? videoTitle : (item != null ? item.getTitle() : "");
+            if (castUrl.isEmpty()) {
+                Toast.makeText(this, "Primero reproduce el contenido para poder transmitir", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            final String finalUrl   = castUrl;
+            final String finalTitle = castTitle;
+            final boolean finalM3u8 = capturedIsM3u8;
+            CastBottomSheet sheet = CastBottomSheet.newInstance();
+            sheet.setVideoInfo(finalUrl, finalTitle, finalM3u8);
+            sheet.setCallback(device -> {
+                if (device == null) return;
+                switch (device.getType()) {
+                    case DLNA:
+                        Toast.makeText(this, "Conectando a " + device.getName() + "…", Toast.LENGTH_SHORT).show();
+                        DLNAManager.getInstance().playVideo(device, finalUrl, () ->
+                            runOnUiThread(() -> Toast.makeText(this,
+                                "No se pudo conectar al TV DLNA. ¿Estás en la misma red WiFi?",
+                                Toast.LENGTH_LONG).show()));
+                        break;
+                    case AIRPLAY:
+                        Toast.makeText(this, "Conectando a " + device.getName() + "…", Toast.LENGTH_SHORT).show();
+                        AirPlayManager.getInstance().playVideo(device, finalUrl, 0, () ->
+                            runOnUiThread(() -> Toast.makeText(this,
+                                "Apple TV no respondió. Verifica que esté en la misma red WiFi.",
+                                Toast.LENGTH_LONG).show()));
+                        break;
+                    case CHROMECAST:
+                        // Launch MediaActivity with the captured URL so Chromecast Cast SDK
+                        // can start a proper session from the full player.
+                        Intent castIntent = new Intent(this, MediaActivity.class);
+                        castIntent.putExtra("url",      finalUrl);
+                        castIntent.putExtra("title",    finalTitle);
+                        castIntent.putExtra("referer",  capturedReferer != null ? capturedReferer : "");
+                        castIntent.putExtra("is_m3u8",  finalM3u8);
+                        startActivityForResult(castIntent, MediaActivity.REQUEST_CODE);
+                        Toast.makeText(this, "Abriendo en el reproductor para Chromecast…", Toast.LENGTH_SHORT).show();
+                        break;
+                }
+            });
+            sheet.show(getSupportFragmentManager(), "castPanel");
+        });
 
         View btnShare = findViewById(R.id.pdBtnShare);
         if (btnShare != null) btnShare.setOnClickListener(v -> {
