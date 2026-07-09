@@ -103,6 +103,16 @@
                 android:src="@drawable/ic_media_settings"
                 android:tint="#CCFFFFFF"
                 android:contentDescription="Configuración"/>
+
+            <ImageButton
+                android:id="@+id/btnCast"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_cast"
+                android:tint="#66FFFFFF"
+                android:contentDescription="Transmitir a TV"
+                android:layout_marginStart="2dp"/>
         </LinearLayout>
 
         <!-- ── CENTER CONTROLS ────────────────────────────────────────── -->
@@ -703,5 +713,8 @@
             <View android:layout_width="match_parent" android:layout_height="40dp"/>
         </LinearLayout>
     </ScrollView>
+
+    <!-- ── Mini Cast Controller (visible while casting to TV) ────────────── -->
+    <include layout="@layout/layout_mini_cast_controller"/>
 
 </FrameLayout>

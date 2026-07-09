@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.ultragol.app-mergeDebugResources-34:/values-v21/values-v21.xml",
+            "outputFile": "com.ultragol.app-mergeDebugResources-39:/values-v21/values-v21.xml",
             "map": [
                 {
                     "source": "/home/runner/.gradle/caches/transforms-3/16cd80d85fb89d4919c740ea57848675/transformed/media-1.6.0/res/values-v21/values-v21.xml",

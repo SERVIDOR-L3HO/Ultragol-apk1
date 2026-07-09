@@ -72,6 +72,10 @@ drawable gradient_hero
 drawable gradient_radial_splash
 drawable gradient_top_black
 drawable ic_back
+drawable ic_cast
+drawable ic_cast_phone
+drawable ic_cast_stop
+drawable ic_cast_tv
 drawable ic_channel_placeholder
 drawable ic_media_fit
 drawable ic_media_forward10
@@ -195,6 +199,7 @@ id btnBannerBookmark
 id btnBannerInfo
 id btnBannerPlay
 id btnBell
+id btnCast
 id btnClearAll
 id btnDelete
 id btnDeportesBack
@@ -248,6 +253,14 @@ id cardTitle
 id cardTitleBelow
 id cardType
 id cardYear
+id castBtnCancel
+id castDeviceIcon
+id castDeviceInUse
+id castDeviceList
+id castDeviceName
+id castDeviceType
+id castSearching
+id castStatus
 id categoryChips
 id channelCategory
 id channelCountry
@@ -354,6 +367,13 @@ id loadingServers
 id loadingServersOverlay
 id loadingSpinner
 id lockOverlay
+id miniCastBar
+id miniCastDevice
+id miniCastLocal
+id miniCastPlayPause
+id miniCastPoster
+id miniCastStop
+id miniCastTitle
 id navAnime
 id navDeportes
 id navDoramas
@@ -547,6 +567,7 @@ layout dialog_server_select
 layout dialog_trailer
 layout dialog_update
 layout episode_item
+layout fragment_cast_bottom_sheet
 layout fragment_cine
 layout fragment_deportes_web
 layout fragment_downloads
@@ -555,6 +576,7 @@ layout fragment_grid
 layout fragment_home
 layout fragment_sports
 layout item_banner
+layout item_cast_device
 layout item_channel
 layout item_cine_card
 layout item_cine_hero
@@ -569,6 +591,7 @@ layout item_notification_card
 layout item_profile_add
 layout item_profile_card
 layout item_trending_card
+layout layout_mini_cast_controller
 layout row_live_glass
 layout row_section
 layout row_trending_carousel

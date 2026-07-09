@@ -10,6 +10,8 @@
     <uses-permission android:name="android.permission.DOWNLOAD_WITHOUT_NOTIFICATION" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -69,6 +71,11 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/continue_watching_widget_info"/>
         </receiver>
+
+        <!-- Google Cast SDK options provider -->
+        <meta-data
+            android:name="com.google.android.gms.cast.framework.OPTIONS_PROVIDER_CLASS_NAME"
+            android:value=".CastOptionsProvider" />
 
         <!-- ExoPlayer offline download service -->
         <service android:name=".VideoDownloadService"

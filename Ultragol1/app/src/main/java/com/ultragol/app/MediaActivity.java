@@ -39,6 +39,16 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.util.Collections;
 
+// ── Cast / TV Streaming ───────────────────────────────────────────────────────
+import android.widget.ImageView;
+import com.google.android.gms.cast.CastMediaControlIntent;
+import com.google.android.gms.cast.framework.CastContext;
+import com.google.android.gms.cast.framework.CastSession;
+import com.google.android.gms.cast.framework.SessionManager;
+import com.google.android.gms.cast.framework.SessionManagerListener;
+import androidx.mediarouter.media.MediaRouter;
+import androidx.mediarouter.media.MediaRouteSelector;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
@@ -94,8 +104,16 @@ public class MediaActivity extends AppCompatActivity {
     private CardView resumeCard;
     private TextView tvResumeText, tvTapLeft, tvTapRight;
 
+    // ── Cast fields ───────────────────────────────────────────────────────────
+    private ImageButton btnCast;
+    private MiniCastController miniCastController;
+    private CastManager castManager;
+    private CastDevice currentCastDevice;   // active DLNA or AirPlay device
+    private SessionManagerListener<CastSession> castSessionListener;
+    private boolean isCasting = false;
+
     // State
-    private String videoUrl, videoTitle, referer;
+    private String videoUrl, videoTitle, referer, posterUrl;
     private boolean isM3u8;
     private boolean controlsVisible = false;
     private boolean isFitMode = true;
@@ -195,6 +213,7 @@ public class MediaActivity extends AppCompatActivity {
         videoUrl   = getIntent().getStringExtra("url");
         videoTitle = getIntent().getStringExtra("title");
         referer    = getIntent().getStringExtra("referer");
+        posterUrl  = getIntent().getStringExtra("poster_url");
         isM3u8     = getIntent().getBooleanExtra("is_m3u8", false);
         useOffline = getIntent().getBooleanExtra("use_offline", false);
 
@@ -209,6 +228,7 @@ public class MediaActivity extends AppCompatActivity {
         setupGestures();
         setupPlayer();
         checkResumePosition();
+        setupCast();
     }
 
     @Override protected void onStart() {
@@ -228,6 +248,11 @@ public class MediaActivity extends AppCompatActivity {
 
     @Override protected void onPause() {
         super.onPause();
+        // Unregister Cast session listener
+        if (castManager != null && castManager.isAvailable() && castSessionListener != null) {
+            SessionManager sm = castManager.getSessionManager();
+            if (sm != null) sm.removeSessionManagerListener(castSessionListener, CastSession.class);
+        }
         if (!isInPipMode && player != null) {
             saveProgress(player.getCurrentPosition());
             player.setPlayWhenReady(false);
@@ -238,7 +263,12 @@ public class MediaActivity extends AppCompatActivity {
         super.onResume();
         if (!isInPipMode) {
             hideSystemBars();
-            if (player != null) player.setPlayWhenReady(true);
+            if (player != null && !isCasting) player.setPlayWhenReady(true);
+        }
+        // Register Cast session listener
+        if (castManager != null && castManager.isAvailable() && castSessionListener != null) {
+            SessionManager sm = castManager.getSessionManager();
+            if (sm != null) sm.addSessionManagerListener(castSessionListener, CastSession.class);
         }
     }
 
@@ -248,6 +278,13 @@ public class MediaActivity extends AppCompatActivity {
             saveProgress(player.getCurrentPosition());
             player.release();
             player = null;
+        }
+        // Stop DLNA / AirPlay if active
+        if (currentCastDevice != null) {
+            if (currentCastDevice.getType() == CastDevice.Type.DLNA)
+                DLNAManager.getInstance().stopVideo(currentCastDevice);
+            else if (currentCastDevice.getType() == CastDevice.Type.AIRPLAY)
+                AirPlayManager.getInstance().stopVideo(currentCastDevice);
         }
         super.onDestroy();
     }
@@ -317,6 +354,17 @@ public class MediaActivity extends AppCompatActivity {
         btnLock             = findViewById(R.id.btnLock);
         btnServer           = findViewById(R.id.btnServer);
         btnPip              = findViewById(R.id.btnPip);
+        btnCast             = findViewById(R.id.btnCast);
+
+        // Mini cast controller
+        View miniCastBar = findViewById(R.id.miniCastBar);
+        if (miniCastBar != null) {
+            miniCastController = new MiniCastController(miniCastBar, new MiniCastController.Listener() {
+                @Override public void onPlayPause()     { onMiniCastPlayPause(); }
+                @Override public void onStop()          { stopAllCasting(true); }
+                @Override public void onReturnToPhone() { stopAllCasting(true); }
+            });
+        }
         lockOverlay         = findViewById(R.id.lockOverlay);
         unlockHint          = findViewById(R.id.unlockHint);
         btnSpeedChip        = findViewById(R.id.btnSpeedChip);
@@ -346,6 +394,7 @@ public class MediaActivity extends AppCompatActivity {
 
         if (btnLock   != null) btnLock.setOnClickListener(v -> { consumedByButton = true; activateLock(); });
         if (btnServer != null) btnServer.setOnClickListener(v -> { consumedByButton = true; changeServer(); });
+        if (btnCast   != null) btnCast.setOnClickListener(v -> { consumedByButton = true; showCastPanel(); });
         if (btnPip    != null) btnPip.setOnClickListener(v -> {
             consumedByButton = true;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) enterPipMode();
@@ -1006,5 +1055,211 @@ public class MediaActivity extends AppCompatActivity {
         final int index;
         final String label;
         TrackInfo(int index, String label) { this.index = index; this.label = label; }
+    }
+
+    // ─── Cast / TV Streaming ──────────────────────────────────────────────────
+
+    private void setupCast() {
+        castManager = CastManager.getInstance(this);
+
+        if (!castManager.isAvailable()) {
+            // No Google Play Services — hide cast button
+            if (btnCast != null) btnCast.setVisibility(View.GONE);
+            return;
+        }
+
+        castSessionListener = new SessionManagerListener<CastSession>() {
+            @Override public void onSessionStarting(CastSession s)              {}
+            @Override public void onSessionStarted(CastSession s, String id)    { onCastSessionStarted(s); }
+            @Override public void onSessionStartFailed(CastSession s, int e) {
+                showCastError("No se pudo conectar. ¿Reintentar?");
+            }
+            @Override public void onSessionResuming(CastSession s, String id)   {}
+            @Override public void onSessionResumed(CastSession s, boolean b)    { onCastSessionStarted(s); }
+            @Override public void onSessionResumeFailed(CastSession s, int e)   {}
+            @Override public void onSessionEnding(CastSession s)                {}
+            @Override public void onSessionEnded(CastSession s, int e)          { onCastSessionEnded(); }
+            @Override public void onSessionSuspended(CastSession s, int e)      { onCastSessionEnded(); }
+        };
+
+        // If already casting (e.g. app re-opened), show mini controller
+        if (castManager.isCasting()) {
+            isCasting = true;
+            if (player != null) player.setPlayWhenReady(false);
+            if (miniCastController != null)
+                miniCastController.show(videoTitle, "Chromecast", posterUrl);
+            castManager.castVideo(videoUrl, videoTitle, posterUrl, isM3u8,
+                player != null ? player.getCurrentPosition() : 0);
+            updateCastButton();
+        }
+
+        // Check for available routes and tint button accordingly
+        updateCastButton();
+    }
+
+    private void showCastPanel() {
+        CastBottomSheet sheet = CastBottomSheet.newInstance();
+        sheet.setVideoInfo(videoUrl, videoTitle, isM3u8);
+        sheet.setCallback(device -> {
+            mainHandler.post(() -> handleDeviceSelected(device));
+        });
+        sheet.show(getSupportFragmentManager(), "castPanel");
+    }
+
+    private void handleDeviceSelected(CastDevice device) {
+        if (device == null) return;
+        long position = player != null ? player.getCurrentPosition() : 0;
+
+        switch (device.getType()) {
+            case CHROMECAST:
+                // Select route → Cast SDK triggers session → onCastSessionStarted fires
+                if (device.getRouteInfo() != null) {
+                    try {
+                        MediaRouter.getInstance(this).selectRoute(device.getRouteInfo());
+                    } catch (Exception e) {
+                        showCastError("No se pudo conectar al Chromecast.");
+                    }
+                }
+                break;
+
+            case DLNA:
+                if (device.isInUse()) return;
+                currentCastDevice = device;
+                isCasting = true;
+                if (player != null) {
+                    saveProgress(player.getCurrentPosition());
+                    player.setPlayWhenReady(false);
+                }
+                if (miniCastController != null)
+                    miniCastController.show(videoTitle, device.getName(), posterUrl);
+                updateCastButton();
+
+                if (isM3u8) {
+                    showCastError("Tu TV puede no soportar HLS (m3u8). Intenta con un servidor mp4 directo.");
+                }
+                DLNAManager.getInstance().playVideo(device, videoUrl, () -> {
+                    isCasting = false;
+                    currentCastDevice = null;
+                    if (miniCastController != null) miniCastController.hide();
+                    updateCastButton();
+                    showCastError("No se pudo conectar al TV DLNA. ¿Reintentar?");
+                });
+                break;
+
+            case AIRPLAY:
+                if (device.isInUse()) return;
+                currentCastDevice = device;
+                isCasting = true;
+                if (player != null) {
+                    saveProgress(player.getCurrentPosition());
+                    player.setPlayWhenReady(false);
+                }
+                if (miniCastController != null)
+                    miniCastController.show(videoTitle, device.getName(), posterUrl);
+                updateCastButton();
+
+                AirPlayManager.getInstance().playVideo(device, videoUrl, position, () -> {
+                    isCasting = false;
+                    currentCastDevice = null;
+                    if (miniCastController != null) miniCastController.hide();
+                    updateCastButton();
+                    showCastError("Apple TV no respondió. Verifica que esté en la misma red WiFi.");
+                });
+                break;
+        }
+    }
+
+    private void onCastSessionStarted(CastSession session) {
+        isCasting = true;
+        long pos = player != null ? player.getCurrentPosition() : 0;
+        if (player != null) {
+            saveProgress(pos);
+            player.setPlayWhenReady(false);
+        }
+        String deviceName = "Chromecast";
+        try { deviceName = session.getCastDevice().getFriendlyName(); } catch (Exception ignored) {}
+        final String dName = deviceName;
+        mainHandler.post(() -> {
+            if (miniCastController != null)
+                miniCastController.show(videoTitle, dName, posterUrl);
+            updateCastButton();
+        });
+        castManager.castVideo(videoUrl, videoTitle, posterUrl, isM3u8, pos);
+    }
+
+    private void onCastSessionEnded() {
+        isCasting = false;
+        long resumePos = castManager != null ? castManager.getCastPosition() : 0;
+        mainHandler.post(() -> {
+            if (miniCastController != null) miniCastController.hide();
+            updateCastButton();
+            if (player != null) {
+                if (resumePos > 0) player.seekTo(resumePos);
+                player.setPlayWhenReady(true);
+            }
+        });
+    }
+
+    private void onMiniCastPlayPause() {
+        if (!isCasting) return;
+        if (currentCastDevice != null) {
+            // DLNA or AirPlay
+            boolean nowPaused = miniCastController != null && miniCastController.isPlaying();
+            if (currentCastDevice.getType() == CastDevice.Type.DLNA)
+                DLNAManager.getInstance().togglePause(currentCastDevice, nowPaused);
+            else if (currentCastDevice.getType() == CastDevice.Type.AIRPLAY)
+                AirPlayManager.getInstance().togglePause(currentCastDevice, nowPaused, null);
+        } else if (castManager != null) {
+            // Chromecast
+            castManager.togglePlayPause();
+        }
+        if (miniCastController != null)
+            miniCastController.setPlaying(!miniCastController.isPlaying());
+    }
+
+    private void stopAllCasting(boolean resumeLocal) {
+        if (currentCastDevice != null) {
+            if (currentCastDevice.getType() == CastDevice.Type.DLNA)
+                DLNAManager.getInstance().stopVideo(currentCastDevice);
+            else if (currentCastDevice.getType() == CastDevice.Type.AIRPLAY)
+                AirPlayManager.getInstance().stopVideo(currentCastDevice);
+            currentCastDevice = null;
+        }
+        if (castManager != null && castManager.isCasting()) {
+            castManager.stopCasting();
+        }
+        isCasting = false;
+        if (miniCastController != null) miniCastController.hide();
+        updateCastButton();
+        if (resumeLocal && player != null) player.setPlayWhenReady(true);
+    }
+
+    private void updateCastButton() {
+        if (btnCast == null) return;
+        if (isCasting) {
+            // Blue — actively casting
+            btnCast.setColorFilter(0xFF4FC3F7);
+        } else {
+            // Check if any cast routes are available
+            boolean hasRoutes = false;
+            if (castManager != null && castManager.isAvailable()) {
+                try {
+                    String appId = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
+                    MediaRouteSelector sel = new MediaRouteSelector.Builder()
+                        .addControlCategory(CastMediaControlIntent.categoryForCast(appId))
+                        .build();
+                    for (MediaRouter.RouteInfo r : MediaRouter.getInstance(this).getRoutes()) {
+                        if (r.matchesSelector(sel) && !r.isDefault()) { hasRoutes = true; break; }
+                    }
+                } catch (Exception ignored) {}
+            }
+            // White = devices available, dim gray = no devices
+            btnCast.setColorFilter(hasRoutes ? 0xFFFFFFFF : 0x66FFFFFF);
+        }
+    }
+
+    private void showCastError(String message) {
+        View root = findViewById(android.R.id.content);
+        if (root != null) Snackbar.make(root, message, Snackbar.LENGTH_LONG).show();
     }
 }
