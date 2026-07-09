@@ -397,10 +397,10 @@ id notifLoading
 id notifMessage
 id notifTitle
 id pbLoading
+id pdBtnCast
 id pdBtnDownload
 id pdBtnDub
 id pdBtnLike
-id pdBtnReport
 id pdBtnShare
 id pdBtnSubs
 id pdDownloadIcon

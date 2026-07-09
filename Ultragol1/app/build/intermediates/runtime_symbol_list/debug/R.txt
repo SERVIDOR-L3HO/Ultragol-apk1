@@ -4587,10 +4587,10 @@ int id password_toggle 0x7f0a02d7
 int id path 0x7f0a02d8
 int id pathRelative 0x7f0a02d9
 int id pbLoading 0x7f0a02da
-int id pdBtnDownload 0x7f0a02db
-int id pdBtnDub 0x7f0a02dc
-int id pdBtnLike 0x7f0a02dd
-int id pdBtnReport 0x7f0a02de
+int id pdBtnCast 0x7f0a02db
+int id pdBtnDownload 0x7f0a02dc
+int id pdBtnDub 0x7f0a02dd
+int id pdBtnLike 0x7f0a02de
 int id pdBtnShare 0x7f0a02df
 int id pdBtnSubs 0x7f0a02e0
 int id pdDownloadIcon 0x7f0a02e1

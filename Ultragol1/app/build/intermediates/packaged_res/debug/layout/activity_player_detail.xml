@@ -124,7 +124,7 @@
                     </LinearLayout>
 
                     <LinearLayout
-                        android:id="@+id/pdBtnReport"
+                        android:id="@+id/pdBtnCast"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
@@ -136,13 +136,16 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:background="@drawable/action_btn_bg">
-                        <TextView
-                            android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="⚑" android:textColor="#FFFFFF" android:textSize="18sp"/>
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_cast_tv"
+                            android:tint="#FFFFFF"
+                            android:contentDescription="Transmitir a TV"/>
                         <TextView
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Reportar" android:textColor="#FFFFFF" android:textSize="11sp"
+                            android:text="Transmitir" android:textColor="#FFFFFF" android:textSize="11sp"
                             android:fontFamily="sans-serif-medium"/>
                     </LinearLayout>
 
