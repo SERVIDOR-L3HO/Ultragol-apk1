@@ -46,6 +46,7 @@ public class HomeFragment extends Fragment {
 
     // Discover (infinite grid)
     private InfiniteDiscoverAdapter discoverAdapter;
+    private RecyclerView discoverGrid;
     private int  discoverPage       = 0;
     private boolean discoverLoading = false;
 
@@ -508,7 +509,7 @@ public class HomeFragment extends Fragment {
         View rowDiscover = view.findViewById(R.id.rowDiscover);
         if (rowDiscover == null) return;
 
-        RecyclerView discoverGrid = rowDiscover.findViewById(R.id.discoverGrid);
+        discoverGrid = rowDiscover.findViewById(R.id.discoverGrid);
         if (discoverGrid == null) return;
 
         discoverAdapter = new InfiniteDiscoverAdapter(requireContext());
@@ -548,7 +549,10 @@ public class HomeFragment extends Fragment {
         if (discoverLoading || discoverAdapter == null || !isAdded()) return;
         discoverLoading = true;
         discoverPage++;
-        discoverAdapter.showLoading();
+        // Post to avoid IllegalStateException when called during RecyclerView layout/scroll pass
+        if (discoverGrid != null) {
+            discoverGrid.post(() -> discoverAdapter.showLoading());
+        }
 
         final int pageToLoad = discoverPage;
         ExecutorService exec = Executors.newSingleThreadExecutor();
