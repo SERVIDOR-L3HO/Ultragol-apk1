@@ -6014,42 +6014,80 @@ function renderImportantMatches() {
         const equipo1 = (vsSplit[0] || evento).trim();
         const equipo2 = (vsSplit[1] || '').trim();
 
-        const statusBadge = isLive
-            ? `<span class="rim-live"><span class="rim-dot"></span>EN VIVO</span>`
-            : t.fecha ? (() => { try { const d = new Date(t.fecha); return isNaN(d) ? '' : `<span class="rim-time"><i class="far fa-clock"></i> ${d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})}</span>`; } catch(e){ return ''; } })() : '';
+        const timeLabel = t.fecha ? (() => { try { const d = new Date(t.fecha); return isNaN(d) ? '' : d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; } })() : '';
 
-        const ligaBadge = liga ? `<span class="rim-liga"><i class="fas ${sportIcon}"></i> ${liga.toUpperCase()}</span>` : '';
+        const entranceDelay = (idx * 55) + 'ms';
 
-        const entranceDelay = (idx * 45) + 'ms';
+        // Sport-specific accent colors for the card
+        const sportAccent = deporte.includes('basket') || ligaRaw.includes('nba') ? '#FF7F00'
+            : deporte.includes('box') || deporte.includes('ufc') || deporte.includes('mma') ? '#FF1744'
+            : deporte.includes('americano') || ligaRaw.includes('nfl') ? '#1565C0'
+            : deporte.includes('tenis') || deporte.includes('tennis') ? '#4CAF50'
+            : deporte.includes('moto') || deporte.includes('f1') ? '#E91E63'
+            : '#FF6B35';
+
+        const ligaDisplay = liga ? liga.toUpperCase().substring(0,22) : 'DEPORTES';
 
         return `
             <div class="rim-card ${isLive ? 'live' : ''}"
-                 style="animation-delay:${entranceDelay};background-image:url('${sportBg}')"
+                 style="animation-delay:${entranceDelay}"
                  tabindex="0" role="button"
                  aria-label="${evento}"
                  onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectImportantMatchByTransmision('${eventoEscapado}')}"
                  onclick='selectImportantMatchByTransmision("${eventoEscapado}")'>
+
+                <!-- Sport photo background -->
+                <div class="rim-sport-bg" style="background-image:url('${sportBg}')"></div>
                 <div class="rim-bg-overlay"></div>
-                <div class="rim-teams">
-                    <div class="rim-team">
-                        <div class="rim-logo-box">
+                ${isLive ? '<div class="rim-live-strip"></div>' : ''}
+
+                <!-- Top meta row -->
+                <div class="rim-top-row">
+                    <div class="rim-league-chip" style="--sport-clr:${sportAccent}">
+                        <i class="fas ${sportIcon}"></i>
+                        <span>${ligaDisplay}</span>
+                    </div>
+                    ${isLive
+                        ? `<span class="rim-live-badge"><span class="rim-dot"></span>EN VIVO</span>`
+                        : timeLabel
+                            ? `<span class="rim-time-badge"><i class="far fa-clock"></i> ${timeLabel}</span>`
+                            : ''}
+                </div>
+
+                <!-- Teams / match area -->
+                <div class="rim-match-area">
+                    ${equipo2 ? `
+                    <div class="rim-team-block">
+                        <div class="rim-logo-wrap">
                             <img class="rim-logo" src="/ULTRA/favicon.png" alt="${equipo1}" data-team="${encodeURIComponent(equipo1)}">
                         </div>
-                        <span class="rim-name">${equipo1.toUpperCase()}</span>
+                        <span class="rim-team-name">${equipo1.length > 12 ? equipo1.substring(0,12).toUpperCase()+'…' : equipo1.toUpperCase()}</span>
                     </div>
-                    <div class="rim-vs-col">
-                        <span class="rim-vs">VS</span>
+                    <div class="rim-vs-block" style="--sport-clr:${sportAccent}">
+                        <span class="rim-vs-text">VS</span>
+                        ${isLive ? '<span class="rim-vs-live-dot"></span>' : ''}
                     </div>
-                    <div class="rim-team rim-team-right">
-                        <span class="rim-name">${equipo2.toUpperCase()}</span>
-                        <div class="rim-logo-box">
+                    <div class="rim-team-block rim-team-right">
+                        <div class="rim-logo-wrap">
                             <img class="rim-logo" src="/ULTRA/favicon.png" alt="${equipo2}" data-team="${encodeURIComponent(equipo2)}">
                         </div>
+                        <span class="rim-team-name">${equipo2.length > 12 ? equipo2.substring(0,12).toUpperCase()+'…' : equipo2.toUpperCase()}</span>
                     </div>
+                    ` : `
+                    <div class="rim-single-event">
+                        <i class="fas ${sportIcon} rim-event-icon"></i>
+                        <span class="rim-event-title">${evento}</span>
+                    </div>
+                    `}
                 </div>
-                <div class="rim-footer-row">
-                    <div class="rim-badges">${statusBadge}${ligaBadge}</div>
-                    <i class="fas fa-chevron-right rim-chevron"></i>
+
+                <!-- CTA -->
+                <div class="rim-cta-row" style="--sport-clr:${sportAccent}">
+                    <div class="rim-cta-btn">
+                        <i class="fas fa-play"></i>
+                        <span>Ver ahora</span>
+                        <i class="fas fa-chevron-right rim-cta-arrow"></i>
+                    </div>
                 </div>
             </div>
         `;
@@ -6057,145 +6095,260 @@ function renderImportantMatches() {
 
     body.innerHTML = `
         <style>
+            /* ══════════════════════════════════════════════
+               STADIUM PRO — Sports Card Design System
+               Professional dark UI for live match cards
+            ══════════════════════════════════════════════ */
+
             /* ── Wrapper & scroll ── */
-            .rokc-wrapper{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:#08080c;}
-            .rokc-list{flex:1;overflow-y:auto;padding:12px 12px 4px;display:flex;flex-direction:column;gap:9px;}
+            .rokc-wrapper{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:#07070f;}
+            .rokc-list{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:12px;}
             .rokc-list::-webkit-scrollbar{width:2px;}
-            .rokc-list::-webkit-scrollbar-thumb{background:rgba(255,107,53,0.3);border-radius:2px;}
+            .rokc-list::-webkit-scrollbar-thumb{background:rgba(255,107,53,0.25);border-radius:2px;}
+
+            /* ── Keyframe animations ── */
+            @keyframes rimIn{from{opacity:0;transform:translateY(16px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+            @keyframes rimPulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:.5;transform:scale(1.5);}}
+            @keyframes rimLiveGlow{0%,100%{box-shadow:0 0 0 0 rgba(255,48,48,0.55);}50%{box-shadow:0 0 0 6px rgba(255,48,48,0);}}
+            @keyframes rimShimmer{0%{transform:translateX(-100%);}100%{transform:translateX(200%);}}
+            @keyframes rimStripPulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
 
             /* ── Base card ── */
-            @keyframes rimIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-            @keyframes rimPulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(255,64,64,.55);}50%{opacity:.6;box-shadow:0 0 0 5px rgba(255,64,64,0);}}
-
             .rim-card{
-                border:1px solid rgba(255,255,255,0.1);
-                border-radius:18px;
-                padding:16px 14px 13px 18px;
+                border:1px solid rgba(255,255,255,0.09);
+                border-radius:20px;
+                padding:0;
                 cursor:pointer;
                 position:relative;
                 overflow:hidden;
-                background-size:cover;
-                background-position:center;
-                background-color:#111;
-                transition:border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
-                animation:rimIn 0.38s ease both;
-                min-height:88px;
+                background:#0e0e1a;
+                transition:transform 0.22s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.22s ease, border-color 0.22s ease;
+                animation:rimIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both;
+                min-height:148px;
+                display:flex;
+                flex-direction:column;
             }
-            /* top shimmer line */
+            /* shimmer highlight at top */
             .rim-card::before{
-                content:'';position:absolute;top:0;left:0;right:0;height:1px;z-index:2;
-                background:linear-gradient(90deg,transparent 10%,rgba(255,255,255,0.18) 50%,transparent 90%);
-            }
-            /* left accent bar */
-            .rim-card::after{
-                content:'';position:absolute;top:12px;bottom:12px;left:0;z-index:3;
-                width:3.5px;border-radius:0 3px 3px 0;
-                background:rgba(255,255,255,0.2);
-                transition:background 0.2s ease, box-shadow 0.2s ease, width 0.2s ease;
-            }
-            .rim-card.live::after{
-                background:linear-gradient(180deg,#ff6b35,#ff3d00);
-                box-shadow:0 0 14px rgba(255,69,0,0.8);
-            }
-            .rim-card.live{
-                border-color:rgba(255,107,53,0.35);
-                box-shadow:0 0 28px rgba(255,69,0,0.12);
+                content:'';position:absolute;top:0;left:0;right:0;height:1px;z-index:10;
+                background:linear-gradient(90deg,transparent 5%,rgba(255,255,255,0.14) 50%,transparent 95%);
             }
             .rim-card:hover{
-                border-color:rgba(255,255,255,0.22);
-                transform:translateY(-2px) scale(1.005);
-                box-shadow:0 12px 36px rgba(0,0,0,0.55);
+                transform:translateY(-3px) scale(1.012);
+                box-shadow:0 18px 48px rgba(0,0,0,0.65);
+                border-color:rgba(255,255,255,0.18);
             }
-            .rim-card:hover::after{ width:4.5px; }
+            .rim-card.live{
+                border-color:rgba(255,48,48,0.38);
+                animation:rimIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both, rimLiveGlow 2.5s ease-in-out infinite;
+            }
             .rim-card.live:hover{
-                border-color:rgba(255,107,53,0.55);
-                box-shadow:0 12px 36px rgba(255,69,0,0.2);
+                border-color:rgba(255,80,80,0.6);
+                box-shadow:0 18px 48px rgba(255,30,30,0.18);
             }
-            .rim-card:active{transform:scale(0.985);opacity:0.92;}
+            .rim-card:active{transform:scale(0.976);opacity:0.9;transition:transform 0.08s ease;}
 
-            /* ── Photo overlay ── */
+            /* ── Sport photo background ── */
+            .rim-sport-bg{
+                position:absolute;inset:0;
+                background-size:cover;background-position:center;
+                border-radius:inherit;
+                filter:saturate(1.3) brightness(0.55);
+                transition:filter 0.3s ease, transform 0.3s ease;
+                z-index:0;
+            }
+            .rim-card:hover .rim-sport-bg{
+                filter:saturate(1.5) brightness(0.65);
+                transform:scale(1.04);
+            }
+
+            /* ── Dark overlay gradient ── */
             .rim-bg-overlay{
                 position:absolute;inset:0;z-index:1;pointer-events:none;border-radius:inherit;
                 background:linear-gradient(
-                    105deg,
-                    rgba(0,0,0,0.88) 0%,
-                    rgba(0,0,0,0.72) 45%,
-                    rgba(0,0,0,0.55) 70%,
-                    rgba(0,0,0,0.72) 100%
+                    160deg,
+                    rgba(5,5,20,0.96) 0%,
+                    rgba(8,8,22,0.82) 35%,
+                    rgba(10,10,20,0.65) 65%,
+                    rgba(5,5,18,0.88) 100%
                 );
             }
             .rim-card.live .rim-bg-overlay{
                 background:linear-gradient(
-                    105deg,
-                    rgba(12,4,0,0.92) 0%,
-                    rgba(20,6,0,0.75) 45%,
-                    rgba(0,0,0,0.58) 70%,
-                    rgba(0,0,0,0.75) 100%
+                    160deg,
+                    rgba(18,3,3,0.96) 0%,
+                    rgba(22,5,5,0.82) 35%,
+                    rgba(12,4,4,0.65) 65%,
+                    rgba(8,2,2,0.88) 100%
                 );
             }
 
-            /* ── Team row ── */
-            .rim-teams{display:flex;align-items:center;gap:6px;margin-bottom:10px;position:relative;z-index:2;}
-            .rim-team{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
-            .rim-team-right{justify-content:flex-end;}
+            /* ── Live accent strip (top edge) ── */
+            .rim-live-strip{
+                position:absolute;top:0;left:0;right:0;height:3px;z-index:9;
+                background:linear-gradient(90deg,transparent 0%,#ff2020 20%,#ff5533 50%,#ff2020 80%,transparent 100%);
+                animation:rimStripPulse 1.8s ease-in-out infinite;
+            }
 
-            .rim-logo-box{
-                width:36px;height:36px;border-radius:10px;
-                background:rgba(0,0,0,0.45);
-                border:1px solid rgba(255,255,255,0.18);
-                backdrop-filter:blur(6px);
+            /* ── Inner content layers ── */
+            .rim-top-row,
+            .rim-match-area,
+            .rim-cta-row{ position:relative;z-index:2; }
+
+            /* ── Top meta row ── */
+            .rim-top-row{
+                display:flex;align-items:center;justify-content:space-between;
+                padding:13px 14px 0 14px;
+                gap:8px;
+            }
+            .rim-league-chip{
+                display:inline-flex;align-items:center;gap:6px;
+                background:rgba(var(--sport-rgb,255,107,53),0.18);
+                border:1px solid rgba(var(--sport-rgb,255,107,53),0.35);
+                border-radius:30px;
+                padding:4px 10px 4px 8px;
+                max-width:180px;overflow:hidden;
+            }
+            .rim-league-chip i{font-size:9px;color:var(--sport-clr,#FF6B35);flex-shrink:0;}
+            .rim-league-chip span{
+                font-size:9.5px;font-weight:800;letter-spacing:0.6px;
+                color:rgba(255,255,255,0.9);
+                white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                text-shadow:0 1px 4px rgba(0,0,0,0.6);
+            }
+            .rim-live-badge{
+                display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+                background:rgba(200,0,0,0.7);
+                border:1px solid rgba(255,60,60,0.6);
+                backdrop-filter:blur(10px);
+                border-radius:30px;padding:4px 10px;
+                font-size:9px;font-weight:900;color:#fff;
+                letter-spacing:1px;text-transform:uppercase;
+                box-shadow:0 2px 14px rgba(255,0,0,0.4);
+            }
+            .rim-time-badge{
+                display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
+                background:rgba(255,255,255,0.08);
+                border:1px solid rgba(255,255,255,0.15);
+                backdrop-filter:blur(8px);
+                border-radius:30px;padding:4px 10px;
+                font-size:9px;font-weight:700;
+                color:rgba(255,230,180,0.95);
+            }
+            .rim-time-badge i,.rim-live-badge .rim-dot-wrap i{font-size:8px;}
+
+            /* ── Live pulse dot ── */
+            .rim-dot{
+                width:6px;height:6px;background:#ff4040;border-radius:50%;
+                animation:rimPulse 1.1s ease-in-out infinite;
+                flex-shrink:0;
+                box-shadow:0 0 6px rgba(255,50,50,0.9);
+            }
+
+            /* ── Match / teams area ── */
+            .rim-match-area{
+                flex:1;
+                display:flex;align-items:center;justify-content:space-between;
+                padding:10px 14px 8px;
+                gap:6px;
+            }
+            .rim-team-block{
+                flex:1;display:flex;flex-direction:column;align-items:center;
+                gap:7px;min-width:0;
+            }
+            .rim-team-block.rim-team-right{ }
+            .rim-logo-wrap{
+                width:48px;height:48px;border-radius:14px;
+                background:rgba(255,255,255,0.07);
+                border:1.5px solid rgba(255,255,255,0.14);
+                backdrop-filter:blur(8px);
                 display:flex;align-items:center;justify-content:center;
                 flex-shrink:0;overflow:hidden;
+                box-shadow:0 4px 16px rgba(0,0,0,0.5);
+                transition:border-color 0.2s, box-shadow 0.2s;
             }
-            .rim-logo{width:28px;height:28px;object-fit:contain;opacity:0.3;transition:opacity 0.35s ease;}
+            .rim-card.live .rim-logo-wrap{
+                border-color:rgba(255,80,50,0.28);
+                box-shadow:0 4px 20px rgba(255,50,0,0.2);
+            }
+            .rim-logo{width:36px;height:36px;object-fit:contain;opacity:0.25;transition:opacity 0.4s ease;}
             .rim-logo.loaded{opacity:1;}
 
-            .rim-name{
-                font-size:14px;font-weight:900;color:#ffffff;
-                letter-spacing:0.4px;line-height:1.2;
-                overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-                text-shadow:0 1px 8px rgba(0,0,0,0.9),0 0 20px rgba(0,0,0,0.7);
+            .rim-team-name{
+                font-size:11.5px;font-weight:900;color:#fff;
+                letter-spacing:0.5px;line-height:1.15;
+                text-align:center;
+                text-shadow:0 1px 8px rgba(0,0,0,0.95),0 0 24px rgba(0,0,0,0.8);
+                max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
             }
-            .rim-team.rim-team-right .rim-name{text-align:right;}
 
-            .rim-vs-col{flex-shrink:0;display:flex;align-items:center;justify-content:center;padding:0 4px;}
-            .rim-vs{
-                font-size:10px;font-weight:900;letter-spacing:1.4px;
-                color:#ffffff;
-                background:rgba(255,107,53,0.75);
-                border:none;
-                border-radius:6px;
-                padding:4px 8px;
+            /* ── VS block ── */
+            .rim-vs-block{
+                flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+                gap:5px;padding:0 6px;
+            }
+            .rim-vs-text{
+                font-size:12px;font-weight:900;letter-spacing:2px;
+                color:#fff;
+                background:linear-gradient(135deg,var(--sport-clr,#FF6B35) 0%,rgba(255,107,53,0.7) 100%);
+                border-radius:8px;
+                padding:5px 10px;
                 text-shadow:none;
-                box-shadow:0 2px 10px rgba(255,69,0,0.5);
+                box-shadow:0 3px 14px rgba(255,69,0,0.5);
+            }
+            .rim-vs-live-dot{
+                width:5px;height:5px;background:#ff3030;border-radius:50%;
+                animation:rimPulse 0.9s ease-in-out infinite;
+                box-shadow:0 0 7px rgba(255,30,30,0.9);
             }
 
-            /* ── Footer row ── */
-            .rim-footer-row{display:flex;align-items:center;justify-content:space-between;gap:8px;position:relative;z-index:2;}
-            .rim-badges{display:flex;align-items:center;gap:7px;flex-wrap:wrap;min-width:0;}
+            /* ── Single event (no VS split) ── */
+            .rim-single-event{
+                flex:1;display:flex;align-items:center;gap:10px;
+            }
+            .rim-event-icon{font-size:24px;color:rgba(255,255,255,0.35);}
+            .rim-event-title{
+                font-size:13px;font-weight:800;color:#fff;line-height:1.3;
+                text-shadow:0 1px 8px rgba(0,0,0,0.9);
+            }
 
-            .rim-live{
-                display:inline-flex;align-items:center;gap:5px;
-                background:rgba(200,0,0,0.55);
-                border:1px solid rgba(255,60,60,0.5);
-                backdrop-filter:blur(8px);
-                border-radius:20px;padding:3px 9px;
-                font-size:9.5px;font-weight:800;color:#fff;
-                letter-spacing:0.8px;text-transform:uppercase;
-                box-shadow:0 2px 10px rgba(255,0,0,0.3);
+            /* ── CTA row ── */
+            .rim-cta-row{
+                padding:0 12px 12px;
             }
-            .rim-dot{
-                width:5px;height:5px;background:#ff5555;border-radius:50%;
-                animation:rimPulse 1.2s ease-in-out infinite;
-                flex-shrink:0;box-shadow:0 0 5px rgba(255,60,60,0.9);
+            .rim-cta-btn{
+                display:flex;align-items:center;justify-content:center;gap:8px;
+                background:linear-gradient(90deg,var(--sport-clr,#FF6B35) 0%,rgba(255,40,0,0.9) 100%);
+                border-radius:12px;
+                padding:10px 16px;
+                font-size:12px;font-weight:800;color:#fff;letter-spacing:0.5px;
+                text-transform:uppercase;
+                box-shadow:0 4px 18px rgba(255,69,0,0.4);
+                transition:opacity 0.15s, transform 0.15s;
+                position:relative;overflow:hidden;
             }
-            .rim-time{
-                display:inline-flex;align-items:center;gap:4px;
-                font-size:9.5px;font-weight:600;color:rgba(255,255,255,0.75);
-                background:rgba(0,0,0,0.45);border:1px solid rgba(255,255,255,0.18);
-                backdrop-filter:blur(8px);
-                border-radius:20px;padding:3px 9px;
+            /* shimmer sweep on CTA */
+            .rim-cta-btn::after{
+                content:'';position:absolute;top:0;left:0;bottom:0;width:50%;
+                background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
+                animation:rimShimmer 2.4s ease-in-out infinite;
+                pointer-events:none;
             }
+            .rim-cta-btn:hover{opacity:0.88;transform:scale(1.02);}
+            .rim-cta-btn i:first-child{font-size:9px;}
+            .rim-cta-btn span{flex:1;text-align:center;}
+            .rim-cta-arrow{font-size:9px;opacity:0.7;}
+
+            /* ── Empty state ── */
+            .rim-empty{
+                text-align:center;color:rgba(255,255,255,0.22);
+                padding:60px 20px;font-size:14px;
+                display:flex;flex-direction:column;align-items:center;gap:14px;
+            }
+            .rim-empty i{font-size:40px;color:rgba(255,255,255,0.08);}
+            .rim-empty p{font-size:13px;}
+
+            /* ── Liga badge (legacy, kept for compat) ── */
             .rim-liga{
                 display:inline-flex;align-items:center;gap:4px;
                 background:rgba(0,0,0,0.45);
@@ -6207,21 +6360,6 @@ function renderImportantMatches() {
                 max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
             }
             .rim-liga i{font-size:8px;flex-shrink:0;}
-            .rim-chevron{
-                font-size:13px;color:rgba(255,255,255,0.55);flex-shrink:0;
-                transition:color 0.18s ease, transform 0.18s ease;
-                text-shadow:0 1px 6px rgba(0,0,0,0.8);
-            }
-            .rim-card:hover .rim-chevron{color:#ff8a50;transform:translateX(3px);}
-
-            /* ── Empty state ── */
-            .rim-empty{
-                text-align:center;color:rgba(255,255,255,0.25);
-                padding:60px 20px;font-size:14px;
-                display:flex;flex-direction:column;align-items:center;gap:14px;
-            }
-            .rim-empty i{font-size:36px;color:rgba(255,255,255,0.1);}
-            .rim-empty p{font-size:13px;}
 
             /* ── Footer ── */
             .rokc-footer{padding:12px 12px 16px;background:#08080c;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
