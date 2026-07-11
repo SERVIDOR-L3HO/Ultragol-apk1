@@ -6,7 +6,6 @@ import android.os.Handler;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import androidx.viewpager2.widget.ViewPager2;
@@ -21,6 +20,10 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class HomeFragment extends Fragment {
+
+    // Top-level RecyclerView (header item + infinite discover grid, concatenated)
+    private RecyclerView rvHome;
+    private View headerView;
 
     // Hero banner
     private ViewPager2 hero;
@@ -46,7 +49,6 @@ public class HomeFragment extends Fragment {
 
     // Discover (infinite grid)
     private InfiniteDiscoverAdapter discoverAdapter;
-    private RecyclerView discoverGrid;
     private int  discoverPage       = 0;
     private boolean discoverLoading = false;
 
@@ -60,19 +62,43 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle state) {
         super.onViewCreated(view, state);
-        setupTopBar(view);
-        setupHero(view);
-        setupTrendingCarousel(view);
-        setupContinueWatching(view);
-        setupRows(view);
-        setupDiscover(view);
-        loadAll();
+
+        rvHome = view.findViewById(R.id.rvHome);
+        discoverAdapter = new InfiniteDiscoverAdapter(requireContext());
+        discoverAdapter.setOnLoadMoreListener(this::loadMoreDiscover);
+
+        HomeHeaderAdapter headerAdapter = new HomeHeaderAdapter(hv -> {
+            headerView = hv;
+            setupTopBar(hv);
+            setupHero(hv);
+            setupTrendingCarousel(hv);
+            setupContinueWatching(hv);
+            setupRows(hv);
+            loadAll();
+        });
+
+        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int pos) {
+                // Position 0 is always the header item (full width).
+                if (pos == 0) return 2;
+                return discoverAdapter != null ? discoverAdapter.getSpanSize(pos - 1) : 1;
+            }
+        });
+
+        rvHome.setLayoutManager(glm);
+        rvHome.setItemViewCacheSize(6);
+        rvHome.setAdapter(new ConcatAdapter(headerAdapter, discoverAdapter));
+
+        // Load first discover page immediately.
+        loadMoreDiscover();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (getView() != null) refreshContinueWatching();
+        if (headerView != null) refreshContinueWatching();
     }
 
     private void setupTopBar(View view) {
@@ -249,8 +275,12 @@ public class HomeFragment extends Fragment {
         // Init live glass carousel RecyclerView
         if (rowLiveGlass != null) {
             RecyclerView rv = rowLiveGlass.findViewById(R.id.liveCarouselRv);
-            if (rv != null) rv.setLayoutManager(
-                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            if (rv != null) {
+                rv.setLayoutManager(
+                    new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                rv.setHasFixedSize(true);
+                rv.setItemViewCacheSize(4);
+            }
         }
     }
 
@@ -260,8 +290,12 @@ public class HomeFragment extends Fragment {
         RecyclerView rv = row.findViewById(R.id.rowRv);
         View verTodos = row.findViewById(R.id.rowVerTodos);
         if (tv != null) tv.setText(title);
-        if (rv != null) rv.setLayoutManager(
-            new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+        if (rv != null) {
+            rv.setLayoutManager(
+                new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            rv.setHasFixedSize(true);
+            rv.setItemViewCacheSize(6);
+        }
         if (verTodos != null) {
             if (verTodosTarget != null) {
                 verTodos.setOnClickListener(v -> {
@@ -504,54 +538,18 @@ public class HomeFragment extends Fragment {
     }
 
     // ── Discover infinite grid ────────────────────────────────────────────────
-
-    private void setupDiscover(View view) {
-        View rowDiscover = view.findViewById(R.id.rowDiscover);
-        if (rowDiscover == null) return;
-
-        discoverGrid = rowDiscover.findViewById(R.id.discoverGrid);
-        if (discoverGrid == null) return;
-
-        discoverAdapter = new InfiniteDiscoverAdapter(requireContext());
-
-        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
-        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int pos) {
-                return discoverAdapter != null ? discoverAdapter.getSpanSize(pos) : 1;
-            }
-        });
-
-        discoverGrid.setLayoutManager(glm);
-        discoverGrid.setNestedScrollingEnabled(false);
-        discoverGrid.setAdapter(discoverAdapter);
-
-        discoverAdapter.setOnLoadMoreListener(this::loadMoreDiscover);
-
-        // Listen on the NestedScrollView root to trigger load-more when near bottom
-        if (view instanceof NestedScrollView) {
-            NestedScrollView nsv = (NestedScrollView) view;
-            nsv.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener)
-                (v, scrollX, scrollY, oldX, oldY) -> {
-                    View child = v.getChildAt(0);
-                    if (child != null) {
-                        int diff = child.getHeight() - v.getHeight() - scrollY;
-                        if (diff < 600) loadMoreDiscover();
-                    }
-                });
-        }
-
-        // Load first page immediately
-        loadMoreDiscover();
-    }
+    // Note: the grid's items are appended directly to rvHome's adapter (via
+    // ConcatAdapter), NOT to a separate nested RecyclerView, so they get real
+    // view recycling as the user scrolls. Load-more is triggered from inside
+    // InfiniteDiscoverAdapter#onBindViewHolder when nearing the end.
 
     private void loadMoreDiscover() {
         if (discoverLoading || discoverAdapter == null || !isAdded()) return;
         discoverLoading = true;
         discoverPage++;
         // Post to avoid IllegalStateException when called during RecyclerView layout/scroll pass
-        if (discoverGrid != null) {
-            discoverGrid.post(() -> discoverAdapter.showLoading());
+        if (rvHome != null) {
+            rvHome.post(() -> discoverAdapter.showLoading());
         }
 
         final int pageToLoad = discoverPage;

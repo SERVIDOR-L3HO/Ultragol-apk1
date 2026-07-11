@@ -4179,7 +4179,6 @@ id disableIntraAutoTransition
 id disablePostScroll
 id disableScroll
 id discoverBadge
-id discoverGrid
 id discoverPoster
 id discoverTitle
 id disjoint
@@ -4666,7 +4665,6 @@ id right_icon
 id right_side
 id rounded
 id rowAnime
-id rowDiscover
 id rowDoramas
 id rowLiveGlass
 id rowMovies
@@ -4682,6 +4680,7 @@ id rowVerTodos
 id row_index_key
 id rvContinueWatching
 id rvEpisodes
+id rvHome
 id rvProfiles
 id save_non_transition_alpha
 id save_overlay_view
@@ -5221,7 +5220,6 @@ layout notification_template_media
 layout notification_template_media_custom
 layout notification_template_part_chronometer
 layout notification_template_part_time
-layout row_discover_infinite
 layout row_live_glass
 layout row_section
 layout row_trending_carousel
@@ -5230,6 +5228,7 @@ layout select_dialog_multichoice_material
 layout select_dialog_singlechoice_material
 layout sheet_notifications
 layout support_simple_spinner_dropdown_item
+layout view_home_header
 layout widget_continue_watching
 menu bottom_nav
 mipmap ic_launcher

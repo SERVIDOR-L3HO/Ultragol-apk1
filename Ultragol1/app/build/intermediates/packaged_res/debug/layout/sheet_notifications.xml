@@ -30,7 +30,7 @@
             android:layout_width="22dp"
             android:layout_height="22dp"
             android:src="@drawable/ic_notification"
-            android:tint="#FF6B35"/>
+            android:tint="#D5000F"/>
 
         <TextView
             android:layout_width="0dp"
@@ -67,7 +67,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="32dp"
-        android:indeterminateTint="#FF6B35"
+        android:indeterminateTint="#D5000F"
         android:visibility="visible"/>
 
     <!-- Empty state -->

@@ -263,7 +263,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Configurar"
-                    android:textColor="#FF6B00"
+                    android:textColor="#D50000"
                     android:textSize="13sp"
                     android:fontFamily="sans-serif-medium"
                     android:paddingStart="10dp"

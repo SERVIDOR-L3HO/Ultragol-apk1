@@ -8,7 +8,7 @@
     <ProgressBar
         android:layout_width="28dp"
         android:layout_height="28dp"
-        android:indeterminateTint="#FF6B00"/>
+        android:indeterminateTint="#D50000"/>
 
     <TextView
         android:layout_width="wrap_content"

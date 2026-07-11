@@ -3,14 +3,14 @@
     <!-- Outer soft glow -->
     <item>
         <shape android:shape="oval">
-            <solid android:color="#44FF6B00"/>
+            <solid android:color="#44D50000"/>
         </shape>
     </item>
     <!-- Middle ring -->
     <item android:left="5dp" android:top="5dp" android:right="5dp" android:bottom="5dp">
         <shape android:shape="oval">
-            <solid android:color="#22FF6B00"/>
-            <stroke android:width="2dp" android:color="#CCFF6B00"/>
+            <solid android:color="#22D50000"/>
+            <stroke android:width="2dp" android:color="#CCD50000"/>
         </shape>
     </item>
     <!-- Inner fill (transparent, let avatar show through) -->

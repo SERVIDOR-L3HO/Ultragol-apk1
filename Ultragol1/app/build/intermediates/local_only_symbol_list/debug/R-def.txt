@@ -294,7 +294,6 @@ id dialogDismiss
 id dialogPoster
 id dialogTitle
 id discoverBadge
-id discoverGrid
 id discoverPoster
 id discoverTitle
 id dividerQuality
@@ -455,7 +454,6 @@ id rgSleepTimer
 id rgSpeed
 id rgSubtitles
 id rowAnime
-id rowDiscover
 id rowDoramas
 id rowLiveGlass
 id rowMovies
@@ -470,6 +468,7 @@ id rowTrendingCarousel
 id rowVerTodos
 id rvContinueWatching
 id rvEpisodes
+id rvHome
 id rvProfiles
 id searchInput
 id seasonCard
@@ -604,11 +603,11 @@ layout item_profile_add
 layout item_profile_card
 layout item_trending_card
 layout layout_mini_cast_controller
-layout row_discover_infinite
 layout row_live_glass
 layout row_section
 layout row_trending_carousel
 layout sheet_notifications
+layout view_home_header
 layout widget_continue_watching
 menu bottom_nav
 mipmap ic_launcher

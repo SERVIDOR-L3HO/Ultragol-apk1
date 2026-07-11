@@ -3,7 +3,7 @@
     <!-- Orange tinted glass fill -->
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="#22FF6B00"/>
+            <solid android:color="#22D50000"/>
             <corners android:radius="22dp"/>
         </shape>
     </item>
@@ -12,7 +12,7 @@
         <shape android:shape="rectangle">
             <gradient
                 android:startColor="#30FF8C00"
-                android:endColor="#08FF6B00"
+                android:endColor="#08D50000"
                 android:angle="270"
                 android:type="linear"/>
             <corners android:radius="22dp"/>
@@ -22,7 +22,7 @@
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#00000000"/>
-            <stroke android:width="2dp" android:color="#CCFF6B00"/>
+            <stroke android:width="2dp" android:color="#CCD50000"/>
             <corners android:radius="22dp"/>
         </shape>
     </item>

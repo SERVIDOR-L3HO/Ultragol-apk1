@@ -60,7 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|end"
                 android:text="Gestionar"
-                android:textColor="#FF6B00"
+                android:textColor="#D50000"
                 android:textSize="13sp"
                 android:fontFamily="sans-serif-medium"
                 android:paddingStart="14dp"

@@ -408,7 +408,7 @@
                         android:layout_width="90dp"
                         android:layout_height="2dp"
                         android:layout_marginStart="16dp"
-                        android:background="#FF6B00"/>
+                        android:background="#D50000"/>
                 </FrameLayout>
 
                 <!-- Full-width divider -->
@@ -544,7 +544,7 @@
                 android:id="@+id/loadingSpinner"
                 android:layout_width="52dp"
                 android:layout_height="52dp"
-                android:indeterminateTint="#FF6B00"
+                android:indeterminateTint="#D50000"
                 android:layout_marginBottom="32dp"/>
 
             <!-- Label secundario: pequeño y sutil -->
@@ -565,7 +565,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="SERVIDORES"
-                android:textColor="#FFFF6B00"
+                android:textColor="#FFD50000"
                 android:textSize="22sp"
                 android:fontFamily="sans-serif-black"
                 android:letterSpacing="0.08"
