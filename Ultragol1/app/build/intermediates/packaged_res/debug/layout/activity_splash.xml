@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#050505">
+    android:background="#000000">
 
     <!-- Spotlight amplio de fondo -->
     <View
@@ -29,11 +29,14 @@
         android:orientation="vertical"
         android:gravity="center">
 
-        <!-- Logo: grande y dominante -->
+        <!-- Logo: gigante, de esquina a esquina -->
         <ImageView
             android:id="@+id/splashLogo"
-            android:layout_width="360dp"
-            android:layout_height="116dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:adjustViewBounds="true"
             android:src="@drawable/logo_ultragol_splash"
             android:scaleType="fitCenter"
             android:alpha="0"/>
@@ -53,24 +56,24 @@
 
     </LinearLayout>
 
-    <!-- Barra de progreso full-width pegada al fondo -->
+    <!-- Barra de progreso full-width pegada al fondo: roja, más grande, estilo caramelo -->
     <FrameLayout
         android:id="@+id/splashProgressBar"
         android:layout_width="match_parent"
-        android:layout_height="3dp"
+        android:layout_height="10dp"
         android:layout_gravity="bottom"
+        android:layout_marginBottom="40dp"
         android:alpha="0">
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="3dp"
-            android:background="#10FFFFFF"/>
+            android:layout_height="10dp"
+            android:background="#22D50000"/>
 
-        <View
+        <com.ultragol.app.CandyStripeView
             android:id="@+id/splashProgressFill"
             android:layout_width="0dp"
-            android:layout_height="3dp"
-            android:background="@drawable/splash_progress_fill"/>
+            android:layout_height="10dp"/>
 
     </FrameLayout>
 

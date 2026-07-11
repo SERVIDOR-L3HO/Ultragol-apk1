@@ -1312,7 +1312,7 @@ function openFeaturedMatchChannels(index) {
 function _fmpSpawnParticles() {
     const container = document.getElementById('fmpContainer');
     if (!container) return;
-    const colors = ['#ffd700','#ff6b35','#e94560','#ffffff','#00ff88'];
+    const colors = ['#ffd700','#E30613','#e94560','#ffffff','#00ff88'];
     for (let i = 0; i < 18; i++) {
         const p = document.createElement('div');
         p.className = 'fmp-particle';
@@ -3303,7 +3303,7 @@ function playStreamInModal(streamUrl, title, isYouTube = false) {
                 <div style="text-align: center; color: white;">
                     <i class="fas fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
                     <p>Error al cargar la transmisión</p>
-                    <button onclick="refreshStream()" style="margin-top: 16px; padding: 12px 24px; background: #ff6b35; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                    <button onclick="refreshStream()" style="margin-top: 16px; padding: 12px 24px; background: #E30613; color: white; border: none; border-radius: 8px; cursor: pointer;">
                         <i class="fas fa-redo"></i> Reintentar
                     </button>
                 </div>
@@ -4026,7 +4026,7 @@ function showSearchWelcome() {
         { name: 'Premier League', sub: 'Inglaterra · Fútbol', icon: 'fa-crown', color: '#a855f7' },
         { name: 'Libertadores', sub: 'Sudamérica · Fútbol', icon: 'fa-futbol', color: '#22d3ee' },
         { name: 'NBA', sub: 'EEUU · Baloncesto', icon: 'fa-basketball-ball', color: '#c9082a' },
-        { name: 'UFC', sub: 'MMA · Artes Marciales', icon: 'fa-fist-raised', color: '#FF4500' },
+        { name: 'UFC', sub: 'MMA · Artes Marciales', icon: 'fa-fist-raised', color: '#B71C1C' },
         { name: 'NFL', sub: 'EEUU · Fútbol Americano', icon: 'fa-football-ball', color: '#7c3aed' },
     ];
 
@@ -5127,7 +5127,7 @@ function showToast(message) {
         bottom: 100px;
         left: 50%;
         transform: translateX(-50%);
-        background: rgba(255, 69, 0, 0.95);
+        background: rgba(183, 28, 28, 0.95);
         color: white;
         padding: 12px 24px;
         border-radius: 25px;
@@ -6019,12 +6019,7 @@ function renderImportantMatches() {
         const entranceDelay = (idx * 55) + 'ms';
 
         // Sport-specific accent colors for the card
-        const sportAccent = deporte.includes('basket') || ligaRaw.includes('nba') ? '#FF7F00'
-            : deporte.includes('box') || deporte.includes('ufc') || deporte.includes('mma') ? '#FF1744'
-            : deporte.includes('americano') || ligaRaw.includes('nfl') ? '#1565C0'
-            : deporte.includes('tenis') || deporte.includes('tennis') ? '#4CAF50'
-            : deporte.includes('moto') || deporte.includes('f1') ? '#E91E63'
-            : '#FF6B35';
+        const sportAccent = '#E30613';
 
         const ligaDisplay = liga ? liga.toUpperCase().substring(0,22) : 'DEPORTES';
 
@@ -6104,7 +6099,7 @@ function renderImportantMatches() {
             .rokc-wrapper{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;background:#07070f;}
             .rokc-list{flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:12px;}
             .rokc-list::-webkit-scrollbar{width:2px;}
-            .rokc-list::-webkit-scrollbar-thumb{background:rgba(255,107,53,0.25);border-radius:2px;}
+            .rokc-list::-webkit-scrollbar-thumb{background:rgba(227, 6, 19,0.25);border-radius:2px;}
 
             /* ── Keyframe animations ── */
             @keyframes rimIn{from{opacity:0;transform:translateY(16px) scale(0.97)}to{opacity:1;transform:translateY(0) scale(1)}}
@@ -6140,7 +6135,8 @@ function renderImportantMatches() {
             }
             .rim-card.live{
                 border-color:rgba(255,48,48,0.38);
-                animation:rimIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both, rimLiveGlow 2.5s ease-in-out infinite;
+                animation:rimIn 0.42s cubic-bezier(0.34,1.56,0.64,1) both;
+                box-shadow:0 0 0 1px rgba(255,48,48,0.2);
             }
             .rim-card.live:hover{
                 border-color:rgba(255,80,80,0.6);
@@ -6203,13 +6199,13 @@ function renderImportantMatches() {
             }
             .rim-league-chip{
                 display:inline-flex;align-items:center;gap:6px;
-                background:rgba(var(--sport-rgb,255,107,53),0.18);
-                border:1px solid rgba(var(--sport-rgb,255,107,53),0.35);
+                background:rgba(30,10,10,0.55);
+                border:1px solid rgba(255,255,255,0.16);
                 border-radius:30px;
                 padding:4px 10px 4px 8px;
                 max-width:180px;overflow:hidden;
             }
-            .rim-league-chip i{font-size:9px;color:var(--sport-clr,#FF6B35);flex-shrink:0;}
+            .rim-league-chip i{font-size:9px;color:var(--sport-clr,#E30613);flex-shrink:0;}
             .rim-league-chip span{
                 font-size:9.5px;font-weight:800;letter-spacing:0.6px;
                 color:rgba(255,255,255,0.9);
@@ -6218,9 +6214,8 @@ function renderImportantMatches() {
             }
             .rim-live-badge{
                 display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
-                background:rgba(200,0,0,0.7);
+                background:rgba(180,0,0,0.85);
                 border:1px solid rgba(255,60,60,0.6);
-                backdrop-filter:blur(10px);
                 border-radius:30px;padding:4px 10px;
                 font-size:9px;font-weight:900;color:#fff;
                 letter-spacing:1px;text-transform:uppercase;
@@ -6228,12 +6223,11 @@ function renderImportantMatches() {
             }
             .rim-time-badge{
                 display:inline-flex;align-items:center;gap:5px;flex-shrink:0;
-                background:rgba(255,255,255,0.08);
+                background:rgba(30,30,30,0.75);
                 border:1px solid rgba(255,255,255,0.15);
-                backdrop-filter:blur(8px);
                 border-radius:30px;padding:4px 10px;
                 font-size:9px;font-weight:700;
-                color:rgba(255,230,180,0.95);
+                color:rgba(255,200,200,0.95);
             }
             .rim-time-badge i,.rim-live-badge .rim-dot-wrap i{font-size:8px;}
 
@@ -6259,9 +6253,8 @@ function renderImportantMatches() {
             .rim-team-block.rim-team-right{ }
             .rim-logo-wrap{
                 width:48px;height:48px;border-radius:14px;
-                background:rgba(255,255,255,0.07);
+                background:rgba(40,40,40,0.65);
                 border:1.5px solid rgba(255,255,255,0.14);
-                backdrop-filter:blur(8px);
                 display:flex;align-items:center;justify-content:center;
                 flex-shrink:0;overflow:hidden;
                 box-shadow:0 4px 16px rgba(0,0,0,0.5);
@@ -6290,11 +6283,11 @@ function renderImportantMatches() {
             .rim-vs-text{
                 font-size:12px;font-weight:900;letter-spacing:2px;
                 color:#fff;
-                background:linear-gradient(135deg,var(--sport-clr,#FF6B35) 0%,rgba(255,107,53,0.7) 100%);
+                background:linear-gradient(135deg,var(--sport-clr,#E30613) 0%,rgba(227, 6, 19,0.7) 100%);
                 border-radius:8px;
                 padding:5px 10px;
                 text-shadow:none;
-                box-shadow:0 3px 14px rgba(255,69,0,0.5);
+                box-shadow:0 3px 14px rgba(183, 28, 28,0.5);
             }
             .rim-vs-live-dot{
                 width:5px;height:5px;background:#ff3030;border-radius:50%;
@@ -6318,20 +6311,20 @@ function renderImportantMatches() {
             }
             .rim-cta-btn{
                 display:flex;align-items:center;justify-content:center;gap:8px;
-                background:linear-gradient(90deg,var(--sport-clr,#FF6B35) 0%,rgba(255,40,0,0.9) 100%);
+                background:linear-gradient(90deg,var(--sport-clr,#E30613) 0%,rgba(255,40,0,0.9) 100%);
                 border-radius:12px;
                 padding:10px 16px;
                 font-size:12px;font-weight:800;color:#fff;letter-spacing:0.5px;
                 text-transform:uppercase;
-                box-shadow:0 4px 18px rgba(255,69,0,0.4);
+                box-shadow:0 4px 18px rgba(183, 28, 28,0.4);
                 transition:opacity 0.15s, transform 0.15s;
                 position:relative;overflow:hidden;
             }
-            /* shimmer sweep on CTA */
+            /* shimmer sweep on CTA — runs once on entrance, not infinite (perf) */
             .rim-cta-btn::after{
                 content:'';position:absolute;top:0;left:0;bottom:0;width:50%;
                 background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);
-                animation:rimShimmer 2.4s ease-in-out infinite;
+                animation:rimShimmer 1.4s ease-out 1;
                 pointer-events:none;
             }
             .rim-cta-btn:hover{opacity:0.88;transform:scale(1.02);}
@@ -6365,17 +6358,17 @@ function renderImportantMatches() {
             .rokc-footer{padding:12px 12px 16px;background:#08080c;border-top:1px solid rgba(255,255,255,0.06);flex-shrink:0;}
             .rokc-footer::before{
                 content:'';display:block;height:1px;margin-bottom:12px;
-                background:linear-gradient(90deg,transparent,rgba(255,107,53,0.2),transparent);
+                background:linear-gradient(90deg,transparent,rgba(227, 6, 19,0.2),transparent);
             }
             .rokc-footer-btn{
                 display:flex;align-items:center;justify-content:center;gap:9px;
                 width:100%;padding:13px 16px;border-radius:14px;
-                border:1px solid rgba(255,107,53,0.3);
-                background:rgba(255,107,53,0.08);
-                color:#ff8a50;font-size:13px;font-weight:700;
+                border:1px solid rgba(227, 6, 19,0.3);
+                background:rgba(227, 6, 19,0.08);
+                color:#FF5252;font-size:13px;font-weight:700;
                 cursor:pointer;transition:all 0.2s;letter-spacing:0.3px;
             }
-            .rokc-footer-btn:hover{background:rgba(255,107,53,0.14);border-color:rgba(255,107,53,0.5);}
+            .rokc-footer-btn:hover{background:rgba(227, 6, 19,0.14);border-color:rgba(227, 6, 19,0.5);}
             .rokc-footer-btn:active{transform:scale(0.98);}
             .rokc-footer-btn i{font-size:13px;}
             .rokc-footer-hint{text-align:center;margin-top:8px;font-size:10px;color:rgba(255,255,255,0.18);line-height:1.5;}

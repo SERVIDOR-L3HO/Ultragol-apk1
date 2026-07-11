@@ -42,7 +42,7 @@ public class SplashActivity extends AppCompatActivity {
         final View logo         = findViewById(R.id.splashLogo);
         final View tagline      = findViewById(R.id.splashTagline);
         final View progressBar  = findViewById(R.id.splashProgressBar);
-        final View progressFill = findViewById(R.id.splashProgressFill);
+        final CandyStripeView progressFill = findViewById(R.id.splashProgressFill);
 
         // ── 1. GLOW: aparece expandiéndose desde pequeño ───────────────────────
         if (glowInner != null) {
@@ -105,6 +105,8 @@ public class SplashActivity extends AppCompatActivity {
                 .alpha(1f)
                 .setDuration(400)
                 .start();
+
+            progressFill.startAnimating();
 
             progressBar.post(() -> {
                 DisplayMetrics dm = new DisplayMetrics();
