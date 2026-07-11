@@ -83,7 +83,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_marginBottom="16dp"
-        android:text="ULTRAGOL1"
+        android:text="ACTION PLAY"
         android:textColor="#15FFFFFF"
         android:textSize="9sp"
         android:letterSpacing="0.35"
