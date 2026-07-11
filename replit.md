@@ -21,7 +21,7 @@ Server listens on port 5000.
 | GET | `/version` | Current version info (ultragol1) |
 | GET | `/ultragol1/version` | Same as above |
 | GET | `/ultra1/version` | ultra1 version info |
-| GET | `/ultragol1/download` | Download ultragol1.apk |
+| GET | `/ultragol1/download` | Download ultra.apk |
 | GET | `/ultra1/download` | Download ultra1.apk |
 | GET | `/notifications` | Active in-app notifications |
 | GET | `/api/gol` | Live match proxy (ultrago-xi.vercel.app) |

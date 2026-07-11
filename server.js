@@ -116,7 +116,7 @@ function getVersionFile(appName) {
 }
 function getApkName(appName) {
     if (appName === 'ultra1')    return 'ultra1.apk';
-    if (appName === 'ultragol1') return 'ultragol1.apk';
+    if (appName === 'ultragol1') return 'ultra.apk';
     return 'ultragol.apk';
 }
 function getDownloadPath(appName) {
@@ -155,9 +155,9 @@ app.get('/ultra1/download', (req, res) => {
 });
 
 app.get('/ultragol1/download', (req, res) => {
-    const apkPath = path.join(__dirname, 'apks', 'ultragol1.apk');
+    const apkPath = path.join(__dirname, 'apks', 'ultra.apk');
     if (!fs.existsSync(apkPath)) return res.status(404).json({ error: 'APK no encontrado' });
-    res.download(apkPath, 'ultragol1.apk');
+    res.download(apkPath, 'ultra.apk');
 });
 
 // ── ADMIN UPDATE ──────────────────────────────────────────────────────────────
