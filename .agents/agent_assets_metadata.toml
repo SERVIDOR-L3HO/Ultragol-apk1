@@ -102,3 +102,9 @@ id = "L4jv57Q5gddtOsP8GPz10"
 uri = "file://apks/ultragol1-debug.zip"
 type = "unspecified"
 title = "ultragol1-debug.zip — Reproductor Glass + nuevas funciones (13 MB)"
+
+[[outputs]]
+id = "GpFFZipcK0QTIv8OZ5CAl"
+uri = "file://apks/ultragol1.apk"
+type = "unspecified"
+title = "Ultragol1 — Stadium Pro (debug build)"
