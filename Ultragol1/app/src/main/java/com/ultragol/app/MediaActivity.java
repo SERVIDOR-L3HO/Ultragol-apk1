@@ -470,8 +470,11 @@ public class MediaActivity extends AppCompatActivity {
         String ua = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
         DataSource.Factory dsFactory;
-        if (useOffline) {
-            // Serve from ExoPlayer's offline cache (downloaded segments / MP4)
+        if (videoUrl != null && videoUrl.startsWith("file://")) {
+            // Local file on disk — DefaultDataSource handles file:// natively
+            dsFactory = new com.google.android.exoplayer2.upstream.DefaultDataSource.Factory(this);
+        } else if (useOffline) {
+            // Serve from ExoPlayer's offline cache (downloaded HLS segments)
             dsFactory = DownloadUtil.getInstance(this).buildCacheDataSourceFactory();
         } else {
             Map<String, String> headers = new HashMap<>();

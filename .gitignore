@@ -1,0 +1,36 @@
+# Android build outputs
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+
+# Gradle
+.gradle/
+build/
+*/build/
+**/build/
+local.properties
+*.iml
+.idea/
+*.keystore
+!debug.keystore
+
+# Android SDK (reinstalled each session)
+/android-sdk/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / server
+node_modules/
+npm-debug.log*
+
+# Replit
+.replit.nix
+.upm/
+.cache/
+
+# Attached assets (screenshots, etc.)
+attached_assets/

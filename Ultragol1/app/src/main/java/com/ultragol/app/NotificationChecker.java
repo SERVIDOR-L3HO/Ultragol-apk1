@@ -29,7 +29,7 @@ public class NotificationChecker {
 
     public static final String NOTIF_URL =
             "https://da8cd50c-b6a4-475c-8783-70b87f2e70be-00-3s6o17dujacbo.spock.replit.dev/notifications";
-    private static final String CHANNEL_ID  = "ultragol_notifs";
+    private static final String CHANNEL_ID  = SmartNotificationWorker.CH_SERVER;
     private static final String PREFS_NAME  = "ultragol_notif_prefs";
     private static final String SHOWN_KEY   = "shown_ids";
 

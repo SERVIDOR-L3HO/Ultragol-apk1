@@ -89,6 +89,82 @@ public class DetailActivity extends AppCompatActivity {
     //  DOWNLOAD CAPTURE — hidden WebView intercepts real MP4/M3U8 URL
     // ══════════════════════════════════════════════════════════════════════════
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  SMART DOWNLOAD — tries StreamingApi first, then WebView capture fallback
+    // ══════════════════════════════════════════════════════════════════════════
+
+    private void startSmartDownload() {
+        // Show progress dialog immediately
+        downloadingDialog = new AlertDialog.Builder(this)
+            .setTitle("Preparando descarga")
+            .setMessage("Buscando fuente de video…")
+            .setCancelable(true)
+            .setNegativeButton("Cancelar", (d, w) -> {
+                destroyCaptureWebView();
+                if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+            })
+            .create();
+        downloadingDialog.show();
+
+        ExecutorService exec = java.util.concurrent.Executors.newSingleThreadExecutor();
+        exec.execute(() -> {
+            String mp4Url  = null;
+            String m3u8Url = null;
+            try {
+                StreamingApi.ServerData data = item.getContentType() == ContentItem.TYPE_MOVIE
+                    ? StreamingApi.fetchMovieServers(item.getTmdbId())
+                    : StreamingApi.fetchSeriesServers(item.getTmdbId(), 1, 1);
+
+                // Collect all servers in priority order
+                List<StreamingApi.Server> all = new ArrayList<>(data.latino);
+                all.addAll(data.espanol);
+                all.addAll(data.subtitulado);
+
+                for (StreamingApi.Server s : all) {
+                    String u = s.url != null ? s.url : "";
+                    if (u.contains(".mp4")  && mp4Url  == null) mp4Url  = u;
+                    if (u.contains(".m3u8") && m3u8Url == null) m3u8Url = u;
+                }
+                // Also scan embedUrl
+                String emb = data.embedUrl != null ? data.embedUrl : "";
+                if (emb.contains(".mp4")  && mp4Url  == null) mp4Url  = emb;
+                if (emb.contains(".m3u8") && m3u8Url == null) m3u8Url = emb;
+
+            } catch (Exception ignored) {}
+
+            final String finalMp4  = mp4Url;
+            final String finalM3u8 = m3u8Url;
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (isFinishing()) return;
+                if (downloadingDialog != null && downloadingDialog.isShowing())
+                    downloadingDialog.dismiss();
+
+                if (finalMp4 != null) {
+                    // Best case: direct MP4 → Android DownloadManager → real .mp4 file
+                    DownloadsManager.startDirectMp4Download(this, item, finalMp4);
+                    if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+                    Toast.makeText(this,
+                        "⬇ Descargando MP4 — revisa la bandeja de notificaciones",
+                        Toast.LENGTH_LONG).show();
+
+                } else if (finalM3u8 != null) {
+                    // M3U8 direct → ExoPlayer offline download
+                    DownloadsManager.startVideoDownload(this, item, finalM3u8, null);
+                    if (pendingDownloadBtn != null) updateDownloadBtn(pendingDownloadBtn);
+                    Toast.makeText(this,
+                        "⬇ Descarga iniciada (HLS) — revisa tus Descargas",
+                        Toast.LENGTH_LONG).show();
+
+                } else {
+                    // Fallback: WebView capture
+                    startDownloadCapture();
+                }
+            });
+        });
+        exec.shutdown();
+    }
+
     @android.annotation.SuppressLint("SetJavaScriptEnabled")
     private void startDownloadCapture() {
         capturedDownloadUrl = null;
@@ -405,10 +481,10 @@ public class DetailActivity extends AppCompatActivity {
                 } else if ("DOWNLOADING".equals(state)) {
                     Toast.makeText(this, "Ya se está descargando...", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Start real MP4 download via WebView capture
+                    // Smart download: StreamingApi first → Android DM for MP4 → WebView fallback
                     pendingDownloadBtn = btnDownload;
                     setDownloadBtnLoading(btnDownload, true);
-                    startDownloadCapture();
+                    startSmartDownload();
                 }
             });
         }

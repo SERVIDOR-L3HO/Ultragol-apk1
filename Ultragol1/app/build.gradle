@@ -53,4 +53,7 @@ dependencies {
     // ── Cast / TV Streaming ──────────────────────────────────────────────────
     implementation 'com.google.android.gms:play-services-cast-framework:21.3.0'
     implementation 'androidx.mediarouter:mediarouter:1.6.0'
+
+    // ── WorkManager (notificaciones automáticas) ─────────────────────────────
+    implementation 'androidx.work:work-runtime:2.9.0'
 }

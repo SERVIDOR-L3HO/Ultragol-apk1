@@ -1,10 +1,13 @@
 package com.ultragol.app.fragments;
 
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -15,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.ultragol.app.DetailActivity;
+import com.ultragol.app.DownloadCompleteReceiver;
 import com.ultragol.app.DownloadUtil;
 import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.MediaActivity;
@@ -26,8 +30,16 @@ import java.util.List;
 public class DownloadsFragment extends Fragment {
 
     private final Handler refreshHandler = new Handler(Looper.getMainLooper());
-    private Runnable       refreshRunnable;
+    private Runnable            refreshRunnable;
     private DownloadCardAdapter adapter;
+
+    // Refreshes the list immediately when any download finishes
+    private final BroadcastReceiver downloadDoneReceiver = new BroadcastReceiver() {
+        @Override public void onReceive(Context context, Intent intent) {
+            View v = getView();
+            if (v != null) loadContent(v);
+        }
+    };
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
@@ -48,12 +60,22 @@ public class DownloadsFragment extends Fragment {
         View view = getView();
         if (view != null) loadContent(view);
         startProgressPolling();
+        // Listen for download completion → instant list refresh
+        IntentFilter filter = new IntentFilter(DownloadCompleteReceiver.ACTION_REFRESH);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requireContext().registerReceiver(
+                downloadDoneReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            requireContext().registerReceiver(downloadDoneReceiver, filter);
+        }
     }
 
     @Override
     public void onPause() {
         super.onPause();
         stopProgressPolling();
+        try { requireContext().unregisterReceiver(downloadDoneReceiver); }
+        catch (Exception ignored) {}
     }
 
     @Override
@@ -174,16 +196,27 @@ public class DownloadsFragment extends Fragment {
             // Tap → play offline if COMPLETE, else open detail
             h.itemView.setOnClickListener(v -> {
                 if ("COMPLETE".equals(state)) {
-                    // localVideoPath holds the captured stream URL (M3U8 or MP4)
-                    String streamUrl = item.getLocalVideoPath();
-                    if (streamUrl != null && !streamUrl.isEmpty()) {
-                        boolean isM3u8 = streamUrl.contains(".m3u8");
+                    String videoPath = item.getLocalVideoPath();
+                    if (videoPath != null && !videoPath.isEmpty()) {
+                        // Real .mp4 file on disk → play as file URI
+                        String playUrl;
+                        if (videoPath.startsWith("/")) {
+                            File f = new File(videoPath);
+                            if (!f.exists()) {
+                                Toast.makeText(ctx, "Archivo no encontrado", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            playUrl = "file://" + videoPath;
+                        } else {
+                            playUrl = videoPath; // streaming URL or m3u8
+                        }
+                        boolean isM3u8 = playUrl.contains(".m3u8");
                         Intent intent = new Intent(ctx, MediaActivity.class);
-                        intent.putExtra("url",         streamUrl);
+                        intent.putExtra("url",         playUrl);
                         intent.putExtra("title",       item.getTitle());
-                        intent.putExtra("referer",     streamUrl);
+                        intent.putExtra("referer",     playUrl);
                         intent.putExtra("is_m3u8",     isM3u8);
-                        intent.putExtra("use_offline", true);
+                        intent.putExtra("use_offline", !isM3u8);
                         ctx.startActivity(intent);
                         return;
                     }

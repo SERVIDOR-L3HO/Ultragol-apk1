@@ -1,6 +1,9 @@
 package com.ultragol.app;
 
 import android.content.Context;
+import android.database.Cursor;
+import android.net.Uri;
+import android.os.Environment;
 import com.ultragol.app.models.ContentItem;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -41,30 +44,157 @@ public class DownloadsManager {
 
     /**
      * Returns "NONE" | "DOWNLOADING" | "COMPLETE" | "FAILED"
-     * Always queries DownloadUtil for the live state.
+     * Handles both ExoPlayer (HLS) and Android DownloadManager (MP4) downloads.
      */
     public static String getVideoState(Context ctx, ContentItem item) {
         ContentItem stored = findStored(ctx, item.getTmdbId());
         if (stored == null) return "NONE";
+
+        String videoPath = stored.getLocalVideoPath();
+
+        // ── Android DownloadManager path (real .mp4 file) ──────────────────
+        if (videoPath != null && videoPath.startsWith("/")) {
+            File f = new File(videoPath);
+            if (f.exists() && f.length() > 1024) {
+                // File complete → persist state
+                if (!"COMPLETE".equals(stored.getVideoState()))
+                    updateStoredState(ctx, item.getTmdbId(), "COMPLETE");
+                return "COMPLETE";
+            }
+            if (stored.getDownloadId() >= 0) {
+                String dmState = queryAndroidDmState(ctx, stored.getDownloadId());
+                if (!"NONE".equals(dmState)) {
+                    if (!dmState.equals(stored.getVideoState()))
+                        updateStoredState(ctx, item.getTmdbId(), dmState);
+                    return dmState;
+                }
+            }
+            return stored.getVideoState();
+        }
+
+        // ── ExoPlayer / HLS path ────────────────────────────────────────────
         String live = DownloadUtil.getInstance(ctx)
                 .getState(String.valueOf(item.getTmdbId()));
-        if (!"NONE".equals(live) && !live.equals(stored.getVideoState())) {
+        if (!"NONE".equals(live) && !live.equals(stored.getVideoState()))
             updateStoredState(ctx, item.getTmdbId(), live);
-        }
         return "NONE".equals(live) ? stored.getVideoState() : live;
     }
 
     /**
      * Returns 0–100 progress while downloading, or -1 if unknown.
+     * Handles both Android DM and ExoPlayer.
      */
     public static int getDownloadProgress(Context ctx, int tmdbId) {
+        ContentItem stored = findStored(ctx, tmdbId);
+        if (stored != null && stored.getDownloadId() >= 0
+                && stored.getLocalVideoPath() != null
+                && stored.getLocalVideoPath().startsWith("/")) {
+            return queryAndroidDmProgress(ctx, stored.getDownloadId());
+        }
         return DownloadUtil.getInstance(ctx).getProgress(String.valueOf(tmdbId));
     }
 
+    // ── Android DownloadManager helpers ──────────────────────────────────────
+
+    private static String queryAndroidDmState(Context ctx, long dlId) {
+        try {
+            android.app.DownloadManager dm =
+                (android.app.DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+            if (dm == null) return "NONE";
+            android.app.DownloadManager.Query q =
+                new android.app.DownloadManager.Query().setFilterById(dlId);
+            Cursor c = dm.query(q);
+            if (c != null && c.moveToFirst()) {
+                int col = c.getColumnIndex(android.app.DownloadManager.COLUMN_STATUS);
+                int status = col >= 0 ? c.getInt(col) : -1;
+                c.close();
+                switch (status) {
+                    case android.app.DownloadManager.STATUS_SUCCESSFUL: return "COMPLETE";
+                    case android.app.DownloadManager.STATUS_RUNNING:
+                    case android.app.DownloadManager.STATUS_PENDING:
+                    case android.app.DownloadManager.STATUS_PAUSED:   return "DOWNLOADING";
+                    case android.app.DownloadManager.STATUS_FAILED:   return "FAILED";
+                }
+            }
+            if (c != null) c.close();
+        } catch (Exception ignored) {}
+        return "NONE";
+    }
+
+    private static int queryAndroidDmProgress(Context ctx, long dlId) {
+        try {
+            android.app.DownloadManager dm =
+                (android.app.DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+            if (dm == null) return -1;
+            android.app.DownloadManager.Query q =
+                new android.app.DownloadManager.Query().setFilterById(dlId);
+            Cursor c = dm.query(q);
+            if (c != null && c.moveToFirst()) {
+                int colDown = c.getColumnIndex(android.app.DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+                int colTotal = c.getColumnIndex(android.app.DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+                long down  = colDown  >= 0 ? c.getLong(colDown)  : 0;
+                long total = colTotal >= 0 ? c.getLong(colTotal) : 0;
+                c.close();
+                if (total > 0) return (int) (down * 100 / total);
+            }
+            if (c != null) c.close();
+        } catch (Exception ignored) {}
+        return -1;
+    }
+
+    private static final String UA =
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+        + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
     /**
-     * Starts an ExoPlayer offline download for the given video URL.
-     * Works for both HLS (M3U8) and progressive MP4.
-     * Saves metadata immediately so the item appears in the downloads list.
+     * Starts a REAL MP4 download via Android's DownloadManager.
+     * The file is saved to internal Movies/ActionPlay/ directory as an actual .mp4 file.
+     */
+    public static void startDirectMp4Download(Context ctx, ContentItem item, String videoUrl) {
+        // Destination: app-private Movies directory (no extra permissions needed)
+        String filename = sanitizeFilename(item.getTitle())
+            + "_" + item.getTmdbId() + ".mp4";
+        File dir = new File(ctx.getExternalFilesDir(Environment.DIRECTORY_MOVIES), "ActionPlay");
+        if (!dir.exists()) dir.mkdirs();
+        File destFile = new File(dir, filename);
+        String destPath = destFile.getAbsolutePath();
+
+        // Save metadata immediately so the item appears in the list
+        saveOrUpdateRecord(ctx, item, "", destPath, "DOWNLOADING", -1L);
+
+        android.app.DownloadManager dm =
+            (android.app.DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+        if (dm != null) {
+            android.app.DownloadManager.Request req =
+                new android.app.DownloadManager.Request(Uri.parse(videoUrl));
+            req.setTitle(item.getTitle());
+            req.setDescription("Action Play — descargando película…");
+            req.setNotificationVisibility(
+                android.app.DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+            req.setDestinationUri(Uri.fromFile(destFile));
+            req.addRequestHeader("User-Agent", UA);
+            req.addRequestHeader("Referer", "https://unlimplay.com/");
+            long dlId = dm.enqueue(req);
+            // Persist download ID so progress can be tracked
+            saveOrUpdateRecord(ctx, item, "", destPath, "DOWNLOADING", dlId);
+        }
+
+        // Download poster in background
+        new Thread(() -> {
+            String posterPath = downloadPoster(ctx, item);
+            if (!posterPath.isEmpty()) updatePosterPath(ctx, item.getTmdbId(), posterPath);
+        }).start();
+    }
+
+    private static String sanitizeFilename(String name) {
+        if (name == null) return "video";
+        return name.replaceAll("[^a-zA-Z0-9áéíóúÁÉÍÓÚüÜñÑ _\\-]", "")
+                   .trim().replace(" ", "_");
+    }
+
+    /**
+     * Starts an ExoPlayer offline download for HLS (M3U8) or progressive MP4.
+     * Note: for direct MP4 files, prefer startDirectMp4Download() instead.
      */
     public static void startVideoDownload(Context ctx, ContentItem item,
                                           String videoUrl, String referer) {
@@ -101,10 +231,28 @@ public class DownloadsManager {
         }).start();
     }
 
-    /** Removes metadata, poster, and cancels the ExoPlayer download. */
+    /** Removes metadata, poster, video file, and cancels any active download. */
     public static void remove(Context ctx, ContentItem item) {
-        // Cancel ExoPlayer download
+        ContentItem stored = findStored(ctx, item.getTmdbId());
+
+        // Cancel ExoPlayer download (HLS)
         DownloadUtil.getInstance(ctx).removeDownload(String.valueOf(item.getTmdbId()));
+
+        // Cancel Android DownloadManager download + delete .mp4 file
+        if (stored != null) {
+            if (stored.getDownloadId() >= 0) {
+                try {
+                    android.app.DownloadManager dm = (android.app.DownloadManager)
+                        ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+                    if (dm != null) dm.remove(stored.getDownloadId());
+                } catch (Exception ignored) {}
+            }
+            String videoPath = stored.getLocalVideoPath();
+            if (videoPath != null && videoPath.startsWith("/")) {
+                File vf = new File(videoPath);
+                if (vf.exists()) vf.delete();
+            }
+        }
 
         // Delete poster file
         File posterFile = posterFile(ctx, item.getTmdbId());

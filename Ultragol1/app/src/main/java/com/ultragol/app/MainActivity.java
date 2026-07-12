@@ -214,6 +214,8 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         NotificationChecker.check(this);
+        // Programar notificaciones automáticas inteligentes
+        NotificationScheduler.schedule(this);
     }
 
     @Override
@@ -224,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 1001 && grantResults.length > 0
                 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             NotificationChecker.check(this);
+            // Permiso concedido → lanzar notificación inmediata de bienvenida
+            NotificationScheduler.runNow(this);
         }
     }
 
