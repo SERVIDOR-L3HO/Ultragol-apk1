@@ -15,6 +15,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import com.ultragol.app.fragments.*;
 
 public class MainActivity extends AppCompatActivity {
@@ -201,6 +203,11 @@ public class MainActivity extends AppCompatActivity {
         if (current instanceof DeportesWebFragment) {
             if (((DeportesWebFragment) current).onBackPressed()) return;
         }
+        // Pop non-home fragments; exits the app when backstack is empty (at Home)
+        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+            getSupportFragmentManager().popBackStack();
+            return;
+        }
         super.onBackPressed();
     }
 
@@ -232,9 +239,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadFragment(Fragment fragment) {
-        getSupportFragmentManager().beginTransaction()
+        boolean isHome = fragment instanceof HomeFragment;
+        FragmentManager fm = getSupportFragmentManager();
+        if (isHome) {
+            // Clear the full backstack when navigating home via the drawer
+            fm.popBackStackImmediate(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
+        FragmentTransaction tx = fm.beginTransaction()
             .setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out)
-            .replace(R.id.fragmentContainer, fragment)
-            .commit();
+            .replace(R.id.fragmentContainer, fragment);
+        if (!isHome) tx.addToBackStack(null);
+        tx.commit();
     }
 }

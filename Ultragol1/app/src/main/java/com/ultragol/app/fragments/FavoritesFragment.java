@@ -38,14 +38,20 @@ public class FavoritesFragment extends Fragment {
         grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
         List<ContentItem> items = FavoritesManager.getAll(requireContext());
         if (items.isEmpty()) {
+            grid.setVisibility(View.GONE);
             TextView empty = new TextView(requireContext());
             empty.setText("Aún no tienes favoritos.\nAgrega contenido desde su detalle.");
-            empty.setTextColor(0x88FFFFFF);
-            empty.setTextSize(14f);
+            empty.setTextColor(0xAAFFFFFF);
+            empty.setTextSize(15f);
             empty.setGravity(android.view.Gravity.CENTER);
-            empty.setPadding(32, 80, 32, 80);
+            android.widget.LinearLayout.LayoutParams lp =
+                new android.widget.LinearLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, 0);
+            lp.weight = 1f;
+            empty.setLayoutParams(lp);
             ((ViewGroup) view).addView(empty);
         } else {
+            grid.setVisibility(View.VISIBLE);
             grid.setAdapter(new ContentGridAdapter(requireContext(), items));
         }
     }

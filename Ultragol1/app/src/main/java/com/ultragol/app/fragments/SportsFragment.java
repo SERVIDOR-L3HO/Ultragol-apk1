@@ -96,14 +96,18 @@ public class SportsFragment extends Fragment {
         Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 List<Channel> r = StreamingApi.fetchAllChannels(category);
+                if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
+                    if (!isAdded()) return;
                     allChannels.addAll(r); filtered.addAll(r);
                     adapter.notifyDataSetChanged();
                     if (loadingView != null) loadingView.setVisibility(View.GONE);
                     if (emptyView   != null) emptyView.setVisibility(r.isEmpty() ? View.VISIBLE : View.GONE);
                 });
             } catch (Exception e) {
+                if (!isAdded()) return;
                 requireActivity().runOnUiThread(() -> {
+                    if (!isAdded()) return;
                     if (loadingView != null) loadingView.setVisibility(View.GONE);
                     if (emptyView   != null) emptyView.setVisibility(View.VISIBLE);
                 });
