@@ -9,8 +9,8 @@ import android.widget.*;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
+import com.ultragol.app.ChannelStreamDialog;
 import com.ultragol.app.R;
-import com.ultragol.app.PlayerActivity;
 import com.ultragol.app.adapters.ChannelAdapter;
 import com.ultragol.app.models.Channel;
 import com.ultragol.app.network.StreamingApi;
@@ -37,10 +37,8 @@ public class SportsFragment extends Fragment {
         RecyclerView grid = view.findViewById(R.id.channelsGrid);
         grid.setLayoutManager(new GridLayoutManager(requireContext(), 2));
         adapter = new ChannelAdapter(requireContext(), filtered, ch -> {
-            Intent intent = new Intent(requireContext(), PlayerActivity.class);
-            intent.putExtra("url", ch.getPlayerUrl());
-            intent.putExtra("title", ch.getDisplayName());
-            startActivity(intent);
+            // Show stream options dialog (Ver / Cast / Calidad)
+            ChannelStreamDialog.show(requireContext(), ch);
         });
         grid.setAdapter(adapter);
 

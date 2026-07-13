@@ -375,6 +375,36 @@ public class LiveMatchServerDialog {
             info.addView(tvSrvLabel);
             row.addView(info);
 
+            // ── Cast button (📡) ──────────────────────────────────────────────
+            final String fUrlForCast   = url;
+            final String fTitleForCast = match.titulo;
+            TextView castBtn = new TextView(ctx);
+            castBtn.setText("📡");
+            castBtn.setTextSize(15);
+            castBtn.setGravity(Gravity.CENTER);
+            castBtn.setClickable(true);
+            castBtn.setFocusable(true);
+            GradientDrawable castBtnBg = new GradientDrawable();
+            castBtnBg.setShape(GradientDrawable.OVAL);
+            castBtnBg.setColor(Color.argb(30, 255, 152, 0));
+            castBtnBg.setStroke(dp(ctx,1), Color.argb(80, 255, 152, 0));
+            castBtn.setBackground(castBtnBg);
+            LinearLayout.LayoutParams castBtnLp = new LinearLayout.LayoutParams(
+                dp(ctx,36), dp(ctx,36));
+            castBtnLp.gravity = Gravity.CENTER_VERTICAL;
+            castBtnLp.setMarginStart(dp(ctx,6));
+            castBtn.setLayoutParams(castBtnLp);
+            castBtn.setOnClickListener(cv -> {
+                Intent castIntent = new Intent(ctx, PlayerActivity.class);
+                castIntent.putExtra("url",      fUrlForCast);
+                castIntent.putExtra("title",    fTitleForCast);
+                castIntent.putExtra("autocast", true);
+                castIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(castIntent);
+                dialog.dismiss();
+            });
+            row.addView(castBtn);
+
             // ── Arrow pill ────────────────────────────────────────────────────
             TextView arrow = new TextView(ctx);
             arrow.setText("›");
@@ -389,7 +419,7 @@ public class LiveMatchServerDialog {
             arrow.setBackground(arrowBg);
             LinearLayout.LayoutParams arrLp = new LinearLayout.LayoutParams(
                 dp(ctx,32), dp(ctx,32));
-            arrLp.setMarginStart(dp(ctx,10));
+            arrLp.setMarginStart(dp(ctx,6));
             arrLp.gravity = Gravity.CENTER_VERTICAL;
             arrow.setLayoutParams(arrLp);
             row.addView(arrow);

@@ -8,7 +8,7 @@
             android:layout_width="match_parent" android:layout_height="match_parent"/>
         <LinearLayout android:layout_width="match_parent" android:layout_height="56dp"
             android:orientation="horizontal" android:gravity="center_vertical"
-            android:paddingStart="8dp" android:paddingEnd="16dp"
+            android:paddingStart="8dp" android:paddingEnd="8dp"
             android:background="@drawable/gradient_top_black">
             <ImageView android:id="@+id/btnPlayerBack"
                 android:layout_width="40dp" android:layout_height="40dp"
@@ -20,6 +20,17 @@
                 android:textColor="#FFFFFF" android:textSize="15sp"
                 android:fontFamily="sans-serif-medium" android:maxLines="1"
                 android:ellipsize="end"/>
+            <!-- Cast button — hidden until a stream URL is captured -->
+            <TextView android:id="@+id/btnPlayerCastWaiting"
+                android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:text="Capturando…" android:textColor="#66FFFFFF" android:textSize="10sp"
+                android:gravity="center" android:visibility="gone"/>
+            <TextView android:id="@+id/btnPlayerCast"
+                android:layout_width="44dp" android:layout_height="44dp"
+                android:text="📡" android:textSize="20sp" android:gravity="center"
+                android:clickable="true" android:focusable="true"
+                android:visibility="gone"/>
         </LinearLayout>
         <ProgressBar android:id="@+id/playerProgress"
             android:layout_width="match_parent" android:layout_height="3dp"

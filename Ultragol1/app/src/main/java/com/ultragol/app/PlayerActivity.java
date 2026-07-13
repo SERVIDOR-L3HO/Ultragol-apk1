@@ -49,6 +49,12 @@ public class PlayerActivity extends AppCompatActivity {
     private String currentEmbedUrl           = null;
     private String videoTitle                = null;
 
+    // ── Extra flags ───────────────────────────────────────────────────────────
+    /** If true: once stream URL is captured, auto-open CastBottomSheet instead of MediaActivity */
+    private boolean autoCast   = false;
+    /** If true: keep WebView visible (manual quality / source selection) */
+    private boolean manualMode = false;
+
     private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
 
     // ── JavaScript extracted from inject string for readability ───────────────
@@ -104,6 +110,8 @@ public class PlayerActivity extends AppCompatActivity {
         String url = getIntent().getStringExtra("url");
         videoTitle  = getIntent().getStringExtra("title");
         item        = (ContentItem) getIntent().getSerializableExtra("item");
+        autoCast    = getIntent().getBooleanExtra("autocast",    false);
+        manualMode  = getIntent().getBooleanExtra("manual_mode", false);
 
         setContentView(item != null ? R.layout.activity_player_detail : R.layout.activity_player);
 
@@ -244,6 +252,14 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
+        // ── Cast button (simple player layout) ───────────────────────────────
+        View castWaiting = findViewById(R.id.btnPlayerCastWaiting);
+        View btnCast = findViewById(R.id.btnPlayerCast);
+        if (btnCast != null) {
+            if (autoCast && castWaiting != null) castWaiting.setVisibility(View.VISIBLE);
+            btnCast.setOnClickListener(v -> showCastOptions());
+        }
+
         if (url != null) {
             currentEmbedUrl = url;
             webView.loadUrl(url);
@@ -259,13 +275,78 @@ public class PlayerActivity extends AppCompatActivity {
 
     // ── Called when a video URL is captured (from intercept or JS) ────────────
     private void onVideoUrlCaptured(String url, String referer, boolean isM3u8) {
-        // Launch the native ExoPlayer
+        // Show cast button in the simple-player header bar
+        View castWaiting = findViewById(R.id.btnPlayerCastWaiting);
+        View btnCast     = findViewById(R.id.btnPlayerCast);
+        if (castWaiting != null) castWaiting.setVisibility(View.GONE);
+        if (btnCast != null)     btnCast.setVisibility(View.VISIBLE);
+
+        if (manualMode) {
+            // Stay in WebView so user can choose quality/source manually
+            Toast.makeText(this,
+                "Stream capturado ✓  Usa los controles del reproductor para elegir calidad",
+                Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (autoCast) {
+            // Auto-open cast selector instead of launching MediaActivity
+            Toast.makeText(this, "Stream listo — elige dispositivo para transmitir", Toast.LENGTH_SHORT).show();
+            new Handler(Looper.getMainLooper()).postDelayed(this::showCastOptions, 300);
+            return;
+        }
+
+        // Default: launch native ExoPlayer
         Intent intent = new Intent(this, MediaActivity.class);
         intent.putExtra("url",      url);
         intent.putExtra("title",    videoTitle != null ? videoTitle : "");
         intent.putExtra("referer",  referer != null ? referer : "");
         intent.putExtra("is_m3u8",  isM3u8);
         startActivityForResult(intent, MediaActivity.REQUEST_CODE);
+    }
+
+    // ── Cast options sheet (DLNA / AirPlay / Chromecast) ─────────────────────
+    private void showCastOptions() {
+        if (capturedVideoUrl == null || capturedVideoUrl.isEmpty()) {
+            Toast.makeText(this,
+                "Espera mientras se captura el stream…", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        final String castUrl   = capturedVideoUrl;
+        final String castTitle = videoTitle != null ? videoTitle : "";
+        final boolean castM3u8 = capturedIsM3u8;
+
+        CastBottomSheet sheet = CastBottomSheet.newInstance();
+        sheet.setVideoInfo(castUrl, castTitle, castM3u8);
+        sheet.setCallback(device -> {
+            if (device == null) return;
+            switch (device.getType()) {
+                case DLNA:
+                    Toast.makeText(this, "Conectando a " + device.getName() + "…", Toast.LENGTH_SHORT).show();
+                    DLNAManager.getInstance().playVideo(device, castUrl, () ->
+                        runOnUiThread(() -> Toast.makeText(this,
+                            "No se pudo conectar al TV DLNA. ¿Estás en la misma red WiFi?",
+                            Toast.LENGTH_LONG).show()));
+                    break;
+                case AIRPLAY:
+                    Toast.makeText(this, "Conectando a " + device.getName() + "…", Toast.LENGTH_SHORT).show();
+                    AirPlayManager.getInstance().playVideo(device, castUrl, 0, () ->
+                        runOnUiThread(() -> Toast.makeText(this,
+                            "Apple TV no respondió. Verifica que esté en la misma red WiFi.",
+                            Toast.LENGTH_LONG).show()));
+                    break;
+                case CHROMECAST:
+                    Intent castIntent = new Intent(this, MediaActivity.class);
+                    castIntent.putExtra("url",     castUrl);
+                    castIntent.putExtra("title",   castTitle);
+                    castIntent.putExtra("referer", capturedReferer != null ? capturedReferer : "");
+                    castIntent.putExtra("is_m3u8", castM3u8);
+                    startActivityForResult(castIntent, MediaActivity.REQUEST_CODE);
+                    Toast.makeText(this, "Abriendo para Chromecast…", Toast.LENGTH_SHORT).show();
+                    break;
+            }
+        });
+        sheet.show(getSupportFragmentManager(), "castSheet");
     }
 
     @Override
