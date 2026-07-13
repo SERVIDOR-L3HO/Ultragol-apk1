@@ -252,12 +252,15 @@ public class PlayerActivity extends AppCompatActivity {
             }
         });
 
-        // ── Cast button (simple player layout) ───────────────────────────────
-        View castWaiting = findViewById(R.id.btnPlayerCastWaiting);
-        View btnCast = findViewById(R.id.btnPlayerCast);
-        if (btnCast != null) {
-            if (autoCast && castWaiting != null) castWaiting.setVisibility(View.VISIBLE);
-            btnCast.setOnClickListener(v -> showCastOptions());
+        // ── Cast button (simple player layout) — always visible ──────────────
+        View castContainer = findViewById(R.id.btnCastContainer);
+        if (castContainer != null) {
+            // alpha=0.45 set in XML (searching state); tap always works
+            castContainer.setOnClickListener(v -> showCastOptions());
+            if (autoCast) {
+                TextView waitLbl = findViewById(R.id.btnPlayerCastWaiting);
+                if (waitLbl != null) waitLbl.setText("preparando…");
+            }
         }
 
         if (url != null) {
@@ -275,11 +278,13 @@ public class PlayerActivity extends AppCompatActivity {
 
     // ── Called when a video URL is captured (from intercept or JS) ────────────
     private void onVideoUrlCaptured(String url, String referer, boolean isM3u8) {
-        // Show cast button in the simple-player header bar
-        View castWaiting = findViewById(R.id.btnPlayerCastWaiting);
-        View btnCast     = findViewById(R.id.btnPlayerCast);
-        if (castWaiting != null) castWaiting.setVisibility(View.GONE);
-        if (btnCast != null)     btnCast.setVisibility(View.VISIBLE);
+        // Highlight cast button: full opacity + "listo" label
+        View castContainer = findViewById(R.id.btnCastContainer);
+        if (castContainer != null) {
+            castContainer.animate().alpha(1f).setDuration(300).start();
+            TextView waitLbl = findViewById(R.id.btnPlayerCastWaiting);
+            if (waitLbl != null) waitLbl.setText("listo ·");
+        }
 
         if (manualMode) {
             // Stay in WebView so user can choose quality/source manually
