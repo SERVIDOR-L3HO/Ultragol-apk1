@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#CC000000">
+    android:background="@android:color/transparent">
 
     <!-- Tap outside to dismiss -->
     <View
@@ -97,12 +97,15 @@
 
 
         <!-- Loading -->
-        <ProgressBar
+        <TextView
             android:id="@+id/loadingServers"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="end"
-            android:indeterminateTint="#FFFFFF"
+            android:text="Cargando servidores"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:fontFamily="sans-serif-bold"
             android:visibility="visible"/>
 
         <!-- Error -->
