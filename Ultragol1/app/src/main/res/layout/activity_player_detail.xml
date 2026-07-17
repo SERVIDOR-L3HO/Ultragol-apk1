@@ -17,29 +17,83 @@
             <FrameLayout android:id="@+id/webviewContainer"
                 android:layout_width="match_parent" android:layout_height="212dp"
                 android:background="#000000">
+
                 <WebView android:id="@+id/playerWebView"
                     android:layout_width="match_parent" android:layout_height="match_parent"/>
+
+                <!-- Intercepting / loading overlay -->
+                <LinearLayout android:id="@+id/interceptingOverlay"
+                    android:layout_width="match_parent" android:layout_height="match_parent"
+                    android:orientation="vertical" android:gravity="center"
+                    android:background="#CC000000" android:visibility="visible">
+                    <ProgressBar
+                        android:layout_width="36dp" android:layout_height="36dp"
+                        android:indeterminateTint="#FF6B35"/>
+                    <TextView
+                        android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:text="Buscando stream…"
+                        android:textColor="#AAFFFFFF" android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"/>
+                </LinearLayout>
+
+                <!-- TOP BAR: back + title + fullscreen -->
                 <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
                     android:orientation="horizontal" android:gravity="center_vertical"
-                    android:paddingStart="8dp" android:paddingEnd="16dp"
+                    android:paddingStart="4dp" android:paddingEnd="4dp"
                     android:background="@drawable/gradient_top_black">
+
                     <ImageView android:id="@+id/btnPlayerBack"
-                        android:layout_width="40dp" android:layout_height="40dp"
-                        android:src="@android:drawable/ic_menu_revert"
-                        android:tint="#FFFFFF" android:padding="8dp" android:clickable="true" android:focusable="true"/>
+                        android:layout_width="44dp" android:layout_height="44dp"
+                        android:src="@drawable/ic_back"
+                        android:tint="#FFFFFF" android:padding="10dp"
+                        android:clickable="true" android:focusable="true"/>
+
                     <TextView android:id="@+id/playerTitle"
                         android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:layout_marginStart="8dp"
+                        android:layout_weight="1" android:layout_marginStart="4dp"
                         android:textColor="#FFFFFF" android:textSize="14sp"
                         android:fontFamily="sans-serif-medium" android:maxLines="1"
                         android:ellipsize="end"/>
+
+                    <!-- Stream captured badge -->
+                    <TextView android:id="@+id/playerStreamBadge"
+                        android:layout_width="wrap_content" android:layout_height="26dp"
+                        android:layout_marginEnd="6dp"
+                        android:paddingStart="10dp" android:paddingEnd="10dp"
+                        android:gravity="center"
+                        android:text="● STREAM"
+                        android:textColor="#FF6B35" android:textSize="10sp"
+                        android:fontFamily="sans-serif-bold" android:letterSpacing="0.05"
+                        android:background="@drawable/player_capture_bg"
+                        android:visibility="gone"/>
+
+                    <!-- Fullscreen toggle -->
+                    <ImageView android:id="@+id/btnPlayerFullscreen"
+                        android:layout_width="44dp" android:layout_height="44dp"
+                        android:src="@drawable/ic_media_fullscreen"
+                        android:tint="#FFFFFF" android:padding="10dp"
+                        android:clickable="true" android:focusable="true"/>
                 </LinearLayout>
+
+                <!-- Loading progress bar (webview page load) -->
                 <ProgressBar android:id="@+id/playerProgress"
                     android:layout_width="match_parent" android:layout_height="3dp"
                     android:layout_gravity="top" android:layout_marginTop="52dp"
                     android:progressDrawable="@drawable/progress_orange"
                     android:max="100" android:visibility="gone"
                     style="@android:style/Widget.ProgressBar.Horizontal"/>
+
+                <!-- Resize handle at bottom -->
+                <LinearLayout android:id="@+id/playerResizeHandle"
+                    android:layout_width="match_parent" android:layout_height="28dp"
+                    android:layout_gravity="bottom"
+                    android:gravity="center"
+                    android:clickable="true" android:focusable="true">
+                    <View android:layout_width="44dp" android:layout_height="4dp"
+                        android:background="@drawable/player_resize_handle"/>
+                </LinearLayout>
+
             </FrameLayout>
 
             <!-- Detail info panel -->

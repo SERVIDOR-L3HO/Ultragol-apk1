@@ -7,10 +7,13 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.webkit.*;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -41,6 +44,14 @@ public class PlayerActivity extends AppCompatActivity {
     private View webviewContainer, customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
     private ContentItem item;
+
+    // ── Inline player resize / fullscreen ────────────────────────────────────
+    private static final int PLAYER_MIN_H_DP = 160;
+    private static final int PLAYER_MAX_H_DP = 400;
+    private boolean isPlayerFullscreen = false;
+    private ViewGroup playerNormalParent = null;
+    private int playerNormalParentIndex  = 0;
+    private int playerNormalHeightPx     = 0;
 
     // ── M3U8 / MP4 interception ───────────────────────────────────────────────
     private volatile String capturedVideoUrl = null;
@@ -263,6 +274,15 @@ public class PlayerActivity extends AppCompatActivity {
             }
         }
 
+        // ── Fullscreen button ─────────────────────────────────────────────────
+        View btnFullscreen = findViewById(R.id.btnPlayerFullscreen);
+        if (btnFullscreen != null) {
+            btnFullscreen.setOnClickListener(v -> togglePlayerFullscreen());
+        }
+
+        // ── Resize handle drag ────────────────────────────────────────────────
+        setupResizeHandle();
+
         if (url != null) {
             currentEmbedUrl = url;
             webView.loadUrl(url);
@@ -276,8 +296,103 @@ public class PlayerActivity extends AppCompatActivity {
         }
     }
 
+    // ── Resize handle ─────────────────────────────────────────────────────────
+    private void setupResizeHandle() {
+        View resizeHandle = webviewContainer != null ? webviewContainer.findViewById(R.id.playerResizeHandle) : null;
+        if (resizeHandle == null) return;
+        final int minH = dpToPx(PLAYER_MIN_H_DP);
+        final int maxH = dpToPx(PLAYER_MAX_H_DP);
+        final int[] startY = {0};
+        final int[] startH = {0};
+        resizeHandle.setOnTouchListener((v, event) -> {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_DOWN:
+                    startY[0] = (int) event.getRawY();
+                    startH[0] = webviewContainer.getHeight();
+                    return true;
+                case MotionEvent.ACTION_MOVE:
+                    int dy  = (int) event.getRawY() - startY[0];
+                    int newH = Math.max(minH, Math.min(maxH, startH[0] + dy));
+                    ViewGroup.LayoutParams lp = webviewContainer.getLayoutParams();
+                    lp.height = newH;
+                    webviewContainer.setLayoutParams(lp);
+                    return true;
+                case MotionEvent.ACTION_UP:
+                    return true;
+            }
+            return false;
+        });
+    }
+
+    // ── Fullscreen toggle ─────────────────────────────────────────────────────
+    private void togglePlayerFullscreen() {
+        if (isPlayerFullscreen) {
+            exitPlayerFullscreen();
+        } else {
+            enterPlayerFullscreen();
+        }
+    }
+
+    private void enterPlayerFullscreen() {
+        if (webviewContainer == null || fullscreenContainer == null) return;
+        // Remember normal position
+        playerNormalParent      = (ViewGroup) webviewContainer.getParent();
+        playerNormalParentIndex = playerNormalParent.indexOfChild(webviewContainer);
+        playerNormalHeightPx    = webviewContainer.getHeight();
+        // Move to fullscreen container
+        playerNormalParent.removeView(webviewContainer);
+        FrameLayout.LayoutParams fslp = new FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        webviewContainer.setLayoutParams(fslp);
+        fullscreenContainer.addView(webviewContainer);
+        fullscreenContainer.setVisibility(View.VISIBLE);
+        isPlayerFullscreen = true;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        hideSystemUI();
+        updateFullscreenIcon(true);
+    }
+
+    private void exitPlayerFullscreen() {
+        if (webviewContainer == null || fullscreenContainer == null || playerNormalParent == null) return;
+        fullscreenContainer.removeView(webviewContainer);
+        fullscreenContainer.setVisibility(View.GONE);
+        int restoreH = playerNormalHeightPx > 0 ? playerNormalHeightPx : dpToPx(212);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, restoreH);
+        webviewContainer.setLayoutParams(lp);
+        playerNormalParent.addView(webviewContainer, playerNormalParentIndex);
+        isPlayerFullscreen = false;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
+        updateFullscreenIcon(false);
+    }
+
+    private void updateFullscreenIcon(boolean fullscreen) {
+        if (webviewContainer == null) return;
+        ImageView btn = webviewContainer.findViewById(R.id.btnPlayerFullscreen);
+        if (btn != null) {
+            btn.setImageResource(fullscreen
+                ? R.drawable.ic_media_fullscreen_exit
+                : R.drawable.ic_media_fullscreen);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return Math.round(dp * getResources().getDisplayMetrics().density);
+    }
+
     // ── Called when a video URL is captured (from intercept or JS) ────────────
     private void onVideoUrlCaptured(String url, String referer, boolean isM3u8) {
+        // ── Hide intercepting overlay, show STREAM badge ──────────────────────
+        if (webviewContainer != null) {
+            View overlay = webviewContainer.findViewById(R.id.interceptingOverlay);
+            if (overlay != null) overlay.setVisibility(View.GONE);
+            TextView badge = webviewContainer.findViewById(R.id.playerStreamBadge);
+            if (badge != null) {
+                badge.setVisibility(View.VISIBLE);
+                badge.animate().alpha(1f).setDuration(300).start();
+            }
+        }
         // ── Channel player: highlight 📡 button ──────────────────────────────
         View castContainer = findViewById(R.id.btnCastContainer);
         if (castContainer != null) {
@@ -532,9 +647,10 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     @Override public void onBackPressed() {
-        if (customView != null) webView.getWebChromeClient().onHideCustomView();
-        else if (webView.canGoBack()) webView.goBack();
-        else super.onBackPressed();
+        if (isPlayerFullscreen) { exitPlayerFullscreen(); return; }
+        if (customView != null) { webView.getWebChromeClient().onHideCustomView(); return; }
+        if (webView.canGoBack()) { webView.goBack(); return; }
+        super.onBackPressed();
     }
     @Override protected void onPause()   { super.onPause();   webView.onPause(); }
     @Override protected void onResume()  { super.onResume();  webView.onResume(); }
