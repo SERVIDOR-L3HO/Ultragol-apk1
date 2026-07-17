@@ -89,9 +89,11 @@
     <!-- RIGHT PANEL: episode controls + servers -->
     <LinearLayout
         android:layout_width="280dp"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:layout_gravity="center_vertical|end"
         android:layout_marginEnd="8dp"
+        android:layout_marginTop="36dp"
+        android:layout_marginBottom="36dp"
         android:orientation="vertical"
         android:gravity="end">
 
@@ -145,12 +147,22 @@
                 android:paddingStart="12dp" android:paddingEnd="12dp" android:gravity="center"/>
         </LinearLayout>
 
-        <!-- Server rows -->
-        <LinearLayout
-            android:id="@+id/serverContainer"
+        <!-- Server rows (scrollable) -->
+        <ScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"/>
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:fillViewport="false">
+            <LinearLayout
+                android:id="@+id/serverContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"/>
+        </ScrollView>
     </LinearLayout>
 
 </FrameLayout>

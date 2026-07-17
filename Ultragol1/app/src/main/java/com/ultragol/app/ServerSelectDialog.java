@@ -191,7 +191,9 @@ public class ServerSelectDialog {
     private static void addRows(Context ctx, LinearLayout cnt, Dialog dialog,
                                 ContentItem item, List<StreamingApi.Server> list, int selectedIdx) {
         if (cnt == null || list == null || list.isEmpty()) return;
-        final int[] sel = {selectedIdx};
+        final int[] sel       = {selectedIdx};
+        final int[] dragRow   = {-1};
+        final boolean[] dragging = {false};
         final java.util.ArrayList<View> rows = new java.util.ArrayList<>();
 
         for (int i = 0; i < list.size(); i++) {
@@ -200,86 +202,102 @@ public class ServerSelectDialog {
             cnt.addView(row);
         }
 
-        // Drag-to-select: resalta el servidor bajo el dedo mientras deslizas
-        final int[] lastHovered = {-1};
-        cnt.setOnTouchListener((v, event) -> {
-            LinearLayout container = (LinearLayout) v;
-            int[] loc = new int[2];
-            container.getLocationOnScreen(loc);
-            int relY = (int) event.getRawY() - loc[1];
+        // Each row handles its own touch so events are always received.
+        // ACTION_MOVE tracks cross-row drag and highlights whichever row is under the finger.
+        for (int i = 0; i < rows.size(); i++) {
+            final int rowIdx = i;
+            rows.get(i).setOnTouchListener((v, event) -> {
+                int action = event.getAction();
 
-            int hoveredIdx = -1;
-            for (int i = 0; i < container.getChildCount(); i++) {
-                View child = container.getChildAt(i);
-                if (relY >= child.getTop() && relY <= child.getBottom()) {
-                    hoveredIdx = i;
-                    break;
-                }
-            }
+                if (action == android.view.MotionEvent.ACTION_DOWN) {
+                    dragging[0] = true;
+                    dragRow[0]  = rowIdx;
+                    // Block parent ScrollView from stealing the gesture
+                    ViewParent p = cnt.getParent();
+                    if (p != null) p.requestDisallowInterceptTouchEvent(true);
+                    highlightHovered(rows, rowIdx);
 
-            int action = event.getAction();
-            if (action == android.view.MotionEvent.ACTION_DOWN
-                    || action == android.view.MotionEvent.ACTION_MOVE) {
-                if (hoveredIdx >= 0 && hoveredIdx != lastHovered[0]) {
-                    lastHovered[0] = hoveredIdx;
-                    for (int i = 0; i < rows.size(); i++) {
-                        View row = rows.get(i);
-                        if (i == hoveredIdx) {
-                            row.setBackgroundResource(R.drawable.server_row_active);
-                            row.animate().scaleX(1.05f).scaleY(1.05f).alpha(1f)
-                                    .setDuration(80).start();
-                        } else {
-                            row.setBackgroundResource(R.drawable.server_row);
-                            row.animate().scaleX(0.94f).scaleY(0.94f).alpha(0.4f)
-                                    .setDuration(80).start();
+                } else if (action == android.view.MotionEvent.ACTION_MOVE && dragging[0]) {
+                    // Which row is the finger over right now?
+                    int[] cntLoc = new int[2];
+                    cnt.getLocationOnScreen(cntLoc);
+                    int relY = (int) event.getRawY() - cntLoc[1];
+                    int hovered = -1;
+                    for (int j = 0; j < cnt.getChildCount(); j++) {
+                        View child = cnt.getChildAt(j);
+                        if (relY >= child.getTop() && relY <= child.getBottom()) {
+                            hovered = j;
+                            break;
                         }
                     }
-                }
-            } else if (action == android.view.MotionEvent.ACTION_UP) {
-                int confirmed = lastHovered[0];
-                lastHovered[0] = -1;
-                if (confirmed >= 0 && confirmed < list.size()) {
-                    if (confirmed != sel[0]) {
-                        animateDeselect(rows.get(sel[0]));
+                    if (hovered >= 0 && hovered != dragRow[0]) {
+                        dragRow[0] = hovered;
+                        highlightHovered(rows, hovered);
+                    }
+
+                } else if (action == android.view.MotionEvent.ACTION_UP) {
+                    dragging[0] = false;
+                    int confirmed = dragRow[0];
+                    dragRow[0] = -1;
+                    ViewParent p = cnt.getParent();
+                    if (p != null) p.requestDisallowInterceptTouchEvent(false);
+
+                    if (confirmed >= 0 && confirmed < list.size()) {
                         sel[0] = confirmed;
+                        for (int j = 0; j < rows.size(); j++) {
+                            if (j == confirmed) animateSelect(rows.get(j));
+                            else                animateDeselect(rows.get(j));
+                        }
+                        final String url = list.get(confirmed).url;
+                        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                            Intent intent = new Intent(ctx, PlayerActivity.class);
+                            intent.putExtra("url", url);
+                            intent.putExtra("title", item.getTitle());
+                            intent.putExtra("item", item);
+                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            ctx.startActivity(intent);
+                            dialog.dismiss();
+                        }, 150);
+                    } else {
+                        resetToSelection(rows, sel[0]);
                     }
-                    animateSelect(rows.get(sel[0]));
-                    final String url = list.get(confirmed).url;
-                    Intent intent = new Intent(ctx, PlayerActivity.class);
-                    intent.putExtra("url", url);
-                    intent.putExtra("title", item.getTitle());
-                    intent.putExtra("item", item);
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    ctx.startActivity(intent);
-                    dialog.dismiss();
-                } else {
-                    // Fuera de filas — restablecer estado visual
-                    for (int i = 0; i < rows.size(); i++) {
-                        boolean selected = (i == sel[0]);
-                        rows.get(i).setBackgroundResource(
-                                selected ? R.drawable.server_row_active : R.drawable.server_row);
-                        rows.get(i).animate()
-                                .scaleX(selected ? 1f : 0.96f)
-                                .scaleY(selected ? 1f : 0.96f)
-                                .alpha(selected ? 1f : 0.75f)
-                                .setDuration(150).start();
-                    }
+
+                } else if (action == android.view.MotionEvent.ACTION_CANCEL) {
+                    dragging[0] = false;
+                    dragRow[0]  = -1;
+                    ViewParent p = cnt.getParent();
+                    if (p != null) p.requestDisallowInterceptTouchEvent(false);
+                    resetToSelection(rows, sel[0]);
                 }
-            } else if (action == android.view.MotionEvent.ACTION_CANCEL) {
-                lastHovered[0] = -1;
-                for (int i = 0; i < rows.size(); i++) {
-                    boolean selected = (i == sel[0]);
-                    rows.get(i).setBackgroundResource(
-                            selected ? R.drawable.server_row_active : R.drawable.server_row);
-                    rows.get(i).animate()
-                            .scaleX(selected ? 1f : 0.96f)
-                            .scaleY(selected ? 1f : 0.96f)
-                            .alpha(selected ? 1f : 0.75f)
-                            .setDuration(150).start();
-                }
+                return true;
+            });
+        }
+    }
+
+    private static void highlightHovered(java.util.ArrayList<View> rows, int hovered) {
+        for (int i = 0; i < rows.size(); i++) {
+            View row = rows.get(i);
+            if (i == hovered) {
+                row.setBackgroundResource(R.drawable.server_row_active);
+                row.animate().scaleX(1.05f).scaleY(1.05f).alpha(1f).setDuration(80).start();
+            } else {
+                row.setBackgroundResource(R.drawable.server_row);
+                row.animate().scaleX(0.94f).scaleY(0.94f).alpha(0.35f).setDuration(80).start();
             }
-            return true;
-        });
+        }
+    }
+
+    private static void resetToSelection(java.util.ArrayList<View> rows, int sel) {
+        for (int i = 0; i < rows.size(); i++) {
+            boolean selected = (i == sel);
+            rows.get(i).setBackgroundResource(
+                    selected ? R.drawable.server_row_active : R.drawable.server_row);
+            rows.get(i).animate()
+                    .scaleX(selected ? 1f : 0.96f)
+                    .scaleY(selected ? 1f : 0.96f)
+                    .alpha(selected ? 1f : 0.75f)
+                    .setDuration(150).start();
+        }
     }
 
     /**
@@ -293,8 +311,6 @@ public class ServerSelectDialog {
         LinearLayout row = new LinearLayout(ctx);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(android.view.Gravity.CENTER_VERTICAL);
-        row.setClickable(true);
-        row.setFocusable(true);
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 76));
