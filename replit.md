@@ -43,5 +43,13 @@ Server listens on port 5000.
 - `vapid.json` — auto-generated VAPID keys (generated once on first run)
 - `apks/` — uploaded APK files
 
+## Verified setup
+- Server starts cleanly via the `Start application` workflow (`npm install && node server.js`)
+- Listens on port 5000 (mapped to external port 80 in `.replit`)
+- `GET /version` and `GET /notifications` respond correctly on startup
+- VAPID keys are auto-generated to `vapid.json` on first run (already present)
+- Download URLs in `version.json` / `version_ultra1.json` are patched to the current Replit domain automatically on each server start
+- `ADMIN_KEY` secret is **not yet set** — `/admin/*` routes return 503 until it is configured in Replit Secrets
+
 ## User preferences
 <!-- Add any preferences here -->
