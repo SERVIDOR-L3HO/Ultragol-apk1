@@ -108,3 +108,9 @@ id = "GpFFZipcK0QTIv8OZ5CAl"
 uri = "file://apks/ultragol1.apk"
 type = "unspecified"
 title = "Ultragol1 — fix real del stutter en scroll (Home)"
+
+[[outputs]]
+id = "wQ3PBd_ZDqk-tjluUqXBR"
+uri = "file://Ultragol1/app/build/outputs/apk/debug/app-debug.apk"
+type = "unspecified"
+title = "Ultragol1 - app-debug.apk"
