@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+    android:background="#CC000000">
 
     <!-- Tap outside to dismiss -->
     <View
@@ -88,24 +88,21 @@
 
     <!-- RIGHT PANEL: episode controls + servers -->
     <LinearLayout
-        android:layout_width="240dp"
+        android:layout_width="280dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical|end"
-        android:layout_marginEnd="12dp"
+        android:layout_marginEnd="8dp"
         android:orientation="vertical"
         android:gravity="end">
 
 
         <!-- Loading -->
-        <TextView
+        <ProgressBar
             android:id="@+id/loadingServers"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
             android:layout_gravity="end"
-            android:text="Cargando servidores"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp"
-            android:fontFamily="sans-serif-bold"
+            android:indeterminateTint="#FFFFFF"
             android:visibility="visible"/>
 
         <!-- Error -->

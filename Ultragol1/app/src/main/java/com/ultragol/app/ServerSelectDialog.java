@@ -200,24 +200,86 @@ public class ServerSelectDialog {
             cnt.addView(row);
         }
 
-        for (int i = 0; i < rows.size(); i++) {
-            final int idx = i;
-            final String url = list.get(i).url;
-            rows.get(i).setOnClickListener(v -> {
-                if (idx != sel[0]) {
-                    animateDeselect(rows.get(sel[0]));
-                    animateSelect(rows.get(idx));
-                    sel[0] = idx;
+        // Drag-to-select: resalta el servidor bajo el dedo mientras deslizas
+        final int[] lastHovered = {-1};
+        cnt.setOnTouchListener((v, event) -> {
+            LinearLayout container = (LinearLayout) v;
+            int[] loc = new int[2];
+            container.getLocationOnScreen(loc);
+            int relY = (int) event.getRawY() - loc[1];
+
+            int hoveredIdx = -1;
+            for (int i = 0; i < container.getChildCount(); i++) {
+                View child = container.getChildAt(i);
+                if (relY >= child.getTop() && relY <= child.getBottom()) {
+                    hoveredIdx = i;
+                    break;
                 }
-                Intent intent = new Intent(ctx, PlayerActivity.class);
-                intent.putExtra("url", url);
-                intent.putExtra("title", item.getTitle());
-                intent.putExtra("item", item);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ctx.startActivity(intent);
-                dialog.dismiss();
-            });
-        }
+            }
+
+            int action = event.getAction();
+            if (action == android.view.MotionEvent.ACTION_DOWN
+                    || action == android.view.MotionEvent.ACTION_MOVE) {
+                if (hoveredIdx >= 0 && hoveredIdx != lastHovered[0]) {
+                    lastHovered[0] = hoveredIdx;
+                    for (int i = 0; i < rows.size(); i++) {
+                        View row = rows.get(i);
+                        if (i == hoveredIdx) {
+                            row.setBackgroundResource(R.drawable.server_row_active);
+                            row.animate().scaleX(1.05f).scaleY(1.05f).alpha(1f)
+                                    .setDuration(80).start();
+                        } else {
+                            row.setBackgroundResource(R.drawable.server_row);
+                            row.animate().scaleX(0.94f).scaleY(0.94f).alpha(0.4f)
+                                    .setDuration(80).start();
+                        }
+                    }
+                }
+            } else if (action == android.view.MotionEvent.ACTION_UP) {
+                int confirmed = lastHovered[0];
+                lastHovered[0] = -1;
+                if (confirmed >= 0 && confirmed < list.size()) {
+                    if (confirmed != sel[0]) {
+                        animateDeselect(rows.get(sel[0]));
+                        sel[0] = confirmed;
+                    }
+                    animateSelect(rows.get(sel[0]));
+                    final String url = list.get(confirmed).url;
+                    Intent intent = new Intent(ctx, PlayerActivity.class);
+                    intent.putExtra("url", url);
+                    intent.putExtra("title", item.getTitle());
+                    intent.putExtra("item", item);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    ctx.startActivity(intent);
+                    dialog.dismiss();
+                } else {
+                    // Fuera de filas — restablecer estado visual
+                    for (int i = 0; i < rows.size(); i++) {
+                        boolean selected = (i == sel[0]);
+                        rows.get(i).setBackgroundResource(
+                                selected ? R.drawable.server_row_active : R.drawable.server_row);
+                        rows.get(i).animate()
+                                .scaleX(selected ? 1f : 0.96f)
+                                .scaleY(selected ? 1f : 0.96f)
+                                .alpha(selected ? 1f : 0.75f)
+                                .setDuration(150).start();
+                    }
+                }
+            } else if (action == android.view.MotionEvent.ACTION_CANCEL) {
+                lastHovered[0] = -1;
+                for (int i = 0; i < rows.size(); i++) {
+                    boolean selected = (i == sel[0]);
+                    rows.get(i).setBackgroundResource(
+                            selected ? R.drawable.server_row_active : R.drawable.server_row);
+                    rows.get(i).animate()
+                            .scaleX(selected ? 1f : 0.96f)
+                            .scaleY(selected ? 1f : 0.96f)
+                            .alpha(selected ? 1f : 0.75f)
+                            .setDuration(150).start();
+                }
+            }
+            return true;
+        });
     }
 
     /**
@@ -235,12 +297,12 @@ public class ServerSelectDialog {
         row.setFocusable(true);
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-            ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 62));
-        lp.setMargins(0, dp(ctx, 4), 0, dp(ctx, 4));
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 76));
+        lp.setMargins(0, dp(ctx, 5), 0, dp(ctx, 5));
         row.setLayoutParams(lp);
 
         row.setBackgroundResource(selected ? R.drawable.server_row_active : R.drawable.server_row);
-        row.setPadding(dp(ctx, 14), dp(ctx, 10), dp(ctx, 14), dp(ctx, 10));
+        row.setPadding(dp(ctx, 16), dp(ctx, 12), dp(ctx, 16), dp(ctx, 12));
 
         if (!selected) {
             row.setScaleX(0.96f);
@@ -250,9 +312,9 @@ public class ServerSelectDialog {
 
         // Radio indicator (child 0) — LEFT side
         View radio = new View(ctx);
-        int radioSize = dp(ctx, selected ? 20 : 10);
+        int radioSize = dp(ctx, selected ? 24 : 12);
         LinearLayout.LayoutParams radioLp = new LinearLayout.LayoutParams(radioSize, radioSize);
-        radioLp.setMarginEnd(dp(ctx, 12));
+        radioLp.setMarginEnd(dp(ctx, 14));
         radio.setLayoutParams(radioLp);
         radio.setBackgroundResource(selected ? R.drawable.server_radio_ring : R.drawable.server_radio_dot);
         row.addView(radio);     // child 0
@@ -267,7 +329,7 @@ public class ServerSelectDialog {
         tvName.setText(srv.name);
         tvName.setGravity(android.view.Gravity.START);
         tvName.setTextColor(selected ? 0xFFFFFFFF : 0x99FFFFFF);
-        tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, selected ? 16f : 14f);
+        tvName.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, selected ? 18f : 16f);
         tvName.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
         tvName.setMaxLines(1);
         tvName.setEllipsize(android.text.TextUtils.TruncateAt.END);
@@ -277,7 +339,7 @@ public class ServerSelectDialog {
         tvStream.setText(srv.tipo != null && srv.tipo.equals("directo") ? "DIRECTO" : "STREAM");
         tvStream.setGravity(android.view.Gravity.START);
         tvStream.setTextColor(selected ? 0xAAFF6B00 : 0x44FFFFFF);
-        tvStream.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 9f);
+        tvStream.setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 11f);
         tvStream.setLetterSpacing(0.12f);
         tvStream.setTypeface(null, Typeface.BOLD);
         LinearLayout.LayoutParams slp = new LinearLayout.LayoutParams(
@@ -299,7 +361,7 @@ public class ServerSelectDialog {
         row.setBackgroundResource(R.drawable.server_row_active);
         if (ll.getChildCount() >= 2) {
             View radio = ll.getChildAt(0);
-            int size = dp(row.getContext(), 20);
+            int size = dp(row.getContext(), 24);
             android.view.ViewGroup.LayoutParams rLp = radio.getLayoutParams();
             rLp.width = size; rLp.height = size;
             radio.setLayoutParams(rLp);
@@ -308,7 +370,7 @@ public class ServerSelectDialog {
             LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
             if (textCol.getChildCount() >= 2) {
                 ((TextView) textCol.getChildAt(0)).setTextColor(0xFFFFFFFF);
-                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f);
+                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 18f);
                 ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.BOLD);
                 ((TextView) textCol.getChildAt(1)).setTextColor(0xAAFF6B00);
             }
@@ -337,7 +399,7 @@ public class ServerSelectDialog {
         row.setBackgroundResource(R.drawable.server_row);
         if (ll.getChildCount() >= 2) {
             View radio = ll.getChildAt(0);
-            int size = dp(row.getContext(), 10);
+            int size = dp(row.getContext(), 12);
             android.view.ViewGroup.LayoutParams rLp = radio.getLayoutParams();
             rLp.width = size; rLp.height = size;
             radio.setLayoutParams(rLp);
@@ -346,7 +408,7 @@ public class ServerSelectDialog {
             LinearLayout textCol = (LinearLayout) ll.getChildAt(1);
             if (textCol.getChildCount() >= 2) {
                 ((TextView) textCol.getChildAt(0)).setTextColor(0x99FFFFFF);
-                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 14f);
+                ((TextView) textCol.getChildAt(0)).setTextSize(android.util.TypedValue.COMPLEX_UNIT_SP, 16f);
                 ((TextView) textCol.getChildAt(0)).setTypeface(null, Typeface.NORMAL);
                 ((TextView) textCol.getChildAt(1)).setTextColor(0x44FFFFFF);
             }
