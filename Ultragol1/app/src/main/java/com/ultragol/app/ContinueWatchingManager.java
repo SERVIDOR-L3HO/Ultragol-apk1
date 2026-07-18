@@ -17,43 +17,69 @@ public class ContinueWatchingManager {
         public final ContentItem item;
         public final int season, episode;
         public final long timestamp;
-        /** Watch progress 0-100. 0 = never played (shouldn't appear), >0 = in progress. */
+        /** Watch progress 0-100. */
         public final int progressPercent;
+        /** Exact playback position in milliseconds. */
+        public final long progressMs;
+        /** Embed page URL (server) used to play this item. Empty = unknown. */
+        public final String serverUrl;
 
-        public Entry(ContentItem item, int season, int episode, long timestamp, int progressPercent) {
+        public Entry(ContentItem item, int season, int episode, long timestamp,
+                     int progressPercent, long progressMs, String serverUrl) {
             this.item = item;
             this.season = season;
             this.episode = episode;
             this.timestamp = timestamp;
             this.progressPercent = Math.max(0, Math.min(100, progressPercent));
+            this.progressMs = Math.max(0, progressMs);
+            this.serverUrl = serverUrl != null ? serverUrl : "";
+        }
+
+        /** Legacy constructor (no ms / server). */
+        public Entry(ContentItem item, int season, int episode, long timestamp, int progressPercent) {
+            this(item, season, episode, timestamp, progressPercent, 0, "");
         }
     }
 
-    /**
-     * Save an item with default starting progress (10%).
-     * Call this when the user starts playing content.
-     */
+    /** Save with default 10% progress (called when user first starts playing). */
     public static void save(Context ctx, ContentItem item, int season, int episode) {
-        save(ctx, item, season, episode, 10);
+        save(ctx, item, season, episode, 10, 0, "");
+    }
+
+    /** Save with explicit progress percentage (no ms position). */
+    public static void save(Context ctx, ContentItem item, int season, int episode, int progressPercent) {
+        save(ctx, item, season, episode, progressPercent, 0, "");
     }
 
     /**
-     * Save an item with explicit progress percentage (0-100).
-     * Use this to update progress mid-playback.
+     * Full save: progress percentage + exact ms position + server embed URL.
+     * Always use this overload when saving from the player so that
+     * "Continuar viendo" can resume at the exact minute on the same server.
      */
-    public static void save(Context ctx, ContentItem item, int season, int episode, int progressPercent) {
+    public static void save(Context ctx, ContentItem item, int season, int episode,
+                            int progressPercent, long progressMs, String serverUrl) {
         List<Entry> list = getAll(ctx);
-        // Preserve existing progress if new value is lower (e.g. same item replayed)
+
+        // Preserve existing data where the new call doesn't supply a value
         int existingProgress = 0;
+        long existingMs = 0;
+        String existingServer = "";
         for (Entry e : list) {
             if (e.item.getTmdbId() == item.getTmdbId()) {
                 existingProgress = e.progressPercent;
+                existingMs = e.progressMs;
+                existingServer = e.serverUrl;
                 break;
             }
         }
-        int finalProgress = Math.max(progressPercent, existingProgress);
+
+        int finalProgress  = Math.max(progressPercent, existingProgress);
+        long finalMs       = progressMs > 0 ? progressMs : existingMs;
+        String finalServer = (serverUrl != null && !serverUrl.isEmpty()) ? serverUrl : existingServer;
+
         list.removeIf(e -> e.item.getTmdbId() == item.getTmdbId());
-        list.add(0, new Entry(item, season, episode, System.currentTimeMillis(), finalProgress));
+        list.add(0, new Entry(item, season, episode, System.currentTimeMillis(),
+                finalProgress, finalMs, finalServer));
         if (list.size() > MAX) list = list.subList(0, MAX);
         writeList(ctx, list);
     }
@@ -79,12 +105,13 @@ public class ContinueWatchingManager {
                 it.setTmdbId(o.optInt("tmdbId", 0));
                 it.setBackdropUrl(o.optString("backdropUrl", ""));
                 it.setStreamUrl(o.optString("streamUrl", ""));
-                int progress = o.optInt("progress", 10); // default 10 for legacy entries
                 list.add(new Entry(it,
                     o.optInt("season", 1),
                     o.optInt("episode", 1),
                     o.optLong("ts", 0),
-                    progress));
+                    o.optInt("progress", 10),
+                    o.optLong("progressMs", 0),
+                    o.optString("serverUrl", "")));
             }
         } catch (Exception ignored) {}
         return list;
@@ -95,20 +122,22 @@ public class ContinueWatchingManager {
             JSONArray arr = new JSONArray();
             for (Entry e : list) {
                 JSONObject o = new JSONObject();
-                o.put("title",      e.item.getTitle());
-                o.put("genre",      e.item.getGenre());
-                o.put("year",       e.item.getYear());
-                o.put("rating",     e.item.getRating());
-                o.put("posterUrl",  e.item.getPosterUrl());
-                o.put("overview",   e.item.getOverview());
-                o.put("backdropUrl",e.item.getBackdropUrl());
-                o.put("streamUrl",  e.item.getStreamUrl());
-                o.put("type",       e.item.getContentType());
-                o.put("tmdbId",     e.item.getTmdbId());
-                o.put("season",     e.season);
-                o.put("episode",    e.episode);
-                o.put("ts",         e.timestamp);
-                o.put("progress",   e.progressPercent);
+                o.put("title",       e.item.getTitle());
+                o.put("genre",       e.item.getGenre());
+                o.put("year",        e.item.getYear());
+                o.put("rating",      e.item.getRating());
+                o.put("posterUrl",   e.item.getPosterUrl());
+                o.put("overview",    e.item.getOverview());
+                o.put("backdropUrl", e.item.getBackdropUrl());
+                o.put("streamUrl",   e.item.getStreamUrl());
+                o.put("type",        e.item.getContentType());
+                o.put("tmdbId",      e.item.getTmdbId());
+                o.put("season",      e.season);
+                o.put("episode",     e.episode);
+                o.put("ts",          e.timestamp);
+                o.put("progress",    e.progressPercent);
+                o.put("progressMs",  e.progressMs);
+                o.put("serverUrl",   e.serverUrl);
                 arr.put(o);
             }
             ctx.getSharedPreferences(prefsName(ctx), Context.MODE_PRIVATE)

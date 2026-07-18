@@ -95,6 +95,11 @@
             </intent-filter>
         </receiver>
 
+        <!-- Continue Watching Widget data service -->
+        <service android:name=".ContinueWatchingWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS"
+            android:exported="false" />
+
         <!-- ExoPlayer offline download service -->
         <service android:name=".VideoDownloadService"
             android:exported="false"

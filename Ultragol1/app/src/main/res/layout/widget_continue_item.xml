@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Single carousel card for the "Continuar viendo" home-screen widget.
+  Root id = wItemRoot is required for setOnClickFillInIntent.
+  Only views supported by RemoteViews are used here.
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wItemRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#1A1A1A">
+
+    <!-- Poster / backdrop image fills the whole card -->
+    <ImageView
+        android:id="@+id/wItemPoster"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"/>
+
+    <!-- Semi-transparent gradient bar at bottom for text legibility -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:orientation="vertical"
+        android:background="#D0000000"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="6dp">
+
+        <!-- Movie / series title -->
+        <TextView
+            android:id="@+id/wItemTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:fontFamily="sans-serif-bold"
+            android:maxLines="1"
+            android:ellipsize="end"/>
+
+        <!-- Episode label + progress % side by side -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="2dp">
+
+            <TextView
+                android:id="@+id/wItemEp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:textColor="#AAFFFFFF"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <TextView
+                android:id="@+id/wItemProgressText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#D50000"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+
+        <!-- Red progress bar -->
+        <ProgressBar
+            android:id="@+id/wItemProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_marginTop="5dp"
+            android:progressTint="#D50000"
+            android:progressBackgroundTint="#33FFFFFF"
+            android:max="100"
+            android:progress="10"/>
+    </LinearLayout>
+
+    <!-- Centered play button overlay -->
+    <TextView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:text="▶"
+        android:textColor="#CCFFFFFF"
+        android:textSize="16sp"
+        android:gravity="center"
+        android:background="#66000000"/>
+
+</FrameLayout>

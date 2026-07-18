@@ -292,7 +292,9 @@ public class PlayerActivity extends AppCompatActivity {
 
         // ── Save to "Continuar Viendo" history when player opens ─────────────
         if (item != null) {
-            ContinueWatchingManager.save(this, item, 1, 1);
+            // Save with the server URL so "Continuar viendo" can re-open the same source
+            ContinueWatchingManager.save(this, item, 1, 1, 10, 0,
+                    url != null ? url : "");
         }
     }
 
@@ -421,10 +423,17 @@ public class PlayerActivity extends AppCompatActivity {
 
         // Default: launch native ExoPlayer
         Intent intent = new Intent(this, MediaActivity.class);
-        intent.putExtra("url",      url);
-        intent.putExtra("title",    videoTitle != null ? videoTitle : "");
-        intent.putExtra("referer",  referer != null ? referer : "");
-        intent.putExtra("is_m3u8",  isM3u8);
+        intent.putExtra("url",        url);
+        intent.putExtra("title",      videoTitle != null ? videoTitle : "");
+        intent.putExtra("referer",    referer != null ? referer : "");
+        intent.putExtra("is_m3u8",   isM3u8);
+        // Pass item and server so MediaActivity can update ContinueWatchingManager
+        if (item != null) intent.putExtra("item", item);
+        intent.putExtra("server_url", currentEmbedUrl != null ? currentEmbedUrl : "");
+        intent.putExtra("poster_url", item != null ? item.getPosterUrl() : "");
+        // Forward resume position (e.g. coming from widget or ContinueWatchingAdapter)
+        long resumeMsFromIntent = getIntent().getLongExtra("resume_ms", 0);
+        if (resumeMsFromIntent > 0) intent.putExtra("resume_ms", resumeMsFromIntent);
         startActivityForResult(intent, MediaActivity.REQUEST_CODE);
     }
 

@@ -61,10 +61,23 @@ public class ContinueWatchingAdapter extends RecyclerView.Adapter<ContinueWatchi
             h.cwProgress.setProgress(pct);
         }
 
-        // Open detail on tap
+        // Open at the saved position on tap:
+        // → if a server URL is saved, open PlayerActivity directly so it re-extracts the
+        //   stream and lands in MediaActivity at the exact minute where the user left off.
+        // → otherwise fall back to DetailActivity so the user can pick a server first.
         h.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(ctx, DetailActivity.class);
-            intent.putExtra("item", item);
+            Intent intent;
+            if (!e.serverUrl.isEmpty()) {
+                intent = new Intent(ctx, com.ultragol.app.PlayerActivity.class);
+                intent.putExtra("url",       e.serverUrl);
+                intent.putExtra("title",     item.getTitle());
+                intent.putExtra("item",      item);
+                intent.putExtra("resume_ms", e.progressMs);
+                intent.putExtra("poster_url", item.getPosterUrl());
+            } else {
+                intent = new Intent(ctx, DetailActivity.class);
+                intent.putExtra("item", item);
+            }
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(intent);
         });

@@ -39,6 +39,9 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import java.util.Collections;
 
+// ── Continue Watching ─────────────────────────────────────────────────────────
+import com.ultragol.app.models.ContentItem;
+
 // ── Cast / TV Streaming ───────────────────────────────────────────────────────
 import android.widget.ImageView;
 import com.google.android.gms.cast.CastMediaControlIntent;
@@ -195,6 +198,12 @@ public class MediaActivity extends AppCompatActivity {
     // Offline playback flag — uses ExoPlayer cache instead of network
     private boolean useOffline = false;
 
+    // Continue-watching tracking
+    private ContentItem watchedItem;
+    private String serverUrlForSave;
+    private int watchedSeason  = 1;
+    private int watchedEpisode = 1;
+
     // Prefs
     private SharedPreferences prefs;
 
@@ -210,12 +219,16 @@ public class MediaActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_media);
 
-        videoUrl   = getIntent().getStringExtra("url");
-        videoTitle = getIntent().getStringExtra("title");
-        referer    = getIntent().getStringExtra("referer");
-        posterUrl  = getIntent().getStringExtra("poster_url");
-        isM3u8     = getIntent().getBooleanExtra("is_m3u8", false);
-        useOffline = getIntent().getBooleanExtra("use_offline", false);
+        videoUrl         = getIntent().getStringExtra("url");
+        videoTitle       = getIntent().getStringExtra("title");
+        referer          = getIntent().getStringExtra("referer");
+        posterUrl        = getIntent().getStringExtra("poster_url");
+        isM3u8           = getIntent().getBooleanExtra("is_m3u8", false);
+        useOffline       = getIntent().getBooleanExtra("use_offline", false);
+        watchedItem      = (ContentItem) getIntent().getSerializableExtra("item");
+        serverUrlForSave = getIntent().getStringExtra("server_url");
+        watchedSeason    = getIntent().getIntExtra("season", 1);
+        watchedEpisode   = getIntent().getIntExtra("episode", 1);
 
         if (videoUrl == null || videoUrl.isEmpty()) { finish(); return; }
 
@@ -1002,12 +1015,27 @@ public class MediaActivity extends AppCompatActivity {
 
     private void saveProgress(long posMs) {
         if (videoUrl == null || posMs < 5000) return;
+        // Save raw position keyed by URL (used by checkResumePosition)
         prefs.edit().putLong(videoUrl, posMs).apply();
+        // Also persist progress in ContinueWatchingManager so the home section
+        // and widget always show the correct thumbnail + resume position
+        if (watchedItem != null) {
+            long duration = (player != null) ? player.getDuration() : 0;
+            int pct = (duration > 0) ? (int) ((posMs * 100L) / duration) : 10;
+            pct = Math.max(1, Math.min(99, pct));
+            ContinueWatchingManager.save(this, watchedItem,
+                    watchedSeason, watchedEpisode,
+                    pct, posMs,
+                    serverUrlForSave != null ? serverUrlForSave : "");
+            ContinueWatchingWidget.refresh(this);
+        }
     }
 
     private void checkResumePosition() {
         if (videoUrl == null || resumeCard == null) return;
-        long savedPos = prefs.getLong(videoUrl, 0);
+        // If launched from "Continuar viendo" with an explicit resume position, use it
+        long intentMs = getIntent().getLongExtra("resume_ms", 0);
+        long savedPos = intentMs > 5000 ? intentMs : prefs.getLong(videoUrl, 0);
         if (savedPos < 5000) return;
 
         if (tvResumeText != null) tvResumeText.setText("Continuar desde " + formatTime(savedPos));
