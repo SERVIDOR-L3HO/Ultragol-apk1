@@ -315,6 +315,103 @@ app.get('/api/gol', async (req, res) => {
     }
 });
 
+// ── DRAMA-SHORTS API (proxy Dailymotion) ──────────────────────────────────────
+const DM_API    = 'https://api.dailymotion.com';
+const DM_FIELDS = 'id,title,thumbnail_url,duration,views_total,owner.screenname';
+
+async function dmFetch(path) {
+    const r = await fetch(`${DM_API}${path}`);
+    if (!r.ok) throw new Error(`DM ${r.status}`);
+    return r.json();
+}
+
+function mapDM(v) {
+    return {
+        id:          v.id,
+        titulo:      v.title || '',
+        thumbnailUrl:v.thumbnail_url || '',
+        duracion:    v.duration || 0,
+        vistas:      v.views_total || 0,
+        canal:       v['owner.screenname'] || '',
+        url:         `https://www.dailymotion.com/embed/video/${v.id}`
+    };
+}
+
+// 1. Recientes
+app.get('/drama-shorts', async (req, res) => {
+    try {
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const lang  = req.query.lang || 'es';
+        const q     = req.query.q   || 'drama corto';
+        const data  = await dmFetch(
+            `/videos?search=${encodeURIComponent(q)}&language=${lang}&fields=${DM_FIELDS}&limit=${limit}&page=${page}&sort=recent`
+        );
+        res.json({ transmisiones: (data.list || []).map(mapDM), total: data.total || 0, page });
+    } catch (e) { res.status(500).json({ error: 'Error drama-shorts', detail: e.message }); }
+});
+
+// 2. Buscar por título
+app.get('/drama-shorts/buscar', async (req, res) => {
+    try {
+        const titulo = req.query.titulo;
+        if (!titulo) return res.status(400).json({ error: 'Falta titulo' });
+        const lang  = req.query.lang  || 'es';
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const data  = await dmFetch(
+            `/videos?search=${encodeURIComponent(titulo)}&language=${lang}&fields=${DM_FIELDS}&limit=${limit}&page=${page}`
+        );
+        res.json({ resultados: (data.list || []).map(mapDM), total: data.total || 0 });
+    } catch (e) { res.status(500).json({ error: 'Error buscar', detail: e.message }); }
+});
+
+// 3. Video por ID
+app.get('/drama-shorts/video/:id', async (req, res) => {
+    try {
+        const data = await dmFetch(`/video/${req.params.id}?fields=${DM_FIELDS},description`);
+        res.json(mapDM(data));
+    } catch (e) { res.status(500).json({ error: 'Error video', detail: e.message }); }
+});
+
+// 4. Videos de un canal
+app.get('/drama-shorts/canal/:username', async (req, res) => {
+    try {
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const data  = await dmFetch(
+            `/user/${req.params.username}/videos?fields=${DM_FIELDS}&limit=${limit}&page=${page}`
+        );
+        res.json({ canal: req.params.username, videos: (data.list || []).map(mapDM), total: data.total || 0 });
+    } catch (e) { res.status(500).json({ error: 'Error canal', detail: e.message }); }
+});
+
+// 5. Populares
+app.get('/drama-shorts/populares', async (req, res) => {
+    try {
+        const lang  = req.query.lang  || 'es';
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const data  = await dmFetch(
+            `/videos?search=drama&language=${lang}&fields=${DM_FIELDS}&limit=${limit}&page=${page}&sort=visited`
+        );
+        res.json({ populares: (data.list || []).map(mapDM), total: data.total || 0 });
+    } catch (e) { res.status(500).json({ error: 'Error populares', detail: e.message }); }
+});
+
+// 6. Tendencias
+app.get('/drama-shorts/tendencias', async (req, res) => {
+    try {
+        const lang  = req.query.lang  || 'es';
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = Math.min(parseInt(req.query.limit) || 20, 100);
+        const data  = await dmFetch(
+            `/videos?search=drama&language=${lang}&fields=${DM_FIELDS}&limit=${limit}&page=${page}&sort=trending`
+        );
+        res.json({ tendencias: (data.list || []).map(mapDM), total: data.total || 0 });
+    } catch (e) { res.status(500).json({ error: 'Error tendencias', detail: e.message }); }
+});
+
 // ── GLOBAL ERROR HANDLER ──────────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
     if (err.code === 'LIMIT_FILE_SIZE')

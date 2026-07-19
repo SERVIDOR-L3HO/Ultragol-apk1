@@ -151,7 +151,8 @@
 
     <!-- ── Rows ── -->
     <include android:id="@+id/rowTrending" layout="@layout/row_section"/>
-    <include android:id="@+id/rowNew"      layout="@layout/row_section"/>
+    <include android:id="@+id/rowNew"          layout="@layout/row_section"/>
+    <include android:id="@+id/rowShortsdramas" layout="@layout/row_section"/>
 
     <!-- ── EN VIVO Glass Carousel (between Últimos Estrenos and Películas Populares) ── -->
     <include android:id="@+id/rowLiveGlass" layout="@layout/row_live_glass"/>

@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.ultragol.app.*;
 import com.ultragol.app.adapters.*;
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.DramaShortsApi;
 import com.ultragol.app.network.TmdbApi;
 import org.json.*;
 import java.io.*;
@@ -41,6 +42,7 @@ public class HomeFragment extends Fragment {
 
     // Content rows
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
+    private View rowShortsdramas;
     private View rowLiveGlass;
 
     // Continue watching
@@ -255,22 +257,24 @@ public class HomeFragment extends Fragment {
     // ── Content rows ─────────────────────────────────────────────────────────
 
     private void setupRows(View view) {
-        rowTrending  = view.findViewById(R.id.rowTrending);
-        rowTop10     = view.findViewById(R.id.rowTop10);
-        rowNew       = view.findViewById(R.id.rowNew);
-        rowMovies    = view.findViewById(R.id.rowMovies);
-        rowSeries    = view.findViewById(R.id.rowSeries);
-        rowAnime     = view.findViewById(R.id.rowAnime);
-        rowDoramas   = view.findViewById(R.id.rowDoramas);
-        rowLiveGlass = view.findViewById(R.id.rowLiveGlass);
+        rowTrending      = view.findViewById(R.id.rowTrending);
+        rowTop10         = view.findViewById(R.id.rowTop10);
+        rowNew           = view.findViewById(R.id.rowNew);
+        rowShortsdramas  = view.findViewById(R.id.rowShortsdramas);
+        rowMovies        = view.findViewById(R.id.rowMovies);
+        rowSeries        = view.findViewById(R.id.rowSeries);
+        rowAnime         = view.findViewById(R.id.rowAnime);
+        rowDoramas       = view.findViewById(R.id.rowDoramas);
+        rowLiveGlass     = view.findViewById(R.id.rowLiveGlass);
 
-        initRow(rowTrending, "Tendencias",          null);
-        initRow(rowNew,      "Últimos Estrenos",    new MoviesFragment());
-        initRow(rowMovies,   "Películas Populares", new MoviesFragment());
-        initRow(rowSeries,   "Series Populares",    new SeriesFragment());
-        initRow(rowAnime,    "Animes",              new AnimeFragment());
-        initRow(rowDoramas,  "Doramas",             new DoramasFragment());
-        initRow(rowTop10,    "Top 10",              new MoviesFragment());
+        initRow(rowTrending,     "Tendencias",          null);
+        initRow(rowNew,          "Últimos Estrenos",    new MoviesFragment());
+        initRow(rowShortsdramas, "🎬 Shorts Dramas",   null);
+        initRow(rowMovies,       "Películas Populares", new MoviesFragment());
+        initRow(rowSeries,       "Series Populares",    new SeriesFragment());
+        initRow(rowAnime,        "Animes",              new AnimeFragment());
+        initRow(rowDoramas,      "Doramas",             new DoramasFragment());
+        initRow(rowTop10,        "Top 10",              new MoviesFragment());
 
         // Init live glass carousel RecyclerView
         if (rowLiveGlass != null) {
@@ -327,9 +331,10 @@ public class HomeFragment extends Fragment {
             // ── Kids mode: hide sports/anime/doramas rows, load family content ──
             h.post(() -> {
                 if (!isAdded()) return;
-                if (rowAnime != null)     rowAnime.setVisibility(View.GONE);
-                if (rowDoramas != null)   rowDoramas.setVisibility(View.GONE);
-                if (rowLiveGlass != null) rowLiveGlass.setVisibility(View.GONE);
+                if (rowAnime != null)         rowAnime.setVisibility(View.GONE);
+                if (rowDoramas != null)       rowDoramas.setVisibility(View.GONE);
+                if (rowShortsdramas != null)  rowShortsdramas.setVisibility(View.GONE);
+                if (rowLiveGlass != null)     rowLiveGlass.setVisibility(View.GONE);
                 if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
                 if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
                 if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
@@ -384,21 +389,23 @@ public class HomeFragment extends Fragment {
             // ── Normal mode: explicitly restore all row visibilities ─────────
             h.post(() -> {
                 if (!isAdded()) return;
-                if (rowAnime != null)     rowAnime.setVisibility(View.VISIBLE);
-                if (rowDoramas != null)   rowDoramas.setVisibility(View.VISIBLE);
-                if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
-                if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
-                if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
-                if (rowNew != null)       rowNew.setVisibility(View.VISIBLE);
-                if (rowTop10 != null)     rowTop10.setVisibility(View.VISIBLE);
+                if (rowAnime != null)        rowAnime.setVisibility(View.VISIBLE);
+                if (rowDoramas != null)      rowDoramas.setVisibility(View.VISIBLE);
+                if (rowShortsdramas != null) rowShortsdramas.setVisibility(View.VISIBLE);
+                if (rowTrending != null)     rowTrending.setVisibility(View.VISIBLE);
+                if (rowMovies != null)       rowMovies.setVisibility(View.VISIBLE);
+                if (rowSeries != null)       rowSeries.setVisibility(View.VISIBLE);
+                if (rowNew != null)          rowNew.setVisibility(View.VISIBLE);
+                if (rowTop10 != null)        rowTop10.setVisibility(View.VISIBLE);
                 // Restore default row titles
-                setRowTitle(rowTrending, "Tendencias");
-                setRowTitle(rowMovies,   "Películas Populares");
-                setRowTitle(rowSeries,   "Series Populares");
-                setRowTitle(rowNew,      "Últimos Estrenos");
-                setRowTitle(rowTop10,    "Top 10");
-                setRowTitle(rowAnime,    "Animes");
-                setRowTitle(rowDoramas,  "Doramas");
+                setRowTitle(rowTrending,     "Tendencias");
+                setRowTitle(rowMovies,       "Películas Populares");
+                setRowTitle(rowSeries,       "Series Populares");
+                setRowTitle(rowNew,          "Últimos Estrenos");
+                setRowTitle(rowShortsdramas, "🎬 Shorts Dramas");
+                setRowTitle(rowTop10,        "Top 10");
+                setRowTitle(rowAnime,        "Animes");
+                setRowTitle(rowDoramas,      "Doramas");
             });
 
             pool.execute(() -> { try {
@@ -447,6 +454,28 @@ public class HomeFragment extends Fragment {
                 List<ContentItem> r = TmdbApi.fetchTopMovies();
                 h.post(() -> { try { if (isAdded()) fillRow(rowTop10, r); } catch (Exception ignored) {} });
             } catch (Exception ignored) {} });
+
+            // ── Shorts Dramas (Dailymotion, random) ──
+            pool.execute(() -> {
+                try {
+                    List<DramaShortsApi.VideoItem> shorts = DramaShortsApi.fetchRecientes(1);
+                    h.post(() -> {
+                        try {
+                            if (!isAdded() || rowShortsdramas == null) return;
+                            if (shorts.isEmpty()) {
+                                rowShortsdramas.setVisibility(View.GONE);
+                                return;
+                            }
+                            RecyclerView rv = rowShortsdramas.findViewById(R.id.rowRv);
+                            if (rv != null) {
+                                rv.setAdapter(new DramaShortsRowAdapter(requireContext(), shorts));
+                            }
+                        } catch (Exception ignored) {}
+                    });
+                } catch (Exception ignored) {
+                    h.post(() -> { if (rowShortsdramas != null) rowShortsdramas.setVisibility(View.GONE); });
+                }
+            });
 
             // Live glass carousel
             Executors.newSingleThreadExecutor().execute(() -> {

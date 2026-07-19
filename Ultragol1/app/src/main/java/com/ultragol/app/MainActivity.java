@@ -77,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
         });
         if (navSearch    != null) navSearch.setOnClickListener(v    -> {
             hideMenu();
-            startActivity(new Intent(this, SearchActivity.class));
+            startActivity(new Intent(this, DramaShortsActivity.class));
         });
 
         // ── Plataformas ──
