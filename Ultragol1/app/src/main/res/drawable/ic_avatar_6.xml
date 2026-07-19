@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Beard male -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M12,5C9.24,5 7,7.24 7,10C7,12.76 9.24,15 12,15C14.76,15 17,12.76 17,10C17,7.24 14.76,5 12,5ZM7,10C7,7.24 9.24,4.5 12,4.5C14.76,4.5 17,7.24 17,10L16,10C16,7.79 14.21,6 12,6C9.79,6 8,7.79 8,10ZM8.5,13C8.5,12 9.5,11.5 12,11.5C14.5,11.5 15.5,12 15.5,13L15.5,15.5C15.5,16 14,16.5 12,16.5C10,16.5 8.5,16 8.5,15.5ZM3,23C3,19.13 7.13,17 12,17C16.87,17 21,19.13 21,23Z"/>
+</vector>

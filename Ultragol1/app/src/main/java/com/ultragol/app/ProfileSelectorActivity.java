@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.ultragol.app.adapters.ProfileAdapter;
 import java.util.List;
+import android.widget.ImageView;
 
 public class ProfileSelectorActivity extends AppCompatActivity
         implements ProfileAdapter.Listener {
@@ -253,15 +254,16 @@ public class ProfileSelectorActivity extends AppCompatActivity
         if (dialog.getWindow() != null)
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
 
-        TextView dialogTitle  = v.findViewById(R.id.dialogTitle);
-        EditText etName       = v.findViewById(R.id.etName);
-        FrameLayout avatarPrev = v.findViewById(R.id.avatarPreview);
-        TextView initialPrev  = v.findViewById(R.id.avatarInitialPreview);
-        LinearLayout colorPicker = v.findViewById(R.id.colorPicker);
+        TextView dialogTitle      = v.findViewById(R.id.dialogTitle);
+        EditText etName           = v.findViewById(R.id.etName);
+        FrameLayout avatarPrev    = v.findViewById(R.id.avatarPreview);
+        ImageView ivAvatarPreview = v.findViewById(R.id.ivAvatarIconPreview);
+        LinearLayout colorPicker  = v.findViewById(R.id.colorPicker);
+        LinearLayout avatarPickerRow = v.findViewById(R.id.avatarPickerRow);
         androidx.appcompat.widget.SwitchCompat switchKids = v.findViewById(R.id.switchKids);
-        TextView tvPinStatus  = v.findViewById(R.id.tvPinStatus);
-        TextView btnSetPin    = v.findViewById(R.id.btnSetPin);
-        TextView btnSave      = v.findViewById(R.id.btnSave);
+        TextView tvPinStatus = v.findViewById(R.id.tvPinStatus);
+        TextView btnSetPin   = v.findViewById(R.id.btnSetPin);
+        TextView btnSave     = v.findViewById(R.id.btnSave);
 
         boolean isEdit = existing != null;
         dialogTitle.setText(isEdit ? "Editar perfil" : "Nuevo perfil");
@@ -270,23 +272,76 @@ public class ProfileSelectorActivity extends AppCompatActivity
             switchKids.setChecked(existing.isKids);
         }
 
-        // Temp profile to hold pending PIN change
         final ProfileManager.Profile[] pending = {isEdit ? existing : ProfileManager.newProfile("", ProfileManager.AVATAR_COLORS[0])};
+        final String[] selectedColor  = {isEdit ? existing.avatarColor : ProfileManager.AVATAR_COLORS[0]};
+        final int[]    selectedAvatar = {isEdit ? existing.avatarId    : 0};
+        float dp = getResources().getDisplayMetrics().density;
 
-        // Avatar color tracking
-        final String[] selectedColor = {isEdit ? existing.avatarColor : ProfileManager.AVATAR_COLORS[0]};
-
-        // Set avatar preview
+        // ── Update big preview ──────────────────────────────────────────────
         Runnable updatePreview = () -> {
             GradientDrawable gd = new GradientDrawable();
             gd.setShape(GradientDrawable.OVAL);
             try { gd.setColor(Color.parseColor(selectedColor[0])); }
-            catch (Exception e) { gd.setColor(Color.parseColor("#FF6B00")); }
-            avatarPrev.setBackground(gd);
-            String name = etName.getText().toString().trim();
-            initialPrev.setText(name.isEmpty() ? "?" : String.valueOf(name.charAt(0)).toUpperCase());
+            catch (Exception e) { gd.setColor(0xFFFF6B00); }
+            if (avatarPrev != null) avatarPrev.setBackground(gd);
+            if (ivAvatarPreview != null) {
+                boolean kids = switchKids != null && switchKids.isChecked();
+                int[] arr = kids ? ProfileManager.KIDS_AVATARS : ProfileManager.ADULT_AVATARS;
+                int id = selectedAvatar[0] >= 100 ? selectedAvatar[0] - 100 : selectedAvatar[0];
+                if (id < 0 || id >= arr.length) id = 0;
+                ivAvatarPreview.setImageResource(arr[id]);
+            }
         };
         updatePreview.run();
+
+        // ── Avatar picker ───────────────────────────────────────────────────
+        final Runnable[] buildPicker = {null};
+        buildPicker[0] = () -> {
+            if (avatarPickerRow == null) return;
+            avatarPickerRow.removeAllViews();
+            boolean kids = switchKids != null && switchKids.isChecked();
+            int[] avatarArr = kids ? ProfileManager.KIDS_AVATARS : ProfileManager.ADULT_AVATARS;
+            int sel = selectedAvatar[0];
+            for (int i = 0; i < avatarArr.length; i++) {
+                final int finalIdx   = i;
+                final int finalAvatarId = kids ? (100 + i) : i;
+                FrameLayout item = new FrameLayout(this);
+                int sz = (int)(58 * dp);
+                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sz, sz);
+                lp.setMargins((int)(5*dp), (int)(4*dp), (int)(5*dp), (int)(4*dp));
+                item.setLayoutParams(lp);
+
+                GradientDrawable bg = new GradientDrawable();
+                bg.setShape(GradientDrawable.OVAL);
+                try { bg.setColor(Color.parseColor(selectedColor[0])); } catch (Exception e) { bg.setColor(0xFFFF6B00); }
+                boolean isSel = (sel == finalAvatarId);
+                bg.setStroke(isSel ? (int)(3*dp) : (int)(1*dp), isSel ? 0xFFFFFFFF : 0x44FFFFFF);
+                item.setBackground(bg);
+
+                ImageView iv = new ImageView(this);
+                FrameLayout.LayoutParams ivlp = new FrameLayout.LayoutParams((int)(34*dp), (int)(34*dp));
+                ivlp.gravity = android.view.Gravity.CENTER;
+                iv.setLayoutParams(ivlp);
+                iv.setImageResource(avatarArr[finalIdx]);
+                iv.setColorFilter(isSel ? 0xFFFFFFFF : 0xAAFFFFFF);
+                item.addView(iv);
+
+                item.setOnClickListener(sv -> {
+                    selectedAvatar[0] = finalAvatarId;
+                    buildPicker[0].run();
+                    updatePreview.run();
+                });
+                avatarPickerRow.addView(item);
+            }
+        };
+        buildPicker[0].run();
+
+        // ── Kids toggle ─────────────────────────────────────────────────────
+        switchKids.setOnCheckedChangeListener((btn, isChecked) -> {
+            selectedAvatar[0] = isChecked ? 100 : 0;
+            buildPicker[0].run();
+            updatePreview.run();
+        });
 
         etName.addTextChangedListener(new TextWatcher() {
             public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
@@ -294,36 +349,36 @@ public class ProfileSelectorActivity extends AppCompatActivity
             public void afterTextChanged(Editable s) {}
         });
 
-        // Color swatches
+        // ── Color swatches ──────────────────────────────────────────────────
         for (String color : ProfileManager.AVATAR_COLORS) {
             FrameLayout swatch = new FrameLayout(this);
-            int sz = (int)(44 * getResources().getDisplayMetrics().density);
+            int sz = (int)(38 * dp);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sz, sz);
-            lp.setMargins(8, 0, 8, 0);
+            lp.setMargins((int)(5*dp), 0, (int)(5*dp), 0);
             swatch.setLayoutParams(lp);
             GradientDrawable gd = new GradientDrawable();
             gd.setShape(GradientDrawable.OVAL);
             try { gd.setColor(Color.parseColor(color)); } catch (Exception ignored) {}
-            if (color.equals(selectedColor[0])) gd.setStroke((int)(3*getResources().getDisplayMetrics().density), Color.WHITE);
+            if (color.equals(selectedColor[0])) gd.setStroke((int)(3*dp), Color.WHITE);
             swatch.setBackground(gd);
             swatch.setOnClickListener(sv -> {
                 selectedColor[0] = color;
-                // Refresh all swatches
                 for (int i = 0; i < colorPicker.getChildCount(); i++) {
                     View sw = colorPicker.getChildAt(i);
                     GradientDrawable gd2 = new GradientDrawable();
                     gd2.setShape(GradientDrawable.OVAL);
                     String c = ProfileManager.AVATAR_COLORS[i];
                     try { gd2.setColor(Color.parseColor(c)); } catch (Exception ignored) {}
-                    if (c.equals(selectedColor[0])) gd2.setStroke((int)(3*getResources().getDisplayMetrics().density), Color.WHITE);
+                    if (c.equals(selectedColor[0])) gd2.setStroke((int)(3*dp), Color.WHITE);
                     sw.setBackground(gd2);
                 }
+                buildPicker[0].run();
                 updatePreview.run();
             });
             colorPicker.addView(swatch);
         }
 
-        // PIN status
+        // ── PIN status ──────────────────────────────────────────────────────
         Runnable refreshPinStatus = () -> {
             tvPinStatus.setText(pending[0].hasPin() ? "PIN configurado ✓" : "Sin PIN configurado");
             tvPinStatus.setTextColor(pending[0].hasPin()
@@ -334,11 +389,11 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         btnSetPin.setOnClickListener(btn -> {
             dialog.dismiss();
-            // Temporarily save pending profile for PIN flow
-            pending[0].name = etName.getText().toString().trim();
+            pending[0].name        = etName.getText().toString().trim();
             if (pending[0].name.isEmpty()) pending[0].name = "Perfil";
             pending[0].avatarColor = selectedColor[0];
-            pending[0].isKids = switchKids.isChecked();
+            pending[0].avatarId    = selectedAvatar[0];
+            pending[0].isKids      = switchKids.isChecked();
             showInlineSetPin(pending[0], refreshPinStatus, dialog);
         });
 
@@ -350,6 +405,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
             }
             pending[0].name        = name;
             pending[0].avatarColor = selectedColor[0];
+            pending[0].avatarId    = selectedAvatar[0];
             pending[0].isKids      = switchKids.isChecked();
             ProfileManager.save(this, pending[0]);
             dialog.dismiss();
@@ -362,13 +418,11 @@ public class ProfileSelectorActivity extends AppCompatActivity
         dialog.setCanceledOnTouchOutside(isEdit);
         dialog.show();
 
-        // ── Forzar ancho completo con márgenes estilo Netflix ──────────────────
         if (dialog.getWindow() != null) {
             int screenW = getResources().getDisplayMetrics().widthPixels;
             int margin  = (int)(20 * getResources().getDisplayMetrics().density);
             dialog.getWindow().setLayout(screenW - margin * 2,
                 android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
-            // Eliminar el dimming raro y reemplazar por el del fondo ya existente
             dialog.getWindow().setDimAmount(0.75f);
         }
     }

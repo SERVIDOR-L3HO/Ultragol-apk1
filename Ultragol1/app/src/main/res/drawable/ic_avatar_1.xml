@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Long hair female -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M12,5C9.24,5 7,7.24 7,10C7,12.76 9.24,15 12,15C14.76,15 17,12.76 17,10C17,7.24 14.76,5 12,5ZM6.5,9C6.5,5.97 9.01,3.5 12,3.5C14.99,3.5 17.5,5.97 17.5,9L17.5,19L15.5,19L15.5,12C14.68,13.2 13.42,14 12,14C10.58,14 9.32,13.2 8.5,12L8.5,19L6.5,19ZM3,23C3,19.13 7.13,17 12,17C16.87,17 21,19.13 21,23Z"/>
+</vector>

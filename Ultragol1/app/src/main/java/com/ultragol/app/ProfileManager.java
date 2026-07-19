@@ -19,14 +19,27 @@ public class ProfileManager {
         "#E67E22", "#2ECC71"
     };
 
+    public static final int[] ADULT_AVATARS = {
+        R.drawable.ic_avatar_0, R.drawable.ic_avatar_1,
+        R.drawable.ic_avatar_2, R.drawable.ic_avatar_3,
+        R.drawable.ic_avatar_4, R.drawable.ic_avatar_5,
+        R.drawable.ic_avatar_6, R.drawable.ic_avatar_7
+    };
+
+    public static final int[] KIDS_AVATARS = {
+        R.drawable.ic_avatar_kids_0, R.drawable.ic_avatar_kids_1,
+        R.drawable.ic_avatar_kids_2, R.drawable.ic_avatar_kids_3
+    };
+
     // ─────────────────────────────────────────────────────────────────────────
 
     public static class Profile {
         public String id;
         public String name;
-        public String avatarColor;  // hex string
+        public String avatarColor;  // hex string (accent / circle bg)
         public String pin;          // "" if no PIN
         public boolean isKids;
+        public int    avatarId;     // 0-7 adults, 100-103 kids
         public long createdAt;
 
         public Profile() {}
@@ -35,6 +48,14 @@ public class ProfileManager {
             return name != null && !name.isEmpty()
                 ? String.valueOf(name.charAt(0)).toUpperCase(Locale.getDefault())
                 : "?";
+        }
+
+        public int getAvatarResId() {
+            if (avatarId >= 100) {
+                int idx = avatarId - 100;
+                return (idx >= 0 && idx < KIDS_AVATARS.length) ? KIDS_AVATARS[idx] : KIDS_AVATARS[0];
+            }
+            return (avatarId >= 0 && avatarId < ADULT_AVATARS.length) ? ADULT_AVATARS[avatarId] : ADULT_AVATARS[0];
         }
 
         public boolean hasPin() { return pin != null && !pin.isEmpty(); }
@@ -78,6 +99,7 @@ public class ProfileManager {
         p.avatarColor = color;
         p.pin         = "";
         p.isKids      = false;
+        p.avatarId    = 0;
         p.createdAt   = System.currentTimeMillis();
         return p;
     }
@@ -132,18 +154,20 @@ public class ProfileManager {
         p.avatarColor = o.optString("color", "#FF6B00");
         p.pin         = o.optString("pin", "");
         p.isKids      = o.optBoolean("kids", false);
+        p.avatarId    = o.optInt("avatarId", 0);
         p.createdAt   = o.optLong("ts", 0);
         return p;
     }
 
     private static JSONObject toJson(Profile p) throws JSONException {
         JSONObject o = new JSONObject();
-        o.put("id",    p.id);
-        o.put("name",  p.name);
-        o.put("color", p.avatarColor);
-        o.put("pin",   p.pin);
-        o.put("kids",  p.isKids);
-        o.put("ts",    p.createdAt);
+        o.put("id",       p.id);
+        o.put("name",     p.name);
+        o.put("color",    p.avatarColor);
+        o.put("pin",      p.pin);
+        o.put("kids",     p.isKids);
+        o.put("avatarId", p.avatarId);
+        o.put("ts",       p.createdAt);
         return o;
     }
 }

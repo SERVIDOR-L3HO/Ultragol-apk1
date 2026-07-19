@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.ultragol.app.*;
 import java.util.List;
+import android.widget.ImageView;
 
 public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -73,14 +74,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private void bindProfile(ProfileVH h, ProfileManager.Profile p) {
-        // Avatar color
+        // Avatar accent circle background
         GradientDrawable circle = new GradientDrawable();
         circle.setShape(GradientDrawable.OVAL);
         try { circle.setColor(Color.parseColor(p.avatarColor)); }
         catch (Exception e) { circle.setColor(Color.parseColor("#FF6B00")); }
         h.avatarCircle.setBackground(circle);
 
-        h.tvInitial.setText(p.getInitial());
+        // Avatar icon
+        if (h.ivAvatar != null) h.ivAvatar.setImageResource(p.getAvatarResId());
         h.tvName.setText(p.name);
 
         // PIN badge
@@ -117,14 +119,15 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     class ProfileVH extends RecyclerView.ViewHolder {
         FrameLayout cardContainer, avatarCircle;
-        TextView tvInitial, tvName;
+        ImageView ivAvatar;
+        TextView tvName;
         View tvPinBadge, badgeKids;
         View btnDelete;
         ProfileVH(View v) {
             super(v);
             cardContainer = v.findViewById(R.id.cardContainer);
             avatarCircle  = v.findViewById(R.id.avatarCircle);
-            tvInitial     = v.findViewById(R.id.tvInitial);
+            ivAvatar      = v.findViewById(R.id.ivAvatar);
             tvName        = v.findViewById(R.id.tvName);
             tvPinBadge    = v.findViewById(R.id.tvPinBadge);
             badgeKids     = v.findViewById(R.id.badgeKids);

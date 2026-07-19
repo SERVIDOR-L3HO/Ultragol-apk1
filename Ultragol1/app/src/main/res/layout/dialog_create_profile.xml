@@ -55,18 +55,48 @@
                     android:layout_gravity="center"
                     android:background="@drawable/profile_avatar_circle">
 
-                    <TextView
-                        android:id="@+id/avatarInitialPreview"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center"
-                        android:text="?"
-                        android:textColor="#FFFFFF"
-                        android:textSize="32sp"
-                        android:fontFamily="sans-serif-black"/>
+                    <ImageView
+                        android:id="@+id/ivAvatarIconPreview"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:src="@drawable/ic_avatar_0"
+                        android:tint="#EEFFFFFF"
+                        android:scaleType="fitCenter"/>
                 </FrameLayout>
             </FrameLayout>
         </LinearLayout>
+
+        <!-- ── Avatar picker horizontal ──────────────────────────────────── -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ELIGE TU AVATAR"
+            android:textColor="#80FFFFFF"
+            android:textSize="9sp"
+            android:fontFamily="sans-serif-bold"
+            android:letterSpacing="0.12"
+            android:layout_marginStart="18dp"
+            android:layout_marginBottom="8dp"/>
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:layout_marginBottom="16dp">
+
+            <LinearLayout
+                android:id="@+id/avatarPickerRow"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"/>
+        </HorizontalScrollView>
 
         <!-- ── BODY ──────────────────────────────────────────────────────── -->
         <LinearLayout
@@ -120,7 +150,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="COLOR DEL AVATAR"
+                android:text="COLOR DE ACENTO"
                 android:textColor="#80FFFFFF"
                 android:textSize="9sp"
                 android:fontFamily="sans-serif-bold"
