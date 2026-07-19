@@ -21,15 +21,13 @@ import java.util.List;
 
 public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    public static final int TYPE_HEADER     = 0;
-    public static final int TYPE_CATEGORIES = 1;
-    public static final int TYPE_CHANNEL    = 2;
-    public static final int TYPE_LOADING    = 3;
-    public static final int TYPE_EMPTY      = 4;
+    public static final int TYPE_CATEGORIES = 0;
+    public static final int TYPE_CHANNEL    = 1;
+    public static final int TYPE_LOADING    = 2;
+    public static final int TYPE_EMPTY      = 3;
 
-    private static final int POS_HEADER     = 0;
-    private static final int POS_CATEGORIES = 1;
-    private static final int POS_CONTENT    = 2; // channels start here
+    private static final int POS_CATEGORIES = 0;
+    private static final int POS_CONTENT    = 1; // channels start here
 
     private final Context context;
     private final List<TvChannel> channels = new ArrayList<>();
@@ -77,13 +75,12 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     // ── Adapter ───────────────────────────────────────────────────────────────
 
     @Override public int getItemCount() {
-        // Header + Categories + (loading OR channels OR empty)
+        // Categories row + (loading OR channels OR empty)
         int contentCount = isLoading ? 1 : (channels.isEmpty() ? 1 : channels.size());
         return POS_CONTENT + contentCount;
     }
 
     @Override public int getItemViewType(int pos) {
-        if (pos == POS_HEADER)     return TYPE_HEADER;
         if (pos == POS_CATEGORIES) return TYPE_CATEGORIES;
         if (isLoading)             return TYPE_LOADING;
         if (channels.isEmpty())    return TYPE_EMPTY;
@@ -94,8 +91,6 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater li = LayoutInflater.from(context);
         switch (viewType) {
-            case TYPE_HEADER:
-                return new HeaderVH(li.inflate(R.layout.item_tv_header, parent, false));
             case TYPE_CATEGORIES:
                 return new CategoriesVH(li.inflate(R.layout.item_tv_categories, parent, false));
             case TYPE_LOADING:
@@ -110,9 +105,6 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int pos) {
         switch (getItemViewType(pos)) {
-            case TYPE_HEADER:
-                ((HeaderVH) holder).bind(channels.size());
-                break;
             case TYPE_CATEGORIES:
                 ((CategoriesVH) holder).bind(categories, selectedCategory);
                 break;
@@ -126,18 +118,6 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     }
 
     // ── ViewHolders ───────────────────────────────────────────────────────────
-
-    class HeaderVH extends RecyclerView.ViewHolder {
-        private final TextView tvCount;
-        HeaderVH(View v) {
-            super(v);
-            tvCount = v.findViewById(R.id.tvChannelCount);
-        }
-        void bind(int count) {
-            if (tvCount != null)
-                tvCount.setText(count > 0 ? count + " canales en vivo" : "Cargando canales…");
-        }
-    }
 
     class CategoriesVH extends RecyclerView.ViewHolder {
         private final LinearLayout chipContainer;

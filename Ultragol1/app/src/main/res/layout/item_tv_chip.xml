@@ -13,7 +13,7 @@
         android:paddingEnd="16dp"
         android:textSize="13sp"
         android:fontFamily="sans-serif-medium"
-        android:clickable="true"
-        android:focusable="true"/>
+        android:clickable="false"
+        android:focusable="false"/>
 
 </FrameLayout>
