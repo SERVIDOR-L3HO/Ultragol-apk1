@@ -50,6 +50,15 @@ public class TvFragment extends Fragment {
     /** Canales de respaldo siempre disponibles — accesibles desde otras clases. */
     public static TvChannel[] getFallbackChannels() { return FALLBACK; }
 
+    /**
+     * Caché global de canales cargados — accesible desde SearchActivity.
+     * Se puebla progresivamente conforme el fragment carga fuentes M3U.
+     */
+    private static final List<TvChannel> CHANNEL_CACHE = new ArrayList<>();
+    public static List<TvChannel> getCachedChannels() {
+        synchronized (CHANNEL_CACHE) { return new ArrayList<>(CHANNEL_CACHE); }
+    }
+
     // ── Canales de respaldo (siempre disponibles, streams conocidos) ──────────
     private static final TvChannel[] FALLBACK = {
         // Noticias internacionales
@@ -93,20 +102,49 @@ public class TvFragment extends Fragment {
            TvChannel.CAT_ENTRETENIMIENTO, "US"),
     };
 
-    // ── Fuentes IPTV remotas (iptv-org) ───────────────────────────────────────
+    // ── Fuentes IPTV remotas (iptv-org + otros agregadores) ──────────────────
     private static final String[] M3U_SOURCES = {
+        // Por categoría
         "https://iptv-org.github.io/iptv/categories/news.m3u",
         "https://iptv-org.github.io/iptv/categories/sports.m3u",
         "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
         "https://iptv-org.github.io/iptv/categories/music.m3u",
         "https://iptv-org.github.io/iptv/categories/documentary.m3u",
+        "https://iptv-org.github.io/iptv/categories/kids.m3u",
+        "https://iptv-org.github.io/iptv/categories/general.m3u",
+        "https://iptv-org.github.io/iptv/categories/science.m3u",
+        "https://iptv-org.github.io/iptv/categories/business.m3u",
+        "https://iptv-org.github.io/iptv/categories/travel.m3u",
+        "https://iptv-org.github.io/iptv/categories/cooking.m3u",
+        "https://iptv-org.github.io/iptv/categories/religious.m3u",
+        // Por idioma español + inglés
+        "https://iptv-org.github.io/iptv/languages/spa.m3u",
+        "https://iptv-org.github.io/iptv/languages/por.m3u",
+        // LATAM y España por país
         "https://iptv-org.github.io/iptv/countries/mx.m3u",
         "https://iptv-org.github.io/iptv/countries/ar.m3u",
         "https://iptv-org.github.io/iptv/countries/co.m3u",
         "https://iptv-org.github.io/iptv/countries/es.m3u",
+        "https://iptv-org.github.io/iptv/countries/pe.m3u",
+        "https://iptv-org.github.io/iptv/countries/ve.m3u",
+        "https://iptv-org.github.io/iptv/countries/cl.m3u",
+        "https://iptv-org.github.io/iptv/countries/ec.m3u",
+        "https://iptv-org.github.io/iptv/countries/bo.m3u",
+        "https://iptv-org.github.io/iptv/countries/py.m3u",
+        "https://iptv-org.github.io/iptv/countries/uy.m3u",
+        "https://iptv-org.github.io/iptv/countries/cr.m3u",
+        "https://iptv-org.github.io/iptv/countries/do.m3u",
+        "https://iptv-org.github.io/iptv/countries/gt.m3u",
+        "https://iptv-org.github.io/iptv/countries/us.m3u",
+        "https://iptv-org.github.io/iptv/countries/br.m3u",
+        "https://iptv-org.github.io/iptv/countries/fr.m3u",
+        "https://iptv-org.github.io/iptv/countries/de.m3u",
+        "https://iptv-org.github.io/iptv/countries/it.m3u",
+        "https://iptv-org.github.io/iptv/countries/gb.m3u",
+        "https://iptv-org.github.io/iptv/countries/pt.m3u",
     };
 
-    private static final int MAX_PER_SOURCE = 60; // límite por fuente
+    private static final int MAX_PER_SOURCE = 50; // límite por fuente
 
     // ── Estado ────────────────────────────────────────────────────────────────
     private TvAdapter adapter;
@@ -156,9 +194,14 @@ public class TvFragment extends Fragment {
             applyFilter();
         });
 
-        // Mostrar canales de respaldo inmediatamente
+        // Mostrar canales de respaldo inmediatamente + poblar caché global
         synchronized (allChannels) {
             for (TvChannel ch : FALLBACK) allChannels.add(ch);
+        }
+        synchronized (CHANNEL_CACHE) {
+            if (CHANNEL_CACHE.isEmpty()) {
+                for (TvChannel ch : FALLBACK) CHANNEL_CACHE.add(ch);
+            }
         }
         applyFilter();
 
@@ -249,6 +292,14 @@ public class TvFragment extends Fragment {
                         }
                     }
                     if (!newChannels.isEmpty()) {
+                        // Añadir también al caché global para SearchActivity
+                        synchronized (CHANNEL_CACHE) {
+                            LinkedHashSet<String> cacheUrls = new LinkedHashSet<>();
+                            for (TvChannel c : CHANNEL_CACHE) cacheUrls.add(c.url);
+                            for (TvChannel c : newChannels) {
+                                if (!cacheUrls.contains(c.url)) CHANNEL_CACHE.add(c);
+                            }
+                        }
                         mainHandler.post(this::applyFilter);
                     }
                 }
