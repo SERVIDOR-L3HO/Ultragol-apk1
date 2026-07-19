@@ -114,7 +114,8 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 ((CategoriesVH) holder).bind(categories, selectedCategory);
                 break;
             case TYPE_CHANNEL:
-                ((ChannelVH) holder).bind(channels.get(pos - POS_CONTENT));
+                int channelIndex = pos - POS_CONTENT;
+                ((ChannelVH) holder).bind(channels.get(channelIndex), channelIndex + 1);
                 break;
             default:
                 break;
@@ -164,18 +165,20 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     class ChannelVH extends RecyclerView.ViewHolder {
         private final ImageView ivLogo;
-        private final TextView  tvName, tvFlag, tvCat;
+        private final TextView  tvName, tvFlag, tvCat, tvNumber;
         ChannelVH(View v) {
             super(v);
-            ivLogo = v.findViewById(R.id.ivChannelLogo);
-            tvName = v.findViewById(R.id.tvChannelName);
-            tvFlag = v.findViewById(R.id.tvChannelFlag);
-            tvCat  = v.findViewById(R.id.tvChannelCategory);
+            ivLogo   = v.findViewById(R.id.ivChannelLogo);
+            tvName   = v.findViewById(R.id.tvChannelName);
+            tvFlag   = v.findViewById(R.id.tvChannelFlag);
+            tvCat    = v.findViewById(R.id.tvChannelCategory);
+            tvNumber = v.findViewById(R.id.tvChannelNumber);
         }
-        void bind(TvChannel ch) {
-            if (tvName != null) tvName.setText(ch.name);
-            if (tvFlag != null) tvFlag.setText(TvChannel.flagOf(ch.country));
-            if (tvCat  != null) tvCat.setText(ch.category);
+        void bind(TvChannel ch, int number) {
+            if (tvName   != null) tvName.setText(ch.name);
+            if (tvFlag   != null) tvFlag.setText(TvChannel.flagOf(ch.country));
+            if (tvCat    != null) tvCat.setText(ch.category);
+            if (tvNumber != null) tvNumber.setText(String.valueOf(number));
             if (ivLogo != null) {
                 Glide.with(context)
                     .load(ch.logo)
@@ -199,9 +202,6 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
         EmptyVH(View v) { super(v); }
     }
 
-    /** Returns span size for GridLayoutManager. */
-    public int getSpanSize(int position) {
-        int type = getItemViewType(position);
-        return (type == TYPE_CHANNEL) ? 1 : 2;
-    }
+    /** Returns span size — always 1 (LinearLayoutManager). */
+    public int getSpanSize(int position) { return 1; }
 }

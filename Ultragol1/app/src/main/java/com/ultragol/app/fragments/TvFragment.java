@@ -10,7 +10,8 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ultragol.app.MediaActivity;
@@ -134,11 +135,15 @@ public class TvFragment extends Fragment {
         RecyclerView rv = view.findViewById(R.id.rvTvChannels);
         adapter = new TvAdapter(requireContext(), CATEGORIES);
 
-        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
-        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override public int getSpanSize(int pos) { return adapter.getSpanSize(pos); }
-        });
-        rv.setLayoutManager(glm);
+        LinearLayoutManager llm = new LinearLayoutManager(requireContext());
+        rv.setLayoutManager(llm);
+
+        // Divider sutil entre filas
+        DividerItemDecoration divider = new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL);
+        if (requireContext().getDrawable(com.ultragol.app.R.drawable.tv_row_divider) != null) {
+            divider.setDrawable(requireContext().getDrawable(com.ultragol.app.R.drawable.tv_row_divider));
+        }
+        rv.addItemDecoration(divider);
         rv.setAdapter(adapter);
 
         adapter.setOnChannelClickListener(this::playChannel);

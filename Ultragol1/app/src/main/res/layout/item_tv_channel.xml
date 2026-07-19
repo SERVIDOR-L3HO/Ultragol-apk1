@@ -1,89 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:layout_margin="6dp"
-    android:background="@drawable/tv_channel_card_bg"
+    android:layout_height="72dp"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:background="?attr/selectableItemBackground"
     android:clickable="true"
-    android:focusable="true"
-    android:foreground="?attr/selectableItemBackground">
+    android:focusable="true">
 
-    <!-- Logo del canal (16:9) -->
+    <!-- Número del canal -->
+    <TextView
+        android:id="@+id/tvChannelNumber"
+        android:layout_width="36dp"
+        android:layout_height="wrap_content"
+        android:textColor="#44FFFFFF"
+        android:textSize="12sp"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text="1"/>
+
+    <!-- Logo del canal (cuadrado redondeado) -->
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="90dp"
-        android:background="#0D000000">
+        android:layout_width="52dp"
+        android:layout_height="52dp"
+        android:layout_marginStart="4dp"
+        android:background="@drawable/tv_logo_container">
 
         <ImageView
             android:id="@+id/ivChannelLogo"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scaleType="centerInside"
-            android:padding="10dp"
+            android:padding="6dp"
             android:contentDescription="Logo"/>
-
-        <!-- Badge EN VIVO (esquina superior derecha) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_margin="6dp"
-            android:text="● EN VIVO"
-            android:textColor="#FFFFFF"
-            android:textSize="8sp"
-            android:fontFamily="sans-serif-bold"
-            android:background="@drawable/badge_live"
-            android:paddingStart="5dp"
-            android:paddingEnd="5dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"/>
     </FrameLayout>
 
-    <!-- Nombre y detalles -->
+    <!-- Nombre + categoría -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="10dp">
 
         <TextView
             android:id="@+id/tvChannelName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="#FFFFFF"
-            android:textSize="12sp"
+            android:textSize="14sp"
             android:fontFamily="sans-serif-bold"
-            android:maxLines="2"
-            android:ellipsize="end"
-            android:lineSpacingMultiplier="1.1"/>
+            android:maxLines="1"
+            android:ellipsize="end"/>
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="5dp"
+            android:layout_marginTop="4dp"
             android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvChannelFlag"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:layout_marginEnd="5dp"/>
+                android:textSize="12sp"
+                android:layout_marginEnd="6dp"/>
 
             <TextView
                 android:id="@+id/tvChannelCategory"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:background="@drawable/tv_cat_badge"
-                android:textColor="#CCFFFFFF"
+                android:textColor="#AAFFFFFF"
                 android:textSize="9sp"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="7dp"
+                android:paddingEnd="7dp"
                 android:paddingTop="2dp"
                 android:paddingBottom="2dp"
                 android:maxLines="1"/>
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Live badge + flecha -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/tv_live_pill"
+            android:paddingStart="6dp"
+            android:paddingEnd="6dp"
+            android:paddingTop="3dp"
+            android:paddingBottom="3dp"
+            android:layout_marginBottom="6dp">
+
+            <View
+                android:layout_width="6dp"
+                android:layout_height="6dp"
+                android:background="@drawable/red_dot"
+                android:layout_marginEnd="4dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EN VIVO"
+                android:textColor="#FFFFFF"
+                android:textSize="8sp"
+                android:fontFamily="sans-serif-bold"/>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="›"
+            android:textColor="#44FFFFFF"
+            android:textSize="22sp"
+            android:gravity="center"/>
+    </LinearLayout>
+
 </LinearLayout>
