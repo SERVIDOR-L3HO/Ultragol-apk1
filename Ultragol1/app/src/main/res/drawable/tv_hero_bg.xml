@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base oscura -->
+    <item>
+        <shape>
+            <solid android:color="#0A0A12"/>
+        </shape>
+    </item>
+    <!-- Degradado sutil de rojo oscuro desde abajo -->
+    <item>
+        <shape>
+            <gradient
+                android:type="linear"
+                android:angle="90"
+                android:startColor="#00CC1111"
+                android:endColor="#22CC1111"/>
+        </shape>
+    </item>
+</layer-list>

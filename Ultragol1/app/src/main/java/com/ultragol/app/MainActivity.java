@@ -56,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
         View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
+        View navTv        = drawerOverlay.findViewById(R.id.navTv);
         View navFavorites     = drawerOverlay.findViewById(R.id.navFavorites);
         View navMyList        = drawerOverlay.findViewById(R.id.navMyList);
         View navSwitchProfile = drawerOverlay.findViewById(R.id.navSwitchProfile);
@@ -67,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
         if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
+        if (navTv        != null) navTv.setOnClickListener(v        -> navigate(new com.ultragol.app.fragments.TvFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
         View navDownloads = drawerOverlay.findViewById(R.id.navDownloads);
