@@ -86,12 +86,14 @@
                             android:padding="6dp"
                             android:clickable="true"
                             android:focusable="true"/>
-                        <TextView
+                        <ImageView
                             android:layout_width="38dp"
                             android:layout_height="38dp"
-                            android:text="🔔"
-                            android:textSize="18sp"
-                            android:gravity="center"/>
+                            android:src="@drawable/ic_notification"
+                            android:tint="#FFFFFF"
+                            android:padding="7dp"
+                            android:scaleType="fitCenter"
+                            android:contentDescription="Notificaciones"/>
                         <!-- Close X button -->
                         <TextView
                             android:id="@+id/drawerClose"
