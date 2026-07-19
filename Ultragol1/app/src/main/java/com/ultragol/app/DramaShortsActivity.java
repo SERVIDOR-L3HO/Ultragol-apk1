@@ -1,175 +1,195 @@
 package com.ultragol.app;
 
 import android.content.Intent;
-import android.net.Uri;
+import android.content.res.Resources;
 import android.os.Bundle;
-import android.os.Handler;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.network.DramaShortsApi;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Executors;
 
 /**
- * Pantalla completa de Shorts Dramas.
- * Muestra recientes, populares y tendencias; también permite buscar por título.
+ * Pantalla de Shorts Dramas — diseño estilo Doramas.
+ * Hero banner + filas horizontales por categoría.
+ * Los videos se abren con el reproductor interno (PlayerActivity).
  */
 public class DramaShortsActivity extends AppCompatActivity {
 
-    // ── UI ────────────────────────────────────────────────────────────────────
-    private EditText          searchInput;
-    private View              loadingView, emptyView;
-    private RecyclerView      grid;
-    private TextView          tabRecientes, tabPopulares, tabTendencias;
-
-    // ── State ─────────────────────────────────────────────────────────────────
-    private final List<DramaShortsApi.VideoItem> items = new ArrayList<>();
-    private       GridAdapter adapter;
-    private       String  activeTab   = "recientes";
-    private final Handler handler     = new Handler();
-    private       Runnable searchJob;
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    private LinearLayout    container;
+    private View            loadingView;
+    private NestedScrollView scrollView;
+    private boolean         firstLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_drama_shorts);
 
-        searchInput  = findViewById(R.id.dsSearchInput);
-        loadingView  = findViewById(R.id.dsLoading);
-        emptyView    = findViewById(R.id.dsEmpty);
-        grid         = findViewById(R.id.dsGrid);
-        tabRecientes = findViewById(R.id.tabRecientes);
-        tabPopulares = findViewById(R.id.tabPopulares);
-        tabTendencias= findViewById(R.id.tabTendencias);
+        loadingView = findViewById(R.id.dsLoading);
+        scrollView  = findViewById(R.id.dsScroll);
+        container   = findViewById(R.id.dsContainer);
 
         // Back button
         View btnBack = findViewById(R.id.dsBtnBack);
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
-        // Grid
-        adapter = new GridAdapter();
-        grid.setLayoutManager(new GridLayoutManager(this, 2));
-        grid.setAdapter(adapter);
+        // Show loading
+        loadingView.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.GONE);
 
-        // Tabs
-        tabRecientes .setOnClickListener(v -> selectTab("recientes"));
-        tabPopulares .setOnClickListener(v -> selectTab("populares"));
-        tabTendencias.setOnClickListener(v -> selectTab("tendencias"));
-
-        // Search
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
-            @Override public void afterTextChanged(Editable s) {}
-            @Override public void onTextChanged(CharSequence s, int a, int b, int c) {
-                if (searchJob != null) handler.removeCallbacks(searchJob);
-                String q = s.toString().trim();
-                if (q.length() < 2) {
-                    selectTab(activeTab); // revert to tab content
-                    return;
-                }
-                searchJob = () -> doSearch(q);
-                handler.postDelayed(searchJob, 500);
-            }
-        });
-
-        // Load default tab
-        selectTab("recientes");
+        // Load all sections in parallel
+        loadHeroSection();
+        loadSection("RECIENTES", "DRAMA CORTO RECIENTE",  0xFFE91E63,
+                () -> DramaShortsApi.fetchRecientes(1));
+        loadSection("POPULARES", "MÁS VISTOS",            0xFFFF6B00,
+                () -> DramaShortsApi.fetchPopulares("es", 1));
+        loadSection("TENDENCIAS", "EN TENDENCIA",          0xFF2196F3,
+                () -> DramaShortsApi.fetchTendencias("es", 1));
     }
 
-    // ── Tab handling ──────────────────────────────────────────────────────────
+    // ── Hero ──────────────────────────────────────────────────────────────────
 
-    private void selectTab(String tab) {
-        activeTab = tab;
-
-        // Highlight active tab
-        int active   = 0xFFFFFFFF;
-        int inactive = 0x88FFFFFF;
-        tabRecientes .setTextColor(tab.equals("recientes")  ? active : inactive);
-        tabPopulares .setTextColor(tab.equals("populares")  ? active : inactive);
-        tabTendencias.setTextColor(tab.equals("tendencias") ? active : inactive);
-
-        loadContent(tab);
-    }
-
-    // ── Data loading ──────────────────────────────────────────────────────────
-
-    private void loadContent(String tab) {
-        showLoading(true);
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        exec.execute(() -> {
-            List<DramaShortsApi.VideoItem> result = new ArrayList<>();
+    private void loadHeroSection() {
+        Executors.newSingleThreadExecutor().execute(() -> {
             try {
-                switch (tab) {
-                    case "populares":
-                        result = DramaShortsApi.fetchPopulares("es", 1); break;
-                    case "tendencias":
-                        result = DramaShortsApi.fetchTendencias("es", 1); break;
-                    default:
-                        result = DramaShortsApi.fetchRecientes(1); break;
-                }
+                List<DramaShortsApi.VideoItem> items = DramaShortsApi.fetchRecientes(1);
+                if (items == null || items.isEmpty()) return;
+                final DramaShortsApi.VideoItem hero = items.get(0);
+                runOnUiThread(() -> {
+                    showContent();
+                    addHeroView(hero);
+                });
             } catch (Exception ignored) {}
-            final List<DramaShortsApi.VideoItem> r = result;
-            runOnUiThread(() -> {
-                items.clear(); items.addAll(r);
-                adapter.notifyDataSetChanged();
-                showLoading(false);
-                emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
-            });
         });
-        exec.shutdown();
     }
 
-    private void doSearch(String query) {
-        showLoading(true);
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        exec.execute(() -> {
-            List<DramaShortsApi.VideoItem> result = new ArrayList<>();
-            try { result = DramaShortsApi.buscar(query, "es", 1); } catch (Exception ignored) {}
-            final List<DramaShortsApi.VideoItem> r = result;
-            runOnUiThread(() -> {
-                items.clear(); items.addAll(r);
-                adapter.notifyDataSetChanged();
-                showLoading(false);
-                emptyView.setVisibility(items.isEmpty() ? View.VISIBLE : View.GONE);
-            });
+    private void addHeroView(DramaShortsApi.VideoItem hero) {
+        View v = LayoutInflater.from(this)
+                .inflate(R.layout.item_ds_hero, container, false);
+
+        ImageView img      = v.findViewById(R.id.dsHeroImage);
+        TextView  title    = v.findViewById(R.id.dsHeroTitle);
+        TextView  canal    = v.findViewById(R.id.dsHeroCanal);
+        TextView  duracion = v.findViewById(R.id.dsHeroDuracion);
+
+        title.setText(hero.titulo);
+        canal.setText(hero.canal);
+        duracion.setText(hero.getDuracionStr());
+
+        if (hero.thumbnailUrl != null && !hero.thumbnailUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(hero.thumbnailUrl)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .centerCrop()
+                    .into(img);
+        }
+
+        v.setOnClickListener(view -> openPlayer(hero));
+
+        // Hero must be first — insert at position 0
+        container.addView(v, 0);
+    }
+
+    // ── Horizontal sections ───────────────────────────────────────────────────
+
+    private void loadSection(String subLabel, String mainTitle, int accentColor,
+                             Callable<List<DramaShortsApi.VideoItem>> fetcher) {
+        Executors.newSingleThreadExecutor().execute(() -> {
+            try {
+                List<DramaShortsApi.VideoItem> items = fetcher.call();
+                if (items == null || items.isEmpty()) return;
+                runOnUiThread(() -> {
+                    showContent();
+                    addSectionView(subLabel, mainTitle, accentColor, items);
+                });
+            } catch (Exception ignored) {}
         });
-        exec.shutdown();
     }
 
-    private void showLoading(boolean loading) {
-        if (loadingView != null) loadingView.setVisibility(loading ? View.VISIBLE : View.GONE);
-        if (emptyView   != null) emptyView  .setVisibility(View.GONE);
+    private void addSectionView(String subLabel, String mainTitle, int accentColor,
+                                List<DramaShortsApi.VideoItem> items) {
+        View section = LayoutInflater.from(this)
+                .inflate(R.layout.item_cine_section, container, false);
+
+        View     accentBar = section.findViewById(R.id.sectionAccentBar);
+        TextView playIcon  = section.findViewById(R.id.sectionPlayIcon);
+        TextView subLbl    = section.findViewById(R.id.sectionSubLabel);
+        TextView mainLbl   = section.findViewById(R.id.sectionMainTitle);
+        TextView navPrev   = section.findViewById(R.id.sectionNavPrev);
+        TextView navNext   = section.findViewById(R.id.sectionNavNext);
+        RecyclerView rv    = section.findViewById(R.id.sectionRv);
+
+        if (accentBar != null) accentBar.setBackgroundColor(accentColor);
+        if (playIcon  != null) playIcon.setTextColor(accentColor);
+        if (subLbl    != null) subLbl.setText(subLabel);
+        if (mainLbl   != null) mainLbl.setText(mainTitle);
+
+        if (rv != null) {
+            rv.setLayoutManager(new LinearLayoutManager(
+                    this, LinearLayoutManager.HORIZONTAL, false));
+            rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
+            rv.setAdapter(new DsCardAdapter(items));
+
+            int pageWidthPx = dpToPx(160 * 2);
+            if (navPrev != null) navPrev.setOnClickListener(v -> rv.smoothScrollBy(-pageWidthPx, 0));
+            if (navNext != null) navNext.setOnClickListener(v -> rv.smoothScrollBy( pageWidthPx, 0));
+        }
+
+        container.addView(section);
     }
 
-    // ── Grid Adapter ──────────────────────────────────────────────────────────
+    // ── Player ────────────────────────────────────────────────────────────────
 
-    class GridAdapter extends RecyclerView.Adapter<GridAdapter.VH> {
+    private void openPlayer(DramaShortsApi.VideoItem item) {
+        Intent intent = new Intent(this, PlayerActivity.class);
+        intent.putExtra("url",   item.getEmbedUrl());
+        intent.putExtra("title", item.titulo);
+        startActivity(intent);
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void showContent() {
+        if (!firstLoaded) {
+            firstLoaded = true;
+            loadingView.setVisibility(View.GONE);
+            scrollView .setVisibility(View.VISIBLE);
+        }
+    }
+
+    private int dpToPx(int dp) {
+        return (int) (dp * Resources.getSystem().getDisplayMetrics().density);
+    }
+
+    // ── Card adapter for horizontal rows ─────────────────────────────────────
+
+    private class DsCardAdapter
+            extends RecyclerView.Adapter<DsCardAdapter.VH> {
+
+        private final List<DramaShortsApi.VideoItem> items;
+
+        DsCardAdapter(List<DramaShortsApi.VideoItem> items) { this.items = items; }
 
         @Override
         public VH onCreateViewHolder(ViewGroup parent, int viewType) {
             View v = LayoutInflater.from(DramaShortsActivity.this)
-                    .inflate(R.layout.item_drama_short_grid, parent, false);
+                    .inflate(R.layout.item_ds_card, parent, false);
             return new VH(v);
         }
 
         @Override
         public void onBindViewHolder(VH h, int pos) {
             DramaShortsApi.VideoItem item = items.get(pos);
-            h.title   .setText(item.titulo);
-            h.canal   .setText(item.canal);
+            h.title  .setText(item.titulo);
+            h.canal  .setText(item.canal);
             h.duracion.setText(item.getDuracionStr());
-            h.vistas  .setText(item.getVistasStr() + " vistas");
 
             if (item.thumbnailUrl != null && !item.thumbnailUrl.isEmpty()) {
                 Glide.with(DramaShortsActivity.this)
@@ -181,26 +201,20 @@ public class DramaShortsActivity extends AppCompatActivity {
                 h.thumb.setImageResource(R.drawable.gradient_hero);
             }
 
-            h.itemView.setOnClickListener(v -> {
-                try {
-                    startActivity(new Intent(Intent.ACTION_VIEW,
-                            Uri.parse(item.getEmbedUrl())));
-                } catch (Exception ignored) {}
-            });
+            h.itemView.setOnClickListener(v -> openPlayer(item));
         }
 
         @Override public int getItemCount() { return items.size(); }
 
         class VH extends RecyclerView.ViewHolder {
             ImageView thumb;
-            TextView  title, canal, duracion, vistas;
+            TextView  title, canal, duracion;
             VH(View v) {
                 super(v);
-                thumb    = v.findViewById(R.id.dsgThumb);
-                title    = v.findViewById(R.id.dsgTitle);
-                canal    = v.findViewById(R.id.dsgCanal);
-                duracion = v.findViewById(R.id.dsgDuracion);
-                vistas   = v.findViewById(R.id.dsgVistas);
+                thumb    = v.findViewById(R.id.dscThumb);
+                title    = v.findViewById(R.id.dscTitle);
+                canal    = v.findViewById(R.id.dscCanal);
+                duracion = v.findViewById(R.id.dscDuracion);
             }
         }
     }
