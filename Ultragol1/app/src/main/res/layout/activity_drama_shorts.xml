@@ -53,7 +53,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:hint="Buscar dramas cortos..."
-            android:hintTextColor="#66FFFFFF"
+            android:textColorHint="#66FFFFFF"
             android:textColor="#FFFFFF"
             android:textSize="14sp"
             android:background="@null"
