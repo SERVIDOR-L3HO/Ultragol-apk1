@@ -132,6 +132,43 @@ public class TvFragment extends Fragment {
         ch("Foro TV",         "https://telecanal.multimedios.com:1935/live/noticias24/playlist.m3u8",
            "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/ForoTV_logo.svg/200px-ForoTV_logo.svg.png",
            TvChannel.CAT_NOTICIAS, "MX"),
+
+        // ── Televisa / TelevisaUnivision ────────────────────────────────────────
+        ch("Las Estrellas",   "https://mdustvmxmdu4-lh.akamaihd.net/i/Estrellas_1@459383/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/0/09/Las_Estrellas_logo.svg/200px-Las_Estrellas_logo.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Canal 5 MX",      "https://mdustvmxmdu5-lh.akamaihd.net/i/CanalCinco_1@459339/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6f/Canal_5_Mexico_2016.svg/200px-Canal_5_Mexico_2016.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Gala TV (Nu9ve)", "https://mdustvmxmdu9-lh.akamaihd.net/i/CanalNueve_1@459392/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Gala_TV_Logo.svg/200px-Gala_TV_Logo.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Telehit",         "https://mdust4vmxmdu-lh.akamaihd.net/i/Telehit_1@459388/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Telehit_logo.svg/200px-Telehit_logo.svg.png",
+           TvChannel.CAT_MUSICA, "MX"),
+        ch("Bandamax",        "https://mdustbmax-lh.akamaihd.net/i/Bandamax_1@459378/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a5/Bandamax_logo_2019.svg/200px-Bandamax_logo_2019.svg.png",
+           TvChannel.CAT_MUSICA, "MX"),
+        ch("De Película",     "https://mdust4vmxmdu-lh.akamaihd.net/i/DePelicula_1@459381/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/De_pelicula_logo.svg/200px-De_pelicula_logo.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Televisa Deportes","https://mdust4vmxmdu-lh.akamaihd.net/i/TelevisaDeportes_1@459390/master.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/TUDN_logo.svg/200px-TUDN_logo.svg.png",
+           TvChannel.CAT_DEPORTES, "MX"),
+
+        // ── TV Azteca ──────────────────────────────────────────────────────────
+        ch("Azteca Uno",      "https://mdstrm.com/live-stream/58c5237793490d0e008b456b.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/4/47/Azteca_Uno_logo_%282017%29.svg/200px-Azteca_Uno_logo_%282017%29.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Azteca 7",        "https://mdstrm.com/live-stream/azteca7live.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Azteca_7_2017.svg/200px-Azteca_7_2017.svg.png",
+           TvChannel.CAT_ENTRETENIMIENTO, "MX"),
+        ch("Azteca Noticias", "https://mdstrm.com/live-stream/5a7f9802d5c6b84c008b4572.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Azteca_Noticias_2019.svg/200px-Azteca_Noticias_2019.svg.png",
+           TvChannel.CAT_NOTICIAS, "MX"),
+        ch("Azteca Deportes", "https://mdstrm.com/live-stream/aztecadeportes.m3u8",
+           "https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Azteca_Deportes_2022.svg/200px-Azteca_Deportes_2022.svg.png",
+           TvChannel.CAT_DEPORTES, "MX"),
     };
 
     // ── Fuentes IPTV remotas (iptv-org + otros agregadores) ──────────────────
