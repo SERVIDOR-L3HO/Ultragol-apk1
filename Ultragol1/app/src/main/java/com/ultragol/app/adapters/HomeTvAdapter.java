@@ -2,6 +2,7 @@ package com.ultragol.app.adapters;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -66,10 +67,14 @@ public class HomeTvAdapter extends RecyclerView.Adapter<HomeTvAdapter.VH> {
             if (tvInitial != null) tvInitial.setText(ch.name.length() > 0
                     ? String.valueOf(ch.name.charAt(0)).toUpperCase() : "T");
 
-            // Colored tinted bg based on category
+            // Colored tinted overlay with rounded corners matching the card shape
             if (vColor != null) {
                 try {
-                    vColor.setBackgroundColor(categoryColor(ch.category));
+                    GradientDrawable gd = new GradientDrawable();
+                    gd.setShape(GradientDrawable.RECTANGLE);
+                    gd.setCornerRadius(dpToPx(12));
+                    gd.setColor(categoryColor(ch.category));
+                    vColor.setBackground(gd);
                 } catch (Exception ignored) {}
             }
 
@@ -83,6 +88,10 @@ public class HomeTvAdapter extends RecyclerView.Adapter<HomeTvAdapter.VH> {
                     .into(ivLogo);
             }
         }
+    }
+
+    private float dpToPx(int dp) {
+        return dp * context.getResources().getDisplayMetrics().density;
     }
 
     /** Returns a semi-transparent category accent color for the card bg. */
