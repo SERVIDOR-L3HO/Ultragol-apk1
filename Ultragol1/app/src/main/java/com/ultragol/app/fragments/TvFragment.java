@@ -47,6 +47,9 @@ public class TvFragment extends Fragment {
             TvChannel.CAT_CIENCIA
     );
 
+    /** Canales de respaldo siempre disponibles — accesibles desde otras clases. */
+    public static TvChannel[] getFallbackChannels() { return FALLBACK; }
+
     // ── Canales de respaldo (siempre disponibles, streams conocidos) ──────────
     private static final TvChannel[] FALLBACK = {
         // Noticias internacionales

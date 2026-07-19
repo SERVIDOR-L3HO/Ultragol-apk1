@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="130dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginEnd="10dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackground">
+
+    <!-- Thumbnail area -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="82dp"
+        android:background="@drawable/tv_logo_container">
+
+        <!-- Colored bg gradient (set in code) -->
+        <View
+            android:id="@+id/vChannelColor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/tv_home_card_gradient"/>
+
+        <!-- Initial letter fallback -->
+        <TextView
+            android:id="@+id/tvChannelInitial"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textColor="#33FFFFFF"
+            android:textSize="36sp"
+            android:fontFamily="sans-serif-black"/>
+
+        <!-- Real logo -->
+        <ImageView
+            android:id="@+id/ivChannelLogo"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerInside"
+            android:padding="10dp"
+            android:contentDescription="Logo"/>
+
+        <!-- EN VIVO badge top-right -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|end"
+            android:layout_margin="6dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:background="@drawable/tv_live_pill"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp">
+
+            <View
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:background="@drawable/red_dot"
+                android:layout_marginEnd="3dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="LIVE"
+                android:textColor="#FFFFFF"
+                android:textSize="7sp"
+                android:fontFamily="sans-serif-black"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Channel name -->
+    <TextView
+        android:id="@+id/tvChannelName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="6dp"
+        android:textColor="#DDFFFFFF"
+        android:textSize="11sp"
+        android:fontFamily="sans-serif-bold"
+        android:maxLines="1"
+        android:ellipsize="end"/>
+
+    <!-- Category -->
+    <TextView
+        android:id="@+id/tvChannelCat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:textColor="#66FFFFFF"
+        android:textSize="9sp"
+        android:fontFamily="sans-serif"/>
+
+</LinearLayout>

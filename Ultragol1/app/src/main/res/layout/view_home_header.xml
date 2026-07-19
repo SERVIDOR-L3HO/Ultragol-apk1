@@ -153,6 +153,10 @@
 
     <!-- ── Rows ── -->
     <include android:id="@+id/rowTrending" layout="@layout/row_section"/>
+
+    <!-- ── Canales en vivo (TV) ── -->
+    <include android:id="@+id/rowTvLive" layout="@layout/row_tv_live"/>
+
     <include android:id="@+id/rowNew"          layout="@layout/row_section"/>
     <include android:id="@+id/rowShortsdramas" layout="@layout/row_section"/>
 

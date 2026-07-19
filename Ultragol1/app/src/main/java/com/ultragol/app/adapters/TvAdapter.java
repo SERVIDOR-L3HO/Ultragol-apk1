@@ -1,9 +1,12 @@
 package com.ultragol.app.adapters;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -179,18 +182,44 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
             if (tvFlag   != null) tvFlag.setText(TvChannel.flagOf(ch.country));
             if (tvCat    != null) tvCat.setText(ch.category);
             if (tvNumber != null) tvNumber.setText(String.valueOf(number));
+
+            // Colored logo container background based on category
             if (ivLogo != null) {
+                View parent = (View) ivLogo.getParent();
+                if (parent != null) {
+                    try {
+                        GradientDrawable gd = new GradientDrawable();
+                        gd.setShape(GradientDrawable.RECTANGLE);
+                        gd.setCornerRadius(20f);
+                        gd.setColor(categoryColor(ch.category));
+                        parent.setBackground(gd);
+                    } catch (Exception ignored) {}
+                }
                 Glide.with(context)
                     .load(ch.logo)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(R.drawable.ic_tv_placeholder)
-                    .error(R.drawable.ic_tv_placeholder)
+                    .placeholder(android.R.color.transparent)
+                    .error(android.R.color.transparent)
                     .centerInside()
                     .into(ivLogo);
             }
             itemView.setOnClickListener(v -> {
                 if (clickListener != null) clickListener.onChannelClick(ch);
             });
+        }
+
+        private int categoryColor(String cat) {
+            if (cat == null) return Color.parseColor("#22D50000");
+            switch (cat) {
+                case TvChannel.CAT_NOTICIAS:        return Color.parseColor("#331565C0");
+                case TvChannel.CAT_DEPORTES:        return Color.parseColor("#332E7D32");
+                case TvChannel.CAT_ENTRETENIMIENTO: return Color.parseColor("#336A1B9A");
+                case TvChannel.CAT_MUSICA:          return Color.parseColor("#33E64A19");
+                case TvChannel.CAT_DOCUMENTALES:    return Color.parseColor("#3300695C");
+                case TvChannel.CAT_INFANTIL:        return Color.parseColor("#33F57F17");
+                case TvChannel.CAT_CIENCIA:         return Color.parseColor("#33283593");
+                default:                             return Color.parseColor("#33D50000");
+            }
         }
     }
 

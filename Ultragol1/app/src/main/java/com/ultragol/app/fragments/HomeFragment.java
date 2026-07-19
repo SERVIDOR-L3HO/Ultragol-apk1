@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.*;
 import androidx.viewpager2.widget.ViewPager2;
 import com.ultragol.app.*;
 import com.ultragol.app.adapters.*;
+import com.ultragol.app.fragments.TvFragment;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.DramaShortsApi;
 import com.ultragol.app.network.TmdbApi;
@@ -44,6 +45,7 @@ public class HomeFragment extends Fragment {
     private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
     private View rowShortsdramas;
     private View rowLiveGlass;
+    private View rowTvLive;
 
     // Continue watching
     private View sectionContinueWatching;
@@ -266,6 +268,7 @@ public class HomeFragment extends Fragment {
         rowAnime         = view.findViewById(R.id.rowAnime);
         rowDoramas       = view.findViewById(R.id.rowDoramas);
         rowLiveGlass     = view.findViewById(R.id.rowLiveGlass);
+        rowTvLive        = view.findViewById(R.id.rowTvLive);
 
         initRow(rowTrending,     "Tendencias",          null);
         initRow(rowNew,          "Últimos Estrenos",    new MoviesFragment());
@@ -275,6 +278,39 @@ public class HomeFragment extends Fragment {
         initRow(rowAnime,        "Animes",              new AnimeFragment());
         initRow(rowDoramas,      "Doramas",             new DoramasFragment());
         initRow(rowTop10,        "Top 10",              new MoviesFragment());
+
+        // Init TV Live row
+        if (rowTvLive != null) {
+            RecyclerView rvTv = rowTvLive.findViewById(R.id.rvTvLive);
+            if (rvTv != null) {
+                rvTv.setLayoutManager(
+                    new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+                rvTv.setHasFixedSize(true);
+                // Populate with fallback channels
+                java.util.List<com.ultragol.app.models.TvChannel> tvChs = new java.util.ArrayList<>();
+                for (com.ultragol.app.models.TvChannel ch : TvFragment.getFallbackChannels()) tvChs.add(ch);
+                com.ultragol.app.adapters.HomeTvAdapter tvAdapter =
+                    new com.ultragol.app.adapters.HomeTvAdapter(requireContext(), tvChs);
+                tvAdapter.setOnClickListener(ch -> {
+                    Intent tvIntent = new Intent(requireContext(), MediaActivity.class);
+                    tvIntent.putExtra("url",     ch.url);
+                    tvIntent.putExtra("title",   ch.name);
+                    tvIntent.putExtra("is_m3u8", true);
+                    tvIntent.putExtra("referer", "");
+                    startActivity(tvIntent);
+                });
+                rvTv.setAdapter(tvAdapter);
+            }
+            // "Ver TV" button
+            View btnVerTv = rowTvLive.findViewById(R.id.btnVerTv);
+            if (btnVerTv != null) {
+                btnVerTv.setOnClickListener(v -> {
+                    if (getActivity() instanceof MainActivity) {
+                        ((MainActivity) getActivity()).navigate(new TvFragment());
+                    }
+                });
+            }
+        }
 
         // Init live glass carousel RecyclerView
         if (rowLiveGlass != null) {
