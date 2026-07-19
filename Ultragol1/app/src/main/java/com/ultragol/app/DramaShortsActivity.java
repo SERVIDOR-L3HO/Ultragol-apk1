@@ -148,9 +148,9 @@ public class DramaShortsActivity extends AppCompatActivity {
     // ── Player ────────────────────────────────────────────────────────────────
 
     private void openPlayer(DramaShortsApi.VideoItem item) {
-        Intent intent = new Intent(this, PlayerActivity.class);
-        intent.putExtra("url",   item.getEmbedUrl());
-        intent.putExtra("title", item.titulo);
+        Intent intent = new Intent(this, ShortsPlayerActivity.class);
+        intent.putExtra("video_id", item.id);
+        intent.putExtra("title",    item.titulo);
         startActivity(intent);
     }
 

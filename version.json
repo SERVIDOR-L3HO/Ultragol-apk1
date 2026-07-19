@@ -1,9 +1,9 @@
 {
-  "versionCode": 12,
-  "versionName": "1.8",
+  "versionCode": 13,
+  "versionName": "1.9",
   "appName": "Ultragol1",
-  "changelog": "- 🎬 Shorts Dramas rediseñado al estilo Doramas (hero banner + filas horizontales)\n- ✂️ Buscador eliminado de Shorts Dramas — usa el buscador principal\n- 📺 Reproductor interno: los videos ya no abren el navegador\n- 🎭 Filas: Recientes, Populares y Tendencias con flechas de navegación\n- 🔥 Barra de inicio también abre reproductor interno",
+  "changelog": "- 🎬 Reproductor vertical propio para Shorts Dramas (ya no abre el navegador)\n- 🔍 Buscador ahora muestra también resultados de Shorts Dramas (Dailymotion)\n- 📺 Player en modo retrato, pantalla completa, con barra oculta automática\n- ✅ Se corrige error de reproducción — Dailymotion reproduce directo en WebView",
   "downloadUrl": "https://35ece81b-e84d-45d0-8f58-badfb68e0886-00-53xj0ixfkl5t.riker.replit.dev/ultragol1/download",
   "forceUpdate": false,
-  "updatedAt": "2026-07-19T02:33:00.000Z"
+  "updatedAt": "2026-07-19T03:10:00.000Z"
 }

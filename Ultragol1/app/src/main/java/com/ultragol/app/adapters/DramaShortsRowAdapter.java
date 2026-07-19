@@ -8,14 +8,14 @@ import androidx.annotation.*;
 import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.ultragol.app.PlayerActivity;
+import com.ultragol.app.ShortsPlayerActivity;
 import com.ultragol.app.R;
 import com.ultragol.app.network.DramaShortsApi;
 import java.util.List;
 
 /**
  * Horizontal card row adapter for the "Shorts Dramas" section on the home screen.
- * Tapping opens the video with the in-app PlayerActivity (intercepts m3u8/mp4).
+ * Tapping opens the in-app vertical ShortsPlayerActivity.
  */
 public class DramaShortsRowAdapter
         extends RecyclerView.Adapter<DramaShortsRowAdapter.VH> {
@@ -54,9 +54,9 @@ public class DramaShortsRowAdapter
         }
 
         h.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(ctx, PlayerActivity.class);
-            intent.putExtra("url",   item.getEmbedUrl());
-            intent.putExtra("title", item.titulo);
+            Intent intent = new Intent(ctx, ShortsPlayerActivity.class);
+            intent.putExtra("video_id", item.id);
+            intent.putExtra("title",    item.titulo);
             ctx.startActivity(intent);
         });
     }
