@@ -19,12 +19,12 @@
         android:background="#00000000"
         android:visibility="gone">
 
-        <!-- Tap-to-close scrim (covers full screen, glass darkens right area) -->
+        <!-- Tap-to-close scrim (covers full screen, ultra transparent) -->
         <View
             android:id="@+id/drawerClose"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="#99000000"
+            android:background="#55000000"
             android:clickable="true"
             android:focusable="true"/>
 
@@ -54,26 +54,17 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ULTRA"
+                        android:text="ACTION"
                         android:textColor="#FFFFFF"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-black"/>
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="GOL"
+                        android:text="PLAY"
                         android:textColor="@color/red_primary"
                         android:textSize="18sp"
                         android:fontFamily="sans-serif-black"/>
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="1.NET"
-                        android:textColor="@color/red_primary"
-                        android:textSize="10sp"
-                        android:fontFamily="sans-serif-black"
-                        android:layout_gravity="bottom"
-                        android:layout_marginBottom="2dp"/>
                 </LinearLayout>
 
                 <!-- Search icon -->

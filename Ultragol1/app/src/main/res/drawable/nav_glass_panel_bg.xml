@@ -1,28 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Main dark glass fill -->
+    <!-- Main ultra-transparent glass fill -->
     <item>
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#F2020510"
-                android:endColor="#EE06080F"
+                android:startColor="#B8000005"
+                android:endColor="#A0010208"
                 android:angle="0"/>
         </shape>
     </item>
     <!-- Subtle white glass edge on the right -->
     <item android:left="-2dp" android:top="-2dp" android:bottom="-2dp">
         <shape android:shape="rectangle">
-            <stroke android:width="1dp" android:color="#22FFFFFF"/>
+            <stroke android:width="1dp" android:color="#30FFFFFF"/>
         </shape>
     </item>
     <!-- Very subtle top highlight -->
     <item android:bottom="-300dp">
         <shape android:shape="rectangle">
             <gradient
-                android:startColor="#10FFFFFF"
+                android:startColor="#18FFFFFF"
                 android:endColor="#00FFFFFF"
                 android:angle="270"/>
-            <corners android:topRightRadius="0dp"/>
         </shape>
     </item>
 </layer-list>
