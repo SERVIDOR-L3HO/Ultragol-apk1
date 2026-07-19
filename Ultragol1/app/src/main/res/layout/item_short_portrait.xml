@@ -1,91 +1,73 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tarjeta vertical estilo YouTube Shorts para la fila del home -->
+<!-- Tarjeta vertical estilo YouTube Shorts — relación 9:16 aprox -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="115dp"
-    android:layout_height="200dp"
-    android:layout_marginStart="5dp"
-    android:layout_marginEnd="5dp"
+    android:layout_width="match_parent"
+    android:layout_height="220dp"
+    android:layout_margin="3dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?attr/selectableItemBackground">
 
     <!-- Thumbnail full-bleed -->
     <ImageView
-        android:id="@+id/dsThumb"
+        android:id="@+id/spThumb"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
         android:background="#1A1A1A"/>
 
-    <!-- Bottom gradient -->
+    <!-- Bottom gradient overlay -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="130dp"
         android:layout_gravity="bottom"
         android:background="@drawable/gradient_bottom_overlay"/>
 
-    <!-- Duration badge top-right -->
+    <!-- Top-right: duration badge -->
     <TextView
-        android:id="@+id/dsDuracion"
+        android:id="@+id/spDuracion"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|end"
-        android:layout_margin="5dp"
-        android:paddingStart="5dp"
-        android:paddingEnd="5dp"
+        android:layout_margin="7dp"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp"
         android:paddingTop="2dp"
         android:paddingBottom="2dp"
         android:text="0:00"
         android:textColor="#FFFFFF"
-        android:textSize="9sp"
+        android:textSize="10sp"
         android:fontFamily="sans-serif-bold"
         android:background="#CC000000"/>
 
-    <!-- SHORTS label top-left -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top|start"
-        android:layout_margin="5dp"
-        android:paddingStart="5dp"
-        android:paddingEnd="5dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp"
-        android:text="SHORTS"
-        android:textColor="#FFFFFF"
-        android:textSize="7sp"
-        android:fontFamily="sans-serif-black"
-        android:textAllCaps="true"
-        android:background="#CCE91E63"/>
-
     <!-- Center play icon -->
     <TextView
-        android:layout_width="36dp"
-        android:layout_height="36dp"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
         android:layout_gravity="center"
         android:text="▶"
-        android:textColor="#CCFFFFFF"
-        android:textSize="15sp"
+        android:textColor="#DDFFFFFF"
+        android:textSize="18sp"
         android:gravity="center"
-        android:background="#44000000"/>
+        android:background="#55000000"/>
 
-    <!-- Bottom text overlay -->
+    <!-- Bottom text block -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:paddingStart="7dp"
-        android:paddingEnd="7dp"
-        android:paddingBottom="8dp">
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="9dp">
 
         <TextView
-            android:id="@+id/dsTitle"
+            android:id="@+id/spTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Título"
             android:textColor="#FFFFFF"
-            android:textSize="11sp"
+            android:textSize="12sp"
             android:fontFamily="sans-serif-bold"
             android:maxLines="2"
             android:ellipsize="end"
@@ -94,16 +76,32 @@
             android:shadowDy="1"
             android:shadowRadius="4"/>
 
-        <TextView
-            android:id="@+id/dsCanal"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
-            android:text="Canal"
-            android:textColor="#BBFFFFFF"
-            android:textSize="9sp"
-            android:maxLines="1"
-            android:ellipsize="end"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="3dp">
+
+            <!-- Canal icon dot -->
+            <View
+                android:layout_width="5dp"
+                android:layout_height="5dp"
+                android:background="#E91E63"
+                android:layout_marginEnd="5dp"/>
+
+            <TextView
+                android:id="@+id/spCanal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Canal"
+                android:textColor="#CCFFFFFF"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
+                android:ellipsize="end"/>
+        </LinearLayout>
 
     </LinearLayout>
 

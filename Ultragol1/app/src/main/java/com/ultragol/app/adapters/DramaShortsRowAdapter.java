@@ -14,8 +14,8 @@ import com.ultragol.app.network.DramaShortsApi;
 import java.util.List;
 
 /**
- * Horizontal card row adapter for the "Shorts Dramas" section on the home screen.
- * Tapping opens the in-app vertical ShortsPlayerActivity.
+ * Fila horizontal estilo YouTube Shorts para la sección del Home.
+ * Usa item_drama_short_card.xml — tarjetas verticales portrait.
  */
 public class DramaShortsRowAdapter
         extends RecyclerView.Adapter<DramaShortsRowAdapter.VH> {
@@ -39,19 +39,16 @@ public class DramaShortsRowAdapter
     public void onBindViewHolder(@NonNull VH h, int pos) {
         DramaShortsApi.VideoItem item = items.get(pos);
 
-        h.title.setText(item.titulo);
-        h.canal.setText(item.canal);
+        h.title   .setText(item.titulo);
+        h.canal   .setText(item.canal);
         h.duracion.setText(item.getDuracionStr());
 
-        if (item.thumbnailUrl != null && !item.thumbnailUrl.isEmpty()) {
-            Glide.with(ctx)
-                    .load(item.thumbnailUrl)
-                    .transition(DrawableTransitionOptions.withCrossFade())
-                    .centerCrop()
-                    .into(h.thumb);
-        } else {
-            h.thumb.setImageResource(R.drawable.gradient_hero);
-        }
+        Glide.with(ctx)
+                .load(item.thumbnailUrl)
+                .placeholder(R.drawable.gradient_hero)
+                .transition(DrawableTransitionOptions.withCrossFade())
+                .centerCrop()
+                .into(h.thumb);
 
         h.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(ctx, ShortsPlayerActivity.class);

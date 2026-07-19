@@ -25,15 +25,60 @@
             android:clickable="true"
             android:focusable="true"/>
 
-        <TextView
+        <!-- Title + pill de "SHORTS" -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:text="🎬 Shorts Dramas"
-            android:textColor="#FFFFFF"
-            android:textSize="17sp"
-            android:fontFamily="sans-serif-black"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:text="SHORTS"
+                android:textColor="#FFFFFF"
+                android:textSize="9sp"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"
+                android:background="#E91E63"
+                android:layout_marginEnd="8dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DRAMAS"
+                android:textColor="#FFFFFF"
+                android:textSize="17sp"
+                android:fontFamily="sans-serif-black"
+                android:textAllCaps="true"/>
+
+        </LinearLayout>
+
     </FrameLayout>
+
+    <!-- Tab bar: Recientes / Populares / Tendencias -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="42dp"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:background="#0D0D0D">
+
+        <LinearLayout
+            android:id="@+id/dsTabBar"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"/>
+
+    </HorizontalScrollView>
 
     <!-- Loading -->
     <FrameLayout
@@ -48,22 +93,15 @@
             android:layout_gravity="center"/>
     </FrameLayout>
 
-    <!-- Scrollable sections container -->
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/dsScroll"
+    <!-- 2-column grid (YouTube Shorts style) -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/dsGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:padding="3dp"
+        android:clipToPadding="false"
         android:overScrollMode="never"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:id="@+id/dsContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="24dp"/>
-
-    </androidx.core.widget.NestedScrollView>
+        android:visibility="gone"/>
 
 </LinearLayout>
