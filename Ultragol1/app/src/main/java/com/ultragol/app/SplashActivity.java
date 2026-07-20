@@ -24,6 +24,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import org.json.JSONObject;
+import com.ultragol.app.UserSyncManager;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -215,9 +216,15 @@ public class SplashActivity extends AppCompatActivity {
 
     private void goToMain() {
         if (isFinishing() || isDestroyed()) return;
-        boolean loggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
-        Class<?> next = loggedIn ? ProfileSelectorActivity.class : LoginActivity.class;
-        startActivity(new Intent(this, next));
+        com.google.firebase.auth.FirebaseUser user =
+            FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            // Already logged in: pull latest cloud data in background, then go to app
+            UserSyncManager.pullFromCloud(getApplicationContext(), user.getUid(), null);
+            startActivity(new Intent(this, ProfileSelectorActivity.class));
+        } else {
+            startActivity(new Intent(this, LoginActivity.class));
+        }
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
     }

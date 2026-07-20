@@ -12,7 +12,12 @@
           "package_name": "com.ultragol1.app"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyADJ4mR6_BdDTjHSC5v8AxmodMtq5VuPzc"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

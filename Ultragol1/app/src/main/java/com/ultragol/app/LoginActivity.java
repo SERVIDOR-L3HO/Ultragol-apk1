@@ -1,10 +1,12 @@
 package com.ultragol.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.text.InputType;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -14,181 +16,167 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
-import com.google.firebase.auth.FirebaseAuthInvalidUserException;
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;
-import com.google.firebase.auth.FirebaseAuthWeakPasswordException;
+import com.google.android.gms.auth.api.signin.*;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.*;
 
 public class LoginActivity extends AppCompatActivity {
 
-    private FirebaseAuth mAuth;
+    private static final int RC_GOOGLE = 9001;
+    private static final String WEB_CLIENT_ID =
+        "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com";
 
-    private EditText etEmail, etPassword;
-    private TextView btnAction, btnToggle, tvForgot, tvTitle, tvSubtitle;
+    private FirebaseAuth        mAuth;
+    private GoogleSignInClient  googleClient;
+
+    private EditText    etEmail, etPassword;
+    private TextView    btnAction, btnToggle, tvForgot, tvTitle, tvSubtitle, tvQuestion;
     private ProgressBar progressBar;
+    private boolean     isLoginMode = true;
 
-    private boolean isLoginMode = true;
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // Full dark immersive
         getWindow().setFlags(
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
             WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        getWindow().getDecorView().setSystemUiVisibility(
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE |
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN);
 
         mAuth = FirebaseAuth.getInstance();
+        if (mAuth.getCurrentUser() != null) { syncAndGoToMain(); return; }
 
-        // ── If already logged in, go straight to main ─────────────────────────
-        if (mAuth.getCurrentUser() != null) {
-            goToMain();
-            return;
-        }
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(
+            GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(WEB_CLIENT_ID)
+            .requestEmail()
+            .build();
+        googleClient = GoogleSignIn.getClient(this, gso);
 
         buildUI();
     }
 
-    // ── Build the entire UI programmatically ──────────────────────────────────
+    @Override
+    protected void onActivityResult(int req, int res, Intent data) {
+        super.onActivityResult(req, res, data);
+        if (req == RC_GOOGLE) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                GoogleSignInAccount acct = task.getResult(ApiException.class);
+                setLoading(true);
+                AuthCredential cred = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+                mAuth.signInWithCredential(cred)
+                    .addOnCompleteListener(this, t -> {
+                        if (t.isSuccessful()) syncAndGoToMain();
+                        else { setLoading(false); toast("Error con Google Sign-In"); }
+                    });
+            } catch (ApiException e) {
+                toast("Google Sign-In cancelado");
+            }
+        }
+    }
+
+    @Override public void onBackPressed() { finishAffinity(); }
+
+    // ── UI ────────────────────────────────────────────────────────────────────
 
     private void buildUI() {
-        // Root
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setBackgroundColor(0xFF070707);
-        root.setGravity(android.view.Gravity.CENTER_HORIZONTAL);
-
-        // Background gradient overlay
-        GradientDrawable grad = new GradientDrawable(
+        root.setGravity(Gravity.CENTER_HORIZONTAL);
+        GradientDrawable bg = new GradientDrawable(
             GradientDrawable.Orientation.TOP_BOTTOM,
-            new int[]{ 0xFF0D0010, 0xFF070707, 0xFF070707 });
-        root.setBackground(grad);
-
+            new int[]{ 0xFF0A000F, 0xFF070707 });
+        root.setBackground(bg);
         setContentView(root);
 
-        int p24 = dp(24);
-        int p16 = dp(16);
+        // ── Top spacer + brand ────────────────────────────────────────────────
+        root.addView(spacer(dp(90)));
 
-        // ── Logo area ─────────────────────────────────────────────────────────
-        View spacerTop = new View(this);
-        spacerTop.setLayoutParams(new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, dp(90)));
-        root.addView(spacerTop);
-
-        // App name accent bar
-        View accentBar = new View(this);
-        GradientDrawable bar = new GradientDrawable(
+        View bar = new View(this);
+        GradientDrawable barBg = new GradientDrawable(
             GradientDrawable.Orientation.LEFT_RIGHT,
             new int[]{ 0xFFCC1111, 0xFFFF4422 });
-        bar.setCornerRadius(dp(2));
-        accentBar.setBackground(bar);
-        LinearLayout.LayoutParams barLp = new LinearLayout.LayoutParams(dp(48), dp(4));
-        barLp.setMargins(0, 0, 0, dp(20));
-        barLp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        accentBar.setLayoutParams(barLp);
-        root.addView(accentBar);
+        barBg.setCornerRadius(dp(2));
+        bar.setBackground(barBg);
+        LinearLayout.LayoutParams barLp =
+            new LinearLayout.LayoutParams(dp(48), dp(4));
+        barLp.gravity = Gravity.CENTER_HORIZONTAL;
+        barLp.bottomMargin = dp(18);
+        bar.setLayoutParams(barLp);
+        root.addView(bar);
 
-        tvTitle = new TextView(this);
-        tvTitle.setText("ULTRAGOL");
-        tvTitle.setTextColor(Color.WHITE);
-        tvTitle.setTextSize(30f);
-        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle = label("ULTRAGOL", 30f, Color.WHITE, true);
         tvTitle.setLetterSpacing(0.15f);
-        tvTitle.setGravity(android.view.Gravity.CENTER);
-        LinearLayout.LayoutParams titleLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        titleLp.setMargins(0, 0, 0, dp(6));
-        tvTitle.setLayoutParams(titleLp);
+        tvTitle.setGravity(Gravity.CENTER);
+        marginBottom(tvTitle, dp(6));
         root.addView(tvTitle);
 
-        tvSubtitle = new TextView(this);
-        tvSubtitle.setText("Inicia sesión para continuar");
-        tvSubtitle.setTextColor(0x88FFFFFF);
-        tvSubtitle.setTextSize(13f);
-        tvSubtitle.setGravity(android.view.Gravity.CENTER);
-        LinearLayout.LayoutParams subLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        subLp.setMargins(0, 0, 0, dp(40));
-        tvSubtitle.setLayoutParams(subLp);
+        tvSubtitle = label("Inicia sesión para continuar", 13f, 0x88FFFFFF, false);
+        tvSubtitle.setGravity(Gravity.CENTER);
+        marginBottom(tvSubtitle, dp(36));
         root.addView(tvSubtitle);
 
         // ── Form card ─────────────────────────────────────────────────────────
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        GradientDrawable cardBg = new GradientDrawable();
-        cardBg.setColor(0xFF111118);
-        cardBg.setCornerRadius(dp(20));
-        cardBg.setStroke(dp(1), 0x22FFFFFF);
-        card.setBackground(cardBg);
-        card.setPadding(p24, p24, p24, p24);
+        LinearLayout card = card(dp(24));
         LinearLayout.LayoutParams cardLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        cardLp.setMargins(p24, 0, p24, 0);
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT);
+        cardLp.leftMargin = cardLp.rightMargin = dp(22);
         card.setLayoutParams(cardLp);
         root.addView(card);
 
-        // Email field
-        etEmail = makeField("Correo electrónico", InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        card.addView(etEmail);
-
-        // Spacer
-        card.addView(spacer(dp(12)));
-
-        // Password field
-        etPassword = makeField("Contraseña",
+        etEmail    = field("Correo electrónico", InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        etPassword = field("Contraseña",
             InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        card.addView(etEmail);
+        card.addView(spacer(dp(10)));
         card.addView(etPassword);
 
-        // Forgot password
-        tvForgot = new TextView(this);
-        tvForgot.setText("¿Olvidaste tu contraseña?");
-        tvForgot.setTextColor(0xFFCC1111);
-        tvForgot.setTextSize(12f);
-        tvForgot.setGravity(android.view.Gravity.END);
-        LinearLayout.LayoutParams forgotLp = new LinearLayout.LayoutParams(
+        tvForgot = label("¿Olvidaste tu contraseña?", 12f, 0xFFCC1111, false);
+        tvForgot.setGravity(Gravity.END);
+        LinearLayout.LayoutParams fLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        forgotLp.setMargins(0, dp(10), 0, dp(20));
-        tvForgot.setLayoutParams(forgotLp);
-        tvForgot.setClickable(true);
-        tvForgot.setFocusable(true);
+        fLp.topMargin = dp(10); fLp.bottomMargin = dp(18);
+        tvForgot.setLayoutParams(fLp);
+        tvForgot.setClickable(true); tvForgot.setFocusable(true);
         tvForgot.setOnClickListener(v -> showForgotPassword());
         card.addView(tvForgot);
 
-        // Action button
-        btnAction = new TextView(this);
-        btnAction.setText("INICIAR SESIÓN");
-        btnAction.setTextColor(Color.WHITE);
-        btnAction.setTextSize(14f);
-        btnAction.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        btnAction.setLetterSpacing(0.08f);
-        btnAction.setGravity(android.view.Gravity.CENTER);
-        GradientDrawable btnBg = new GradientDrawable(
-            GradientDrawable.Orientation.LEFT_RIGHT,
-            new int[]{ 0xFFCC1111, 0xFFFF3311 });
-        btnBg.setCornerRadius(dp(12));
-        btnAction.setBackground(btnBg);
-        btnAction.setPadding(0, dp(16), 0, dp(16));
-        LinearLayout.LayoutParams btnLp = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        btnLp.setMargins(0, 0, 0, dp(16));
-        btnAction.setLayoutParams(btnLp);
-        btnAction.setClickable(true);
-        btnAction.setFocusable(true);
-        btnAction.setOnClickListener(v -> onActionClick());
+        // Email login button
+        btnAction = actionBtn("INICIAR SESIÓN", 0xFFCC1111, 0xFFFF3311);
+        btnAction.setOnClickListener(v -> onEmailAction());
         card.addView(btnAction);
 
-        // Progress bar
+        // Divider "o"
+        LinearLayout divRow = new LinearLayout(this);
+        divRow.setOrientation(LinearLayout.HORIZONTAL);
+        divRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams drLp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        drLp.topMargin = dp(14); drLp.bottomMargin = dp(14);
+        divRow.setLayoutParams(drLp);
+        View divL = dividerLine(); View divR = dividerLine();
+        TextView tvOr = label("  ó  ", 12f, 0x44FFFFFF, false);
+        tvOr.setGravity(Gravity.CENTER);
+        divRow.addView(divL); divRow.addView(tvOr); divRow.addView(divR);
+        card.addView(divRow);
+
+        // Google Sign-In button
+        TextView btnGoogle = googleBtn();
+        btnGoogle.setOnClickListener(v ->
+            startActivityForResult(googleClient.getSignInIntent(), RC_GOOGLE));
+        card.addView(btnGoogle);
+
+        // Progress
         progressBar = new ProgressBar(this);
         progressBar.setIndeterminateTintList(
             android.content.res.ColorStateList.valueOf(0xFFCC1111));
         LinearLayout.LayoutParams pbLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        pbLp.gravity = android.view.Gravity.CENTER_HORIZONTAL;
-        pbLp.setMargins(0, 0, 0, dp(8));
+        pbLp.gravity = Gravity.CENTER_HORIZONTAL;
+        pbLp.topMargin = dp(8);
         progressBar.setLayoutParams(pbLp);
         progressBar.setVisibility(View.GONE);
         card.addView(progressBar);
@@ -196,64 +184,130 @@ public class LoginActivity extends AppCompatActivity {
         // ── Toggle login/register ─────────────────────────────────────────────
         LinearLayout toggleRow = new LinearLayout(this);
         toggleRow.setOrientation(LinearLayout.HORIZONTAL);
-        toggleRow.setGravity(android.view.Gravity.CENTER);
-        LinearLayout.LayoutParams toggleLp = new LinearLayout.LayoutParams(
+        toggleRow.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams tLp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        toggleLp.setMargins(p24, dp(24), p24, dp(40));
-        toggleRow.setLayoutParams(toggleLp);
+        tLp.topMargin = dp(22); tLp.bottomMargin = dp(40);
+        tLp.leftMargin = tLp.rightMargin = dp(22);
+        toggleRow.setLayoutParams(tLp);
         root.addView(toggleRow);
 
-        TextView tvQuestion = new TextView(this);
-        tvQuestion.setText("¿No tienes cuenta?  ");
-        tvQuestion.setTextColor(0x77FFFFFF);
-        tvQuestion.setTextSize(13f);
+        tvQuestion = label("¿No tienes cuenta?  ", 13f, 0x77FFFFFF, false);
         toggleRow.addView(tvQuestion);
 
-        btnToggle = new TextView(this);
-        btnToggle.setText("Regístrate");
-        btnToggle.setTextColor(0xFFCC1111);
-        btnToggle.setTextSize(13f);
-        btnToggle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
-        btnToggle.setClickable(true);
-        btnToggle.setFocusable(true);
-        btnToggle.setOnClickListener(v -> toggleMode(tvQuestion));
+        btnToggle = label("Regístrate", 13f, 0xFFCC1111, true);
+        btnToggle.setClickable(true); btnToggle.setFocusable(true);
+        btnToggle.setOnClickListener(v -> toggleMode());
         toggleRow.addView(btnToggle);
     }
 
-    // ── Input field factory ───────────────────────────────────────────────────
+    // ── Widget factories ──────────────────────────────────────────────────────
 
-    private EditText makeField(String hint, int inputType) {
+    private TextView label(String text, float size, int color, boolean bold) {
+        TextView tv = new TextView(this);
+        tv.setText(text);
+        tv.setTextSize(size);
+        tv.setTextColor(color);
+        if (bold) tv.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tv.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        return tv;
+    }
+
+    private EditText field(String hint, int inputType) {
         EditText et = new EditText(this);
         et.setHint(hint);
         et.setHintTextColor(0x55FFFFFF);
         et.setTextColor(Color.WHITE);
         et.setTextSize(14f);
         et.setInputType(inputType);
-        et.setBackground(null);
         et.setSingleLine(true);
-
         GradientDrawable bg = new GradientDrawable();
-        bg.setColor(0xFF1A1A26);
-        bg.setCornerRadius(dp(10));
+        bg.setColor(0xFF1A1A26); bg.setCornerRadius(dp(10));
         bg.setStroke(dp(1), 0x33FFFFFF);
         et.setBackground(bg);
         et.setPadding(dp(16), dp(14), dp(16), dp(14));
+        et.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
+        return et;
+    }
 
+    private TextView actionBtn(String text, int colorL, int colorR) {
+        TextView btn = new TextView(this);
+        btn.setText(text);
+        btn.setTextColor(Color.WHITE);
+        btn.setTextSize(14f);
+        btn.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        btn.setLetterSpacing(0.08f);
+        btn.setGravity(Gravity.CENTER);
+        GradientDrawable bg = new GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT, new int[]{ colorL, colorR });
+        bg.setCornerRadius(dp(12));
+        btn.setBackground(bg);
+        btn.setPadding(0, dp(15), 0, dp(15));
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
-        et.setLayoutParams(lp);
-        return et;
+        btn.setLayoutParams(lp);
+        btn.setClickable(true); btn.setFocusable(true);
+        return btn;
+    }
+
+    private TextView googleBtn() {
+        TextView btn = new TextView(this);
+        btn.setText("G   Continuar con Google");
+        btn.setTextColor(Color.WHITE);
+        btn.setTextSize(14f);
+        btn.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        btn.setGravity(Gravity.CENTER);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(0xFF1E1E2A);
+        bg.setCornerRadius(dp(12));
+        bg.setStroke(dp(1), 0x44FFFFFF);
+        btn.setBackground(bg);
+        btn.setPadding(0, dp(15), 0, dp(15));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        btn.setLayoutParams(lp);
+        btn.setClickable(true); btn.setFocusable(true);
+        return btn;
+    }
+
+    private LinearLayout card(int padding) {
+        LinearLayout l = new LinearLayout(this);
+        l.setOrientation(LinearLayout.VERTICAL);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(0xFF111118); bg.setCornerRadius(dp(20));
+        bg.setStroke(dp(1), 0x22FFFFFF);
+        l.setBackground(bg);
+        l.setPadding(padding, padding, padding, padding);
+        return l;
+    }
+
+    private View dividerLine() {
+        View v = new View(this);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(1), 1f);
+        v.setLayoutParams(lp);
+        v.setBackgroundColor(0x22FFFFFF);
+        return v;
     }
 
     private View spacer(int h) {
         View v = new View(this);
-        v.setLayoutParams(new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, h));
+        v.setLayoutParams(new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, h));
         return v;
+    }
+
+    private void marginBottom(View v, int margin) {
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.bottomMargin = margin;
+        v.setLayoutParams(lp);
     }
 
     // ── Mode toggle ───────────────────────────────────────────────────────────
 
-    private void toggleMode(TextView tvQuestion) {
+    private void toggleMode() {
         isLoginMode = !isLoginMode;
         if (isLoginMode) {
             tvTitle.setText("ULTRAGOL");
@@ -272,117 +326,94 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    // ── Auth actions ──────────────────────────────────────────────────────────
+    // ── Auth ──────────────────────────────────────────────────────────────────
 
-    private void onActionClick() {
+    private void onEmailAction() {
         String email    = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
-
-        if (email.isEmpty()) {
-            etEmail.setError("Ingresa tu correo");
-            etEmail.requestFocus();
-            return;
-        }
-        if (password.isEmpty()) {
-            etPassword.setError("Ingresa tu contraseña");
-            etPassword.requestFocus();
-            return;
-        }
-        if (password.length() < 6) {
-            etPassword.setError("Mínimo 6 caracteres");
-            etPassword.requestFocus();
-            return;
-        }
+        if (email.isEmpty())    { etEmail.setError("Ingresa tu correo"); return; }
+        if (password.isEmpty()) { etPassword.setError("Ingresa tu contraseña"); return; }
+        if (password.length() < 6) { etPassword.setError("Mínimo 6 caracteres"); return; }
 
         setLoading(true);
-
         if (isLoginMode) {
             mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    setLoading(false);
-                    if (task.isSuccessful()) {
-                        goToMain();
-                    } else {
-                        showAuthError(task.getException());
-                    }
+                .addOnCompleteListener(this, t -> {
+                    if (t.isSuccessful()) syncAndGoToMain();
+                    else { setLoading(false); showAuthError(t.getException()); }
                 });
         } else {
             mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, task -> {
-                    setLoading(false);
-                    if (task.isSuccessful()) {
-                        goToMain();
-                    } else {
-                        showAuthError(task.getException());
-                    }
+                .addOnCompleteListener(this, t -> {
+                    if (t.isSuccessful()) syncAndGoToMain();
+                    else { setLoading(false); showAuthError(t.getException()); }
                 });
         }
     }
 
     private void showForgotPassword() {
-        EditText etReset = new EditText(this);
-        etReset.setHint("Tu correo electrónico");
-        etReset.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-        etReset.setPadding(dp(16), dp(12), dp(16), dp(12));
+        EditText et = new EditText(this);
+        et.setHint("Tu correo electrónico");
+        et.setInputType(InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        et.setPadding(dp(16), dp(12), dp(16), dp(12));
         String pre = etEmail.getText().toString().trim();
-        if (!pre.isEmpty()) etReset.setText(pre);
-
+        if (!pre.isEmpty()) et.setText(pre);
         new AlertDialog.Builder(this)
             .setTitle("Recuperar contraseña")
-            .setView(etReset)
+            .setView(et)
             .setPositiveButton("Enviar", (d, w) -> {
-                String email = etReset.getText().toString().trim();
+                String email = et.getText().toString().trim();
                 if (email.isEmpty()) return;
                 mAuth.sendPasswordResetEmail(email)
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            toast("Correo enviado a " + email);
-                        } else {
-                            toast("No se pudo enviar el correo");
-                        }
-                    });
+                    .addOnCompleteListener(t ->
+                        toast(t.isSuccessful() ? "Correo enviado a " + email
+                                               : "No se pudo enviar el correo"));
             })
-            .setNegativeButton("Cancelar", null)
-            .show();
+            .setNegativeButton("Cancelar", null).show();
     }
 
     private void showAuthError(Exception e) {
         String msg = "Error de autenticación";
         if (e instanceof FirebaseAuthInvalidUserException)
-            msg = "No existe una cuenta con ese correo";
+            msg = "No existe cuenta con ese correo";
         else if (e instanceof FirebaseAuthInvalidCredentialsException)
             msg = "Correo o contraseña incorrectos";
         else if (e instanceof FirebaseAuthWeakPasswordException)
-            msg = "La contraseña es muy débil (mínimo 6 caracteres)";
+            msg = "Contraseña muy débil (mínimo 6 caracteres)";
         else if (e instanceof FirebaseAuthUserCollisionException)
             msg = "Ya existe una cuenta con ese correo";
-        else if (e != null && e.getMessage() != null)
-            msg = e.getMessage();
+        else if (e != null && e.getMessage() != null) msg = e.getMessage();
         toast(msg);
     }
 
-    private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
-        btnAction.setEnabled(!loading);
-        btnAction.setAlpha(loading ? 0.5f : 1f);
+    // ── Sync & navigate ───────────────────────────────────────────────────────
+
+    /** Pull cloud data, then navigate to ProfileSelector. */
+    private void syncAndGoToMain() {
+        String uid = mAuth.getCurrentUser().getUid();
+        // Pull with loading spinner; go to main when done (or on failure)
+        UserSyncManager.pullFromCloud(getApplicationContext(), uid, () ->
+            runOnUiThread(() -> {
+                setLoading(false);
+                startActivity(new Intent(this, ProfileSelectorActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
+            }));
     }
 
-    private void goToMain() {
-        startActivity(new Intent(this, ProfileSelectorActivity.class));
-        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-        finish();
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private void setLoading(boolean on) {
+        progressBar.setVisibility(on ? View.VISIBLE : View.GONE);
+        btnAction.setEnabled(!on);
+        btnAction.setAlpha(on ? 0.5f : 1f);
     }
 
     private void toast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
-    private int dp(int val) {
-        return Math.round(val * getResources().getDisplayMetrics().density);
-    }
-
-    @Override public void onBackPressed() {
-        // Prevent going back to splash without logging in
-        finishAffinity();
+    private int dp(int v) {
+        return Math.round(v * getResources().getDisplayMetrics().density);
     }
 }
