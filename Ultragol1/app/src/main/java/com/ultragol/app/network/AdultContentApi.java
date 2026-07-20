@@ -11,40 +11,69 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * RedTube Webmasters API wrapper.
- * Official API docs: https://www.redtube.com/api/docs
- * No authentication required for public endpoints.
+ * Multi-source adult content API.
+ * Sources: RedTube Webmasters API + Pornhub Webmasters API
+ * Both are public — no auth required.
  */
 public class AdultContentApi {
 
-    private static final String BASE = "https://api.redtube.com/?output=json";
+    // ── Feed keys (used by AdultFragment chips) ───────────────────────────────
+    public static final String FEED_TRENDING = "trending";
+    public static final String FEED_NEWEST   = "newest";
+    public static final String FEED_TOP      = "top";
 
-    // ── Category IDs ───────────────────────────────────────────────────────────
-    public static final int CAT_AMATEUR    =  6;
-    public static final int CAT_MILF       = 20;
-    public static final int CAT_LATINA     = 21;
-    public static final int CAT_ASIAN      =  9;
-    public static final int CAT_LESBIAN    =  3;
-    public static final int CAT_POV        = 30;
-    public static final int CAT_MATURE     = 16;
-    public static final int CAT_BIG_TITS   =  1;
-    public static final int CAT_ANAL       =  5;
-    public static final int CAT_TEENS      =  2;
-    public static final int CAT_THREESOME  = 2211;
-    public static final int CAT_HENTAI     = 15;
-    public static final int CAT_WEBCAM     = 2291;
-    public static final int CAT_ROMANTIC   = 50;
-    public static final int CAT_MASSAGE    = 51;
+    // ── Category keys ─────────────────────────────────────────────────────────
+    public static final String CAT_AMATEUR   = "amateur";
+    public static final String CAT_MILF      = "milf";
+    public static final String CAT_LATINA    = "latina";
+    public static final String CAT_ASIAN     = "asian";
+    public static final String CAT_LESBIAN   = "lesbian";
+    public static final String CAT_POV       = "pov";
+    public static final String CAT_MATURE    = "mature";
+    public static final String CAT_WEBCAM    = "webcam";
+    public static final String CAT_HENTAI    = "hentai";
+    public static final String CAT_THREESOME = "threesome";
+    public static final String CAT_BIG_TITS  = "big_tits";
+    public static final String CAT_ANAL      = "anal";
+    public static final String CAT_MASSAGE   = "massage";
+    public static final String CAT_ROMANTIC  = "romantic";
 
-    private static String fetch(String path) throws Exception {
-        URL url = new URL(BASE + path);
+    // ── RedTube API ───────────────────────────────────────────────────────────
+    private static final String RT_BASE = "https://api.redtube.com/?output=json";
+
+    // RedTube category IDs
+    private static int rtCatId(String key) {
+        switch (key) {
+            case CAT_AMATEUR:   return 6;
+            case CAT_MILF:      return 20;
+            case CAT_LATINA:    return 21;
+            case CAT_ASIAN:     return 9;
+            case CAT_LESBIAN:   return 3;
+            case CAT_POV:       return 30;
+            case CAT_MATURE:    return 16;
+            case CAT_WEBCAM:    return 2291;
+            case CAT_HENTAI:    return 15;
+            case CAT_THREESOME: return 2211;
+            case CAT_BIG_TITS:  return 1;
+            case CAT_ANAL:      return 5;
+            case CAT_MASSAGE:   return 51;
+            case CAT_ROMANTIC:  return 50;
+            default:            return -1;
+        }
+    }
+
+    private static String httpGet(String fullUrl) throws Exception {
+        URL url = new URL(fullUrl);
         HttpURLConnection c = (HttpURLConnection) url.openConnection();
         c.setRequestMethod("GET");
         c.setRequestProperty("User-Agent",
-            "Mozilla/5.0 (Linux; Android 12; Mobile) AppleWebKit/537.36");
+            "Mozilla/5.0 (Linux; Android 13; Mobile) AppleWebKit/537.36 "
+            + "(KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36");
         c.setRequestProperty("Accept", "application/json");
-        c.setConnectTimeout(12000);
-        c.setReadTimeout(12000);
+        c.setConnectTimeout(14000);
+        c.setReadTimeout(14000);
+        int code = c.getResponseCode();
+        if (code != 200) throw new Exception("HTTP " + code);
         BufferedReader br = new BufferedReader(
             new InputStreamReader(c.getInputStream(), "UTF-8"));
         StringBuilder sb = new StringBuilder();
@@ -54,7 +83,9 @@ public class AdultContentApi {
         return sb.toString();
     }
 
-    private static List<AdultVideoItem> parse(String json) {
+    // ── RedTube parsers & fetchers ────────────────────────────────────────────
+
+    private static List<AdultVideoItem> parseRT(String json) {
         List<AdultVideoItem> list = new ArrayList<>();
         try {
             JSONObject root = new JSONObject(json);
@@ -63,12 +94,10 @@ public class AdultContentApi {
             for (int i = 0; i < videos.length(); i++) {
                 try {
                     JSONObject v = videos.getJSONObject(i).getJSONObject("video");
-                    String id    = v.optString("video_id", "");
-                    String title = v.optString("title", "Sin título");
-                    // Use the best available thumb
-                    String thumb = v.optString("default_thumb", "");
+                    String id       = v.optString("video_id", "");
+                    String title    = v.optString("title", "Sin título");
+                    String thumb    = v.optString("default_thumb", "");
                     if (thumb.isEmpty()) thumb = v.optString("thumb", "");
-                    // Try to get a larger thumb from thumbs array
                     JSONArray thumbs = v.optJSONArray("thumbs");
                     if (thumbs != null) {
                         for (int j = thumbs.length() - 1; j >= 0; j--) {
@@ -83,11 +112,9 @@ public class AdultContentApi {
                     String views    = v.optString("views", "0");
                     String rating   = String.valueOf((int) v.optDouble("rating", 0.0));
                     String embed    = v.optString("embed_url", "");
-                    if (embed.isEmpty() && !id.isEmpty()) {
+                    if (embed.isEmpty() && !id.isEmpty())
                         embed = "https://embed.redtube.com/?id=" + id;
-                    }
                     String pubDate  = v.optString("publish_date", "");
-                    // Build tag string
                     StringBuilder tagSb = new StringBuilder();
                     JSONArray tags = v.optJSONArray("tags");
                     if (tags != null) {
@@ -107,72 +134,170 @@ public class AdultContentApi {
         return list;
     }
 
-    // ── Curated feeds ─────────────────────────────────────────────────────────
-
-    /** Most viewed this week — main "Trending" row. */
-    public static List<AdultVideoItem> fetchTrending() throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&ordering=mostviewed&period=week&thumbsize=big&page=1&count=20"));
+    private static List<AdultVideoItem> rtFeed(String ordering, String period, int page)
+            throws Exception {
+        String url = RT_BASE
+            + "&data=redtube.Videos.searchVideos"
+            + "&ordering=" + ordering
+            + (period != null ? "&period=" + period : "")
+            + "&thumbsize=big&page=" + page + "&count=20";
+        return parseRT(httpGet(url));
     }
 
-    /** Newest uploads. */
-    public static List<AdultVideoItem> fetchNewest() throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&ordering=newest&thumbsize=big&page=1&count=20"));
+    private static List<AdultVideoItem> rtCategory(int catId, int page) throws Exception {
+        String url = RT_BASE
+            + "&data=redtube.Videos.searchVideos"
+            + "&category=" + catId
+            + "&ordering=mostviewed&thumbsize=big&page=" + page + "&count=20";
+        return parseRT(httpGet(url));
     }
 
-    /** Top rated all time. */
-    public static List<AdultVideoItem> fetchTopRated() throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&ordering=toprated&thumbsize=big&page=1&count=20"));
+    // ── Pornhub Webmasters API ────────────────────────────────────────────────
+    private static final String PH_BASE = "https://www.pornhub.com/webmasters";
+
+    // Pornhub category IDs
+    private static String phCatId(String key) {
+        switch (key) {
+            case CAT_AMATEUR:   return "1";
+            case CAT_MILF:      return "217";
+            case CAT_LATINA:    return "28";
+            case CAT_ASIAN:     return "6";
+            case CAT_LESBIAN:   return "27";
+            case CAT_POV:       return "241";
+            case CAT_MATURE:    return "44";
+            case CAT_WEBCAM:    return "105";
+            case CAT_HENTAI:    return "148";
+            case CAT_THREESOME: return "53";
+            case CAT_BIG_TITS:  return "8";
+            case CAT_ANAL:      return "2";
+            case CAT_MASSAGE:   return "81";
+            case CAT_ROMANTIC:  return "172";
+            default:            return null;
+        }
     }
 
-    /** Most viewed of all time. */
-    public static List<AdultVideoItem> fetchMostViewed() throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&ordering=mostviewed&thumbsize=big&page=1&count=20"));
+    private static List<AdultVideoItem> parsePH(String json) {
+        List<AdultVideoItem> list = new ArrayList<>();
+        try {
+            JSONObject root = new JSONObject(json);
+            JSONArray videos = root.optJSONArray("videos");
+            if (videos == null) return list;
+            for (int i = 0; i < videos.length(); i++) {
+                try {
+                    JSONObject v = videos.getJSONObject(i);
+                    String id    = v.optString("video_id", "");
+                    String title = v.optString("title", "Sin título");
+                    String thumb = v.optString("thumb", "");
+                    // PH duration is in seconds
+                    int secs     = v.optInt("duration", 0);
+                    String duration = String.format("%d:%02d", secs / 60, secs % 60);
+                    String views = String.valueOf(v.optLong("views", 0));
+                    String rating = String.valueOf((int) v.optDouble("rating", 0.0));
+                    String embed = v.optString("embed", "");
+                    if (embed.isEmpty() && !id.isEmpty())
+                        embed = "https://www.pornhub.com/embed/" + id;
+                    String pubDate = v.optString("publish_date", "");
+                    // PH tags can be array of strings or objects
+                    StringBuilder tagSb = new StringBuilder();
+                    JSONArray tags = v.optJSONArray("tags");
+                    if (tags != null) {
+                        for (int t = 0; t < Math.min(tags.length(), 3); t++) {
+                            String tag = tags.optString(t, "");
+                            if (!tag.isEmpty()) {
+                                if (tagSb.length() > 0) tagSb.append(" · ");
+                                tagSb.append(tag);
+                            }
+                        }
+                    }
+                    list.add(new AdultVideoItem(id, title, thumb, duration,
+                        views, rating, embed, pubDate, tagSb.toString()));
+                } catch (Exception ignored) {}
+            }
+        } catch (Exception ignored) {}
+        return list;
     }
 
-    // ── Category feeds ────────────────────────────────────────────────────────
-
-    public static List<AdultVideoItem> fetchByCategory(int categoryId) throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&category=" + categoryId
-            + "&ordering=mostviewed&period=month&thumbsize=big&page=1&count=20"));
+    private static List<AdultVideoItem> phFeed(String ordering, int page) throws Exception {
+        String url = PH_BASE + "/search?search=&ordering=" + ordering
+            + "&thumbsize=medium_q&page=" + page;
+        return parsePH(httpGet(url));
     }
 
-    // ── Convenience category shortcuts ────────────────────────────────────────
-
-    public static List<AdultVideoItem> fetchAmateur()   throws Exception { return fetchByCategory(CAT_AMATEUR); }
-    public static List<AdultVideoItem> fetchMilf()      throws Exception { return fetchByCategory(CAT_MILF); }
-    public static List<AdultVideoItem> fetchLatina()    throws Exception { return fetchByCategory(CAT_LATINA); }
-    public static List<AdultVideoItem> fetchAsian()     throws Exception { return fetchByCategory(CAT_ASIAN); }
-    public static List<AdultVideoItem> fetchLesbian()   throws Exception { return fetchByCategory(CAT_LESBIAN); }
-    public static List<AdultVideoItem> fetchPOV()       throws Exception { return fetchByCategory(CAT_POV); }
-    public static List<AdultVideoItem> fetchMature()    throws Exception { return fetchByCategory(CAT_MATURE); }
-    public static List<AdultVideoItem> fetchHentai()    throws Exception { return fetchByCategory(CAT_HENTAI); }
-    public static List<AdultVideoItem> fetchWebcam()    throws Exception { return fetchByCategory(CAT_WEBCAM); }
-    public static List<AdultVideoItem> fetchRomantic()  throws Exception { return fetchByCategory(CAT_ROMANTIC); }
-
-    // ── Search ────────────────────────────────────────────────────────────────
-
-    public static List<AdultVideoItem> search(String query) throws Exception {
-        String enc = java.net.URLEncoder.encode(query, "UTF-8");
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&search=" + enc
-            + "&ordering=mostviewed&thumbsize=big&page=1&count=20"));
+    private static List<AdultVideoItem> phCategory(String catId, int page) throws Exception {
+        String url = PH_BASE + "/search?search=&categories_id[]=" + catId
+            + "&ordering=mostviewed&thumbsize=medium_q&page=" + page;
+        return parsePH(httpGet(url));
     }
 
-    // ── Paginated fetch (for infinite scroll) ─────────────────────────────────
+    // ── Unified fetch with fallback ───────────────────────────────────────────
 
-    public static List<AdultVideoItem> fetchPage(int page) throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&ordering=mostviewed&period=week&thumbsize=big&page=" + page + "&count=20"));
+    /**
+     * Main entry point. Tries RedTube first; falls back to Pornhub if empty.
+     * @param key  One of FEED_* or CAT_* constants.
+     * @param page 1-based page number.
+     */
+    public static List<AdultVideoItem> fetch(String key, int page) {
+        // Try source 1: RedTube
+        try {
+            List<AdultVideoItem> r = fetchRT(key, page);
+            if (!r.isEmpty()) return r;
+        } catch (Exception ignored) {}
+
+        // Try source 2: Pornhub
+        try {
+            List<AdultVideoItem> r = fetchPH(key, page);
+            if (!r.isEmpty()) return r;
+        } catch (Exception ignored) {}
+
+        return new ArrayList<>();
     }
 
-    public static List<AdultVideoItem> fetchCategoryPage(int categoryId, int page) throws Exception {
-        return parse(fetch("&data=redtube.Videos.searchVideos"
-            + "&category=" + categoryId
-            + "&ordering=mostviewed&thumbsize=big&page=" + page + "&count=20"));
+    private static List<AdultVideoItem> fetchRT(String key, int page) throws Exception {
+        switch (key) {
+            case FEED_TRENDING: return rtFeed("mostviewed", "week",  page);
+            case FEED_NEWEST:   return rtFeed("newest",     null,    page);
+            case FEED_TOP:      return rtFeed("toprated",   null,    page);
+            default:
+                int catId = rtCatId(key);
+                if (catId < 0) throw new Exception("Unknown key: " + key);
+                return rtCategory(catId, page);
+        }
+    }
+
+    private static List<AdultVideoItem> fetchPH(String key, int page) throws Exception {
+        switch (key) {
+            case FEED_TRENDING: return phFeed("mostviewed", page);
+            case FEED_NEWEST:   return phFeed("newest",     page);
+            case FEED_TOP:      return phFeed("rating",     page);
+            default:
+                String phId = phCatId(key);
+                if (phId == null) throw new Exception("Unknown key: " + key);
+                return phCategory(phId, page);
+        }
+    }
+
+    // ── Search (tries both sources) ───────────────────────────────────────────
+
+    public static List<AdultVideoItem> search(String query) {
+        String enc;
+        try { enc = java.net.URLEncoder.encode(query, "UTF-8"); }
+        catch (Exception e) { enc = query; }
+
+        // Try RedTube search
+        try {
+            String url = RT_BASE + "&data=redtube.Videos.searchVideos"
+                + "&search=" + enc + "&ordering=mostviewed&thumbsize=big&page=1&count=20";
+            List<AdultVideoItem> r = parseRT(httpGet(url));
+            if (!r.isEmpty()) return r;
+        } catch (Exception ignored) {}
+
+        // Try PH search
+        try {
+            String url = PH_BASE + "/search?search=" + enc
+                + "&ordering=mostviewed&thumbsize=medium_q&page=1";
+            return parsePH(httpGet(url));
+        } catch (Exception ignored) {}
+
+        return new ArrayList<>();
     }
 }

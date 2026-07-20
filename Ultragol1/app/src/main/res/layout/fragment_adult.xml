@@ -5,21 +5,22 @@
     android:orientation="vertical"
     android:background="#0D0D0D">
 
-    <!-- Top bar -->
+    <!-- ── Top bar ──────────────────────────────────────────────────────────── -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:paddingStart="4dp"
-        android:paddingEnd="16dp"
+        android:paddingEnd="12dp"
         android:background="#0D0D0D"
         android:elevation="4dp">
 
+        <!-- Back -->
         <FrameLayout
             android:id="@+id/adultBack"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
             android:clickable="true"
             android:focusable="true">
             <TextView
@@ -28,33 +29,37 @@
                 android:layout_gravity="center"
                 android:text="←"
                 android:textColor="#FFFFFF"
-                android:textSize="24sp"/>
+                android:textSize="22sp"/>
         </FrameLayout>
 
+        <!-- Title -->
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="🔥 ADULTOS"
-            android:textColor="#FF6B1A"
-            android:textSize="20sp"
+            android:text="ADULTOS"
+            android:textColor="#E8401C"
+            android:textSize="18sp"
             android:fontFamily="sans-serif-black"
-            android:letterSpacing="0.05"/>
+            android:letterSpacing="0.1"
+            android:paddingStart="4dp"/>
 
-        <!-- Search -->
+        <!-- Search icon button -->
         <FrameLayout
             android:id="@+id/adultBtnSearch"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:clickable="true"
             android:focusable="true"
-            android:layout_marginEnd="4dp">
+            android:layout_marginEnd="6dp">
+            <!-- Magnifier drawn with a TextView using vector char -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:text="🔍"
-                android:textSize="20sp"/>
+                android:text="⌕"
+                android:textColor="#CCFFFFFF"
+                android:textSize="22sp"/>
         </FrameLayout>
 
         <!-- +18 badge -->
@@ -63,25 +68,33 @@
             android:layout_height="wrap_content"
             android:text="+18"
             android:textColor="#FFFFFF"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:fontFamily="sans-serif-black"
-            android:background="#CCFF3B1A"
+            android:letterSpacing="0.05"
+            android:background="#CCCC1A0A"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
-            android:paddingTop="4dp"
-            android:paddingBottom="4dp"/>
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"/>
     </LinearLayout>
 
-    <!-- Category chips -->
+    <!-- ── Bottom border under top bar ──────────────────────────────────────── -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#1AFFFFFF"/>
+
+    <!-- ── Category chip row ────────────────────────────────────────────────── -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
         android:background="#0D0D0D"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
-        android:paddingStart="12dp"
-        android:paddingEnd="12dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:fadeScrollbars="true">
 
         <LinearLayout
             android:id="@+id/adultChipRow"
@@ -91,28 +104,63 @@
             android:gravity="center_vertical"/>
     </HorizontalScrollView>
 
-    <!-- Thin separator -->
+    <!-- ── Divider ───────────────────────────────────────────────────────────── -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#22FFFFFF"/>
+        android:background="#18FFFFFF"/>
 
-    <!-- Main content: RecyclerView (2-col grid + category sections) -->
-    <ProgressBar
-        android:id="@+id/adultLoading"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="60dp"
-        android:visibility="visible"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/adultGrid"
+    <!-- ── Content area (loading / grid / empty) ─────────────────────────────── -->
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:padding="3dp"
-        android:clipToPadding="false"
-        android:overScrollMode="never"
-        android:visibility="gone"/>
+        android:layout_height="match_parent">
+
+        <!-- Loading spinner -->
+        <ProgressBar
+            android:id="@+id/adultLoading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:indeterminateTint="#E8401C"
+            android:visibility="visible"/>
+
+        <!-- Video grid -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/adultGrid"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="3dp"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:visibility="gone"/>
+
+        <!-- Empty state -->
+        <LinearLayout
+            android:id="@+id/adultEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sin resultados"
+                android:textColor="#66FFFFFF"
+                android:textSize="15sp"
+                android:fontFamily="sans-serif-medium"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Intenta con otra categoría"
+                android:textColor="#33FFFFFF"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"/>
+        </LinearLayout>
+
+    </FrameLayout>
 
 </LinearLayout>

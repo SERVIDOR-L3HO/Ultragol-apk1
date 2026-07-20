@@ -120,3 +120,9 @@ id = "G4EzAvurlgSff_55TAJ2d"
 uri = "file://apks/ultragol1-debug.apk"
 type = "unspecified"
 title = "ultragol1-debug.apk (17 MB)"
+
+[[outputs]]
+id = "wuNP3QoaPJzKVwSyvOaCQ"
+uri = "file://public/ultragol1-debug.apk"
+type = "unspecified"
+title = "ultragol1-debug.apk — diseño nuevo + doble API"
