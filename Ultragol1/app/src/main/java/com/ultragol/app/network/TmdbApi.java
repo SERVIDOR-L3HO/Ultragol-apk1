@@ -106,6 +106,9 @@ public class TmdbApi {
     public static List<ContentItem> fetchMovies() throws Exception {
         return parse(new JSONObject(fetch("/discover/movie?sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
+    public static List<ContentItem> fetchAdult() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&sort_by=popularity.desc&language=es-MX&certification_country=MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
     public static List<ContentItem> fetchTopMovies() throws Exception {
         return parse(new JSONObject(fetch("/movie/top_rated?language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }

@@ -4,13 +4,13 @@ import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.*;
 import android.view.animation.AlphaAnimation;
-import android.widget.FrameLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -73,6 +73,29 @@ public class MainActivity extends AppCompatActivity {
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
         View navDownloads = drawerOverlay.findViewById(R.id.navDownloads);
         if (navDownloads != null) navDownloads.setOnClickListener(v -> navigate(new com.ultragol.app.fragments.DownloadsFragment()));
+
+        // ── Adult section ──
+        View navAdult = drawerOverlay.findViewById(R.id.navAdult);
+        if (navAdult != null) navAdult.setOnClickListener(v -> {
+            hideMenu();
+            if (!AdultManager.isEnabled(this)) {
+                Toast.makeText(this, "🔒 La sección Adultos está desactivada.\nActívala en Configuración.", Toast.LENGTH_LONG).show();
+                return;
+            }
+            if (!AdultManager.hasPin(this)) {
+                navigate(new AdultFragment());
+                return;
+            }
+            showAdultPinDialog(() -> navigate(new AdultFragment()));
+        });
+
+        // ── Settings ──
+        View navSettings = drawerOverlay.findViewById(R.id.navSettings);
+        if (navSettings != null) navSettings.setOnClickListener(v -> {
+            hideMenu();
+            showAdultSettings();
+        });
+
         if (navSwitchProfile != null) navSwitchProfile.setOnClickListener(v -> {
             hideMenu();
             startActivity(new Intent(this, ProfileSelectorActivity.class));
@@ -168,12 +191,20 @@ public class MainActivity extends AppCompatActivity {
      */
     private void applyKidsDrawerFilter(boolean isKids) {
         int kidsGone = isKids ? View.GONE : View.VISIBLE;
-        setDrawerItemVisibility(R.id.navAnime,       kidsGone);
-        setDrawerItemVisibility(R.id.navDoramas,     kidsGone);
-        setDrawerItemVisibility(R.id.navDeportes,    kidsGone);
+        setDrawerItemVisibility(R.id.navAnime,        kidsGone);
+        setDrawerItemVisibility(R.id.navDoramas,      kidsGone);
+        setDrawerItemVisibility(R.id.navDeportes,     kidsGone);
+        setDrawerItemVisibility(R.id.navAdult,        View.GONE); // always hidden for kids
         setDrawerItemVisibility(R.id.platCrunchyroll, kidsGone);
-        setDrawerItemVisibility(R.id.platAtx,        kidsGone);
-        setDrawerItemVisibility(R.id.platTokyoMx,    kidsGone);
+        setDrawerItemVisibility(R.id.platAtx,         kidsGone);
+        setDrawerItemVisibility(R.id.platTokyoMx,     kidsGone);
+        // For adults: restore navAdult visibility based on setting
+        if (!isKids) {
+            setDrawerItemVisibility(R.id.navAdult, View.VISIBLE);
+            // Update lock icon
+            TextView lockIcon = drawerOverlay.findViewById(R.id.tvAdultLock);
+            if (lockIcon != null) lockIcon.setText(AdultManager.isEnabled(this) ? "🔓" : "🔒");
+        }
     }
 
     private void setDrawerItemVisibility(int viewId, int visibility) {
@@ -238,6 +269,253 @@ public class MainActivity extends AppCompatActivity {
             // Permiso concedido → lanzar notificación inmediata de bienvenida
             NotificationScheduler.runNow(this);
         }
+    }
+
+    // ── Adult PIN entry ───────────────────────────────────────────────────────
+
+    private void showAdultPinDialog(Runnable onSuccess) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_pin_entry, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.UpdateDialogTheme)
+            .setView(v).setCancelable(true).create();
+        if (dialog.getWindow() != null)
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        TextView tvName = v.findViewById(R.id.pinProfileName);
+        if (tvName != null) tvName.setText("🔥 Sección Adultos — Ingresa tu contraseña");
+
+        View[] dots = {
+            v.findViewById(R.id.dot1), v.findViewById(R.id.dot2),
+            v.findViewById(R.id.dot3), v.findViewById(R.id.dot4)
+        };
+        TextView tvError = v.findViewById(R.id.tvPinError);
+        StringBuilder entered = new StringBuilder();
+
+        Runnable updateDots = () -> {
+            for (int i = 0; i < 4; i++) {
+                dots[i].setBackgroundResource(
+                    i < entered.length() ? R.drawable.pin_dot_filled : R.drawable.pin_dot_empty);
+            }
+        };
+        int[] keyIds = {R.id.key0, R.id.key1, R.id.key2, R.id.key3, R.id.key4,
+                        R.id.key5, R.id.key6, R.id.key7, R.id.key8, R.id.key9};
+        for (int d = 0; d <= 9; d++) {
+            final int digit = d;
+            v.findViewById(keyIds[d]).setOnClickListener(btn -> {
+                if (entered.length() >= 4) return;
+                entered.append(digit);
+                updateDots.run();
+                if (tvError != null) tvError.setVisibility(View.INVISIBLE);
+                if (entered.length() == 4) {
+                    if (AdultManager.checkPin(this, entered.toString())) {
+                        dialog.dismiss();
+                        onSuccess.run();
+                    } else {
+                        if (tvError != null) tvError.setVisibility(View.VISIBLE);
+                        entered.setLength(0);
+                        updateDots.run();
+                    }
+                }
+            });
+        }
+        View keyDel = v.findViewById(R.id.keyDel);
+        if (keyDel != null) keyDel.setOnClickListener(btn -> {
+            if (entered.length() > 0) { entered.deleteCharAt(entered.length() - 1); updateDots.run(); }
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            int sw = getResources().getDisplayMetrics().widthPixels;
+            int mg = (int)(20 * getResources().getDisplayMetrics().density);
+            dialog.getWindow().setLayout(sw - mg * 2, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    /** Two-step PIN setup: enter → confirm. Calls onDone(pin) when confirmed. */
+    private void showAdultPinSetupDialog(java.util.function.Consumer<String> onDone) {
+        showAdultPinCapture("🔑 Establece tu contraseña (4 dígitos)", first ->
+            showAdultPinCapture("🔑 Confirma tu contraseña", second -> {
+                if (first.equals(second)) {
+                    onDone.accept(first);
+                } else {
+                    Toast.makeText(this, "Las contraseñas no coinciden. Inténtalo de nuevo.", Toast.LENGTH_SHORT).show();
+                    showAdultPinSetupDialog(onDone);
+                }
+            })
+        );
+    }
+
+    private void showAdultPinCapture(String title, java.util.function.Consumer<String> onCaptured) {
+        View v = getLayoutInflater().inflate(R.layout.dialog_pin_entry, null);
+        AlertDialog dialog = new AlertDialog.Builder(this, R.style.UpdateDialogTheme)
+            .setView(v).setCancelable(true).create();
+        if (dialog.getWindow() != null)
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+
+        TextView tvName = v.findViewById(R.id.pinProfileName);
+        if (tvName != null) tvName.setText(title);
+
+        View[] dots = {
+            v.findViewById(R.id.dot1), v.findViewById(R.id.dot2),
+            v.findViewById(R.id.dot3), v.findViewById(R.id.dot4)
+        };
+        StringBuilder entered = new StringBuilder();
+        Runnable updateDots = () -> {
+            for (int i = 0; i < 4; i++)
+                dots[i].setBackgroundResource(i < entered.length() ? R.drawable.pin_dot_filled : R.drawable.pin_dot_empty);
+        };
+        int[] keyIds = {R.id.key0, R.id.key1, R.id.key2, R.id.key3, R.id.key4,
+                        R.id.key5, R.id.key6, R.id.key7, R.id.key8, R.id.key9};
+        for (int d = 0; d <= 9; d++) {
+            final int digit = d;
+            v.findViewById(keyIds[d]).setOnClickListener(btn -> {
+                if (entered.length() >= 4) return;
+                entered.append(digit);
+                updateDots.run();
+                if (entered.length() == 4) { dialog.dismiss(); onCaptured.accept(entered.toString()); }
+            });
+        }
+        View keyDel = v.findViewById(R.id.keyDel);
+        if (keyDel != null) keyDel.setOnClickListener(btn -> {
+            if (entered.length() > 0) { entered.deleteCharAt(entered.length() - 1); updateDots.run(); }
+        });
+        dialog.show();
+        if (dialog.getWindow() != null) {
+            int sw = getResources().getDisplayMetrics().widthPixels;
+            int mg = (int)(20 * getResources().getDisplayMetrics().density);
+            dialog.getWindow().setLayout(sw - mg * 2, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    // ── Adult Settings dialog ─────────────────────────────────────────────────
+
+    private void showAdultSettings() {
+        boolean enabled = AdultManager.isEnabled(this);
+        boolean hasPin  = AdultManager.hasPin(this);
+
+        // Build a simple glass-styled dialog programmatically
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        int pad = (int)(20 * getResources().getDisplayMetrics().density);
+        root.setPadding(pad, pad, pad, pad);
+
+        // Title
+        TextView title = new TextView(this);
+        title.setText("🔥  SECCIÓN ADULTOS");
+        title.setTextColor(0xFFFFCC77);
+        title.setTextSize(16f);
+        title.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        title.setPadding(0, 0, 0, (int)(4 * getResources().getDisplayMetrics().density));
+        root.addView(title);
+
+        // Status line
+        TextView status = new TextView(this);
+        status.setText(enabled ? "Estado: ACTIVA ✓" : "Estado: DESACTIVADA");
+        status.setTextColor(enabled ? 0xFF2ECC71 : 0x99FFFFFF);
+        status.setTextSize(13f);
+        status.setPadding(0, 0, 0, (int)(18 * getResources().getDisplayMetrics().density));
+        root.addView(status);
+
+        // Separator
+        View sep = new View(this);
+        LinearLayout.LayoutParams sepLp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 1);
+        sepLp.bottomMargin = (int)(16 * getResources().getDisplayMetrics().density);
+        sep.setLayoutParams(sepLp);
+        sep.setBackgroundColor(0x22FFFFFF);
+        root.addView(sep);
+
+        AlertDialog[] dialogRef = {null};
+        float dp = getResources().getDisplayMetrics().density;
+
+        // Helper to add a button row
+        java.util.function.BiConsumer<String, Runnable> addBtn = (label, action) -> {
+            TextView btn = new TextView(this);
+            btn.setText(label);
+            btn.setTextColor(0xEEFFFFFF);
+            btn.setTextSize(14f);
+            btn.setPadding((int)(14*dp), (int)(14*dp), (int)(14*dp), (int)(14*dp));
+            GradientDrawable bg = new GradientDrawable();
+            bg.setCornerRadius(10 * dp);
+            bg.setColor(0x18FFFFFF);
+            btn.setBackground(bg);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.bottomMargin = (int)(10 * dp);
+            btn.setLayoutParams(lp);
+            btn.setOnClickListener(v -> { if (dialogRef[0] != null) dialogRef[0].dismiss(); action.run(); });
+            root.addView(btn);
+        };
+
+        if (!enabled) {
+            // --- ACTIVAR ---
+            addBtn.accept("🔓  Activar sección Adultos", () -> {
+                if (!hasPin) {
+                    // First time: set PIN then enable
+                    showAdultPinSetupDialog(pin -> {
+                        AdultManager.setPin(this, pin);
+                        AdultManager.setEnabled(this, true);
+                        Toast.makeText(this, "✅ Sección Adultos activada.", Toast.LENGTH_SHORT).show();
+                        refreshAdultLockIcon();
+                    });
+                } else {
+                    // PIN already set: just verify before enabling
+                    showAdultPinDialog(() -> {
+                        AdultManager.setEnabled(this, true);
+                        Toast.makeText(this, "✅ Sección Adultos activada.", Toast.LENGTH_SHORT).show();
+                        refreshAdultLockIcon();
+                    });
+                }
+            });
+        } else {
+            // --- DESACTIVAR ---
+            addBtn.accept("🔒  Desactivar sección Adultos", () ->
+                showAdultPinDialog(() -> {
+                    AdultManager.setEnabled(this, false);
+                    Toast.makeText(this, "Sección Adultos desactivada.", Toast.LENGTH_SHORT).show();
+                    refreshAdultLockIcon();
+                })
+            );
+        }
+
+        // --- CAMBIAR CONTRASEÑA ---
+        addBtn.accept("🔑  " + (hasPin ? "Cambiar contraseña" : "Establecer contraseña"), () -> {
+            Runnable doSetup = () -> showAdultPinSetupDialog(pin -> {
+                AdultManager.setPin(this, pin);
+                Toast.makeText(this, "✅ Contraseña guardada.", Toast.LENGTH_SHORT).show();
+            });
+            if (hasPin) {
+                // Must verify old PIN first
+                showAdultPinDialog(doSetup::run);
+            } else {
+                doSetup.run();
+            }
+        });
+
+        // --- CANCEL ---
+        TextView cancel = new TextView(this);
+        cancel.setText("Cancelar");
+        cancel.setTextColor(0x77FFFFFF);
+        cancel.setTextSize(13f);
+        cancel.setGravity(android.view.Gravity.CENTER);
+        cancel.setPadding(0, (int)(12*dp), 0, 0);
+        cancel.setOnClickListener(v -> { if (dialogRef[0] != null) dialogRef[0].dismiss(); });
+        root.addView(cancel);
+
+        AlertDialog d = new AlertDialog.Builder(this, R.style.UpdateDialogTheme)
+            .setView(root).setCancelable(true).create();
+        dialogRef[0] = d;
+        if (d.getWindow() != null) {
+            d.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        }
+        d.show();
+        if (d.getWindow() != null) {
+            int sw = getResources().getDisplayMetrics().widthPixels;
+            int mg = (int)(24 * getResources().getDisplayMetrics().density);
+            d.getWindow().setLayout(sw - mg * 2, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    private void refreshAdultLockIcon() {
+        if (drawerOverlay == null) return;
+        TextView lockIcon = drawerOverlay.findViewById(R.id.tvAdultLock);
+        if (lockIcon != null) lockIcon.setText(AdultManager.isEnabled(this) ? "🔓" : "🔒");
     }
 
     private void loadFragment(Fragment fragment) {

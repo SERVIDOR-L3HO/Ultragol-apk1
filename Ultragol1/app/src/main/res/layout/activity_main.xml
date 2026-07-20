@@ -448,6 +448,43 @@
                             android:letterSpacing="0.06"/>
                     </LinearLayout>
 
+                    <!-- Adultos (protected) -->
+                    <LinearLayout
+                        android:id="@+id/navAdult"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/nav_glass_item_bg"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_adult"
+                            android:tint="#FFAA44"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="18dp"
+                            android:text="ADULTOS"
+                            android:textColor="#FFCC77"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                        <TextView
+                            android:id="@+id/tvAdultLock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔒"
+                            android:textSize="14sp"
+                            android:layout_marginEnd="4dp"/>
+                    </LinearLayout>
+
                     <!-- Separator before Platforms -->
                     <View
                         android:layout_width="match_parent"
@@ -663,11 +700,45 @@
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>
 
-            <!-- ── Glass separator above profile ── -->
+            <!-- ── Glass separator above settings/profile ── -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
                 android:background="#18FFFFFF"/>
+
+            <!-- ── Configuración row ── -->
+            <LinearLayout
+                android:id="@+id/navSettings"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="20dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/nav_glass_item_bg"
+                android:clickable="true"
+                android:focusable="true">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_nav_settings"
+                    android:tint="#88FFFFFF"
+                    android:scaleType="fitCenter"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="CONFIGURACIÓN"
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#12FFFFFF"/>
 
             <!-- ── Profile switch row (bottom, pinned) ── -->
             <LinearLayout
