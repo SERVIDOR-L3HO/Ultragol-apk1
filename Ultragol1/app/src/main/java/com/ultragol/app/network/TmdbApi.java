@@ -106,8 +106,51 @@ public class TmdbApi {
     public static List<ContentItem> fetchMovies() throws Exception {
         return parse(new JSONObject(fetch("/discover/movie?sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
+    // ── Adult content section ─────────────────────────────────────────────────
+
+    /** Most popular adult movies (include_adult=true). */
     public static List<ContentItem> fetchAdult() throws Exception {
-        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&sort_by=popularity.desc&language=es-MX&certification_country=MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Adult content sorted by popularity – alias used by AdultFragment row. */
+    public static List<ContentItem> fetchAdultPopular() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&sort_by=popularity.desc&language=es-MX&page=2")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Romance genre (10749) adult movies. */
+    public static List<ContentItem> fetchAdultRomance() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&with_genres=10749&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Thriller genre (53) adult movies. */
+    public static List<ContentItem> fetchAdultThriller() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&with_genres=53&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Drama genre (18) adult movies with high vote average. */
+    public static List<ContentItem> fetchAdultDrama() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&with_genres=18&sort_by=vote_average.desc&vote_count.gte=100&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Best rated adult movies (vote_average desc). */
+    public static List<ContentItem> fetchAdultTopRated() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&sort_by=vote_average.desc&vote_count.gte=200&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Spanish-language adult movies. */
+    public static List<ContentItem> fetchAdultSpanish() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&with_original_language=es&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
+    }
+
+    /** Mature TV series (TV-MA equivalent: drama/thriller series, high rating). */
+    public static List<ContentItem> fetchAdultSeries() throws Exception {
+        return parse(new JSONObject(fetch("/discover/tv?with_genres=18,10749&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_SERIES);
+    }
+
+    /** Crime + Mystery adult films (Noir). */
+    public static List<ContentItem> fetchAdultNoir() throws Exception {
+        return parse(new JSONObject(fetch("/discover/movie?include_adult=true&with_genres=80,9648&sort_by=popularity.desc&language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
     public static List<ContentItem> fetchTopMovies() throws Exception {
         return parse(new JSONObject(fetch("/movie/top_rated?language=es-MX&page=1")).getJSONArray("results"), ContentItem.TYPE_MOVIE);
