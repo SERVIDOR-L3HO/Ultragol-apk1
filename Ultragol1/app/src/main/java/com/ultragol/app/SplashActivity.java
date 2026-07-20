@@ -22,6 +22,7 @@ import android.view.animation.ScaleAnimation;
 import android.view.animation.TranslateAnimation;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.auth.FirebaseAuth;
 import org.json.JSONObject;
 
 public class SplashActivity extends AppCompatActivity {
@@ -214,7 +215,9 @@ public class SplashActivity extends AppCompatActivity {
 
     private void goToMain() {
         if (isFinishing() || isDestroyed()) return;
-        startActivity(new Intent(this, ProfileSelectorActivity.class));
+        boolean loggedIn = FirebaseAuth.getInstance().getCurrentUser() != null;
+        Class<?> next = loggedIn ? ProfileSelectorActivity.class : LoginActivity.class;
+        startActivity(new Intent(this, next));
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         finish();
     }

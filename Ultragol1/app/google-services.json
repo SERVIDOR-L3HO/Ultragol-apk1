@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "62425304873",
+    "project_id": "ultragol-api",
+    "storage_bucket": "ultragol-api.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:62425304873:android:e6d7265d7a9a6c1ce43138",
+        "android_client_info": {
+          "package_name": "com.ultragol1.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADJ4mR6_BdDTjHSC5v8AxmodMtq5VuPzc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
