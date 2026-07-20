@@ -141,7 +141,7 @@ public class AdultFragment extends Fragment {
         if (idx == selectedChipIndex) return;
 
         // Deselect old
-        if (selectedChipIndex < chips.size()) {
+        if (selectedChipIndex >= 0 && selectedChipIndex < chips.size()) {
             styleChip(chips.get(selectedChipIndex), false);
         }
         selectedChipIndex = idx;
