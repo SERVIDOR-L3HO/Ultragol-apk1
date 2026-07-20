@@ -46,7 +46,7 @@ public class AdultFragment extends Fragment {
     private AdultVideoAdapter adapter;
     private RecyclerView grid;
     private ProgressBar loading;
-    private TextView emptyView;
+    private View emptyView;
 
     private String  currentKey  = AdultContentApi.FEED_TRENDING;
     private int     currentPage = 1;
