@@ -412,6 +412,195 @@ app.get('/drama-shorts/tendencias', async (req, res) => {
     } catch (e) { res.status(500).json({ error: 'Error tendencias', detail: e.message }); }
 });
 
+// ── HLS PROXY ─────────────────────────────────────────────────────────────────
+// Proxies any m3u8/ts/segment URL through the server to bypass CORS/Referer
+// restrictions. Rewrites m3u8 playlists so all sub-URLs also go through proxy.
+
+const http  = require('http');
+const https = require('https');
+
+function proxyFetch(targetUrl, reqHeaders) {
+    return new Promise((resolve, reject) => {
+        const parsed  = new URL(targetUrl);
+        const lib     = parsed.protocol === 'https:' ? https : http;
+        const options = {
+            hostname: parsed.hostname,
+            port:     parsed.port || (parsed.protocol === 'https:' ? 443 : 80),
+            path:     parsed.pathname + parsed.search,
+            method:   'GET',
+            headers:  {
+                'User-Agent':      'Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36',
+                'Accept':          '*/*',
+                'Accept-Language': 'es-ES,es;q=0.9',
+                'Origin':          parsed.origin,
+                'Referer':         parsed.origin + '/',
+            }
+        };
+        const req = lib.request(options, resolve);
+        req.on('error', reject);
+        req.end();
+    });
+}
+
+function resolveUrl(base, relative) {
+    try { return new URL(relative).href; } catch { /* relative */ }
+    try { return new URL(relative, base).href; } catch { return relative; }
+}
+
+// Rewrite m3u8 playlists so every segment/sub-playlist goes through /proxy
+function rewriteM3u8(content, baseUrl, proxyBase) {
+    return content.split('\n').map(line => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) return line;
+        const abs = resolveUrl(baseUrl, trimmed);
+        return `${proxyBase}?url=${encodeURIComponent(abs)}`;
+    }).join('\n');
+}
+
+app.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url;
+    if (!targetUrl) return res.status(400).json({ error: 'Falta ?url=' });
+
+    let parsed;
+    try { parsed = new URL(targetUrl); }
+    catch { return res.status(400).json({ error: 'URL inválida' }); }
+
+    try {
+        const upstream = await proxyFetch(targetUrl, req.headers);
+        const ct = (upstream.headers['content-type'] || '').toLowerCase();
+        const isM3u8 = ct.includes('mpegurl') || ct.includes('x-mpegurl') ||
+                       targetUrl.includes('.m3u8');
+
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Headers', '*');
+
+        if (isM3u8) {
+            res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+            let body = '';
+            upstream.on('data', chunk => body += chunk.toString());
+            upstream.on('end', () => {
+                const proxyBase = `${getBaseUrl()}/proxy`;
+                res.send(rewriteM3u8(body, targetUrl, proxyBase));
+            });
+        } else {
+            res.setHeader('Content-Type', upstream.headers['content-type'] || 'application/octet-stream');
+            if (upstream.headers['content-length'])
+                res.setHeader('Content-Length', upstream.headers['content-length']);
+            upstream.pipe(res);
+        }
+    } catch (e) {
+        res.status(502).json({ error: 'No se pudo conectar al origen', detail: e.message });
+    }
+});
+
+// Player page — serves a web HLS player for any proxied stream
+app.get('/player', (req, res) => {
+    const rawUrl   = req.query.url || '';
+    const title    = req.query.title || 'Player';
+    const proxyUrl = rawUrl
+        ? `${getBaseUrl()}/proxy?url=${encodeURIComponent(rawUrl)}`
+        : '';
+
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(`<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>${title}</title>
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0f;color:#fff;font-family:system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px}
+h1{font-size:15px;font-weight:600;color:#aaa;margin-bottom:12px;text-align:center;max-width:600px;word-break:break-all}
+.player-wrap{width:100%;max-width:720px;background:#111;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px #ffffff18}
+video{width:100%;display:block;max-height:55vh;background:#000}
+.controls{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.url-row{display:flex;gap:8px;align-items:center}
+input{flex:1;background:#1a1a2e;border:1px solid #ffffff22;color:#00e5a0;border-radius:8px;padding:10px 12px;font-size:12px;font-family:monospace;outline:none}
+input::placeholder{color:#555}
+button{background:#00e5a0;color:#000;border:none;border-radius:8px;padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+button:active{opacity:.8}
+.status{font-size:11px;color:#555;text-align:center}
+.status.ok{color:#00e5a0}
+.status.err{color:#ff5252}
+.copy-row{display:flex;gap:8px}
+.copy-btn{background:#ffffff10;color:#aaa;border:1px solid #ffffff18;border-radius:8px;padding:8px 14px;font-size:12px;cursor:pointer;flex:1;text-align:center}
+.copy-btn:active{background:#ffffff20}
+</style>
+</head>
+<body>
+<h1 id="ttl">${title || 'Ultragol · HLS Player'}</h1>
+<div class="player-wrap">
+  <video id="v" controls playsinline></video>
+  <div class="controls">
+    <div class="url-row">
+      <input id="inp" placeholder="Pega aquí la URL m3u8 o directo..." value="${rawUrl}"/>
+      <button onclick="load()">▶ Play</button>
+    </div>
+    <div id="status" class="status">${proxyUrl ? 'Cargando stream…' : 'Ingresa una URL y pulsa Play'}</div>
+    <div class="copy-row">
+      <div class="copy-btn" onclick="copyProxy()">📋 Copiar URL proxy</div>
+      <div class="copy-btn" onclick="copyDirect()">🔗 Copiar URL directa</div>
+    </div>
+  </div>
+</div>
+<script>
+const base = '${getBaseUrl()}';
+let hls = null;
+
+function proxyFor(url){ return base+'/proxy?url='+encodeURIComponent(url); }
+
+function load(){
+  const raw = document.getElementById('inp').value.trim();
+  if(!raw){ setStatus('Ingresa una URL primero','err'); return; }
+  history.replaceState(null,'','/player?url='+encodeURIComponent(raw));
+  playUrl(raw);
+}
+
+function playUrl(raw){
+  const src = proxyFor(raw);
+  const vid = document.getElementById('v');
+  if(hls){ hls.destroy(); hls=null; }
+  setStatus('Conectando…','');
+  if(Hls.isSupported()){
+    hls = new Hls({xhrSetup:x=>x.withCredentials=false});
+    hls.loadSource(src);
+    hls.attachMedia(vid);
+    hls.on(Hls.Events.MANIFEST_PARSED, ()=>{ vid.play(); setStatus('✓ Stream activo — reproduciendo','ok'); });
+    hls.on(Hls.Events.ERROR, (_,d)=>{ if(d.fatal) setStatus('Error: '+d.details,'err'); });
+  } else if(vid.canPlayType('application/vnd.apple.mpegurl')){
+    vid.src = src; vid.play();
+    setStatus('✓ Reproduciendo (nativo)','ok');
+  } else {
+    setStatus('Este navegador no soporta HLS','err');
+  }
+}
+
+function setStatus(msg, cls){
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status '+(cls||'');
+}
+
+function copyProxy(){
+  const raw = document.getElementById('inp').value.trim();
+  if(!raw) return;
+  navigator.clipboard.writeText(proxyFor(raw)).then(()=>setStatus('URL proxy copiada','ok'));
+}
+
+function copyDirect(){
+  const raw = document.getElementById('inp').value.trim();
+  if(!raw) return;
+  navigator.clipboard.writeText(raw).then(()=>setStatus('URL directa copiada','ok'));
+}
+
+${proxyUrl ? `window.addEventListener('load',()=>playUrl(${JSON.stringify(rawUrl)}));` : ''}
+</script>
+</body>
+</html>`);
+});
+
 // ── GLOBAL ERROR HANDLER ──────────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
     if (err.code === 'LIMIT_FILE_SIZE')
