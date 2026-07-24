@@ -1,10 +1,16 @@
 package com.ultragol.app;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.text.format.Formatter;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.*;
@@ -77,6 +83,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         view.findViewById(R.id.castBtnCancel).setOnClickListener(v -> dismiss());
 
         setupWebVideoCasterCard(view);
+        setupLocalStreamCard(view);
         startAllDiscovery();
     }
 
@@ -85,6 +92,56 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         super.onDismiss(d);
         stopCastRouterCallback();
         AirPlayManager.getInstance().stopDiscovery();
+    }
+
+    // ── Transmisión Local ─────────────────────────────────────────────────────
+
+    private void setupLocalStreamCard(View view) {
+        TextView tvIpLabel  = view.findViewById(R.id.localStreamIpLabel);
+        TextView tvDot      = view.findViewById(R.id.localStreamDot);
+        TextView tvUrl      = view.findViewById(R.id.localStreamUrl);
+        TextView btnCopy    = view.findViewById(R.id.btnCopyLocalUrl);
+
+        String localIp = getLocalIpAddress();
+        boolean hasIp  = localIp != null && !localIp.isEmpty();
+
+        if (hasIp) {
+            tvDot.setTextColor(0xFF00E5A0);
+            tvIpLabel.setText("Red Wi-Fi detectada  ·  " + localIp);
+        } else {
+            tvDot.setTextColor(0xFFFF5252);
+            tvIpLabel.setText("Sin red Wi-Fi activa");
+        }
+
+        String displayUrl = (videoUrl != null && !videoUrl.isEmpty())
+            ? videoUrl : "URL no disponible";
+        tvUrl.setText(displayUrl);
+
+        btnCopy.setOnClickListener(v -> {
+            if (videoUrl == null || videoUrl.isEmpty()) return;
+            ClipboardManager cm = (ClipboardManager) requireContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm != null) {
+                cm.setPrimaryClip(ClipData.newPlainText("Stream URL", videoUrl));
+                Toast.makeText(requireContext(), "URL copiada al portapapeles",
+                    Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    @SuppressWarnings("deprecation")
+    private String getLocalIpAddress() {
+        try {
+            WifiManager wm = (WifiManager) requireContext().getApplicationContext()
+                .getSystemService(Context.WIFI_SERVICE);
+            if (wm == null) return null;
+            WifiInfo info = wm.getConnectionInfo();
+            int ip = info.getIpAddress();
+            if (ip == 0) return null;
+            return Formatter.formatIpAddress(ip);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     // ── Web Video Caster ──────────────────────────────────────────────────────
