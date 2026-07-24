@@ -266,18 +266,31 @@ public class ChannelStreamDialog {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // LOCAL STREAM MODAL — glass creativo
+    // LOCAL STREAM MODAL — glass creativo con servidor local en el dispositivo
     // ─────────────────────────────────────────────────────────────────────────
 
     private static void showLocalStreamModal(Context ctx, Channel channel) {
         Dialog modal = new Dialog(ctx, android.R.style.Theme_Black_NoTitleBar_Fullscreen);
         modal.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
+        String localIp  = getLocalIpAddress(ctx);
+        boolean hasIp   = localIp != null && !localIp.isEmpty();
+        String rawUrl   = channel.getPlayerUrl();
+
+        // Arrancar el servidor local inmediatamente
+        LocalStreamServer server = LocalStreamServer.getInstance();
+        if (hasIp && rawUrl != null && !rawUrl.isEmpty()) {
+            server.start(rawUrl);
+        }
+
+        // URL a mostrar: local (http://ip:4445/v.mkv) o la directa como fallback
+        final String[] shownUrl = { hasIp ? server.getLocalUrl(localIp) : (rawUrl != null ? rawUrl : "") };
+
         // ── Dim overlay ───────────────────────────────────────────────────────
         FrameLayout root = new FrameLayout(ctx);
         root.setBackgroundColor(0xCC000000);
         root.setClickable(true);
-        root.setOnClickListener(v -> modal.dismiss());
+        root.setOnClickListener(v -> { server.stop(); modal.dismiss(); });
 
         // ── Glass card centrado ───────────────────────────────────────────────
         LinearLayout card = new LinearLayout(ctx);
@@ -286,7 +299,6 @@ public class ChannelStreamDialog {
         card.setFocusable(true);
         card.setOnClickListener(v -> { /* absorb */ });
 
-        // Fondo glass: gradiente azul-verde oscuro con bordes luminosos
         GradientDrawable cardBg = new GradientDrawable(
             GradientDrawable.Orientation.TL_BR,
             new int[]{0xF0091A2A, 0xF0032015, 0xF0050F1A});
@@ -301,7 +313,7 @@ public class ChannelStreamDialog {
         cardLp.setMargins(dp(ctx, 20), 0, dp(ctx, 20), 0);
         card.setLayoutParams(cardLp);
 
-        // ── Icono + título ────────────────────────────────────────────────────
+        // ── Título ────────────────────────────────────────────────────────────
         LinearLayout titleRow = new LinearLayout(ctx);
         titleRow.setOrientation(LinearLayout.HORIZONTAL);
         titleRow.setGravity(Gravity.CENTER_VERTICAL);
@@ -310,7 +322,6 @@ public class ChannelStreamDialog {
         titleRowLp.setMargins(0, 0, 0, dp(ctx, 6));
         titleRow.setLayoutParams(titleRowLp);
 
-        // Círculo de icono WiFi
         TextView wifiIcon = new TextView(ctx);
         wifiIcon.setText("📶");
         wifiIcon.setTextSize(22);
@@ -330,9 +341,9 @@ public class ChannelStreamDialog {
         titleCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
 
         TextView tvTitle = new TextView(ctx);
-        tvTitle.setText("Transmisión Local");
-        tvTitle.setTextColor(0xFF00E5A0);
-        tvTitle.setTextSize(17);
+        tvTitle.setText("Transmisión local (PC / Navegador)");
+        tvTitle.setTextColor(0xFFFFFFFF);
+        tvTitle.setTextSize(16);
         tvTitle.setTypeface(null, Typeface.BOLD);
         titleCol.addView(tvTitle);
 
@@ -351,16 +362,13 @@ public class ChannelStreamDialog {
         titleRow.addView(titleCol);
         card.addView(titleRow);
 
-        // ── Chip "Red local detectada" ────────────────────────────────────────
-        String localIp = getLocalIpAddress(ctx);
-        boolean hasIp   = localIp != null && !localIp.isEmpty();
-
+        // ── Estado Wi-Fi ──────────────────────────────────────────────────────
         LinearLayout chipRow = new LinearLayout(ctx);
         chipRow.setOrientation(LinearLayout.HORIZONTAL);
         chipRow.setGravity(Gravity.CENTER_VERTICAL);
         LinearLayout.LayoutParams chipRowLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        chipRowLp.setMargins(0, dp(ctx, 4), 0, dp(ctx, 20));
+        chipRowLp.setMargins(0, dp(ctx, 4), 0, dp(ctx, 16));
         chipRow.setLayoutParams(chipRowLp);
 
         TextView chipDot = new TextView(ctx);
@@ -374,29 +382,26 @@ public class ChannelStreamDialog {
         chipRow.addView(chipDot);
 
         TextView chipLabel = new TextView(ctx);
-        chipLabel.setText(hasIp ? "Red Wi-Fi detectada · " + localIp : "Sin red Wi-Fi activa");
+        chipLabel.setText(hasIp
+            ? "Servidor local activo · " + localIp + ":" + LocalStreamServer.PORT
+            : "Sin red Wi-Fi activa");
         chipLabel.setTextColor(hasIp ? 0x9900E5A0 : 0x99FF5252);
         chipLabel.setTextSize(10);
         chipRow.addView(chipLabel);
-
         card.addView(chipRow);
 
         // ── URL box ───────────────────────────────────────────────────────────
-        String streamUrl = channel.getPlayerUrl();
-
         TextView labelUrl = new TextView(ctx);
-        labelUrl.setText("URL DEL STREAM");
+        labelUrl.setText("INGRESA ESTA URL EN VLC/PC O NAVEGADOR DE TU TV");
         labelUrl.setTextColor(0x55FFFFFF);
         labelUrl.setTextSize(9);
         labelUrl.setTypeface(null, Typeface.BOLD);
-        labelUrl.setAllCaps(true);
         LinearLayout.LayoutParams labelUrlLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
         labelUrlLp.setMargins(0, 0, 0, dp(ctx, 6));
         labelUrl.setLayoutParams(labelUrlLp);
         card.addView(labelUrl);
 
-        // Caja URL
         FrameLayout urlBox = new FrameLayout(ctx);
         GradientDrawable urlBoxBg = new GradientDrawable();
         urlBoxBg.setColor(0x1A00E5A0);
@@ -406,13 +411,13 @@ public class ChannelStreamDialog {
         urlBox.setPadding(dp(ctx, 14), dp(ctx, 12), dp(ctx, 14), dp(ctx, 12));
         LinearLayout.LayoutParams urlBoxLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        urlBoxLp.setMargins(0, 0, 0, dp(ctx, 8));
+        urlBoxLp.setMargins(0, 0, 0, dp(ctx, 6));
         urlBox.setLayoutParams(urlBoxLp);
 
         TextView tvUrl = new TextView(ctx);
-        tvUrl.setText(streamUrl != null ? streamUrl : "URL no disponible");
+        tvUrl.setText(shownUrl[0]);
         tvUrl.setTextColor(0xFF00E5A0);
-        tvUrl.setTextSize(11);
+        tvUrl.setTextSize(12);
         tvUrl.setTypeface(Typeface.MONOSPACE);
         tvUrl.setSingleLine(false);
         tvUrl.setMaxLines(3);
@@ -422,64 +427,124 @@ public class ChannelStreamDialog {
 
         // Hint
         TextView tvHint = new TextView(ctx);
-        tvHint.setText("Ingresa esta URL en VLC, el navegador de tu PC o TV en la misma red.");
+        tvHint.setText("Ingresa esta URL en VLC/PC o el navegador de tu TV o reproductor.");
         tvHint.setTextColor(0x55FFFFFF);
         tvHint.setTextSize(10);
         LinearLayout.LayoutParams hintLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        hintLp.setMargins(0, 0, 0, dp(ctx, 24));
+        hintLp.setMargins(0, 0, 0, dp(ctx, 16));
         tvHint.setLayoutParams(hintLp);
         card.addView(tvHint);
 
-        // ── Botones acción ────────────────────────────────────────────────────
-        LinearLayout btnRow = new LinearLayout(ctx);
-        btnRow.setOrientation(LinearLayout.HORIZONTAL);
-        btnRow.setGravity(Gravity.CENTER);
-        LinearLayout.LayoutParams btnRowLp = new LinearLayout.LayoutParams(
+        // ── Toggle: Usar streaming local para apps ────────────────────────────
+        LinearLayout toggleRow = new LinearLayout(ctx);
+        toggleRow.setOrientation(LinearLayout.HORIZONTAL);
+        toggleRow.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout.LayoutParams toggleRowLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-        btnRowLp.setMargins(0, 0, 0, dp(ctx, 10));
-        btnRow.setLayoutParams(btnRowLp);
+        toggleRowLp.setMargins(0, 0, 0, dp(ctx, 4));
+        toggleRow.setLayoutParams(toggleRowLp);
 
-        // Copiar URL
-        TextView btnCopy = makeActionButton(ctx, "📋  Copiar URL", 0xFF00E5A0, true);
-        LinearLayout.LayoutParams copyLp = new LinearLayout.LayoutParams(0, dp(ctx, 48), 1f);
-        copyLp.setMarginEnd(dp(ctx, 8));
-        btnCopy.setLayoutParams(copyLp);
-        btnCopy.setOnClickListener(v -> {
-            btnCopy.animate().scaleX(0.96f).scaleY(0.96f).setDuration(60)
-                .withEndAction(() -> btnCopy.animate().scaleX(1f).scaleY(1f).setDuration(120).start())
-                .start();
-            if (streamUrl != null) {
-                ClipboardManager cm = (ClipboardManager) ctx.getSystemService(Context.CLIPBOARD_SERVICE);
-                if (cm != null) {
-                    cm.setPrimaryClip(ClipData.newPlainText("Stream URL", streamUrl));
-                    Toast.makeText(ctx, "URL copiada al portapapeles", Toast.LENGTH_SHORT).show();
-                }
+        LinearLayout toggleTextCol = new LinearLayout(ctx);
+        toggleTextCol.setOrientation(LinearLayout.VERTICAL);
+        toggleTextCol.setLayoutParams(new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        TextView tvToggleLabel = new TextView(ctx);
+        tvToggleLabel.setText("Usar streaming local para apps");
+        tvToggleLabel.setTextColor(0xFFFFFFFF);
+        tvToggleLabel.setTextSize(13);
+        tvToggleLabel.setTypeface(null, Typeface.BOLD);
+        toggleTextCol.addView(tvToggleLabel);
+        toggleRow.addView(toggleTextCol);
+
+        android.widget.Switch toggleSwitch = new android.widget.Switch(ctx);
+        toggleSwitch.setChecked(hasIp && server.isRunning());
+        int[] states = new int[][]{ new int[]{android.R.attr.state_checked}, new int[]{} }[0];
+        toggleSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
+            if (isChecked && rawUrl != null && !rawUrl.isEmpty()) {
+                server.start(rawUrl);
+                String localUrl = server.getLocalUrl(localIp != null ? localIp : "127.0.0.1");
+                shownUrl[0] = localUrl;
+                tvUrl.setText(localUrl);
+                chipDot.setTextColor(0xFF00E5A0);
+                chipLabel.setText("Servidor local activo · " + (localIp != null ? localIp : "127.0.0.1") + ":" + LocalStreamServer.PORT);
+            } else {
+                server.stop();
+                shownUrl[0] = rawUrl != null ? rawUrl : "";
+                tvUrl.setText(shownUrl[0]);
+                chipDot.setTextColor(0xFFFF5252);
+                chipLabel.setText("Servidor local detenido");
             }
         });
-        btnRow.addView(btnCopy);
+        toggleRow.addView(toggleSwitch);
+        card.addView(toggleRow);
 
-        // Compartir
-        TextView btnShare = makeActionButton(ctx, "↗  Compartir", 0xFF4FC3F7, false);
-        LinearLayout.LayoutParams shareLp = new LinearLayout.LayoutParams(0, dp(ctx, 48), 1f);
-        btnShare.setLayoutParams(shareLp);
-        btnShare.setOnClickListener(v -> {
-            btnShare.animate().scaleX(0.96f).scaleY(0.96f).setDuration(60)
-                .withEndAction(() -> btnShare.animate().scaleX(1f).scaleY(1f).setDuration(120).start())
-                .start();
-            if (streamUrl != null) {
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_TEXT,
-                    "Stream: " + channel.getDisplayName() + "\n" + streamUrl);
-                shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                ctx.startActivity(Intent.createChooser(shareIntent, "Compartir stream")
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        TextView tvToggleNote = new TextView(ctx);
+        tvToggleNote.setText("Nota: El streaming local limpia y optimiza la URL internamente para mejorar la compatibilidad y fluidez en aplicaciones externas.");
+        tvToggleNote.setTextColor(0x44FFFFFF);
+        tvToggleNote.setTextSize(9);
+        LinearLayout.LayoutParams noteNp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        noteNp.setMargins(0, dp(ctx, 4), 0, dp(ctx, 20));
+        tvToggleNote.setLayoutParams(noteNp);
+        card.addView(tvToggleNote);
+
+        // ── Separator + Enviar a aplicaciones externas ────────────────────────
+        View sep2 = new View(ctx);
+        sep2.setBackgroundColor(0x1AFFFFFF);
+        LinearLayout.LayoutParams sep2Lp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 1));
+        sep2Lp.setMargins(0, 0, 0, dp(ctx, 16));
+        sep2.setLayoutParams(sep2Lp);
+        card.addView(sep2);
+
+        TextView tvExtLabel = new TextView(ctx);
+        tvExtLabel.setText("Enviar a aplicaciones externas");
+        tvExtLabel.setTextColor(0xFFFFFFFF);
+        tvExtLabel.setTextSize(14);
+        tvExtLabel.setTypeface(null, Typeface.BOLD);
+        LinearLayout.LayoutParams extLabelLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        extLabelLp.setMargins(0, 0, 0, dp(ctx, 12));
+        tvExtLabel.setLayoutParams(extLabelLp);
+        card.addView(tvExtLabel);
+
+        // Botones externos
+        LinearLayout extBtns = new LinearLayout(ctx);
+        extBtns.setOrientation(LinearLayout.HORIZONTAL);
+        extBtns.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams extBtnsLp = new LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        extBtnsLp.setMargins(0, 0, 0, dp(ctx, 20));
+        extBtns.setLayoutParams(extBtnsLp);
+
+        extBtns.addView(makeExtButton(ctx, "📋\nCOPIAR\nURL", 0xFF00E5A0, () -> {
+            android.content.ClipboardManager cm = (android.content.ClipboardManager)
+                ctx.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm != null) {
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Stream URL", shownUrl[0]));
+                Toast.makeText(ctx, "URL copiada", Toast.LENGTH_SHORT).show();
             }
-        });
-        btnRow.addView(btnShare);
-
-        card.addView(btnRow);
+        }));
+        extBtns.addView(makeExtButton(ctx, "↗\nCOMPARTIR", 0xFF4FC3F7, () -> {
+            Intent si = new Intent(Intent.ACTION_SEND);
+            si.setType("text/plain");
+            si.putExtra(Intent.EXTRA_TEXT, shownUrl[0]);
+            si.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            ctx.startActivity(Intent.createChooser(si, "Compartir stream")
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+        }));
+        extBtns.addView(makeExtButton(ctx, "▶\nVLC", 0xFFFF9800, () -> {
+            try {
+                Intent vlc = new Intent(Intent.ACTION_VIEW);
+                vlc.setDataAndType(android.net.Uri.parse(shownUrl[0]), "video/*");
+                vlc.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(vlc);
+            } catch (Exception e) {
+                Toast.makeText(ctx, "No se encontró un reproductor", Toast.LENGTH_SHORT).show();
+            }
+        }));
+        card.addView(extBtns);
 
         // Cerrar
         TextView btnClose = new TextView(ctx);
@@ -492,7 +557,7 @@ public class ChannelStreamDialog {
         LinearLayout.LayoutParams closeLp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, dp(ctx, 40));
         btnClose.setLayoutParams(closeLp);
-        btnClose.setOnClickListener(v -> modal.dismiss());
+        btnClose.setOnClickListener(v -> { server.stop(); modal.dismiss(); });
         card.addView(btnClose);
 
         root.addView(card);
@@ -501,6 +566,33 @@ public class ChannelStreamDialog {
         if (w != null) w.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         modal.show();
+    }
+
+    private static TextView makeExtButton(Context ctx, String label, int color, Runnable action) {
+        int r = Color.red(color), g = Color.green(color), b = Color.blue(color);
+        TextView btn = new TextView(ctx);
+        btn.setText(label);
+        btn.setGravity(Gravity.CENTER);
+        btn.setTextSize(9);
+        btn.setTextColor(color);
+        btn.setTypeface(null, Typeface.BOLD);
+        btn.setClickable(true);
+        btn.setFocusable(true);
+        GradientDrawable bg = new GradientDrawable();
+        bg.setColor(Color.argb(25, r, g, b));
+        bg.setCornerRadius(dp(ctx, 12));
+        bg.setStroke(dp(ctx, 1), Color.argb(80, r, g, b));
+        btn.setBackground(bg);
+        btn.setPadding(dp(ctx, 10), dp(ctx, 10), dp(ctx, 10), dp(ctx, 10));
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(0, dp(ctx, 64), 1f);
+        lp.setMargins(dp(ctx, 4), 0, dp(ctx, 4), 0);
+        btn.setLayoutParams(lp);
+        btn.setOnClickListener(v -> {
+            btn.animate().scaleX(0.95f).scaleY(0.95f).setDuration(60)
+                .withEndAction(() -> btn.animate().scaleX(1f).scaleY(1f).setDuration(100).start()).start();
+            action.run();
+        });
+        return btn;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

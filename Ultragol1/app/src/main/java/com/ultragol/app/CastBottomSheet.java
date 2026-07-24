@@ -101,28 +101,52 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         TextView tvDot      = view.findViewById(R.id.localStreamDot);
         TextView tvUrl      = view.findViewById(R.id.localStreamUrl);
         TextView btnCopy    = view.findViewById(R.id.btnCopyLocalUrl);
+        android.widget.Switch toggleSwitch = view.findViewById(R.id.localStreamToggle);
 
         String localIp = getLocalIpAddress();
         boolean hasIp  = localIp != null && !localIp.isEmpty();
 
-        if (hasIp) {
+        LocalStreamServer server = LocalStreamServer.getInstance();
+
+        // Arrange shown URL: local server URL if available, else raw stream URL
+        final String[] shownUrl = new String[1];
+
+        if (hasIp && videoUrl != null && !videoUrl.isEmpty()) {
+            server.start(videoUrl);
+            shownUrl[0] = server.getLocalUrl(localIp);
             tvDot.setTextColor(0xFF00E5A0);
-            tvIpLabel.setText("Red Wi-Fi detectada  ·  " + localIp);
+            tvIpLabel.setText("Servidor local activo · " + localIp + ":" + LocalStreamServer.PORT);
         } else {
-            tvDot.setTextColor(0xFFFF5252);
-            tvIpLabel.setText("Sin red Wi-Fi activa");
+            shownUrl[0] = videoUrl != null ? videoUrl : "URL no disponible";
+            tvDot.setTextColor(hasIp ? 0xFFFF9800 : 0xFFFF5252);
+            tvIpLabel.setText(hasIp ? "Sin URL de stream" : "Sin red Wi-Fi activa");
+        }
+        tvUrl.setText(shownUrl[0]);
+
+        if (toggleSwitch != null) {
+            toggleSwitch.setChecked(hasIp && server.isRunning());
+            toggleSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
+                if (isChecked && videoUrl != null && !videoUrl.isEmpty() && localIp != null) {
+                    server.start(videoUrl);
+                    shownUrl[0] = server.getLocalUrl(localIp);
+                    tvDot.setTextColor(0xFF00E5A0);
+                    tvIpLabel.setText("Servidor local activo · " + localIp + ":" + LocalStreamServer.PORT);
+                } else {
+                    server.stop();
+                    shownUrl[0] = videoUrl != null ? videoUrl : "";
+                    tvDot.setTextColor(0xFFFF5252);
+                    tvIpLabel.setText("Servidor local detenido");
+                }
+                tvUrl.setText(shownUrl[0]);
+            });
         }
 
-        String displayUrl = (videoUrl != null && !videoUrl.isEmpty())
-            ? videoUrl : "URL no disponible";
-        tvUrl.setText(displayUrl);
-
         btnCopy.setOnClickListener(v -> {
-            if (videoUrl == null || videoUrl.isEmpty()) return;
+            if (shownUrl[0] == null || shownUrl[0].isEmpty()) return;
             ClipboardManager cm = (ClipboardManager) requireContext()
                 .getSystemService(Context.CLIPBOARD_SERVICE);
             if (cm != null) {
-                cm.setPrimaryClip(ClipData.newPlainText("Stream URL", videoUrl));
+                cm.setPrimaryClip(ClipData.newPlainText("Stream URL", shownUrl[0]));
                 Toast.makeText(requireContext(), "URL copiada al portapapeles",
                     Toast.LENGTH_SHORT).show();
             }

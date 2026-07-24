@@ -164,14 +164,12 @@
 
     <!-- ══ TRANSMISIÓN LOCAL ════════════════════════════════════════════════ -->
 
-    <!-- Divider -->
     <View
         android:layout_width="match_parent"
         android:layout_height="0.5dp"
         android:layout_marginTop="4dp"
         android:background="#22FFFFFF"/>
 
-    <!-- Label -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -197,13 +195,13 @@
         android:background="@drawable/bg_local_stream_card"
         android:padding="16dp">
 
-        <!-- IP status row -->
+        <!-- IP status row + copy button -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="10dp">
+            android:layout_marginBottom="8dp">
 
             <TextView
                 android:id="@+id/localStreamDot"
@@ -223,7 +221,6 @@
                 android:textColor="#8800E5A0"
                 android:textSize="11sp"/>
 
-            <!-- Copy button -->
             <TextView
                 android:id="@+id/btnCopyLocalUrl"
                 android:layout_width="wrap_content"
@@ -239,6 +236,7 @@
                 android:paddingBottom="5dp"
                 android:clickable="true"
                 android:focusable="true"/>
+
         </LinearLayout>
 
         <!-- URL display box -->
@@ -257,21 +255,56 @@
                 android:id="@+id/localStreamUrl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="http://—.—.—.—/stream"
+                android:text="http://—.—.—.—:4445/v.mkv"
                 android:textColor="#00E5A0"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:fontFamily="monospace"
                 android:maxLines="3"
                 android:ellipsize="end"/>
+
         </LinearLayout>
 
         <!-- Hint -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Ingresa esta URL en VLC, el navegador de tu PC o TV en la misma red Wi-Fi."
+            android:text="Ingresa esta URL en VLC/PC o el navegador de tu TV o reproductor."
             android:textColor="#55FFFFFF"
-            android:textSize="10sp"/>
+            android:textSize="10sp"
+            android:layout_marginBottom="10dp"/>
+
+        <!-- Toggle: Usar streaming local para apps -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="4dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Usar streaming local para apps"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"/>
+
+            <Switch
+                android:id="@+id/localStreamToggle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"/>
+
+        </LinearLayout>
+
+        <!-- Toggle note -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nota: El streaming local limpia y optimiza la URL internamente para mejorar la compatibilidad y fluidez en aplicaciones externas."
+            android:textColor="#44FFFFFF"
+            android:textSize="9sp"/>
 
     </LinearLayout>
 
