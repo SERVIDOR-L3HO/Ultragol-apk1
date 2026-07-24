@@ -1,6 +1,9 @@
 package com.ultragol.app;
 
-import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.*;
 import android.widget.*;
@@ -18,12 +21,15 @@ import com.google.android.gms.cast.framework.*;
 /**
  * Bottom sheet that discovers and lists available cast devices
  * (Chromecast, DLNA Smart TVs, AirPlay) and calls back when one is selected.
+ * Also shows Web Video Caster as a recommended app.
  */
 public class CastBottomSheet extends BottomSheetDialogFragment {
 
     public interface OnDeviceSelectedCallback {
         void onDeviceSelected(CastDevice device);
     }
+
+    private static final String WVC_PACKAGE = "com.instantbits.cast.webvideo";
 
     private final List<CastDevice> devices = new ArrayList<>();
     private CastDeviceAdapter adapter;
@@ -70,6 +76,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         rv.setAdapter(adapter);
         view.findViewById(R.id.castBtnCancel).setOnClickListener(v -> dismiss());
 
+        setupWebVideoCasterCard(view);
         startAllDiscovery();
     }
 
@@ -78,6 +85,80 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         super.onDismiss(d);
         stopCastRouterCallback();
         AirPlayManager.getInstance().stopDiscovery();
+    }
+
+    // ── Web Video Caster ──────────────────────────────────────────────────────
+
+    private void setupWebVideoCasterCard(View view) {
+        View card         = view.findViewById(R.id.cardWebVideoCaster);
+        ImageView icon    = view.findViewById(R.id.iconWebVideoCaster);
+        TextView  btnOpen = view.findViewById(R.id.btnWebVideoCaster);
+
+        boolean installed = isAppInstalled(WVC_PACKAGE);
+
+        // Load real app icon if installed, else use a cast-style placeholder tint
+        if (installed) {
+            try {
+                Drawable appIcon = requireContext().getPackageManager()
+                    .getApplicationIcon(WVC_PACKAGE);
+                icon.setImageDrawable(appIcon);
+            } catch (PackageManager.NameNotFoundException ignored) {
+                icon.setImageResource(R.drawable.ic_cast);
+                icon.setColorFilter(0xFF4FC3F7);
+            }
+            btnOpen.setText("ABRIR");
+        } else {
+            icon.setImageResource(R.drawable.ic_cast);
+            icon.setColorFilter(0xFF4FC3F7);
+            btnOpen.setText("INSTALAR");
+        }
+
+        View.OnClickListener openAction = v -> {
+            openOrInstallWebVideoCaster();
+            dismiss();
+        };
+        card.setOnClickListener(openAction);
+        btnOpen.setOnClickListener(openAction);
+    }
+
+    private void openOrInstallWebVideoCaster() {
+        PackageManager pm = requireContext().getPackageManager();
+
+        if (isAppInstalled(WVC_PACKAGE)) {
+            // Try to send the video URL directly to the app
+            if (videoUrl != null && !videoUrl.isEmpty()) {
+                try {
+                    Intent send = new Intent(Intent.ACTION_VIEW);
+                    send.setDataAndType(Uri.parse(videoUrl),
+                        isM3u8 ? "application/x-mpegURL" : "video/*");
+                    send.setPackage(WVC_PACKAGE);
+                    send.putExtra("title", videoTitle != null ? videoTitle : "");
+                    startActivity(send);
+                    return;
+                } catch (Exception ignored) {}
+            }
+            // Fallback: just launch the app
+            Intent launch = pm.getLaunchIntentForPackage(WVC_PACKAGE);
+            if (launch != null) { startActivity(launch); return; }
+        }
+
+        // Not installed → Play Store
+        try {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("market://details?id=" + WVC_PACKAGE)));
+        } catch (Exception e) {
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                Uri.parse("https://play.google.com/store/apps/details?id=" + WVC_PACKAGE)));
+        }
+    }
+
+    private boolean isAppInstalled(String packageName) {
+        try {
+            requireContext().getPackageManager().getPackageInfo(packageName, 0);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     // ── Discovery ─────────────────────────────────────────────────────────────
@@ -93,11 +174,9 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
 
     private void discoverChromecast() {
         try {
-            Context ctx = requireContext();
-            mediaRouter = MediaRouter.getInstance(ctx);
+            mediaRouter = MediaRouter.getInstance(requireContext());
             String appId = CastMediaControlIntent.DEFAULT_MEDIA_RECEIVER_APPLICATION_ID;
 
-            // Add existing routes
             MediaRouteSelector selector = new MediaRouteSelector.Builder()
                 .addControlCategory(CastMediaControlIntent.categoryForCast(appId))
                 .build();
@@ -108,17 +187,14 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
                 }
             }
 
-            // Listen for newly discovered routes
             castRouterCallback = new MediaRouter.Callback() {
                 @Override
                 public void onRouteAdded(MediaRouter r, MediaRouter.RouteInfo route) {
                     if (!isAdded()) return;
                     addDevice(routeToCastDevice(route));
                 }
-                @Override
-                public void onRouteRemoved(MediaRouter r, MediaRouter.RouteInfo route) {}
-                @Override
-                public void onRouteChanged(MediaRouter r, MediaRouter.RouteInfo route) {}
+                @Override public void onRouteRemoved(MediaRouter r, MediaRouter.RouteInfo route) {}
+                @Override public void onRouteChanged(MediaRouter r, MediaRouter.RouteInfo route) {}
             };
             mediaRouter.addCallback(selector, castRouterCallback,
                 MediaRouter.CALLBACK_FLAG_REQUEST_DISCOVERY
@@ -142,7 +218,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         });
     }
 
-    // ── Helpers ──────────────────────────────────────────────────────────────
+    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private synchronized void addDevice(CastDevice dev) {
         if (!isAdded() || dev == null) return;

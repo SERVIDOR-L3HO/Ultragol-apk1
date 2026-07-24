@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="#1C1C1C"
-    android:paddingBottom="24dp">
+    android:paddingBottom="28dp">
 
     <!-- Drag handle -->
     <View
@@ -51,6 +51,125 @@
             android:contentDescription="Cerrar"/>
     </LinearLayout>
 
+    <!-- ══ SECCIÓN RECOMENDADO ══════════════════════════════════════════════ -->
+
+    <!-- Label -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="RECOMENDADO"
+        android:textColor="#4FC3F7"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.12"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="8dp"/>
+
+    <!-- Web Video Caster card -->
+    <LinearLayout
+        android:id="@+id/cardWebVideoCaster"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="12dp"
+        android:background="@drawable/bg_recommended_card"
+        android:clickable="true"
+        android:focusable="true">
+
+        <!-- App icon (loaded dynamically or fallback) -->
+        <ImageView
+            android:id="@+id/iconWebVideoCaster"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:scaleType="fitCenter"
+            android:contentDescription="Web Video Caster"/>
+
+        <!-- Info -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="8dp">
+
+            <!-- Name + star badge row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Web Video Caster"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp"
+                    android:textStyle="bold"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="★ TOP"
+                    android:textColor="#FFD700"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_badge_gold"
+                    android:paddingStart="5dp"
+                    android:paddingEnd="5dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Transmite cualquier video a tu TV"
+                android:textColor="#AAFFFFFF"
+                android:textSize="12sp"/>
+
+        </LinearLayout>
+
+        <!-- Open/Install button -->
+        <TextView
+            android:id="@+id/btnWebVideoCaster"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ABRIR"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_btn_blue"
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:clickable="true"
+            android:focusable="true"/>
+
+    </LinearLayout>
+
+    <!-- Divider before device list -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"
+        android:background="#22FFFFFF"/>
+
+    <!-- ══ DISPOSITIVOS DETECTADOS ══════════════════════════════════════════ -->
+
     <!-- Search status -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -59,6 +178,7 @@
         android:gravity="center_vertical"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="4dp">
 
         <ProgressBar
@@ -77,12 +197,6 @@
             android:textColor="#99FFFFFF"
             android:textSize="13sp"/>
     </LinearLayout>
-
-    <!-- Divider -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="#22FFFFFF"/>
 
     <!-- Device list -->
     <androidx.recyclerview.widget.RecyclerView
