@@ -126,3 +126,9 @@ id = "wuNP3QoaPJzKVwSyvOaCQ"
 uri = "file://public/ultragol1-debug.apk"
 type = "unspecified"
 title = "ultragol1-debug.apk — Fix detección Web Video Cast"
+
+[[outputs]]
+id = "ncafPs9sFqUeGV2ZypfzE"
+uri = "file://ultragol1-con-musica.apk"
+type = "unspecified"
+title = "ultragol1-con-musica.apk"
