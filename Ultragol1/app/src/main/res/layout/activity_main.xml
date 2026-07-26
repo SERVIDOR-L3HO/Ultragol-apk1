@@ -322,6 +322,35 @@
                             android:letterSpacing="0.06"/>
                     </LinearLayout>
 
+                    <!-- Música -->
+                    <LinearLayout
+                        android:id="@+id/navMusica"
+                        android:layout_width="match_parent"
+                        android:layout_height="54dp"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/nav_glass_item_bg"
+                        android:clickable="true"
+                        android:focusable="true">
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:src="@drawable/ic_nav_music"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="18dp"
+                            android:text="MÚSICA"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="13sp"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
                     <!-- TV en Vivo -->
                     <LinearLayout
                         android:id="@+id/navTv"

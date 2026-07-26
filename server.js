@@ -33,6 +33,56 @@ function getBaseUrl() {
 app.use(express.json());
 app.use(express.static('public'));
 
+// ── MÚSICA — pancho-mix frontend & API ───────────────────────────────────────
+app.use('/musica', express.static(path.join(__dirname, 'public', 'musica')));
+app.get('/musica', (req, res) => res.sendFile(path.join(__dirname, 'public', 'musica', 'index.html')));
+
+// Canal YouTube de ID Remake
+const IDREMAKE_CHANNEL_ID = 'UC8mT-SdbG0MRk03K_UeyINg';
+let _channelCache = null;
+let _channelCacheTs = 0;
+const CHANNEL_CACHE_TTL = 30 * 60 * 1000; // 30 min
+
+app.get('/musica/api/channel-videos', async (req, res) => {
+    try {
+        if (_channelCache && Date.now() - _channelCacheTs < CHANNEL_CACHE_TTL) {
+            return res.json(_channelCache);
+        }
+        const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${IDREMAKE_CHANNEL_ID}`;
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 12000);
+        let xml;
+        try {
+            const r = await fetch(rssUrl, { signal: ctrl.signal });
+            if (!r.ok) throw new Error(`RSS HTTP ${r.status}`);
+            xml = await r.text();
+        } finally { clearTimeout(timer); }
+
+        const videos = [];
+        const entryRe = /<entry>([\s\S]*?)<\/entry>/g;
+        let m;
+        while ((m = entryRe.exec(xml)) !== null) {
+            const e = m[1];
+            const get = re => (e.match(re) || [])[1] || '';
+            const videoId   = get(/<yt:videoId>(.*?)<\/yt:videoId>/);
+            const title     = get(/<title>([\s\S]*?)<\/title>/)
+                .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&#39;/g,"'");
+            const thumbnail = get(/media:thumbnail url="([^"]*)"/);
+            const published = get(/<published>(.*?)<\/published>/);
+            const views     = parseInt(get(/statistics views="([^"]*)"/)) || 0;
+            const description = get(/<media:description>([\s\S]*?)<\/media:description>/).trim();
+            if (videoId) videos.push({ videoId, title, thumbnail, published, views, description });
+        }
+        const result = { videos, channelName: 'ID Remake', channelId: IDREMAKE_CHANNEL_ID };
+        _channelCache = result;
+        _channelCacheTs = Date.now();
+        res.json(result);
+    } catch (err) {
+        console.error('channel-videos error:', err.message);
+        res.status(500).json({ error: 'No se pudieron cargar los videos' });
+    }
+});
+
 // ── FILE STORAGE ───────────────────────────────────────────────────────────────
 const ALLOWED_APPS = new Set(['ultragol1', 'ultra1', 'ultragol']);
 const storage = multer.diskStorage({
