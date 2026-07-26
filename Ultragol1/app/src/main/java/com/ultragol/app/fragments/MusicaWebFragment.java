@@ -10,8 +10,8 @@ import com.ultragol.app.R;
 
 public class MusicaWebFragment extends Fragment {
 
-    // Página de música clonada en los assets del APK
-    private static final String MUSICA_URL = "file:///android_asset/pancho-mix/index.html";
+    // Página de música alojada
+    private static final String MUSICA_URL = "https://pancho-mix--jordi60897.replit.app";
 
     private WebView webView;
 
