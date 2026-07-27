@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- TV grid: maximum columns for 10-foot UI -->
+<resources>
+    <integer name="home_grid_columns">4</integer>
+    <integer name="content_grid_columns">5</integer>
+    <integer name="tv_grid_columns">4</integer>
+    <integer name="adult_grid_columns">4</integer>
+</resources>

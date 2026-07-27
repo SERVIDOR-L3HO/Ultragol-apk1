@@ -81,19 +81,29 @@ public class HomeFragment extends Fragment {
             loadAll();
         });
 
-        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
+        // Use resource integer so phone=2, tablet=3, TV=4 columns automatically
+        int gridCols = getResources().getInteger(R.integer.home_grid_columns);
+        GridLayoutManager glm = new GridLayoutManager(requireContext(), gridCols);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int pos) {
                 // Position 0 is always the header item (full width).
-                if (pos == 0) return 2;
-                return discoverAdapter != null ? discoverAdapter.getSpanSize(pos - 1) : 1;
+                if (pos == 0) return gridCols;
+                // For discover items: featured spans ALL columns, normal spans 1.
+                // discoverAdapter.getSpanSize returns 1=normal, 2=featured (legacy hardcode).
+                // We map: 1→1, anything else→gridCols so it works on TV (4 cols) too.
+                if (discoverAdapter == null) return 1;
+                int s = discoverAdapter.getSpanSize(pos - 1);
+                return s == 1 ? 1 : gridCols;
             }
         });
 
         rvHome.setLayoutManager(glm);
         rvHome.setItemViewCacheSize(6);
         rvHome.setAdapter(new ConcatAdapter(headerAdapter, discoverAdapter));
+
+        // Make RecyclerView items focusable for D-pad / keyboard navigation (TV & PC)
+        TvHelper.makeFocusable(rvHome);
 
         // Load first discover page immediately.
         loadMoreDiscover();

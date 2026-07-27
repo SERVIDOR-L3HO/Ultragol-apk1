@@ -1,0 +1,881 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TV / Leanback layout for MainActivity.
+  Layout: [Persistent Side Nav 240dp] | [Fragment Container]
+
+  The side nav (id=drawerOverlay) is ALWAYS visible — it is NOT an overlay.
+  All nav-item IDs are identical to the mobile drawer so MainActivity code
+  works without changes. The scrim/close view (drawerClose) is absent so
+  the null-check in setupDrawer() will skip it.
+
+  Navigation is done with D-pad: focus moves naturally between nav items
+  and the content area via Android's standard focus traversal.
+-->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@color/bg_primary">
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         Persistent side-navigation rail (always visible on TV)
+         Uses id=drawerOverlay so MainActivity.setupDrawer() can find
+         all nav-item child views with drawerOverlay.findViewById(…).
+         ══════════════════════════════════════════════════════════════════ -->
+    <FrameLayout
+        android:id="@+id/drawerOverlay"
+        android:layout_width="@dimen/nav_panel_width"
+        android:layout_height="match_parent"
+        android:visibility="visible"
+        android:background="@drawable/nav_glass_panel_bg"
+        android:focusable="false">
+
+        <!-- Actual nav panel — vertical stack -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:clickable="true"
+            android:focusable="false">
+
+            <!-- ── Header: Logo + Search ── -->
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="72dp"
+                android:paddingStart="20dp"
+                android:paddingEnd="12dp">
+
+                <!-- Logo -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ACTION"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:fontFamily="sans-serif-black"/>
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="PLAY"
+                        android:textColor="@color/red_primary"
+                        android:textSize="20sp"
+                        android:fontFamily="sans-serif-black"/>
+                </LinearLayout>
+
+                <!-- Search icon -->
+                <ImageView
+                    android:id="@+id/drawerSearch"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:layout_gravity="end|center_vertical"
+                    android:src="@android:drawable/ic_menu_search"
+                    android:tint="#AAFFFFFF"
+                    android:padding="8dp"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="@drawable/tv_nav_item_focused"
+                    android:contentDescription="Buscar"/>
+            </FrameLayout>
+
+            <!-- Separator -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#18FFFFFF"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"/>
+
+            <!-- ── Scrollable nav items ── -->
+            <androidx.core.widget.NestedScrollView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:overScrollMode="never"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp">
+
+                    <!-- INICIO -->
+                    <LinearLayout
+                        android:id="@+id/navInicio"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusDown="@id/navSeries"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_home"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="INICIO"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- SERIES -->
+                    <LinearLayout
+                        android:id="@+id/navSeries"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navInicio"
+                        android:nextFocusDown="@id/navMovies"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_series"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="SERIES"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- PELÍCULAS -->
+                    <LinearLayout
+                        android:id="@+id/navMovies"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navSeries"
+                        android:nextFocusDown="@id/navAnime"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_movies"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="PELÍCULAS"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- ANIMES -->
+                    <LinearLayout
+                        android:id="@+id/navAnime"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navMovies"
+                        android:nextFocusDown="@id/navDoramas"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_anime"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="ANIMES"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- DORAMAS -->
+                    <LinearLayout
+                        android:id="@+id/navDoramas"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navAnime"
+                        android:nextFocusDown="@id/navDeportes"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_doramas"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="DORAMAS"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- Separator -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#12FFFFFF"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <!-- DEPORTES -->
+                    <LinearLayout
+                        android:id="@+id/navDeportes"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navDoramas"
+                        android:nextFocusDown="@id/navMusica"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_sports"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="DEPORTES"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- MÚSICA -->
+                    <LinearLayout
+                        android:id="@+id/navMusica"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navDeportes"
+                        android:nextFocusDown="@id/navTv"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_music"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="MÚSICA"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- TV EN VIVO -->
+                    <LinearLayout
+                        android:id="@+id/navTv"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navMusica"
+                        android:nextFocusDown="@id/navFavorites"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_tv"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="TV EN VIVO"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- Separator -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#12FFFFFF"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <!-- FAVORITOS -->
+                    <LinearLayout
+                        android:id="@+id/navFavorites"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navTv"
+                        android:nextFocusDown="@id/navMyList"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_favorites"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="FAVORITOS"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- MI LISTA -->
+                    <LinearLayout
+                        android:id="@+id/navMyList"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navFavorites"
+                        android:nextFocusDown="@id/navDownloads"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_mylist"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="MI LISTA"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- MIS DESCARGAS (hidden on TV — no local storage on most TVs) -->
+                    <LinearLayout
+                        android:id="@+id/navDownloads"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"
+                        android:nextFocusUp="@id/navMyList"
+                        android:nextFocusDown="@id/navAdult"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_downloads"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="MIS DESCARGAS"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- SHORTS (hidden on TV) -->
+                    <LinearLayout
+                        android:id="@+id/navSearch"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:visibility="gone"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_shorts"
+                            android:tint="#BAFFFFFF"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="16dp"
+                            android:text="SHORTS DRAMAS"
+                            android:textColor="#EAFFFFFF"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                    </LinearLayout>
+
+                    <!-- ADULTOS (protected) -->
+                    <LinearLayout
+                        android:id="@+id/navAdult"
+                        android:layout_width="match_parent"
+                        android:layout_height="@dimen/nav_item_height"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:background="@drawable/tv_nav_item_focused"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:nextFocusUp="@id/navMyList"
+                        android:nextFocusDown="@id/navSettings"
+                        android:nextFocusRight="@id/fragmentContainer">
+                        <ImageView
+                            android:layout_width="@dimen/nav_icon_size"
+                            android:layout_height="@dimen/nav_icon_size"
+                            android:src="@drawable/ic_nav_adult"
+                            android:tint="#FFAA44"
+                            android:scaleType="fitCenter"/>
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginStart="16dp"
+                            android:text="ADULTOS"
+                            android:textColor="#FFCC77"
+                            android:textSize="@dimen/nav_text_size"
+                            android:fontFamily="sans-serif-medium"
+                            android:letterSpacing="0.06"/>
+                        <TextView
+                            android:id="@+id/tvAdultLock"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🔒"
+                            android:textSize="14sp"
+                            android:layout_marginEnd="4dp"/>
+                    </LinearLayout>
+
+                    <!-- Separator before Platforms -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#12FFFFFF"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginEnd="4dp"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="4dp"/>
+
+                    <!-- PLATAFORMAS label -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_marginTop="4dp"
+                        android:layout_marginBottom="6dp"
+                        android:text="PLATAFORMAS"
+                        android:textColor="#55FFFFFF"
+                        android:textSize="10sp"
+                        android:fontFamily="sans-serif-bold"
+                        android:letterSpacing="0.15"/>
+
+                    <!-- Platform row 1 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="6dp">
+                        <LinearLayout
+                            android:id="@+id/platNetflix"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="NETFLIX"
+                                android:textColor="#E50914"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platPrime"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Prime"
+                                android:textColor="#00A8E0"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-medium"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platDisney"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Disney+"
+                                android:textColor="#113CCF"
+                                android:textSize="10sp"
+                                android:fontFamily="sans-serif-black"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Platform row 2 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="6dp">
+                        <LinearLayout
+                            android:id="@+id/platApple"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Apple TV"
+                                android:textColor="#CCFFFFFF"
+                                android:textSize="9sp"
+                                android:fontFamily="sans-serif-medium"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platHulu"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Hulu"
+                                android:textColor="#1CE783"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif-black"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platHbo"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="HBO Max"
+                                android:textColor="#9B3DE8"
+                                android:textSize="9sp"
+                                android:fontFamily="sans-serif-bold"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <!-- Platform row 3 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <LinearLayout
+                            android:id="@+id/platCrunchyroll"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Crunchyroll"
+                                android:textColor="#F47521"
+                                android:textSize="8sp"
+                                android:fontFamily="sans-serif-bold"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platAtx"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:layout_marginEnd="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="At-X"
+                                android:textColor="#AAFFFFFF"
+                                android:textSize="11sp"
+                                android:fontFamily="sans-serif-bold"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:id="@+id/platTokyoMx"
+                            android:layout_width="0dp"
+                            android:layout_height="44dp"
+                            android:layout_weight="1"
+                            android:layout_marginStart="3dp"
+                            android:background="@drawable/tv_nav_item_focused"
+                            android:gravity="center"
+                            android:clickable="true"
+                            android:focusable="true">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Tokyo MX"
+                                android:textColor="#88FFFFFF"
+                                android:textSize="8sp"
+                                android:fontFamily="sans-serif-bold"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </androidx.core.widget.NestedScrollView>
+
+            <!-- ── Bottom: Separator + Settings + Profile ── -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#18FFFFFF"/>
+
+            <!-- CONFIGURACIÓN -->
+            <LinearLayout
+                android:id="@+id/navSettings"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="18dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/tv_nav_item_focused"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/navAdult"
+                android:nextFocusDown="@id/navSwitchProfile"
+                android:nextFocusRight="@id/fragmentContainer">
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_nav_settings"
+                    android:tint="#88FFFFFF"
+                    android:scaleType="fitCenter"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:text="CONFIGURACIÓN"
+                    android:textColor="#AAFFFFFF"
+                    android:textSize="11sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.06"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="#12FFFFFF"/>
+
+            <!-- CAMBIAR PERFIL -->
+            <LinearLayout
+                android:id="@+id/navSwitchProfile"
+                android:layout_width="match_parent"
+                android:layout_height="68dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="18dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/tv_nav_item_focused"
+                android:clickable="true"
+                android:focusable="true"
+                android:nextFocusUp="@id/navSettings"
+                android:nextFocusRight="@id/fragmentContainer">
+                <ImageView
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:src="@drawable/ic_nav_profile"
+                    android:tint="#AAFFFFFF"
+                    android:padding="5dp"
+                    android:scaleType="fitCenter"/>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="CAMBIAR PERFIL"
+                        android:textColor="#DDFFFFFF"
+                        android:textSize="12sp"
+                        android:fontFamily="sans-serif-medium"
+                        android:letterSpacing="0.04"/>
+                    <TextView
+                        android:id="@+id/tvCurrentProfileName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="Perfil activo"
+                        android:textColor="#66FFFFFF"
+                        android:textSize="11sp"
+                        android:fontFamily="sans-serif"/>
+                </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="›"
+                    android:textColor="#55FFFFFF"
+                    android:textSize="22sp"
+                    android:fontFamily="sans-serif-light"/>
+            </LinearLayout>
+
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- ══════════════════════════════════════════════════════════════════
+         Content area — fills the remaining width
+         id=fragmentContainer must match the one MainActivity uses.
+         ══════════════════════════════════════════════════════════════════ -->
+    <FrameLayout
+        android:id="@+id/fragmentContainer"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:focusable="true"
+        android:focusableInTouchMode="false"
+        android:descendantFocusability="afterDescendants"/>
+
+</LinearLayout>

@@ -51,5 +51,60 @@ Server listens on port 5000.
 - Download URLs in `version.json` / `version_ultra1.json` are patched to the current Replit domain automatically on each server start
 - `ADMIN_KEY` secret is **not yet set** — `/admin/*` routes return 503 until it is configured in Replit Secrets
 
+## Android app — Responsive / Multi-device support (Ultragol1/)
+
+All changes are in `Ultragol1/app/src/main/`.
+
+### New files added
+| File | Purpose |
+|------|---------|
+| `java/.../TvHelper.java` | Device detection (TV/Tablet/Desktop/Phone) + RecyclerView D-pad helper |
+| `res/animator/tv_card_focus.xml` | StateListAnimator: card scales to 108% on focus |
+| `res/drawable/tv_nav_item_focused.xml` | Focus selector for nav items (red accent bar on left) |
+| `res/drawable/tv_card_focus_ring.xml` | Focus ring drawable for content cards |
+| `res/values/dimens.xml` | Base dimensions (phone) |
+| `res/values-large/dimens.xml` | Tablet dimensions (sw600dp+) |
+| `res/values-television/dimens.xml` | TV dimensions (bigger text, larger cards, more spacing) |
+| `res/values/integers.xml` | Grid column counts: home=2, content=3, tv=2, adult=2 |
+| `res/values-large/integers.xml` | Tablet: home=3, content=4, tv=3, adult=3 |
+| `res/values-television/integers.xml` | TV: home=4, content=5, tv=4, adult=4 |
+| `res/layout-television/activity_main.xml` | TV layout: persistent 240dp side nav + content area |
+| `res/values-television/styles.xml` | TV theme (fullscreen, focus colours) |
+
+### Modified files
+| File | Change |
+|------|--------|
+| `AndroidManifest.xml` | Removed `portrait` locks from all activities; added `configChanges=uiMode` so TV remote doesn't restart activities |
+| `MainActivity.java` | TV mode detection, `showMenu()`/`hideMenu()` TV overrides, D-pad routing (`dispatchKeyEvent`), keyboard shortcuts (Esc=back, Ctrl+F=search) |
+| `MediaActivity.java` | Full `dispatchKeyEvent`: DPAD_CENTER=play/pause, ←→=seek±10s, PageUp/Down=±90s, Media keys, Space/Enter, S=settings, F=fit/crop |
+| `fragments/HomeFragment.java` | Responsive grid columns from `R.integer.home_grid_columns`; `TvHelper.makeFocusable(rvHome)` |
+| `fragments/MoviesFragment.java` | Responsive columns + TvHelper |
+| `fragments/FavoritesFragment.java` | Responsive columns + TvHelper |
+| `fragments/MyListFragment.java` | Responsive columns + TvHelper |
+| `fragments/PlatformFragment.java` | Responsive columns + TvHelper |
+| `fragments/SportsFragment.java` | Responsive columns + TvHelper |
+| `fragments/DownloadsFragment.java` | Responsive columns + TvHelper |
+| `fragments/AdultFragment.java` | Responsive columns + TvHelper |
+| `fragments/CineBaseFragment.java` | TvHelper on hero + section RecyclerViews |
+
+### How responsive layout works
+- **Phone**: portrait/landscape, 2-col discover grid, 3-col content, bottom drawer
+- **Tablet** (sw600dp+): landscape allowed, 3-col discover, 4-col content, larger text
+- **TV / Google TV**: `layout-television/activity_main.xml` loads automatically (Android resource qualifiers). Persistent side nav rail always visible. Full D-pad navigation. 4-col discover, 5-col content. All RecyclerView items scale 8% on focus.
+- **PC/Laptop**: keyboard shortcuts work on all layouts. Tab/Shift+Tab = focus traversal (native). Enter/Space = click. Esc = back.
+
+### Remote control key mapping (TV)
+| Key | Action |
+|-----|--------|
+| D-pad center / Enter / Space | Show controls → Play/Pause |
+| ← / → | Seek −10s / +10s |
+| Page Down/Up or CH−/+ | Seek −90s / +90s |
+| ↑ / ↓ | Show controls |
+| Media Play/Pause | Toggle |
+| Media FF / RW | Seek ±10s |
+| S | Settings panel |
+| F | Toggle fit/crop |
+| Esc / Back | Back |
+
 ## User preferences
 <!-- Add any preferences here -->

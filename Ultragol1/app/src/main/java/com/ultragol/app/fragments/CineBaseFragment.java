@@ -8,6 +8,7 @@ import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.CineCardAdapter;
 import com.ultragol.app.adapters.CineHeroAdapter;
 import com.ultragol.app.models.ContentItem;
@@ -109,6 +110,7 @@ public abstract class CineBaseFragment extends Fragment {
         rv.setLayoutManager(new LinearLayoutManager(requireContext()));
         rv.setNestedScrollingEnabled(false);
         rv.setAdapter(new CineHeroAdapter(requireContext(), items, getHeroPillLabel()));
+        TvHelper.makeFocusable(rv);
         container.addView(rv);
     }
 
@@ -135,6 +137,7 @@ public abstract class CineBaseFragment extends Fragment {
                     requireContext(), LinearLayoutManager.HORIZONTAL, false));
             rv.setOverScrollMode(View.OVER_SCROLL_NEVER);
             rv.setAdapter(new CineCardAdapter(requireContext(), items, getCardTypeLabel()));
+            TvHelper.makeFocusable(rv);
 
             int pageWidthPx = dpToPx(170 * 2);
 

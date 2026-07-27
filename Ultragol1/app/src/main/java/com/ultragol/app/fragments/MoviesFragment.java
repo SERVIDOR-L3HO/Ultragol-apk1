@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.ultragol.app.ProfileManager;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.ContentGridAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.TmdbApi;
@@ -30,8 +31,10 @@ public class MoviesFragment extends Fragment {
         ProgressBar pb = view.findViewById(R.id.gridLoading);
         List<ContentItem> items = new ArrayList<>();
         ContentGridAdapter adapter = new ContentGridAdapter(requireContext(), items);
-        grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        int cols = getResources().getInteger(R.integer.content_grid_columns);
+        grid.setLayoutManager(new GridLayoutManager(requireContext(), cols));
         grid.setAdapter(adapter);
+        TvHelper.makeFocusable(grid);
         // Detect kids profile
         boolean isKids = false;
         try {

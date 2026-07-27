@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Grid column counts per device type -->
+<resources>
+    <!-- Home discover grid: phone uses 2 columns -->
+    <integer name="home_grid_columns">2</integer>
+    <!-- Content grid (movies/series/etc.): phone 3 cols -->
+    <integer name="content_grid_columns">3</integer>
+    <!-- Live TV channel grid: phone 2 cols -->
+    <integer name="tv_grid_columns">2</integer>
+    <!-- Adult content grid: phone 2 cols -->
+    <integer name="adult_grid_columns">2</integer>
+</resources>

@@ -12,6 +12,7 @@ import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.AdultVideoAdapter;
 import com.ultragol.app.models.AdultVideoItem;
 import com.ultragol.app.network.AdultContentApi;
@@ -83,11 +84,13 @@ public class AdultFragment extends Fragment {
 
         adapter = new AdultVideoAdapter(requireContext(), items);
         adapter.setOnLoadMoreListener(this::loadNextPage);
-        GridLayoutManager glm = new GridLayoutManager(requireContext(), 2);
+        int adultCols = getResources().getInteger(R.integer.adult_grid_columns);
+        GridLayoutManager glm = new GridLayoutManager(requireContext(), adultCols);
         grid.setLayoutManager(glm);
         grid.setItemAnimator(null);
         grid.setHasFixedSize(false);
         grid.setAdapter(adapter);
+        TvHelper.makeFocusable(grid);
 
         buildChips(view);
         loadPage(1);

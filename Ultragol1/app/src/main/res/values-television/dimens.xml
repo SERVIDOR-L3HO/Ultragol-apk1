@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  TV dimensions (1080p / 4K screens, viewed from ~2–3 metres).
+  Everything is larger and has more breathing room.
+-->
+<resources>
+    <!-- Navigation side rail — always visible on TV -->
+    <dimen name="nav_panel_width">240dp</dimen>
+    <dimen name="nav_item_height">64dp</dimen>
+    <dimen name="nav_icon_size">28dp</dimen>
+    <dimen name="nav_text_size">15sp</dimen>
+
+    <!-- Cards — bigger for 10-foot UI -->
+    <dimen name="card_corner_radius">12dp</dimen>
+    <dimen name="content_card_width">200dp</dimen>
+    <dimen name="content_card_height">290dp</dimen>
+    <dimen name="trending_card_height">280dp</dimen>
+
+    <!-- Hero banner -->
+    <dimen name="hero_height">380dp</dimen>
+
+    <!-- Text sizes — readable from the couch -->
+    <dimen name="text_title_large">28sp</dimen>
+    <dimen name="text_title_medium">22sp</dimen>
+    <dimen name="text_body">17sp</dimen>
+    <dimen name="text_caption">14sp</dimen>
+
+    <!-- Spacing -->
+    <dimen name="section_padding_horizontal">32dp</dimen>
+    <dimen name="section_padding_vertical">16dp</dimen>
+
+    <!-- Player controls — large buttons for remote control -->
+    <dimen name="player_btn_size">80dp</dimen>
+    <dimen name="player_btn_play_size">100dp</dimen>
+    <dimen name="player_btn_padding">20dp</dimen>
+</resources>

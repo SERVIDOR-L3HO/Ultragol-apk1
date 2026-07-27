@@ -309,6 +309,139 @@ public class MediaActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    // ─── D-pad / Remote control / Keyboard ────────────────────────────────────
+    //
+    // Supported controls (all device types):
+    //   TV remote    : DPAD_CENTER=play-pause, ←→=seek±10s, ↑↓=show controls
+    //   Gamepad      : A=play-pause, ←→=seek, ↑↓=show controls
+    //   PC keyboard  : Space/Enter=play-pause, ←→=seek, F=fullscreen, Esc=back
+    //   Media keys   : MEDIA_PLAY_PAUSE, MEDIA_FAST_FORWARD, MEDIA_REWIND
+    //
+    // Rule: any key shows the controls and resets the auto-hide timer.
+    // ──────────────────────────────────────────────────────────────────────────
+    @Override
+    public boolean dispatchKeyEvent(android.view.KeyEvent event) {
+        if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) {
+            return super.dispatchKeyEvent(event);
+        }
+        if (isInPipMode) return super.dispatchKeyEvent(event);
+
+        int kc = event.getKeyCode();
+
+        // ── Back / Escape ─────────────────────────────────────────────────────
+        if (kc == android.view.KeyEvent.KEYCODE_BACK
+                || kc == android.view.KeyEvent.KEYCODE_ESCAPE) {
+            onBackPressed();
+            return true;
+        }
+
+        // ── Screen locked: only unlock hint, no other actions ────────────────
+        if (screenLocked) {
+            showUnlockHint();
+            return true;
+        }
+
+        // ── Media keys (headset / Bluetooth remote / keyboard media row) ──────
+        if (kc == android.view.KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE
+                || kc == android.view.KeyEvent.KEYCODE_HEADSETHOOK) {
+            showControls();
+            togglePlayPause();
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_MEDIA_PLAY) {
+            showControls();
+            if (player != null && !player.isPlaying()) { player.play(); updatePlayPauseBtn(); }
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_MEDIA_PAUSE) {
+            showControls();
+            if (player != null && player.isPlaying()) { player.pause(); updatePlayPauseBtn(); }
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_MEDIA_FAST_FORWARD
+                || kc == android.view.KeyEvent.KEYCODE_MEDIA_SKIP_FORWARD) {
+            showControls();
+            seekBy(SEEK_INCREMENT_MS);
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_MEDIA_REWIND
+                || kc == android.view.KeyEvent.KEYCODE_MEDIA_SKIP_BACKWARD) {
+            showControls();
+            seekBy(-SEEK_INCREMENT_MS);
+            return true;
+        }
+
+        // ── D-pad / Arrow keys ────────────────────────────────────────────────
+        if (kc == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                || kc == android.view.KeyEvent.KEYCODE_ENTER
+                || kc == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER
+                || kc == android.view.KeyEvent.KEYCODE_SPACE) {
+            if (!controlsVisible) {
+                showControls();
+            } else {
+                togglePlayPause();
+            }
+            return true;
+        }
+
+        if (kc == android.view.KeyEvent.KEYCODE_DPAD_RIGHT
+                || kc == android.view.KeyEvent.KEYCODE_MOVE_END) {
+            showControls();
+            seekBy(SEEK_INCREMENT_MS);
+            return true;
+        }
+
+        if (kc == android.view.KeyEvent.KEYCODE_DPAD_LEFT
+                || kc == android.view.KeyEvent.KEYCODE_MOVE_HOME) {
+            showControls();
+            seekBy(-SEEK_INCREMENT_MS);
+            return true;
+        }
+
+        if (kc == android.view.KeyEvent.KEYCODE_DPAD_UP
+                || kc == android.view.KeyEvent.KEYCODE_DPAD_DOWN) {
+            // Show controls (volume adjustment is handled by system)
+            showControls();
+            return true;
+        }
+
+        // ── Long-seek: Page Up/Down or Channel +/- ────────────────────────────
+        if (kc == android.view.KeyEvent.KEYCODE_PAGE_UP
+                || kc == android.view.KeyEvent.KEYCODE_CHANNEL_UP) {
+            showControls();
+            seekBy(SEEK_INCREMENT_MS * 9);   // +90 s
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_PAGE_DOWN
+                || kc == android.view.KeyEvent.KEYCODE_CHANNEL_DOWN) {
+            showControls();
+            seekBy(-SEEK_INCREMENT_MS * 9);  // -90 s
+            return true;
+        }
+
+        // ── PC-specific shortcuts ─────────────────────────────────────────────
+        if (kc == android.view.KeyEvent.KEYCODE_F) {
+            // F = toggle fit/crop
+            toggleFitCrop();
+            showControls();
+            return true;
+        }
+        if (kc == android.view.KeyEvent.KEYCODE_S) {
+            // S = settings panel
+            showControls();
+            if (settingsPanelVisible) closeSettings(); else openSettings();
+            return true;
+        }
+
+        // ── Any other key: just show the controls overlay ─────────────────────
+        if (!controlsVisible) {
+            showControls();
+            return true;
+        }
+
+        return super.dispatchKeyEvent(event);
+    }
+
     /** Al presionar Home mientras reproduce → entra en PiP automáticamente */
     @Override public void onUserLeaveHint() {
         super.onUserLeaveHint();

@@ -54,4 +54,14 @@
         <item name="android:textSize">13sp</item>
     </style>
 </resources>
-<!-- will replace closing tag below -->
+    <!--
+      TV-specific theme: inherits everything from base but sets a visible focus highlight.
+      Used automatically via values-television/styles.xml override.
+    -->
+    <style name="Theme.Ultragol.TV" parent="Theme.Ultragol">
+        <!-- Enable the default focus outline that Android draws on focusable items -->
+        <item name="android:focusedByDefault">false</item>
+        <!-- Cursor and selected-text color = accent -->
+        <item name="colorControlActivated">@color/red_primary</item>
+    </style>
+</resources>

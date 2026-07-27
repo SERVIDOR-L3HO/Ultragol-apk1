@@ -20,6 +20,7 @@ import com.bumptech.glide.Glide;
 import com.ultragol.app.DetailActivity;
 import com.ultragol.app.DownloadCompleteReceiver;
 import com.ultragol.app.DownloadUtil;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.MediaActivity;
 import com.ultragol.app.R;
@@ -115,7 +116,9 @@ public class DownloadsFragment extends Fragment {
         } else {
             grid.setVisibility(View.VISIBLE);
             if (empty != null) empty.setVisibility(View.GONE);
-            grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+            int cols = getResources().getInteger(R.integer.content_grid_columns);
+            grid.setLayoutManager(new GridLayoutManager(requireContext(), cols));
+            TvHelper.makeFocusable(grid);
             adapter = new DownloadCardAdapter(requireContext(), items, () -> loadContent(view));
             grid.setAdapter(adapter);
         }

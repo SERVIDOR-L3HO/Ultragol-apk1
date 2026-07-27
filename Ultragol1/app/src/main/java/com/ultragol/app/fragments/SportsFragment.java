@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.ultragol.app.ChannelStreamDialog;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.ChannelAdapter;
 import com.ultragol.app.models.Channel;
 import com.ultragol.app.network.StreamingApi;
@@ -35,7 +36,9 @@ public class SportsFragment extends Fragment {
         emptyView   = view.findViewById(R.id.sportsEmpty);
 
         RecyclerView grid = view.findViewById(R.id.channelsGrid);
-        grid.setLayoutManager(new GridLayoutManager(requireContext(), 2));
+        int cols = getResources().getInteger(R.integer.tv_grid_columns);
+        grid.setLayoutManager(new GridLayoutManager(requireContext(), cols));
+        TvHelper.makeFocusable(grid);
         adapter = new ChannelAdapter(requireContext(), filtered, ch -> {
             // Show stream options dialog (Ver / Cast / Calidad)
             ChannelStreamDialog.show(requireContext(), ch);

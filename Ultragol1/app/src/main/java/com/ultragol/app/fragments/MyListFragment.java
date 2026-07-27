@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
 import com.ultragol.app.MyListManager;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.ContentGridAdapter;
 import com.ultragol.app.models.ContentItem;
 import java.util.List;
@@ -35,7 +36,9 @@ public class MyListFragment extends Fragment {
     private void loadContent(View view) {
         RecyclerView grid = view.findViewById(R.id.contentGrid);
         if (grid == null) return;
-        grid.setLayoutManager(new GridLayoutManager(requireContext(), 3));
+        int cols = getResources().getInteger(R.integer.content_grid_columns);
+        grid.setLayoutManager(new GridLayoutManager(requireContext(), cols));
+        TvHelper.makeFocusable(grid);
         List<ContentItem> items = MyListManager.getAll(requireContext());
         if (items.isEmpty()) {
             grid.setVisibility(View.GONE);
