@@ -12,6 +12,11 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.text.format.Formatter;
 import android.view.*;
+
+import java.net.Inet6Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 import android.widget.*;
 import androidx.annotation.*;
 import androidx.recyclerview.widget.*;
@@ -112,7 +117,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         final String[] shownUrl = new String[1];
 
         if (hasIp && videoUrl != null && !videoUrl.isEmpty()) {
-            server.start(videoUrl);
+            server.start(videoUrl, localIp);
             shownUrl[0] = server.getLocalUrl(localIp);
             tvDot.setTextColor(0xFF00E5A0);
             tvIpLabel.setText("Servidor local activo · " + localIp + ":" + LocalStreamServer.PORT);
@@ -127,7 +132,7 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
             toggleSwitch.setChecked(hasIp && server.isRunning());
             toggleSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
                 if (isChecked && videoUrl != null && !videoUrl.isEmpty() && localIp != null) {
-                    server.start(videoUrl);
+                    server.start(videoUrl, localIp);
                     shownUrl[0] = server.getLocalUrl(localIp);
                     tvDot.setTextColor(0xFF00E5A0);
                     tvIpLabel.setText("Servidor local activo · " + localIp + ":" + LocalStreamServer.PORT);
@@ -153,19 +158,42 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         });
     }
 
-    @SuppressWarnings("deprecation")
     private String getLocalIpAddress() {
+        // Intento 1: NetworkInterface (funciona en Android 12+ donde WifiManager devuelve 0)
         try {
+            Enumeration<NetworkInterface> ifaces = NetworkInterface.getNetworkInterfaces();
+            while (ifaces != null && ifaces.hasMoreElements()) {
+                NetworkInterface iface = ifaces.nextElement();
+                if (!iface.isUp() || iface.isLoopback()) continue;
+                Enumeration<InetAddress> addrs = iface.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    InetAddress addr = addrs.nextElement();
+                    if (addr.isLoopbackAddress() || addr instanceof Inet6Address) continue;
+                    String ip = addr.getHostAddress();
+                    // Solo IPs privadas (red local)
+                    if (ip != null && (ip.startsWith("192.168.")
+                            || ip.startsWith("10.")
+                            || ip.startsWith("172."))) {
+                        return ip;
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+
+        // Intento 2: WifiManager (fallback para Android < 12)
+        try {
+            @SuppressWarnings("deprecation")
             WifiManager wm = (WifiManager) requireContext().getApplicationContext()
-                .getSystemService(Context.WIFI_SERVICE);
-            if (wm == null) return null;
-            WifiInfo info = wm.getConnectionInfo();
-            int ip = info.getIpAddress();
-            if (ip == 0) return null;
-            return Formatter.formatIpAddress(ip);
-        } catch (Exception e) {
-            return null;
-        }
+                    .getSystemService(Context.WIFI_SERVICE);
+            if (wm != null) {
+                @SuppressWarnings("deprecation")
+                WifiInfo info = wm.getConnectionInfo();
+                int ip = info.getIpAddress();
+                if (ip != 0) return Formatter.formatIpAddress(ip);
+            }
+        } catch (Exception ignored) {}
+
+        return null;
     }
 
     // ── Web Video Caster ──────────────────────────────────────────────────────
