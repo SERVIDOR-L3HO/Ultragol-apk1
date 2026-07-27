@@ -206,19 +206,39 @@ public class CastBottomSheet extends BottomSheetDialogFragment {
         PackageManager pm = requireContext().getPackageManager();
 
         if (isAppInstalled(WVC_PACKAGE)) {
-            // Try to send the video URL directly to the app
             if (videoUrl != null && !videoUrl.isEmpty()) {
+                // Intento 1: video/* con paquete fijo (WVC acepta este MIME)
                 try {
                     Intent send = new Intent(Intent.ACTION_VIEW);
-                    send.setDataAndType(Uri.parse(videoUrl),
-                        isM3u8 ? "application/x-mpegURL" : "video/*");
+                    send.setDataAndType(Uri.parse(videoUrl), "video/*");
                     send.setPackage(WVC_PACKAGE);
-                    send.putExtra("title", videoTitle != null ? videoTitle : "");
+                    if (videoTitle != null && !videoTitle.isEmpty())
+                        send.putExtra("title", videoTitle);
                     startActivity(send);
                     return;
-                } catch (Exception ignored) {}
+                } catch (Exception e1) { /* intentar siguiente */ }
+
+                // Intento 2: sin MIME type, solo la URI
+                try {
+                    Intent send = new Intent(Intent.ACTION_VIEW, Uri.parse(videoUrl));
+                    send.setPackage(WVC_PACKAGE);
+                    if (videoTitle != null && !videoTitle.isEmpty())
+                        send.putExtra("title", videoTitle);
+                    startActivity(send);
+                    return;
+                } catch (Exception e2) { /* intentar siguiente */ }
+
+                // Intento 3: sin restricción de paquete (Android elige el reproductor)
+                try {
+                    Intent send = new Intent(Intent.ACTION_VIEW);
+                    send.setDataAndType(Uri.parse(videoUrl), "video/*");
+                    if (videoTitle != null && !videoTitle.isEmpty())
+                        send.putExtra("title", videoTitle);
+                    startActivity(Intent.createChooser(send, "Transmitir con…"));
+                    return;
+                } catch (Exception e3) { /* caer al fallback */ }
             }
-            // Fallback: just launch the app
+            // Último recurso: abrir WVC sin URL
             Intent launch = pm.getLaunchIntentForPackage(WVC_PACKAGE);
             if (launch != null) { startActivity(launch); return; }
         }
