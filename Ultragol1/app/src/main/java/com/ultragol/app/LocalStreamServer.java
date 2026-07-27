@@ -76,19 +76,29 @@ public class LocalStreamServer {
     // ── Accept loop ───────────────────────────────────────────────────────────
 
     private void acceptLoop() {
+        ServerSocket ss = null;
         try {
-            serverSocket = new ServerSocket(PORT);
-            serverSocket.setReuseAddress(true);
+            ss = new ServerSocket();
+            ss.setReuseAddress(true);
+            ss.bind(new java.net.InetSocketAddress(PORT));
+            synchronized (this) { serverSocket = ss; }
             while (running.get()) {
                 try {
-                    Socket client = serverSocket.accept();
+                    Socket client = ss.accept();
                     executor.execute(() -> handleClient(client));
                 } catch (IOException e) {
                     if (running.get()) Log.w(TAG, "accept: " + e.getMessage());
+                    // break if socket was closed by stop()
+                    if (ss.isClosed()) break;
                 }
             }
         } catch (IOException e) {
-            if (running.get()) Log.e(TAG, "server: " + e.getMessage());
+            if (running.get()) Log.e(TAG, "server bind/accept: " + e.getMessage());
+        } finally {
+            if (ss != null && !ss.isClosed()) {
+                try { ss.close(); } catch (IOException ignored) {}
+            }
+            running.set(false);
         }
     }
 
