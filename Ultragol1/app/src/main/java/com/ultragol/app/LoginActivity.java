@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
         bar.setLayoutParams(barLp);
         root.addView(bar);
 
-        tvTitle = label("ULTRAGOL", 30f, Color.WHITE, true);
+        tvTitle = label("ACTIONPLAY", 30f, Color.WHITE, true);
         tvTitle.setLetterSpacing(0.15f);
         tvTitle.setGravity(Gravity.CENTER);
         marginBottom(tvTitle, dp(6));
@@ -318,7 +318,7 @@ public class LoginActivity extends AppCompatActivity {
     private void toggleMode() {
         isLoginMode = !isLoginMode;
         if (isLoginMode) {
-            tvTitle.setText("ULTRAGOL");
+            tvTitle.setText("ACTIONPLAY");
             tvSubtitle.setText("Inicia sesión para continuar");
             btnAction.setText("INICIAR SESIÓN");
             tvForgot.setVisibility(View.VISIBLE);
