@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "62425304873-p6anp3rk7698580kf1m830s75fb0lc5r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ultragol1.app",
+            "certificate_hash": "59467ea204919f481f95d3080e99b6ce15d2da7c"
+          }
+        },
+        {
           "client_id": "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com",
           "client_type": 3
         }
