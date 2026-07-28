@@ -84,13 +84,28 @@ public class StreamingApi {
             if (!data.embedUrl.isEmpty()) data.latino.add(new Server("Principal", data.embedUrl, "embed"));
             return data;
         }
-        data.latino.addAll(parseServers(idiomas.optJSONObject("latino")));
-        JSONObject esp = idiomas.optJSONObject("español");
-        if (esp == null) esp = idiomas.optJSONObject("espanol");
-        data.espanol.addAll(parseServers(esp));
-        JSONObject sub = idiomas.optJSONObject("subtitulado");
-        if (sub == null) sub = idiomas.optJSONObject("subtitles");
-        data.subtitulado.addAll(parseServers(sub));
+
+        // Iterate all keys — the API may use "Español Latino", "Latino", "español", etc.
+        java.util.Iterator<String> keys = idiomas.keys();
+        while (keys.hasNext()) {
+            String key = keys.next();
+            String k = key.toLowerCase(java.util.Locale.ROOT)
+                          .replace("á","a").replace("é","e")
+                          .replace("í","i").replace("ó","o").replace("ú","u");
+            JSONObject langObj = idiomas.optJSONObject(key);
+            if (langObj == null) continue;
+            List<Server> parsed = parseServers(langObj);
+            if (parsed.isEmpty()) continue;
+            if (k.contains("sub") || k.contains("vose") || k.contains("dub")) {
+                data.subtitulado.addAll(parsed);
+            } else if (k.contains("espa") || k.contains("cast") || k.contains("spain")) {
+                data.espanol.addAll(parsed);
+            } else {
+                // "latino", "Español Latino", "lat", unknown — default to latino
+                data.latino.addAll(parsed);
+            }
+        }
+
         if (data.latino.isEmpty() && data.espanol.isEmpty() && data.subtitulado.isEmpty()
                 && !data.embedUrl.isEmpty())
             data.latino.add(new Server("Principal", data.embedUrl, "embed"));
