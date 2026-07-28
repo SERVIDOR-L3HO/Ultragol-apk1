@@ -18,6 +18,7 @@ import com.ultragol.app.MediaActivity;
 import com.ultragol.app.R;
 import com.ultragol.app.adapters.TvAdapter;
 import com.ultragol.app.models.TvChannel;
+import com.ultragol.app.network.A7xIptvApi;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -274,7 +275,8 @@ public class TvFragment extends Fragment {
         }
         applyFilter();
 
-        // Cargar fuentes IPTV en background
+        // Cargar canales A7X como fuente primaria, luego M3U como respaldo
+        loadA7xChannels();
         loadRemoteChannels();
     }
 
@@ -287,14 +289,67 @@ public class TvFragment extends Fragment {
         mainHandler.removeCallbacksAndMessages(null);
     }
 
+    // ── Carga canales A7X (fuente primaria) ───────────────────────────────────
+
+    /**
+     * Carga los canales en vivo desde la API de A7X TV.
+     * Se añaden antes que los canales M3U, con mayor prioridad.
+     * Si falla (sin conexión, sin token), la app continúa con los canales de respaldo.
+     */
+    private void loadA7xChannels() {
+        if (executor == null) return;
+        executor.execute(() -> {
+            try {
+                List<TvChannel> a7xChannels =
+                        A7xIptvApi.loadLiveChannels(requireContext());
+                if (a7xChannels.isEmpty() || !isAdded()) return;
+
+                List<TvChannel> newChannels = new ArrayList<>();
+                synchronized (allChannels) {
+                    LinkedHashSet<String> existingUrls = new LinkedHashSet<>();
+                    for (TvChannel c : allChannels) existingUrls.add(c.url);
+                    for (TvChannel c : a7xChannels) {
+                        if (!existingUrls.contains(c.url)) {
+                            existingUrls.add(c.url);
+                            // A7X channels se insertan al inicio (mayor prioridad)
+                            allChannels.add(0, c);
+                            newChannels.add(c);
+                        }
+                    }
+                }
+                if (!newChannels.isEmpty()) {
+                    synchronized (CHANNEL_CACHE) {
+                        LinkedHashSet<String> cacheUrls = new LinkedHashSet<>();
+                        for (TvChannel c : CHANNEL_CACHE) cacheUrls.add(c.url);
+                        for (TvChannel c : newChannels) {
+                            if (!cacheUrls.contains(c.url)) CHANNEL_CACHE.add(0, c);
+                        }
+                    }
+                    mainHandler.post(this::applyFilter);
+                }
+            } catch (Exception ignored) {
+                // Falla silenciosa — los canales de respaldo seguirán disponibles
+            }
+        });
+    }
+
     // ── Reproducción ──────────────────────────────────────────────────────────
 
     private void playChannel(TvChannel ch) {
         Intent intent = new Intent(requireContext(), MediaActivity.class);
-        intent.putExtra("url",      ch.url);
-        intent.putExtra("title",    ch.name);
-        intent.putExtra("is_m3u8",  ch.url.contains(".m3u8") || ch.url.contains("m3u"));
-        intent.putExtra("referer",  "");
+        intent.putExtra("url",             ch.url);
+        intent.putExtra("title",           ch.name);
+        intent.putExtra("is_m3u8",         ch.url.contains(".m3u8") || ch.url.contains("m3u"));
+        intent.putExtra("referer",         "");
+        // Activar headers A7X si el canal proviene de la API de A7X TV
+        // (los canales A7X usan stream_url que no contiene iptv-org.github.io)
+        boolean isA7xStream = !ch.url.contains("iptv-org.github.io")
+                && !ch.url.contains("akamaized.net")
+                && !ch.url.contains("akamaihd.net")
+                && !ch.url.contains("cloudfront.net")
+                && !ch.url.contains("wurl.tv")
+                && !ch.url.contains("samsung.wurl");
+        intent.putExtra("use_a7x_headers", isA7xStream);
         startActivity(intent);
     }
 

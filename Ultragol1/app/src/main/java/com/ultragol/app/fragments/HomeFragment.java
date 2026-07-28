@@ -13,6 +13,7 @@ import com.ultragol.app.*;
 import com.ultragol.app.adapters.*;
 import com.ultragol.app.fragments.TvFragment;
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.A7xIptvApi;
 import com.ultragol.app.network.DramaShortsApi;
 import com.ultragol.app.network.TmdbApi;
 import org.json.*;
@@ -476,15 +477,23 @@ public class HomeFragment extends Fragment {
                 h.post(() -> { try { if (isAdded()) fillRow(rowNew, r); } catch (Exception ignored) {} });
             } catch (Exception ignored) {} });
 
-            pool.execute(() -> { try {
-                List<ContentItem> r = TmdbApi.fetchMovies();
-                h.post(() -> { try { if (isAdded()) fillRow(rowMovies, r); } catch (Exception ignored) {} });
-            } catch (Exception ignored) {} });
+            // Películas: A7X IPTV como fuente principal, TMDB como respaldo
+            pool.execute(() -> {
+                List<ContentItem> r = new java.util.ArrayList<>();
+                try { r = A7xIptvApi.loadMovies(requireContext()); } catch (Exception ignored) {}
+                if (r.isEmpty()) { try { r = TmdbApi.fetchMovies(); } catch (Exception ignored) {} }
+                final List<ContentItem> fr = r;
+                h.post(() -> { try { if (isAdded()) fillRow(rowMovies, fr); } catch (Exception ignored) {} });
+            });
 
-            pool.execute(() -> { try {
-                List<ContentItem> r = TmdbApi.fetchSeries();
-                h.post(() -> { try { if (isAdded()) fillRow(rowSeries, r); } catch (Exception ignored) {} });
-            } catch (Exception ignored) {} });
+            // Series: A7X IPTV como fuente principal, TMDB como respaldo
+            pool.execute(() -> {
+                List<ContentItem> r = new java.util.ArrayList<>();
+                try { r = A7xIptvApi.loadSeries(requireContext()); } catch (Exception ignored) {}
+                if (r.isEmpty()) { try { r = TmdbApi.fetchSeries(); } catch (Exception ignored) {} }
+                final List<ContentItem> fr = r;
+                h.post(() -> { try { if (isAdded()) fillRow(rowSeries, fr); } catch (Exception ignored) {} });
+            });
 
             pool.execute(() -> { try {
                 List<ContentItem> r = TmdbApi.fetchAnime();

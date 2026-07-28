@@ -41,6 +41,7 @@ import java.util.Collections;
 
 // ── Continue Watching ─────────────────────────────────────────────────────────
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.A7xConstants;
 
 // ── Cast / TV Streaming ───────────────────────────────────────────────────────
 import android.widget.ImageView;
@@ -613,7 +614,13 @@ public class MediaActivity extends AppCompatActivity {
         playerView.setPlayer(player);
         playerView.setUseController(false);
 
-        String ua = "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
+        // Detectar si el stream requiere headers de A7X
+        boolean useA7xHeaders = getIntent().getBooleanExtra("use_a7x_headers", false);
+
+        // User-Agent por defecto; se sobreescribe si es A7X
+        String ua = useA7xHeaders
+                ? A7xConstants.SECURE_USER_AGENT
+                : "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
         DataSource.Factory dsFactory;
         if (videoUrl != null && videoUrl.startsWith("file://")) {
@@ -625,7 +632,12 @@ public class MediaActivity extends AppCompatActivity {
         } else {
             Map<String, String> headers = new HashMap<>();
             headers.put("User-Agent", ua);
-            if (referer != null && !referer.isEmpty()) headers.put("Referer", referer);
+            if (useA7xHeaders) {
+                // Headers obligatorios para streams A7X TV
+                headers.put("X-A7X-Client", A7xConstants.SECURE_CLIENT_ID);
+            } else if (referer != null && !referer.isEmpty()) {
+                headers.put("Referer", referer);
+            }
             dsFactory = new DefaultHttpDataSource.Factory()
                     .setUserAgent(ua)
                     .setDefaultRequestProperties(headers)

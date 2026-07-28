@@ -35,6 +35,8 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.A7xConstants;
+import com.ultragol.app.network.A7xIptvApi;
 import com.ultragol.app.network.StreamingApi;
 import com.ultragol.app.network.TmdbApi;
 import java.util.ArrayList;
@@ -904,10 +906,58 @@ public class DetailActivity extends AppCompatActivity {
     // ══════════════════════════════════════════════════════════════════════════
 
     /**
+     * Detecta si un ContentItem proviene de A7X IPTV.
+     * Los items A7X tienen streamUrl con URL directa de video (no embed de unlimplay)
+     * o una URL interna "a7x://series/{id}".
+     */
+    private boolean isA7xContent(ContentItem ci) {
+        if (ci == null) return false;
+        String url = ci.getStreamUrl();
+        if (url == null || url.isEmpty()) return false;
+        return url.startsWith("a7x://")
+                || url.contains("a7xtv.com")
+                || (url.startsWith("http") && !url.contains("unlimplay") && !url.contains("themoviedb")
+                        && ci.getTmdbId() == 0);
+    }
+
+    /**
+     * Lanza MediaActivity directamente con headers A7X para streams A7X TV.
+     */
+    private void playA7xDirect(ContentItem ci, String streamUrl) {
+        ContinueWatchingManager.save(this, ci, 1, 1);
+        ContinueWatchingWidget.refresh(this);
+        Intent intent = new Intent(this, MediaActivity.class);
+        intent.putExtra("url",             streamUrl);
+        intent.putExtra("title",           ci.getTitle());
+        intent.putExtra("poster_url",      ci.getPosterUrl());
+        intent.putExtra("is_m3u8",         streamUrl.contains(".m3u8")
+                || streamUrl.contains("m3u") || streamUrl.contains(".ts"));
+        intent.putExtra("use_a7x_headers", true);
+        intent.putExtra("item",            ci);
+        startActivity(intent);
+    }
+
+    /**
      * Shows the loading overlay immediately, starts the server fetch in parallel,
      * then opens the dialog as soon as the data is ready (min 900ms for visual polish).
+     * Para contenido A7X con URL directa, lanza MediaActivity de inmediato.
      */
     private void fetchAndPlay(ContentItem ci, int season, int episode) {
+        // ── A7X content — reproducción directa sin selector de servidor ──────
+        if (isA7xContent(ci)) {
+            String url = ci.getStreamUrl();
+            if (url.startsWith("a7x://series/")) {
+                // Serie A7X: cargar detalle y mostrar selector de episodios
+                String seriesId = url.replace("a7x://series/", "");
+                fetchAndPlayA7xSeries(ci, seriesId);
+                return;
+            }
+            // Película A7X: reproducir directamente
+            playA7xDirect(ci, url);
+            return;
+        }
+
+        // ── Contenido TMDB — flujo existente con selector de servidores ────────
         showLoadingOverlay();
 
         long startMs = System.currentTimeMillis();
@@ -942,6 +992,55 @@ public class DetailActivity extends AppCompatActivity {
                     }
                 });
             }, remaining);
+        });
+        exec.shutdown();
+    }
+
+    /**
+     * Carga el detalle de una serie A7X y muestra el selector de episodios.
+     */
+    private void fetchAndPlayA7xSeries(ContentItem ci, String seriesId) {
+        showLoadingOverlay();
+        ExecutorService exec = Executors.newSingleThreadExecutor();
+        exec.execute(() -> {
+            try {
+                org.json.JSONObject detail = A7xIptvApi.loadSeriesDetail(this, seriesId);
+                org.json.JSONArray seasons = detail.optJSONArray("seasons");
+
+                // Extraer primer episodio disponible como default
+                String firstEpUrl = "";
+                if (seasons != null && seasons.length() > 0) {
+                    org.json.JSONObject s1 = seasons.getJSONObject(0);
+                    org.json.JSONArray eps = s1.optJSONArray("episodes");
+                    if (eps != null && eps.length() > 0) {
+                        firstEpUrl = eps.getJSONObject(0).optString("stream_url", "");
+                    }
+                }
+
+                final String epUrl = firstEpUrl;
+                loadingHandler.post(() -> {
+                    if (isFinishing()) return;
+                    hideLoadingOverlay(() -> {
+                        if (!epUrl.isEmpty()) {
+                            playA7xDirect(ci, epUrl);
+                        } else {
+                            // Mostrar en WebView como fallback
+                            StreamingApi.ServerData fallback = new StreamingApi.ServerData();
+                            fallback.latino.add(new StreamingApi.Server(
+                                "A7X TV", ci.getStreamUrl(), "embed"));
+                            ServerSelectDialog.showPreloaded(this, ci, fallback, 1, 1);
+                        }
+                    });
+                });
+            } catch (Exception e) {
+                loadingHandler.post(() -> {
+                    if (isFinishing()) return;
+                    hideLoadingOverlay(() ->
+                        android.widget.Toast.makeText(this,
+                            "Error al cargar la serie, intenta de nuevo",
+                            android.widget.Toast.LENGTH_SHORT).show());
+                });
+            }
         });
         exec.shutdown();
     }

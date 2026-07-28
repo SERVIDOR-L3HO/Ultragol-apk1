@@ -20,6 +20,7 @@ import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.*;
+import com.ultragol.app.network.VpsAuthService;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -65,21 +66,36 @@ public class LoginActivity extends AppCompatActivity {
             try {
                 GoogleSignInAccount acct = task.getResult(ApiException.class);
                 setLoading(true);
-                AuthCredential cred = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
+
+                // Autenticar con Firebase primero
+                final String idToken     = acct.getIdToken();
+                final String serverAuthCode = acct.getServerAuthCode();
+
+                AuthCredential cred = GoogleAuthProvider.getCredential(idToken, null);
                 mAuth.signInWithCredential(cred)
                     .addOnCompleteListener(this, t -> {
-                        if (t.isSuccessful()) syncAndGoToMain();
-                        else { setLoading(false); toast("Error con Google Sign-In"); }
+                        if (t.isSuccessful()) {
+                            // También autenticar con el backend A7X TV en background
+                            new Thread(() -> {
+                                try {
+                                    VpsAuthService.authenticateWithGoogle(
+                                        LoginActivity.this, idToken, serverAuthCode);
+                                } catch (Exception ignored) {}
+                            }).start();
+                            syncAndGoToMain();
+                        } else {
+                            setLoading(false);
+                            toast("Error al iniciar sesión con Google, intenta de nuevo");
+                        }
                     });
             } catch (ApiException e) {
                 int code = e.getStatusCode();
                 if (code == 12501 || code == 12500) {
-                    // 12501 = cancelado por el usuario, 12500 = flujo cancelado
+                    // Cancelado por el usuario — no hacer nada
                 } else if (code == 10) {
-                    // DEVELOPER_ERROR — SHA-1 no registrada en Firebase Console
                     toast("Error de configuración Google (código 10): registra el SHA-1 en Firebase Console");
                 } else {
-                    toast("Error Google Sign-In (código " + code + ")");
+                    toast("Error al iniciar sesión con Google, intenta de nuevo");
                 }
             }
         }
