@@ -73,12 +73,11 @@ public class LoginActivity extends AppCompatActivity {
                     });
             } catch (ApiException e) {
                 int code = e.getStatusCode();
-                if (code == com.google.android.gms.common.api.CommonStatusCodes.SIGN_IN_CANCELLED
-                        || code == 12501) {
-                    // User pressed "back" / dismissed the picker — no error needed
+                if (code == 12501 || code == 12500) {
+                    // 12501 = cancelado por el usuario, 12500 = flujo cancelado
                 } else if (code == 10) {
                     // DEVELOPER_ERROR — SHA-1 no registrada en Firebase Console
-                    toast("Error de configuración Google (código 10): registra el SHA-1 del keystore en Firebase Console");
+                    toast("Error de configuración Google (código 10): registra el SHA-1 en Firebase Console");
                 } else {
                     toast("Error Google Sign-In (código " + code + ")");
                 }
