@@ -13,6 +13,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.ultragol.app.adapters.ProfileAdapter;
 import java.util.List;
 import android.widget.ImageView;
@@ -39,6 +41,16 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         btnManage.setOnClickListener(v -> toggleManageMode());
         loadProfiles();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Guardar perfiles y datos en Firestore al salir de la pantalla de selección
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            UserSyncManager.pushToCloud(getApplicationContext(), user.getUid());
+        }
     }
 
     private void loadProfiles() {

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import com.google.firebase.auth.FirebaseAuth;
 import com.ultragol.app.fragments.*;
 
 /**
@@ -69,6 +70,18 @@ public class MainActivity extends AppCompatActivity {
                 View first = drawerOverlay.findViewById(R.id.navInicio);
                 if (first != null) first.requestFocus();
             });
+        }
+    }
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Guardar todos los datos locales en Firestore cuando la app va al fondo
+        com.google.firebase.auth.FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            UserSyncManager.pushToCloud(getApplicationContext(), user.getUid());
         }
     }
 
