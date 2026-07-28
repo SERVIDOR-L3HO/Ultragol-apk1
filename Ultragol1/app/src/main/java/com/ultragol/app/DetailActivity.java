@@ -907,17 +907,15 @@ public class DetailActivity extends AppCompatActivity {
 
     /**
      * Detecta si un ContentItem proviene de A7X IPTV.
-     * Los items A7X tienen streamUrl con URL directa de video (no embed de unlimplay)
-     * o una URL interna "a7x://series/{id}".
+     * Usa el flag a7xSource que se establece en A7xIptvApi al parsear los ítems.
      */
     private boolean isA7xContent(ContentItem ci) {
         if (ci == null) return false;
+        // Flag explícito — forma más confiable
+        if (ci.isA7xSource()) return true;
+        // Fallback: detectar por URL interna a7x://
         String url = ci.getStreamUrl();
-        if (url == null || url.isEmpty()) return false;
-        return url.startsWith("a7x://")
-                || url.contains("a7xtv.com")
-                || (url.startsWith("http") && !url.contains("unlimplay") && !url.contains("themoviedb")
-                        && ci.getTmdbId() == 0);
+        return url != null && url.startsWith("a7x://");
     }
 
     /**

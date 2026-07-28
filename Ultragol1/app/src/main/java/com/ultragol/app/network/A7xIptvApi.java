@@ -209,20 +209,28 @@ public final class A7xIptvApi {
                     JSONObject o = arr.getJSONObject(i);
                     String name  = o.optString("name", o.optString("title", ""));
                     String url   = o.optString("stream_url", "");
+                    String id    = o.optString("stream_id",
+                            o.optString("id", String.valueOf(i)));
                     String poster = o.optString("stream_icon",
                             o.optString("cover", ""));
                     String backdrop = o.optString("backdrop_path", "");
-                    String genre = o.optString("genre", "Drama");
-                    String year  = o.optString("year", "2024");
-                    String rating = o.optString("rating", "7.0");
-                    String overview = o.optString("plot", "");
-                    if (name.isEmpty()) continue;
+                    String genre = o.optString("genre",
+                            o.optString("category_name", "Drama"));
+                    String year  = o.optString("year",
+                            o.optString("release_date", "2024"));
+                    String rating = o.optString("rating",
+                            o.optString("vote_average", "7.0"));
+                    String overview = o.optString("plot",
+                            o.optString("description", ""));
+                    // Omitir películas sin URL reproducible
+                    if (name.isEmpty() || url.isEmpty()) continue;
 
                     ContentItem item = new ContentItem(
                             name, genre, year, rating, poster, overview,
                             ContentItem.TYPE_MOVIE, false, false);
                     item.setStreamUrl(url);
                     item.setBackdropUrl(backdrop);
+                    item.setA7xSource(true);   // ← marcar como fuente A7X
                     list.add(item);
                 } catch (Exception ignored) {}
             }
@@ -307,6 +315,7 @@ public final class A7xIptvApi {
                             ContentItem.TYPE_SERIES, false, false);
                     item.setStreamUrl("a7x://series/" + id); // URL interna
                     item.setBackdropUrl(backdrop);
+                    item.setA7xSource(true);   // ← marcar como fuente A7X
                     list.add(item);
                 } catch (Exception ignored) {}
             }
