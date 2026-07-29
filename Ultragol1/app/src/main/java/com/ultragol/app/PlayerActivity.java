@@ -23,6 +23,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.AirPlayManager;
 import com.ultragol.app.CastBottomSheet;
@@ -68,46 +70,118 @@ public class PlayerActivity extends AppCompatActivity {
 
     private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
 
-    // ── JavaScript extracted from inject string for readability ───────────────
+    // ── XHR/fetch hook — injected at onPageStarted to catch streams before shouldInterceptRequest ──
+    private static final String JS_XHR_HOOK =
+        "(function(){"
+        + "try{"
+        + "if(window.__ultragolHooked)return;window.__ultragolHooked=true;"
+        // Patch XMLHttpRequest.open
+        + "var xhrOpen=XMLHttpRequest.prototype.open;"
+        + "XMLHttpRequest.prototype.open=function(method,url){"
+        +   "if(url&&typeof url==='string'&&url.indexOf('http')===0"
+        +     "&&(url.indexOf('.m3u8')>=0||url.indexOf('.mp4')>=0)){"
+        +     "try{window.HTMLOUT.onUrl(url,'xhr');}catch(ex){}"
+        +   "}"
+        +   "return xhrOpen.apply(this,arguments);"
+        + "};"
+        // Patch fetch
+        + "var origFetch=window.fetch;"
+        + "if(typeof origFetch==='function'){"
+        +   "window.fetch=function(input,opts){"
+        +     "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
+        +     "if(u&&u.indexOf('http')===0"
+        +       "&&(u.indexOf('.m3u8')>=0||u.indexOf('.mp4')>=0)){"
+        +       "try{window.HTMLOUT.onUrl(u,'fetch');}catch(ex){}"
+        +     "}"
+        +     "return origFetch.apply(this,arguments);"
+        +   "};"
+        + "}"
+        + "}catch(e){}"
+        + "})();";
+
+    // ── Full JS extractor — covers 10+ player engines + window vars + DOM scan ──
     private static final String JS_EXTRACT =
         "(function(){"
         + "try{"
-        // JW Player
-        + "if(window.jwplayer&&jwplayer().getPlaylistItem()){"
-        +   "var pi=jwplayer().getPlaylistItem();"
-        +   "var src=pi.file||(pi.sources&&pi.sources[0]&&pi.sources[0].file);"
-        +   "if(src){window.HTMLOUT.onUrl(src,'jwplayer');return;}"
+        // ── JW Player ──
+        + "if(window.jwplayer){"
+        +   "var jw=jwplayer();if(jw&&jw.getPlaylistItem){"
+        +     "var pi=jw.getPlaylistItem();"
+        +     "var src=pi&&(pi.file||(pi.sources&&pi.sources[0]&&pi.sources[0].file));"
+        +     "if(src){window.HTMLOUT.onUrl(src,'jwplayer');return;}"
+        +   "}"
         + "}"
-        // Video.js
+        // ── Video.js ──
         + "if(window.videojs&&videojs.players){"
-        +   "var keys=Object.keys(videojs.players);"
-        +   "for(var i=0;i<keys.length;i++){"
-        +     "var p=videojs.players[keys[i]];"
-        +     "if(p&&p.currentSrc&&p.currentSrc()){"
-        +       "window.HTMLOUT.onUrl(p.currentSrc(),'videojs');return;"
+        +   "var vkeys=Object.keys(videojs.players);"
+        +   "for(var vi=0;vi<vkeys.length;vi++){"
+        +     "var vp=videojs.players[vkeys[vi]];"
+        +     "if(vp&&vp.currentSrc&&vp.currentSrc()){"
+        +       "window.HTMLOUT.onUrl(vp.currentSrc(),'videojs');return;"
         +     "}"
         +   "}"
         + "}"
-        // HLS.js
-        + "if(window.Hls&&Hls.instances&&Hls.instances.length>0&&Hls.instances[0].url){"
-        +   "window.HTMLOUT.onUrl(Hls.instances[0].url,'hlsjs');return;"
+        // ── HLS.js ──
+        + "if(window.Hls&&Hls.instances&&Hls.instances.length>0){"
+        +   "var hlsUrl=Hls.instances[0].url||Hls.instances[0].streamController&&Hls.instances[0].streamController.manifestUrl;"
+        +   "if(hlsUrl){window.HTMLOUT.onUrl(hlsUrl,'hlsjs');return;}"
         + "}"
-        // DOM <source>
-        + "var srcs=document.querySelectorAll('source[src]');"
-        + "for(var j=0;j<srcs.length;j++){"
-        +   "var s=srcs[j].src;"
-        +   "if(s&&(s.includes('.m3u8')||s.includes('.mp4'))){"
-        +     "window.HTMLOUT.onUrl(s,'source');return;"
+        // ── Plyr ──
+        + "if(window.plyr){var pl=window.plyr;"
+        +   "var ps=pl.source||(pl.media&&pl.media.currentSrc);"
+        +   "if(ps&&(ps.indexOf('m3u8')>=0||ps.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ps,'plyr');return;}"
+        + "}"
+        // ── DPlayer ──
+        + "if(window.dp&&window.dp.video&&window.dp.video.src){"
+        +   "var ds=window.dp.video.src;"
+        +   "if(ds&&(ds.indexOf('m3u8')>=0||ds.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ds,'dplayer');return;}"
+        + "}"
+        // ── Clappr ──
+        + "if(window.player&&window.player.options&&window.player.options.source){"
+        +   "var cs=window.player.options.source;"
+        +   "if(typeof cs==='string'&&(cs.indexOf('m3u8')>=0||cs.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(cs,'clappr');return;}"
+        + "}"
+        // ── <video> element currentSrc ──
+        + "var vels=document.querySelectorAll('video');"
+        + "for(var vi2=0;vi2<vels.length;vi2++){"
+        +   "var vsrc=vels[vi2].currentSrc||vels[vi2].src||'';"
+        +   "if(vsrc&&vsrc.indexOf('http')===0&&(vsrc.indexOf('m3u8')>=0||vsrc.indexOf('mp4')>=0)){"
+        +     "window.HTMLOUT.onUrl(vsrc,'video_el');return;"
         +   "}"
         + "}"
-        // Inline scripts
+        // ── <source> elements ──
+        + "var srcs=document.querySelectorAll('source[src]');"
+        + "for(var si=0;si<srcs.length;si++){"
+        +   "var ss=srcs[si].src;"
+        +   "if(ss&&(ss.indexOf('m3u8')>=0||ss.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ss,'source');return;}"
+        + "}"
+        // ── data-src / data-file attributes on video ──
+        + "var datas=document.querySelectorAll('[data-src],[data-file],[data-url]');"
+        + "for(var di=0;di<datas.length;di++){"
+        +   "var dv=datas[di].getAttribute('data-src')||datas[di].getAttribute('data-file')||datas[di].getAttribute('data-url')||'';"
+        +   "if(dv&&dv.indexOf('http')===0&&(dv.indexOf('m3u8')>=0||dv.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(dv,'data-attr');return;}"
+        + "}"
+        // ── window config objects ──
+        + "var wVars=['streamUrl','videoUrl','m3u8Url','hlsUrl','fileUrl','sourceUrl','src','videoSrc','stream'];"
+        + "for(var wi=0;wi<wVars.length;wi++){"
+        +   "var wv=window[wVars[wi]];"
+        +   "if(wv&&typeof wv==='string'&&wv.indexOf('http')===0&&(wv.indexOf('m3u8')>=0||wv.indexOf('mp4')>=0)){"
+        +     "window.HTMLOUT.onUrl(wv,'window_var');return;"
+        +   "}"
+        + "}"
+        // ── Inline script text regex — m3u8 then mp4 ──
         + "var scripts=document.querySelectorAll('script');"
-        + "for(var k=0;k<scripts.length;k++){"
-        +   "var text=scripts[k].innerText;"
-        +   "var m=text.match(/[\"'](https?:\\/\\/[^\"']+\\.m3u8[^\"']*)[\"']/);"
-        +   "if(m){window.HTMLOUT.onUrl(m[1],'script');return;}"
-        +   "var mp=text.match(/[\"'](https?:\\/\\/[^\"']+\\.mp4[^\"']*)[\"']/);"
-        +   "if(mp){window.HTMLOUT.onUrl(mp[1],'script_mp4');return;}"
+        + "for(var ki=0;ki<scripts.length;ki++){"
+        +   "var st=scripts[ki].innerText||'';"
+        +   "var m8=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]+\\.m3u8[^\"'`\\s]*)[\"'`]/);"
+        +   "if(m8){window.HTMLOUT.onUrl(m8[1],'script_m3u8');return;}"
+        +   "var mp4=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]+\\.mp4[^\"'`\\s]*)[\"'`]/);"
+        +   "if(mp4){window.HTMLOUT.onUrl(mp4[1],'script_mp4');return;}"
+        // ── playerConfig / setup objects in scripts ──
+        +   "var cfg=st.match(/file\\s*:\\s*[\"'](https?:\\/\\/[^\"']+)[\"']/);"
+        +   "if(cfg&&(cfg[1].indexOf('m3u8')>=0||cfg[1].indexOf('mp4')>=0)){window.HTMLOUT.onUrl(cfg[1],'config_file');return;}"
+        +   "var src2=st.match(/source\\s*:\\s*[\"'](https?:\\/\\/[^\"']+\\.m3u8[^\"']*)[\"']/);"
+        +   "if(src2){window.HTMLOUT.onUrl(src2[1],'config_src');return;}"
         + "}"
         + "}catch(e){}"
         + "})();";
@@ -192,6 +266,8 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override public void onPageStarted(WebView v, String u, Bitmap f) {
                 if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
+                // Inyectar XHR/fetch hook lo antes posible para capturar streams antes de shouldInterceptRequest
+                v.evaluateJavascript("javascript:" + JS_XHR_HOOK, null);
                 // Forzar viewport desktop antes de que el sitio lo sobreescriba
                 v.evaluateJavascript(
                     "javascript:(function(){" +
@@ -204,23 +280,22 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override public void onPageFinished(WebView v, String u) {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
+                // Re-inyectar hook por si la página lo pisó con un reload
+                v.evaluateJavascript("javascript:" + JS_XHR_HOOK, null);
 
-                // Intento 1: inmediato
+                // Intento 1: inmediato tras carga
                 if (capturedVideoUrl == null) {
                     v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
                 }
-                // Intento 2: a los 2 s (algunos players cargan el src tarde)
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    if (capturedVideoUrl == null && !isFinishing()) {
-                        v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
-                    }
-                }, 2000);
-                // Intento 3: a los 5 s (para players lentos o con anuncio previo)
-                new Handler(Looper.getMainLooper()).postDelayed(() -> {
-                    if (capturedVideoUrl == null && !isFinishing()) {
-                        v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
-                    }
-                }, 5000);
+                // Intentos 2-6: escalonados para cubrir players lentos, SPA y anuncios previos
+                int[] delays = {1000, 2500, 5000, 9000, 15000};
+                for (int delay : delays) {
+                    new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                        if (capturedVideoUrl == null && !isFinishing()) {
+                            v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
+                        }
+                    }, delay);
+                }
             }
         });
 
@@ -519,6 +594,20 @@ public class PlayerActivity extends AppCompatActivity {
 
         if (pdTitle != null) pdTitle.setText(item.getTitle());
         if (pdOverview != null) pdOverview.setText(item.getOverview());
+
+        // ── Carga poster/backdrop en el overlay de carga ───────────────────────
+        ImageView posterBg = webviewContainer != null
+            ? webviewContainer.findViewById(R.id.playerPosterBg) : null;
+        if (posterBg != null) {
+            String imgUrl = item.getBackdropUrl() != null && !item.getBackdropUrl().isEmpty()
+                ? item.getBackdropUrl() : item.getPosterUrl();
+            if (imgUrl != null && !imgUrl.isEmpty()) {
+                Glide.with(this).load(imgUrl)
+                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .centerCrop()
+                    .into(posterBg);
+            }
+        }
         if (pdMeta != null) {
             StringBuilder sb = new StringBuilder();
             if (!item.getYear().isEmpty()) sb.append(item.getYear());
