@@ -1044,50 +1044,11 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     private void showLoadingOverlay() {
-        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
-        if (overlay == null) return;
-
-        for (Animator a : dotAnimators) a.cancel();
-        dotAnimators.clear();
-
-        overlay.setAlpha(0f);
-        overlay.setVisibility(View.VISIBLE);
-        overlay.animate().alpha(1f).setDuration(200)
-            .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-
-        TextView tvTitle    = overlay.findViewById(R.id.tvLoadingTitle);
-        TextView tvSubtitle = overlay.findViewById(R.id.tvLoadingSubtitle);
-        if (tvTitle != null) {
-            ObjectAnimator a = ObjectAnimator.ofFloat(tvTitle, "alpha", 1f, 0.4f, 1f);
-            a.setDuration(900); a.setRepeatCount(ObjectAnimator.INFINITE); a.start();
-            dotAnimators.add(a);
-        }
-        if (tvSubtitle != null) {
-            ObjectAnimator a = ObjectAnimator.ofFloat(tvSubtitle, "alpha", 0.6f, 1f, 0.6f);
-            a.setDuration(900); a.setRepeatCount(ObjectAnimator.INFINITE); a.start();
-            dotAnimators.add(a);
-        }
-        animateDot(overlay, R.id.loadingDot1, 0);
-        animateDot(overlay, R.id.loadingDot2, 250);
-        animateDot(overlay, R.id.loadingDot3, 500);
-
-        View spinner = overlay.findViewById(R.id.loadingSpinner);
-        if (spinner != null) {
-            spinner.setScaleX(0f); spinner.setScaleY(0f);
-            spinner.animate().scaleX(1f).scaleY(1f).setDuration(350)
-                .setInterpolator(new AccelerateDecelerateInterpolator()).start();
-        }
+        // overlay "CARGANDO SERVIDORES" deshabilitado
     }
 
     private void hideLoadingOverlay(Runnable onHidden) {
-        FrameLayout overlay = findViewById(R.id.loadingServersOverlay);
-        if (overlay == null) { onHidden.run(); return; }
-        overlay.animate().alpha(0f).setDuration(200).withEndAction(() -> {
-            overlay.setVisibility(View.GONE);
-            for (Animator a : dotAnimators) a.cancel();
-            dotAnimators.clear();
-            onHidden.run();
-        }).start();
+        onHidden.run();
     }
 
     // ══════════════════════════════════════════════════════════════════════════
