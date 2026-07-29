@@ -218,11 +218,11 @@
                         android:background="@drawable/action_btn_bg">
                         <TextView
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:text="↗" android:textColor="#FFFFFF" android:textSize="18sp"/>
+                            android:text="⊞" android:textColor="#FFFFFF" android:textSize="18sp"/>
                         <TextView
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="Compartir" android:textColor="#FFFFFF" android:textSize="11sp"
+                            android:text="Servidores" android:textColor="#FFFFFF" android:textSize="11sp"
                             android:fontFamily="sans-serif-medium"/>
                     </LinearLayout>
                 </LinearLayout>

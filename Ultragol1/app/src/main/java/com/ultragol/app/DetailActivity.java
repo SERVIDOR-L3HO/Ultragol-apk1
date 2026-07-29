@@ -969,27 +969,28 @@ public class DetailActivity extends AppCompatActivity {
             } catch (Exception ignored) {}
 
             final StreamingApi.ServerData finalData = data;
-            long elapsed   = System.currentTimeMillis() - startMs;
-            long minShow   = 900L;  // keep overlay visible at least 900ms
-            long remaining = Math.max(0L, minShow - elapsed);
+            // Auto-pick first available server and launch PlayerActivity directly
+            String autoUrl = null;
+            if (finalData != null) {
+                if (!finalData.latino.isEmpty())      autoUrl = finalData.latino.get(0).url;
+                else if (!finalData.espanol.isEmpty()) autoUrl = finalData.espanol.get(0).url;
+                else if (!finalData.subtitulado.isEmpty()) autoUrl = finalData.subtitulado.get(0).url;
+            }
+            if (autoUrl == null || autoUrl.isEmpty()) {
+                autoUrl = ci.getStreamUrl();
+            }
+            final String launchUrl = autoUrl;
 
-            loadingHandler.postDelayed(() -> {
+            loadingHandler.post(() -> {
                 if (isFinishing()) return;
-                hideLoadingOverlay(() -> {
-                    ContinueWatchingManager.save(this, ci, season, episode);
-                    ContinueWatchingWidget.refresh(this);
-                    if (finalData != null && (!finalData.latino.isEmpty()
-                            || !finalData.espanol.isEmpty() || !finalData.subtitulado.isEmpty())) {
-                        ServerSelectDialog.showPreloaded(this, ci, finalData, season, episode);
-                    } else {
-                        // Build fallback inline — no second network request
-                        StreamingApi.ServerData fallback = new StreamingApi.ServerData();
-                        fallback.latino.add(new StreamingApi.Server(
-                            "UnlimPlay", ci.getStreamUrl(), "embed"));
-                        ServerSelectDialog.showPreloaded(this, ci, fallback, season, episode);
-                    }
-                });
-            }, remaining);
+                ContinueWatchingManager.save(this, ci, season, episode);
+                ContinueWatchingWidget.refresh(this);
+                Intent intent = new Intent(this, PlayerActivity.class);
+                intent.putExtra("url",   launchUrl);
+                intent.putExtra("title", ci.getTitle());
+                intent.putExtra("item",  ci);
+                startActivity(intent);
+            });
         });
         exec.shutdown();
     }

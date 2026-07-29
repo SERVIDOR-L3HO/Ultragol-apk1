@@ -580,10 +580,7 @@ public class PlayerActivity extends AppCompatActivity {
 
         View btnShare = findViewById(R.id.pdBtnShare);
         if (btnShare != null) btnShare.setOnClickListener(v -> {
-            Intent share = new Intent(Intent.ACTION_SEND);
-            share.setType("text/plain");
-            share.putExtra(Intent.EXTRA_TEXT, "Mira \"" + item.getTitle() + "\" en Ultragol");
-            startActivity(Intent.createChooser(share, "Compartir"));
+            ServerSelectDialog.show(this, item, 1, 1);
         });
 
         loadSimilar();
