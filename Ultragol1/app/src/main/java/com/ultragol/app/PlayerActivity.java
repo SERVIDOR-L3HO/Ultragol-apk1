@@ -76,7 +76,7 @@ public class PlayerActivity extends AppCompatActivity {
     private final List<String> serverUrls = new ArrayList<>();
     private int currentServerIndex = 0;
     private final Handler autoRetryHandler = new Handler(Looper.getMainLooper());
-    private static final long AUTO_RETRY_DELAY_MS = 18_000; // 18 s sin captura → siguiente servidor
+    private static final long AUTO_RETRY_DELAY_MS = 10_000; // 10 s sin captura → siguiente servidor
     private int autoFetchSeason  = 1;
     private int autoFetchEpisode = 1;
 
@@ -85,13 +85,19 @@ public class PlayerActivity extends AppCompatActivity {
         "(function(){"
         + "try{"
         + "if(window.__ultragolHooked)return;window.__ultragolHooked=true;"
+        // Helper: decide if a URL is a stream we care about
+        + "function _isStream(u){"
+        +   "if(!u||typeof u!=='string'||u.indexOf('http')!==0)return false;"
+        +   "return u.indexOf('.m3u8')>=0||u.indexOf('.mp4')>=0"
+        +     "||u.indexOf('m3u8')>=0"          // URLs like /stream?type=m3u8
+        +     "||u.indexOf('/manifest')>=0"      // Dash/HLS manifest endpoints
+        +     "||u.indexOf('/master')>=0"        // common HLS master playlist path
+        +     "||u.indexOf('/playlist')>=0;"     // playlist endpoint
+        + "}"
         // Patch XMLHttpRequest.open
         + "var xhrOpen=XMLHttpRequest.prototype.open;"
         + "XMLHttpRequest.prototype.open=function(method,url){"
-        +   "if(url&&typeof url==='string'&&url.indexOf('http')===0"
-        +     "&&(url.indexOf('.m3u8')>=0||url.indexOf('.mp4')>=0)){"
-        +     "try{window.HTMLOUT.onUrl(url,'xhr');}catch(ex){}"
-        +   "}"
+        +   "if(_isStream(url)){try{window.HTMLOUT.onUrl(url,'xhr');}catch(ex){}}"
         +   "return xhrOpen.apply(this,arguments);"
         + "};"
         // Patch fetch
@@ -99,26 +105,49 @@ public class PlayerActivity extends AppCompatActivity {
         + "if(typeof origFetch==='function'){"
         +   "window.fetch=function(input,opts){"
         +     "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
-        +     "if(u&&u.indexOf('http')===0"
-        +       "&&(u.indexOf('.m3u8')>=0||u.indexOf('.mp4')>=0)){"
-        +       "try{window.HTMLOUT.onUrl(u,'fetch');}catch(ex){}"
-        +     "}"
+        +     "if(_isStream(u)){try{window.HTMLOUT.onUrl(u,'fetch');}catch(ex){}}"
         +     "return origFetch.apply(this,arguments);"
         +   "};"
         + "}"
+        // Patch video.src setter — fires the moment the player assigns the source
+        + "try{"
+        +   "var origSrcDesc=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');"
+        +   "if(origSrcDesc&&origSrcDesc.set){"
+        +     "Object.defineProperty(HTMLMediaElement.prototype,'src',{"
+        +       "set:function(v){"
+        +         "if(_isStream(v)){try{window.HTMLOUT.onUrl(v,'src_setter');}catch(ex){}}"
+        +         "return origSrcDesc.set.call(this,v);"
+        +       "},"
+        +       "get:origSrcDesc.get,configurable:true"
+        +     "});"
+        +   "}"
+        + "}catch(ex){}"
         + "}catch(e){}"
         + "})();";
 
-    // ── Full JS extractor — covers 10+ player engines + window vars + DOM scan ──
+    // ── Full JS extractor — covers 15+ player engines + window vars + DOM scan ──
     private static final String JS_EXTRACT =
         "(function(){"
+        + "function _ok(u){return u&&typeof u==='string'&&u.indexOf('http')===0"
+        +   "&&(u.indexOf('m3u8')>=0||u.indexOf('.mp4')>=0"
+        +   "||u.indexOf('/manifest')>=0||u.indexOf('/master')>=0);}"
+        + "function _send(u,src){try{window.HTMLOUT.onUrl(u,src);}catch(e){}}"
         + "try{"
         // ── JW Player ──
         + "if(window.jwplayer){"
         +   "var jw=jwplayer();if(jw&&jw.getPlaylistItem){"
         +     "var pi=jw.getPlaylistItem();"
         +     "var src=pi&&(pi.file||(pi.sources&&pi.sources[0]&&pi.sources[0].file));"
-        +     "if(src){window.HTMLOUT.onUrl(src,'jwplayer');return;}"
+        +     "if(_ok(src)){_send(src,'jwplayer');return;}"
+        +   "}"
+        // Also try jwplayer('player') by ID
+        +   "var els=document.querySelectorAll('[id]');"
+        +   "for(var ji=0;ji<els.length;ji++){"
+        +     "try{var jj=jwplayer(els[ji].id);if(jj&&jj.getPlaylistItem){"
+        +       "var pj=jj.getPlaylistItem();"
+        +       "var sj=pj&&(pj.file||(pj.sources&&pj.sources[0]&&pj.sources[0].file));"
+        +       "if(_ok(sj)){_send(sj,'jwplayer_id');return;}"
+        +     "}}catch(ex){}"
         +   "}"
         + "}"
         // ── Video.js ──
@@ -126,72 +155,114 @@ public class PlayerActivity extends AppCompatActivity {
         +   "var vkeys=Object.keys(videojs.players);"
         +   "for(var vi=0;vi<vkeys.length;vi++){"
         +     "var vp=videojs.players[vkeys[vi]];"
-        +     "if(vp&&vp.currentSrc&&vp.currentSrc()){"
-        +       "window.HTMLOUT.onUrl(vp.currentSrc(),'videojs');return;"
+        +     "if(vp&&vp.currentSrc&&vp.currentSrc()&&_ok(vp.currentSrc())){"
+        +       "_send(vp.currentSrc(),'videojs');return;"
         +     "}"
         +   "}"
         + "}"
         // ── HLS.js ──
         + "if(window.Hls&&Hls.instances&&Hls.instances.length>0){"
-        +   "var hlsUrl=Hls.instances[0].url||Hls.instances[0].streamController&&Hls.instances[0].streamController.manifestUrl;"
-        +   "if(hlsUrl){window.HTMLOUT.onUrl(hlsUrl,'hlsjs');return;}"
+        +   "var hls=Hls.instances[0];"
+        +   "var hu=hls.url||(hls.streamController&&hls.streamController.manifestUrl)"
+        +         "||(hls.networkController&&hls.networkController.manifestUrl);"
+        +   "if(_ok(hu)){_send(hu,'hlsjs');return;}"
+        + "}"
+        // ── Shaka Player ──
+        + "if(window.shaka&&window.player&&window.player.getManifestUri){"
+        +   "var su=window.player.getManifestUri();"
+        +   "if(_ok(su)){_send(su,'shaka');return;}"
         + "}"
         // ── Plyr ──
-        + "if(window.plyr){var pl=window.plyr;"
-        +   "var ps=pl.source||(pl.media&&pl.media.currentSrc);"
-        +   "if(ps&&(ps.indexOf('m3u8')>=0||ps.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ps,'plyr');return;}"
+        + "if(window.plyr){"
+        +   "var pl=Array.isArray(window.plyr)?window.plyr[0]:window.plyr;"
+        +   "if(pl){var ps=pl.source||(pl.media&&pl.media.currentSrc)||(pl.config&&pl.config.url);"
+        +   "if(_ok(ps)){_send(ps,'plyr');return;}}"
         + "}"
         // ── DPlayer ──
         + "if(window.dp&&window.dp.video&&window.dp.video.src){"
         +   "var ds=window.dp.video.src;"
-        +   "if(ds&&(ds.indexOf('m3u8')>=0||ds.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ds,'dplayer');return;}"
+        +   "if(_ok(ds)){_send(ds,'dplayer');return;}"
         + "}"
         // ── Clappr ──
-        + "if(window.player&&window.player.options&&window.player.options.source){"
-        +   "var cs=window.player.options.source;"
-        +   "if(typeof cs==='string'&&(cs.indexOf('m3u8')>=0||cs.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(cs,'clappr');return;}"
+        + "if(window.player&&window.player.options){"
+        +   "var co=window.player.options;"
+        +   "var cs=co.source||co.src||(co.sources&&co.sources[0]&&co.sources[0].file)||'';"
+        +   "if(_ok(cs)){_send(cs,'clappr');return;}"
+        + "}"
+        // ── Artplayer ──
+        + "if(window.artplayer||window.art){"
+        +   "var ap=window.artplayer||window.art;"
+        +   "var au=ap.url||(ap.option&&ap.option.url)||(ap.hls&&ap.hls.url)||'';"
+        +   "if(_ok(au)){_send(au,'artplayer');return;}"
+        + "}"
+        // ── Playerjs ──
+        + "if(window.Playerjs){"
+        +   "try{var pjc=new Playerjs({});var pju=pjc.file||pjc.src||'';"
+        +   "if(_ok(pju)){_send(pju,'playerjs');return;}}catch(ex){}"
+        + "}"
+        // ── flowplayer ──
+        + "if(window.flowplayer){"
+        +   "var fp=flowplayer();if(fp&&fp.video){"
+        +     "var fu=fp.video.url||fp.video.src||'';"
+        +     "if(_ok(fu)){_send(fu,'flowplayer');return;}"
+        +   "}"
+        + "}"
+        // ── OpenPlayer ──
+        + "if(window.OpenPlayer&&window.OpenPlayer.instances){"
+        +   "var ops=Object.values(window.OpenPlayer.instances);"
+        +   "for(var oi=0;oi<ops.length;oi++){"
+        +     "var ou=ops[oi].src||(ops[oi].getMedia&&ops[oi].getMedia().src)||'';"
+        +     "if(_ok(ou)){_send(ou,'openplayer');return;}"
+        +   "}"
+        + "}"
+        // ── MediaElement.js ──
+        + "if(window.mejs&&window.mejs.players){"
+        +   "var mkeys=Object.keys(window.mejs.players);"
+        +   "for(var mi=0;mi<mkeys.length;mi++){"
+        +     "var mp=window.mejs.players[mkeys[mi]];"
+        +     "var mu=mp&&mp.media&&(mp.media.currentSrc||mp.media.src)||'';"
+        +     "if(_ok(mu)){_send(mu,'mejs');return;}"
+        +   "}"
         + "}"
         // ── <video> element currentSrc ──
         + "var vels=document.querySelectorAll('video');"
         + "for(var vi2=0;vi2<vels.length;vi2++){"
         +   "var vsrc=vels[vi2].currentSrc||vels[vi2].src||'';"
-        +   "if(vsrc&&vsrc.indexOf('http')===0&&(vsrc.indexOf('m3u8')>=0||vsrc.indexOf('mp4')>=0)){"
-        +     "window.HTMLOUT.onUrl(vsrc,'video_el');return;"
-        +   "}"
+        +   "if(_ok(vsrc)){_send(vsrc,'video_el');return;}"
         + "}"
         // ── <source> elements ──
         + "var srcs=document.querySelectorAll('source[src]');"
         + "for(var si=0;si<srcs.length;si++){"
-        +   "var ss=srcs[si].src;"
-        +   "if(ss&&(ss.indexOf('m3u8')>=0||ss.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(ss,'source');return;}"
+        +   "var ss=srcs[si].src||'';"
+        +   "if(_ok(ss)){_send(ss,'source');return;}"
         + "}"
-        // ── data-src / data-file attributes on video ──
-        + "var datas=document.querySelectorAll('[data-src],[data-file],[data-url]');"
+        // ── data-* attributes ──
+        + "var datas=document.querySelectorAll('[data-src],[data-file],[data-url],[data-hls],[data-stream]');"
         + "for(var di=0;di<datas.length;di++){"
-        +   "var dv=datas[di].getAttribute('data-src')||datas[di].getAttribute('data-file')||datas[di].getAttribute('data-url')||'';"
-        +   "if(dv&&dv.indexOf('http')===0&&(dv.indexOf('m3u8')>=0||dv.indexOf('mp4')>=0)){window.HTMLOUT.onUrl(dv,'data-attr');return;}"
+        +   "var dv=datas[di].getAttribute('data-src')||datas[di].getAttribute('data-file')"
+        +       "||datas[di].getAttribute('data-url')||datas[di].getAttribute('data-hls')"
+        +       "||datas[di].getAttribute('data-stream')||'';"
+        +   "if(_ok(dv)){_send(dv,'data-attr');return;}"
         + "}"
-        // ── window config objects ──
-        + "var wVars=['streamUrl','videoUrl','m3u8Url','hlsUrl','fileUrl','sourceUrl','src','videoSrc','stream'];"
+        // ── window config variables (extended list) ──
+        + "var wVars=['streamUrl','videoUrl','m3u8Url','hlsUrl','fileUrl','sourceUrl','src',"
+        +   "'videoSrc','stream','manifestUrl','playUrl','playbackUrl','mediaUrl','contentUrl',"
+        +   "'hlsSource','streamSource','videoSource','masterUrl','videoFile'];"
         + "for(var wi=0;wi<wVars.length;wi++){"
         +   "var wv=window[wVars[wi]];"
-        +   "if(wv&&typeof wv==='string'&&wv.indexOf('http')===0&&(wv.indexOf('m3u8')>=0||wv.indexOf('mp4')>=0)){"
-        +     "window.HTMLOUT.onUrl(wv,'window_var');return;"
-        +   "}"
+        +   "if(_ok(wv)){_send(wv,'window_var');return;}"
         + "}"
-        // ── Inline script text regex — m3u8 then mp4 ──
+        // ── Inline script text regex — scan all at once ──
         + "var scripts=document.querySelectorAll('script');"
         + "for(var ki=0;ki<scripts.length;ki++){"
         +   "var st=scripts[ki].innerText||'';"
-        +   "var m8=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]+\\.m3u8[^\"'`\\s]*)[\"'`]/);"
-        +   "if(m8){window.HTMLOUT.onUrl(m8[1],'script_m3u8');return;}"
-        +   "var mp4=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]+\\.mp4[^\"'`\\s]*)[\"'`]/);"
-        +   "if(mp4){window.HTMLOUT.onUrl(mp4[1],'script_mp4');return;}"
-        // ── playerConfig / setup objects in scripts ──
-        +   "var cfg=st.match(/file\\s*:\\s*[\"'](https?:\\/\\/[^\"']+)[\"']/);"
-        +   "if(cfg&&(cfg[1].indexOf('m3u8')>=0||cfg[1].indexOf('mp4')>=0)){window.HTMLOUT.onUrl(cfg[1],'config_file');return;}"
-        +   "var src2=st.match(/source\\s*:\\s*[\"'](https?:\\/\\/[^\"']+\\.m3u8[^\"']*)[\"']/);"
-        +   "if(src2){window.HTMLOUT.onUrl(src2[1],'config_src');return;}"
+        +   "if(!st)continue;"
+        +   "var m8=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]{8,}\\.m3u8[^\"'`\\s]*)[\"'`]/);"
+        +   "if(m8){_send(m8[1],'script_m3u8');return;}"
+        +   "var mp4=st.match(/[\"'`](https?:\\/\\/[^\"'`\\s]{8,}\\.mp4[^\"'`\\s]*)[\"'`]/);"
+        +   "if(mp4){_send(mp4[1],'script_mp4');return;}"
+        +   "var cfg=st.match(/(?:file|src|url|source|stream)\\s*[=:]\\s*[\"'](https?:\\/\\/[^\"']{8,}(?:m3u8|manifest|master)[^\"']*)[\"']/);"
+        +   "if(cfg){_send(cfg[1],'config_key');return;}"
         + "}"
         + "}catch(e){}"
         + "})();";
@@ -276,9 +347,9 @@ public class PlayerActivity extends AppCompatActivity {
 
             @Override public void onPageStarted(WebView v, String u, Bitmap f) {
                 if (progressBar != null) progressBar.setVisibility(View.VISIBLE);
-                // Inyectar XHR/fetch hook lo antes posible para capturar streams antes de shouldInterceptRequest
+                // Inyectar hook XHR/fetch/src-setter lo antes posible
                 v.evaluateJavascript("javascript:" + JS_XHR_HOOK, null);
-                // Forzar viewport desktop antes de que el sitio lo sobreescriba
+                // Forzar viewport desktop
                 v.evaluateJavascript(
                     "javascript:(function(){" +
                     "var m=document.querySelector('meta[name=viewport]');" +
@@ -286,19 +357,24 @@ public class PlayerActivity extends AppCompatActivity {
                     "document.head&&document.head.appendChild(m);}" +
                     "if(m)m.content='width=1280,initial-scale=1';" +
                     "})();", null);
+                // Primer intento de extracción temprana (algunos embeds tienen la URL en el HTML inicial)
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    if (capturedVideoUrl == null && !isFinishing())
+                        v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
+                }, 300);
             }
 
             @Override public void onPageFinished(WebView v, String u) {
                 if (progressBar != null) progressBar.setVisibility(View.GONE);
-                // Re-inyectar hook por si la página lo pisó con un reload
+                // Re-inyectar hook por si la página lo reemplazó con un reload
                 v.evaluateJavascript("javascript:" + JS_XHR_HOOK, null);
 
-                // Intento 1: inmediato tras carga
+                // Intento inmediato tras carga
                 if (capturedVideoUrl == null) {
                     v.evaluateJavascript("javascript:" + JS_EXTRACT, null);
                 }
-                // Intentos 2-6: escalonados para cubrir players lentos, SPA y anuncios previos
-                int[] delays = {1000, 2500, 5000, 9000, 15000};
+                // Intentos escalonados más rápidos: 400 ms → 1.2 s → 2.5 s → 5 s → 8 s
+                int[] delays = {400, 1200, 2500, 5000, 8000};
                 for (int delay : delays) {
                     new Handler(Looper.getMainLooper()).postDelayed(() -> {
                         if (capturedVideoUrl == null && !isFinishing()) {
