@@ -936,8 +936,8 @@ public class DetailActivity extends AppCompatActivity {
     }
 
     /**
-     * Shows the loading overlay immediately, starts the server fetch in parallel,
-     * then opens the dialog as soon as the data is ready (min 900ms for visual polish).
+     * Lanza PlayerActivity INMEDIATAMENTE al tocar REPRODUCIR, sin esperar al API.
+     * PlayerActivity se encarga de buscar y probar servidores en segundo plano.
      * Para contenido A7X con URL directa, lanza MediaActivity de inmediato.
      */
     private void fetchAndPlay(ContentItem ci, int season, int episode) {
@@ -945,54 +945,42 @@ public class DetailActivity extends AppCompatActivity {
         if (isA7xContent(ci)) {
             String url = ci.getStreamUrl();
             if (url.startsWith("a7x://series/")) {
-                // Serie A7X: cargar detalle y mostrar selector de episodios
                 String seriesId = url.replace("a7x://series/", "");
                 fetchAndPlayA7xSeries(ci, seriesId);
                 return;
             }
-            // Película A7X: reproducir directamente
             playA7xDirect(ci, url);
             return;
         }
 
-        // ── Contenido TMDB — flujo existente con selector de servidores ────────
-        showLoadingOverlay();
+        // ── Feedback visual inmediato en el botón ────────────────────────────
+        View btnPlay = findViewById(R.id.btnPlay);
+        if (btnPlay != null) {
+            btnPlay.setEnabled(false);
+            btnPlay.setAlpha(0.6f);
+            // Re-habilitar tras 3 s por si el usuario vuelve atrás
+            loadingHandler.postDelayed(() -> {
+                if (!isFinishing()) {
+                    btnPlay.setEnabled(true);
+                    btnPlay.setAlpha(1f);
+                }
+            }, 3000);
+        }
 
-        long startMs = System.currentTimeMillis();
-        ExecutorService exec = Executors.newSingleThreadExecutor();
-        exec.execute(() -> {
-            StreamingApi.ServerData data = null;
-            try {
-                data = ci.getContentType() == ContentItem.TYPE_MOVIE
-                    ? StreamingApi.fetchMovieServers(ci.getTmdbId())
-                    : StreamingApi.fetchSeriesServers(ci.getTmdbId(), season, episode);
-            } catch (Exception ignored) {}
-
-            final StreamingApi.ServerData finalData = data;
-            // Auto-pick first available server and launch PlayerActivity directly
-            String autoUrl = null;
-            if (finalData != null) {
-                if (!finalData.latino.isEmpty())      autoUrl = finalData.latino.get(0).url;
-                else if (!finalData.espanol.isEmpty()) autoUrl = finalData.espanol.get(0).url;
-                else if (!finalData.subtitulado.isEmpty()) autoUrl = finalData.subtitulado.get(0).url;
-            }
-            if (autoUrl == null || autoUrl.isEmpty()) {
-                autoUrl = ci.getStreamUrl();
-            }
-            final String launchUrl = autoUrl;
-
-            loadingHandler.post(() -> {
-                if (isFinishing()) return;
-                ContinueWatchingManager.save(this, ci, season, episode);
-                ContinueWatchingWidget.refresh(this);
-                Intent intent = new Intent(this, PlayerActivity.class);
-                intent.putExtra("url",   launchUrl);
-                intent.putExtra("title", ci.getTitle());
-                intent.putExtra("item",  ci);
-                startActivity(intent);
-            });
-        });
-        exec.shutdown();
+        // ── Lanzar PlayerActivity de inmediato — sin esperar al API ──────────
+        ContinueWatchingManager.save(this, ci, season, episode);
+        ContinueWatchingWidget.refresh(this);
+        Intent intent = new Intent(this, PlayerActivity.class);
+        // URL de respaldo inmediata (puede ser la embedUrl base del ítem)
+        String fallbackUrl = (ci.getStreamUrl() != null && !ci.getStreamUrl().isEmpty())
+                ? ci.getStreamUrl() : "";
+        intent.putExtra("url",                fallbackUrl);
+        intent.putExtra("title",              ci.getTitle());
+        intent.putExtra("item",               ci);
+        // Pasar temporada/episodio para que PlayerActivity busque los servidores reales
+        intent.putExtra("auto_fetch_season",  season);
+        intent.putExtra("auto_fetch_episode", episode);
+        startActivity(intent);
     }
 
     /**

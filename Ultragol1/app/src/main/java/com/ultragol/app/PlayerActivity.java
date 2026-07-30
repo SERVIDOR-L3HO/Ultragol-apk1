@@ -32,8 +32,10 @@ import com.ultragol.app.CastDevice;
 import com.ultragol.app.ContinueWatchingManager;
 import com.ultragol.app.DLNAManager;
 import com.ultragol.app.models.ContentItem;
+import com.ultragol.app.network.StreamingApi;
 import com.ultragol.app.network.TmdbApi;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,6 +71,14 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean manualMode = false;
 
     private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
+
+    // ── Auto-server-fetch: lista de servidores obtenida del API ──────────────
+    private final List<String> serverUrls = new ArrayList<>();
+    private int currentServerIndex = 0;
+    private final Handler autoRetryHandler = new Handler(Looper.getMainLooper());
+    private static final long AUTO_RETRY_DELAY_MS = 18_000; // 18 s sin captura → siguiente servidor
+    private int autoFetchSeason  = 1;
+    private int autoFetchEpisode = 1;
 
     // ── XHR/fetch hook — injected at onPageStarted to catch streams before shouldInterceptRequest ──
     private static final String JS_XHR_HOOK =
@@ -358,7 +368,10 @@ public class PlayerActivity extends AppCompatActivity {
         // ── Resize handle drag ────────────────────────────────────────────────
         setupResizeHandle();
 
-        if (url != null) {
+        autoFetchSeason  = getIntent().getIntExtra("auto_fetch_season",  1);
+        autoFetchEpisode = getIntent().getIntExtra("auto_fetch_episode", 1);
+
+        if (url != null && !url.isEmpty()) {
             currentEmbedUrl = url;
             webView.loadUrl(url);
         }
@@ -367,9 +380,13 @@ public class PlayerActivity extends AppCompatActivity {
 
         // ── Save to "Continuar Viendo" history when player opens ─────────────
         if (item != null) {
-            // Save with the server URL so "Continuar viendo" can re-open the same source
-            ContinueWatchingManager.save(this, item, 1, 1, 10, 0,
+            ContinueWatchingManager.save(this, item, autoFetchSeason, autoFetchEpisode, 10, 0,
                     url != null ? url : "");
+        }
+
+        // ── Auto-fetch real server list in background ─────────────────────────
+        if (item != null) {
+            fetchServersInBackground();
         }
     }
 
@@ -578,11 +595,102 @@ public class PlayerActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == MediaActivity.REQUEST_CODE && resultCode == MediaActivity.RESULT_RETRY) {
-            // User wants to try another server — reset so next embed can be captured
+            // User wants to try another server — reset and auto-try next
             capturedVideoUrl = null;
             capturedReferer  = null;
-            Toast.makeText(this, "Selecciona otro servidor", Toast.LENGTH_SHORT).show();
+            if (!serverUrls.isEmpty()) {
+                currentServerIndex++;
+                loadNextServer();
+            } else {
+                Toast.makeText(this, "Selecciona otro servidor", Toast.LENGTH_SHORT).show();
+            }
         }
+    }
+
+    // ── Auto-fetch servers from StreamingApi in background ───────────────────
+
+    private void fetchServersInBackground() {
+        if (item == null) return;
+        ExecutorService exec = Executors.newSingleThreadExecutor();
+        exec.execute(() -> {
+            try {
+                StreamingApi.ServerData data = item.getContentType() == com.ultragol.app.models.ContentItem.TYPE_MOVIE
+                        ? StreamingApi.fetchMovieServers(item.getTmdbId())
+                        : StreamingApi.fetchSeriesServers(item.getTmdbId(), autoFetchSeason, autoFetchEpisode);
+
+                // Build ordered URL list: latino → español → subtitulado
+                List<String> urls = new ArrayList<>();
+                for (StreamingApi.Server s : data.latino)      if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
+                for (StreamingApi.Server s : data.espanol)     if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
+                for (StreamingApi.Server s : data.subtitulado) if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
+                if (urls.isEmpty() && data.embedUrl != null && !data.embedUrl.isEmpty()) urls.add(data.embedUrl);
+
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (isFinishing()) return;
+                    serverUrls.clear();
+                    serverUrls.addAll(urls);
+                    currentServerIndex = 0;
+
+                    if (!serverUrls.isEmpty()) {
+                        String bestUrl = serverUrls.get(0);
+                        // Load best server if it differs from what's already loading
+                        if (!bestUrl.equals(currentEmbedUrl)) {
+                            capturedVideoUrl = null;
+                            capturedReferer  = null;
+                            currentEmbedUrl  = bestUrl;
+                            webView.loadUrl(bestUrl);
+                        }
+                        // Schedule auto-retry in case this server doesn't play
+                        scheduleAutoRetry();
+                    }
+                });
+            } catch (Exception ignored) {
+                // Keep loading whatever URL was already set; schedule retry from that
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    if (!isFinishing()) scheduleAutoRetry();
+                });
+            }
+        });
+        exec.shutdown();
+    }
+
+    /**
+     * Schedules a check: if no stream URL has been captured after AUTO_RETRY_DELAY_MS,
+     * automatically load the next server from the list.
+     */
+    private void scheduleAutoRetry() {
+        autoRetryHandler.removeCallbacksAndMessages(null);
+        autoRetryHandler.postDelayed(() -> {
+            if (isFinishing()) return;
+            if (capturedVideoUrl != null) return; // already playing
+            if (serverUrls.isEmpty()) return;
+            currentServerIndex++;
+            loadNextServer();
+        }, AUTO_RETRY_DELAY_MS);
+    }
+
+    /**
+     * Loads the next server URL from the list, cycling back if needed.
+     * Shows a subtle toast so the user knows the app is trying another source.
+     */
+    private void loadNextServer() {
+        if (serverUrls.isEmpty()) return;
+        // Wrap around the list
+        if (currentServerIndex >= serverUrls.size()) currentServerIndex = 0;
+
+        String nextUrl = serverUrls.get(currentServerIndex);
+        capturedVideoUrl = null;
+        capturedReferer  = null;
+        currentEmbedUrl  = nextUrl;
+        webView.loadUrl(nextUrl);
+
+        int humanIdx = currentServerIndex + 1;
+        Toast.makeText(this,
+                "Probando servidor " + humanIdx + " de " + serverUrls.size() + "…",
+                Toast.LENGTH_SHORT).show();
+
+        // Schedule another retry in case this server also fails
+        scheduleAutoRetry();
     }
 
     // ── Detail panel ──────────────────────────────────────────────────────────
@@ -749,7 +857,11 @@ public class PlayerActivity extends AppCompatActivity {
     }
     @Override protected void onPause()   { super.onPause();   webView.onPause(); }
     @Override protected void onResume()  { super.onResume();  webView.onResume(); }
-    @Override protected void onDestroy() { webView.destroy(); super.onDestroy(); }
+    @Override protected void onDestroy() {
+        autoRetryHandler.removeCallbacksAndMessages(null);
+        webView.destroy();
+        super.onDestroy();
+    }
 
     // ── Inner class: receives URLs from injected JavaScript ──────────────────
 
