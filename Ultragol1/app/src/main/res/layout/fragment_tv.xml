@@ -2,7 +2,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="@drawable/tv_fragment_bg">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvTvChannels"
@@ -10,6 +10,8 @@
         android:layout_height="match_parent"
         android:overScrollMode="never"
         android:clipToPadding="false"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:paddingBottom="24dp"/>
 
 </FrameLayout>

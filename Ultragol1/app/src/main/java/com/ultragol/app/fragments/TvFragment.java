@@ -7,11 +7,11 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.ultragol.app.MediaActivity;
@@ -47,6 +47,9 @@ public class TvFragment extends Fragment {
             TvChannel.CAT_NEGOCIOS,
             TvChannel.CAT_CIENCIA
     );
+
+    /** Número de columnas para la cuadrícula principal de canales. */
+    private static final int GRID_SPAN = 2;
 
     /** Canales de respaldo siempre disponibles — accesibles desde otras clases. */
     public static TvChannel[] getFallbackChannels() { return FALLBACK; }
@@ -174,7 +177,6 @@ public class TvFragment extends Fragment {
 
     // ── Fuentes IPTV remotas (iptv-org + otros agregadores) ──────────────────
     private static final String[] M3U_SOURCES = {
-        // Por categoría
         "https://iptv-org.github.io/iptv/categories/news.m3u",
         "https://iptv-org.github.io/iptv/categories/sports.m3u",
         "https://iptv-org.github.io/iptv/categories/entertainment.m3u",
@@ -187,10 +189,8 @@ public class TvFragment extends Fragment {
         "https://iptv-org.github.io/iptv/categories/travel.m3u",
         "https://iptv-org.github.io/iptv/categories/cooking.m3u",
         "https://iptv-org.github.io/iptv/categories/religious.m3u",
-        // Por idioma español + inglés
         "https://iptv-org.github.io/iptv/languages/spa.m3u",
         "https://iptv-org.github.io/iptv/languages/por.m3u",
-        // LATAM y España por país
         "https://iptv-org.github.io/iptv/countries/mx.m3u",
         "https://iptv-org.github.io/iptv/countries/ar.m3u",
         "https://iptv-org.github.io/iptv/countries/co.m3u",
@@ -214,14 +214,12 @@ public class TvFragment extends Fragment {
         "https://iptv-org.github.io/iptv/countries/pt.m3u",
     };
 
-    private static final int MAX_PER_SOURCE = 50; // límite por fuente
+    private static final int MAX_PER_SOURCE = 50;
 
     // ── Estado ────────────────────────────────────────────────────────────────
     private TvAdapter adapter;
     private String selectedCategory = TvChannel.CAT_TODOS;
     private final List<TvChannel> allChannels = new ArrayList<>();
-    // executor se crea en onViewCreated y se destruye en onDestroyView para
-    // soportar correctamente la recreación de la vista (back stack, rotaciones).
     private ExecutorService executor;
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -238,23 +236,23 @@ public class TvFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Crear executor fresco en cada recreación de la vista
         executor = Executors.newFixedThreadPool(8);
-        // Limpiar canales previos para evitar duplicados en rotaciones / back-stack
         synchronized (allChannels) { allChannels.clear(); }
 
         RecyclerView rv = view.findViewById(R.id.rvTvChannels);
         adapter = new TvAdapter(requireContext(), CATEGORIES);
 
-        LinearLayoutManager llm = new LinearLayoutManager(requireContext());
-        rv.setLayoutManager(llm);
-
-        // Divider sutil entre filas
-        DividerItemDecoration divider = new DividerItemDecoration(requireContext(), DividerItemDecoration.VERTICAL);
-        if (requireContext().getDrawable(com.ultragol.app.R.drawable.tv_row_divider) != null) {
-            divider.setDrawable(requireContext().getDrawable(com.ultragol.app.R.drawable.tv_row_divider));
-        }
-        rv.addItemDecoration(divider);
+        // ── GridLayoutManager: 2 columns for channels, full-width for headers ─
+        GridLayoutManager glm = new GridLayoutManager(requireContext(), GRID_SPAN);
+        glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+            @Override
+            public int getSpanSize(int position) {
+                int type = adapter.getItemViewType(position);
+                // Channel cards take 1 span; everything else spans all columns
+                return (type == TvAdapter.TYPE_CHANNEL) ? 1 : GRID_SPAN;
+            }
+        });
+        rv.setLayoutManager(glm);
         rv.setAdapter(adapter);
 
         adapter.setOnChannelClickListener(this::playChannel);
@@ -264,7 +262,7 @@ public class TvFragment extends Fragment {
             applyFilter();
         });
 
-        // Mostrar canales de respaldo inmediatamente + poblar caché global
+        // Show fallback channels immediately
         synchronized (allChannels) {
             for (TvChannel ch : FALLBACK) allChannels.add(ch);
         }
@@ -275,7 +273,6 @@ public class TvFragment extends Fragment {
         }
         applyFilter();
 
-        // Cargar canales A7X como fuente primaria, luego M3U como respaldo
         loadA7xChannels();
         loadRemoteChannels();
     }
@@ -289,13 +286,8 @@ public class TvFragment extends Fragment {
         mainHandler.removeCallbacksAndMessages(null);
     }
 
-    // ── Carga canales A7X (fuente primaria) ───────────────────────────────────
+    // ── Carga canales A7X ─────────────────────────────────────────────────────
 
-    /**
-     * Carga los canales en vivo desde la API de A7X TV.
-     * Se añaden antes que los canales M3U, con mayor prioridad.
-     * Si falla (sin conexión, sin token), la app continúa con los canales de respaldo.
-     */
     private void loadA7xChannels() {
         if (executor == null) return;
         executor.execute(() -> {
@@ -311,7 +303,6 @@ public class TvFragment extends Fragment {
                     for (TvChannel c : a7xChannels) {
                         if (!existingUrls.contains(c.url)) {
                             existingUrls.add(c.url);
-                            // A7X channels se insertan al inicio (mayor prioridad)
                             allChannels.add(0, c);
                             newChannels.add(c);
                         }
@@ -327,9 +318,7 @@ public class TvFragment extends Fragment {
                     }
                     mainHandler.post(this::applyFilter);
                 }
-            } catch (Exception ignored) {
-                // Falla silenciosa — los canales de respaldo seguirán disponibles
-            }
+            } catch (Exception ignored) {}
         });
     }
 
@@ -341,8 +330,6 @@ public class TvFragment extends Fragment {
         intent.putExtra("title",           ch.name);
         intent.putExtra("is_m3u8",         ch.url.contains(".m3u8") || ch.url.contains("m3u"));
         intent.putExtra("referer",         "");
-        // Activar headers A7X si el canal proviene de la API de A7X TV
-        // (los canales A7X usan stream_url que no contiene iptv-org.github.io)
         boolean isA7xStream = !ch.url.contains("iptv-org.github.io")
                 && !ch.url.contains("akamaized.net")
                 && !ch.url.contains("akamaihd.net")
@@ -377,7 +364,6 @@ public class TvFragment extends Fragment {
                 List<TvChannel> parsed = fetchAndParse(src, MAX_PER_SOURCE);
                 if (parsed.isEmpty()) return;
 
-                // Verificar cada canal en paralelo
                 List<TvChannel> verified = new ArrayList<>();
                 List<Runnable> checks = new ArrayList<>();
                 Object lock = new Object();
@@ -390,7 +376,6 @@ public class TvFragment extends Fragment {
                     });
                 }
 
-                // Ejecutar verificaciones concurrentes
                 List<Thread> threads = new ArrayList<>();
                 for (Runnable r : checks) {
                     Thread t = new Thread(r);
@@ -402,7 +387,6 @@ public class TvFragment extends Fragment {
                 }
 
                 if (!verified.isEmpty() && isAdded()) {
-                    // Deduplicar por URL
                     List<TvChannel> newChannels = new ArrayList<>();
                     synchronized (allChannels) {
                         LinkedHashSet<String> existingUrls = new LinkedHashSet<>();
@@ -416,7 +400,6 @@ public class TvFragment extends Fragment {
                         }
                     }
                     if (!newChannels.isEmpty()) {
-                        // Añadir también al caché global para SearchActivity
                         synchronized (CHANNEL_CACHE) {
                             LinkedHashSet<String> cacheUrls = new LinkedHashSet<>();
                             for (TvChannel c : CHANNEL_CACHE) cacheUrls.add(c.url);
@@ -492,11 +475,6 @@ public class TvFragment extends Fragment {
 
     // ── Verificación de stream ─────────────────────────────────────────────────
 
-    /**
-     * Intenta conectar al stream y leer los primeros bytes del manifiesto M3U8.
-     * Retorna true si la respuesta contiene "#EXT" (manifiesto HLS válido) o
-     * si el servidor responde con 200/302 (puede ser TS directo).
-     */
     private boolean checkStream(String streamUrl) {
         try {
             HttpURLConnection conn = (HttpURLConnection) new URL(streamUrl).openConnection();
@@ -509,7 +487,6 @@ public class TvFragment extends Fragment {
             conn.connect();
             int code = conn.getResponseCode();
             if (code == 200) {
-                // Leer primeros 512 bytes para validar que es M3U8 real
                 byte[] buf = new byte[512];
                 int read = conn.getInputStream().read(buf);
                 conn.disconnect();
