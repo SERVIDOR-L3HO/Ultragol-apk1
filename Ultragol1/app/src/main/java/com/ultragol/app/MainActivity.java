@@ -254,23 +254,23 @@ public class MainActivity extends AppCompatActivity {
         View platTokyoMx    = drawerOverlay.findViewById(R.id.platTokyoMx);
 
         if (platNetflix != null)
-            platNetflix.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🔴 Netflix", 8, "all")));
+            platNetflix.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Netflix", 8, "all", PlatformFragment.COLOR_NETFLIX, "Netflix")));
         if (platPrime != null)
-            platPrime.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🔵 Prime Video", 119, "all")));
+            platPrime.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Prime Video", 119, "all", PlatformFragment.COLOR_PRIME, "Prime Video")));
         if (platDisney != null)
-            platDisney.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🔷 Disney+", 337, "all")));
+            platDisney.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Disney+", 337, "all", PlatformFragment.COLOR_DISNEY, "Disney+")));
         if (platApple != null)
-            platApple.setOnClickListener(v -> navigate(PlatformFragment.newInstance("⬜ Apple TV+", 350, "all")));
+            platApple.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Apple TV+", 350, "all", PlatformFragment.COLOR_APPLE, "Apple TV+")));
         if (platHulu != null)
-            platHulu.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🟢 Hulu", 15, "all")));
+            platHulu.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Hulu", 15, "all", PlatformFragment.COLOR_HULU, "Hulu")));
         if (platHbo != null)
-            platHbo.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🟣 HBO Max", 1899, "all")));
+            platHbo.setOnClickListener(v -> navigate(PlatformFragment.newInstance("HBO Max", 1899, "all", PlatformFragment.COLOR_HBO, "HBO Max")));
         if (platCrunchyroll != null)
-            platCrunchyroll.setOnClickListener(v -> navigate(PlatformFragment.newInstance("🟠 Crunchyroll", 283, "anime")));
+            platCrunchyroll.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Crunchyroll", 283, "anime", PlatformFragment.COLOR_CRUNCHYROLL, "Crunchyroll")));
         if (platAtx != null)
-            platAtx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("⬜ At-X", 1408, "anime")));
+            platAtx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("At-X", 1408, "anime", PlatformFragment.COLOR_ATX, "At-X")));
         if (platTokyoMx != null)
-            platTokyoMx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("📺 Tokyo MX", 2359, "anime")));
+            platTokyoMx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Tokyo MX", 2359, "anime", PlatformFragment.COLOR_TOKYOMX, "Tokyo MX")));
     }
 
     // ── Navigation helpers ───────────────────────────────────────────────────

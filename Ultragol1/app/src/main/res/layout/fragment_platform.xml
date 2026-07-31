@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg_primary">
+
+    <!-- ── Branded header ─────────────────────────────────────────────────── -->
+    <FrameLayout
+        android:id="@+id/platformHeader"
+        android:layout_width="match_parent"
+        android:layout_height="64dp">
+
+        <!-- Colored accent bar at the bottom of the header -->
+        <View
+            android:id="@+id/platformAccentBar"
+            android:layout_width="match_parent"
+            android:layout_height="3dp"
+            android:layout_gravity="bottom"
+            android:background="#E50914"/>
+
+        <!-- Back button -->
+        <FrameLayout
+            android:id="@+id/platformBack"
+            android:layout_width="52dp"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackgroundBorderless"
+            android:layout_gravity="start|center_vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="←"
+                android:textColor="#FFFFFF"
+                android:textSize="26sp"/>
+        </FrameLayout>
+
+        <!-- Platform logo / name block -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingStart="4dp">
+
+            <!-- Colored dot indicator -->
+            <View
+                android:id="@+id/platformDot"
+                android:layout_width="10dp"
+                android:layout_height="10dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/platform_dot"/>
+
+            <!-- Platform name styled bold -->
+            <TextView
+                android:id="@+id/platformName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Netflix"
+                android:textColor="#E50914"
+                android:textSize="22sp"
+                android:fontFamily="sans-serif-black"
+                android:letterSpacing="0.02"/>
+        </LinearLayout>
+
+        <!-- Content type badge (top right) -->
+        <TextView
+            android:id="@+id/platformBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:text="TODO"
+            android:textSize="10sp"
+            android:textColor="#AAFFFFFF"
+            android:fontFamily="sans-serif-medium"
+            android:letterSpacing="0.08"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <!-- ── Thin gradient line under header ──────────────────────────────────── -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#22FFFFFF"/>
+
+    <ProgressBar
+        android:id="@+id/platformLoading"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/platformGrid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="4dp"
+        android:clipToPadding="false"/>
+
+</LinearLayout>
