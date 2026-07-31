@@ -60,9 +60,19 @@ public class MainActivity extends AppCompatActivity {
         checkAndShowCrash();
         requestNotificationPermission();
 
-        if (savedInstanceState == null) loadFragment(new HomeFragment());
+        if (savedInstanceState == null) {
+            // Si la notificación trajo un deep-link, ir directamente al destino.
+            // De lo contrario, cargar la pantalla de inicio.
+            String navTo = getIntent() != null ? getIntent().getStringExtra("nav_to") : null;
+            if (navTo == null) {
+                loadFragment(new HomeFragment());
+            }
+        }
 
         setupDrawer();
+
+        // Manejar deep-link de notificación (después de que el drawer está listo)
+        if (savedInstanceState == null) handleNavIntent(getIntent());
 
         // On TV, give initial focus to the first nav item so the remote works immediately
         if (isTV) {
@@ -74,6 +84,53 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+        // Notificación recibida con la app ya en primer plano
+        handleNavIntent(intent);
+    }
+
+    /**
+     * Lee el extra "nav_to" del intent y navega al fragmento correspondiente.
+     * Valores válidos: "tv", "deportes", "movies", "favorites", "mylist",
+     *                  "downloads", "home" (o null = no hace nada).
+     */
+    private void handleNavIntent(Intent intent) {
+        if (intent == null) return;
+        String navTo = intent.getStringExtra("nav_to");
+        if (navTo == null) return;
+
+        Fragment dest;
+        switch (navTo) {
+            case "tv":
+                dest = new com.ultragol.app.fragments.TvFragment();
+                break;
+            case "deportes":
+                dest = new DeportesWebFragment();
+                break;
+            case "movies":
+                dest = new MoviesFragment();
+                break;
+            case "favorites":
+                dest = new FavoritesFragment();
+                break;
+            case "mylist":
+                dest = new MyListFragment();
+                break;
+            case "downloads":
+                dest = new com.ultragol.app.fragments.DownloadsFragment();
+                break;
+            default:
+                dest = new HomeFragment();
+                break;
+        }
+        navigate(dest);
+        // Limpiar el extra para que rotaciones / recreaciones no vuelvan a navegar
+        intent.removeExtra("nav_to");
+    }
 
     @Override
     protected void onStop() {

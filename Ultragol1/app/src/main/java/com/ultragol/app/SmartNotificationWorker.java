@@ -121,7 +121,7 @@ public class SmartNotificationWorker extends Worker {
             "Millones ya la vieron. " + c.title + " te espera ahora."
         };
         int pick = rng.nextInt(titles.length);
-        post(ctx, CH_CONTENT, titles[pick], bodies[pick], c.imageUrl, "▶ Ver ahora", "❤ Guardar");
+        post(ctx, CH_CONTENT, titles[pick], bodies[pick], c.imageUrl, "▶ Ver ahora", "movies", "❤ Guardar", "favorites");
     }
 
     private void showNewRelease(Context ctx) throws Exception {
@@ -137,7 +137,7 @@ public class SmartNotificationWorker extends Worker {
         };
         String body = "\"" + c.title + "\" ya está disponible. " +
             (c.overview.length() > 70 ? c.overview.substring(0, 70) + "…" : c.overview);
-        post(ctx, CH_PROMO, titles[rng.nextInt(titles.length)], body, c.imageUrl, "▶ Ver ahora", "📥 Descargar");
+        post(ctx, CH_PROMO, titles[rng.nextInt(titles.length)], body, c.imageUrl, "▶ Ver ahora", "movies", "📥 Descargar", "downloads");
     }
 
     private void showRecommendation(Context ctx) throws Exception {
@@ -160,7 +160,7 @@ public class SmartNotificationWorker extends Worker {
         };
         String title = "🎭 Recomendado · " + genreNames[idx];
         String body  = hooks[rng.nextInt(hooks.length)] + " — " + c.title;
-        post(ctx, CH_CONTENT, title, body, c.imageUrl, "▶ Ver ahora", "❤ Guardar");
+        post(ctx, CH_CONTENT, title, body, c.imageUrl, "▶ Ver ahora", "movies", "❤ Guardar", "favorites");
     }
 
     private void showTopRated(Context ctx) throws Exception {
@@ -176,7 +176,7 @@ public class SmartNotificationWorker extends Worker {
         };
         String body = c.title + " · " + c.rating + "★  — " +
             (c.overview.length() > 75 ? c.overview.substring(0, 75) + "…" : c.overview);
-        post(ctx, CH_CONTENT, titles[rng.nextInt(titles.length)], body, c.imageUrl, "▶ Ver ahora", "ℹ Más info");
+        post(ctx, CH_CONTENT, titles[rng.nextInt(titles.length)], body, c.imageUrl, "▶ Ver ahora", "movies", "ℹ Más info", "movies");
     }
 
     private void showTrendingSeries(Context ctx) throws Exception {
@@ -197,7 +197,7 @@ public class SmartNotificationWorker extends Worker {
             c.title + " — " + (c.overview.length() > 80 ? c.overview.substring(0, 80) + "…" : c.overview)
         };
         int pick = rng.nextInt(titles.length);
-        post(ctx, CH_CONTENT, titles[pick], bodies[pick], c.imageUrl, "▶ Empezar", "❤ Mi lista");
+        post(ctx, CH_CONTENT, titles[pick], bodies[pick], c.imageUrl, "▶ Empezar", "home", "❤ Mi lista", "mylist");
     }
 
     private void showSportsBait(Context ctx) throws Exception {
@@ -213,22 +213,45 @@ public class SmartNotificationWorker extends Worker {
         };
         int pick = rng.nextInt(sports.length);
         // Para deportes usamos null imagen → notificación sin imagen grande (más rápida)
-        post(ctx, CH_SPORTS, sports[pick][0], sports[pick][1], null, "▶ Ver en vivo", "📅 Agenda");
+        post(ctx, CH_SPORTS, sports[pick][0], sports[pick][1], null, "▶ Ver en vivo", "tv", "📅 Agenda", "deportes");
     }
 
     // ─────────────────── Helpers ─────────────────────────────────────────────
 
+    /**
+     * Publica una notificación con dos botones de acción funcionales.
+     *
+     * @param nav1  Destino del botón 1: "tv", "deportes", "movies", "favorites",
+     *              "mylist", "downloads" o "home".
+     * @param nav2  Destino del botón 2 (mismos valores).
+     */
     private void post(Context ctx, String channelId,
                       String title, String body, String imageUrl,
-                      String action1, String action2) {
+                      String action1, String nav1,
+                      String action2, String nav2) {
 
         SharedPreferences prefs = ctx.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
         int seq = prefs.getInt(KEY_SEQ, 1000);
         prefs.edit().putInt(KEY_SEQ, seq + 1).apply();
 
-        Intent intent = new Intent(ctx, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pi = PendingIntent.getActivity(ctx, seq, intent,
+        // ── Intent base — tocar el cuerpo de la notificación abre la app ─────
+        Intent baseIntent = new Intent(ctx, MainActivity.class);
+        baseIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        PendingIntent pi = PendingIntent.getActivity(ctx, seq, baseIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // ── Botón 1: navega al destino nav1 ───────────────────────────────────
+        Intent intent1 = new Intent(ctx, MainActivity.class);
+        intent1.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent1.putExtra("nav_to", nav1);
+        PendingIntent pi1 = PendingIntent.getActivity(ctx, seq + 10000, intent1,
+            PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
+        // ── Botón 2: navega al destino nav2 ───────────────────────────────────
+        Intent intent2 = new Intent(ctx, MainActivity.class);
+        intent2.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        intent2.putExtra("nav_to", nav2);
+        PendingIntent pi2 = PendingIntent.getActivity(ctx, seq + 20000, intent2,
             PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, channelId)
@@ -239,8 +262,8 @@ public class SmartNotificationWorker extends Worker {
             .setContentIntent(pi)
             .setAutoCancel(true)
             .setColor(0xFF1565C0)  // Azul Action Play
-            .addAction(android.R.drawable.ic_media_play, action1, pi)
-            .addAction(android.R.drawable.btn_star_big_off, action2, pi);
+            .addAction(android.R.drawable.ic_media_play,       action1, pi1)
+            .addAction(android.R.drawable.btn_star_big_off,    action2, pi2);
 
         // Intentar cargar imagen grande
         Bitmap bigImage = imageUrl != null ? downloadBitmap(imageUrl) : null;
