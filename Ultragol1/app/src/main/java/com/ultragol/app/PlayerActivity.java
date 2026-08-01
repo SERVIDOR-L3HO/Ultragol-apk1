@@ -694,11 +694,12 @@ public class PlayerActivity extends AppCompatActivity {
                         ? StreamingApi.fetchMovieServers(item.getTmdbId())
                         : StreamingApi.fetchSeriesServers(item.getTmdbId(), autoFetchSeason, autoFetchEpisode);
 
-                // Build ordered URL list: latino → español → subtitulado
+                // Build ordered URL list: latino → español → subtitulado → english (last resort)
                 List<String> urls = new ArrayList<>();
                 for (StreamingApi.Server s : data.latino)      if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
                 for (StreamingApi.Server s : data.espanol)     if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
                 for (StreamingApi.Server s : data.subtitulado) if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
+                for (StreamingApi.Server s : data.english)     if (s.url != null && !s.url.isEmpty()) urls.add(s.url);
                 if (urls.isEmpty() && data.embedUrl != null && !data.embedUrl.isEmpty()) urls.add(data.embedUrl);
 
                 new Handler(Looper.getMainLooper()).post(() -> {

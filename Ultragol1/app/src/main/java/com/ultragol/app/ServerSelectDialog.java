@@ -153,15 +153,15 @@ public class ServerSelectDialog {
         View tabs = dialog.findViewById(R.id.langTabs);
         if (cnt == null) return;
         cnt.removeAllViews();
-        boolean hL = !data.latino.isEmpty(), hE = !data.espanol.isEmpty(), hS = !data.subtitulado.isEmpty();
-        int n = (hL?1:0)+(hE?1:0)+(hS?1:0);
-        if (n > 1 && tabs != null) {
-            tabs.setVisibility(View.VISIBLE);
-            setupTabs(ctx, dialog, item, data, hL, hE, hS);
-        } else {
-            if (tabs != null) tabs.setVisibility(View.GONE);
-            addRows(ctx, cnt, dialog, item, hL ? data.latino : hE ? data.espanol : data.subtitulado, 0);
-        }
+        // Always hide language tabs — show only the best available in priority order:
+        // Latino → Español → Subtitulado → English (last resort)
+        if (tabs != null) tabs.setVisibility(View.GONE);
+        List<StreamingApi.Server> best;
+        if (!data.latino.isEmpty())           best = data.latino;
+        else if (!data.espanol.isEmpty())     best = data.espanol;
+        else if (!data.subtitulado.isEmpty()) best = data.subtitulado;
+        else                                  best = data.english;
+        addRows(ctx, cnt, dialog, item, best, 0);
     }
 
     private static void setupTabs(Context ctx, Dialog dialog, ContentItem item,

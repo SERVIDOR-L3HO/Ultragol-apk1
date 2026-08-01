@@ -253,9 +253,15 @@ public class TmdbApi {
         JSONArray arr = root.optJSONArray("episodes");
         List<EpisodeInfo> list = new ArrayList<>();
         if (arr == null) return list;
+        // Today's date string (yyyy-MM-dd) for filtering unaired episodes
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.ROOT)
+                .format(new java.util.Date());
         for (int i = 0; i < arr.length(); i++) {
             try {
                 JSONObject o = arr.getJSONObject(i);
+                // Skip episodes with no air_date or a future air_date — they have no content yet
+                String airDate = o.optString("air_date", "");
+                if (airDate.isEmpty() || airDate.compareTo(today) > 0) continue;
                 int epNum = o.optInt("episode_number", i + 1);
                 String name = o.optString("name", "Episodio " + epNum);
                 String overview = o.optString("overview", "");

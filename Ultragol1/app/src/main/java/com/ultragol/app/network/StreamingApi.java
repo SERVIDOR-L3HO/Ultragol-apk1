@@ -24,6 +24,7 @@ public class StreamingApi {
         public final List<Server> latino      = new ArrayList<>();
         public final List<Server> espanol     = new ArrayList<>();
         public final List<Server> subtitulado = new ArrayList<>();
+        public final List<Server> english     = new ArrayList<>(); // excluded by default; last resort only
         public String embedUrl = "";
     }
 
@@ -100,6 +101,10 @@ public class StreamingApi {
                 data.subtitulado.addAll(parsed);
             } else if (k.contains("espa") || k.contains("cast") || k.contains("spain")) {
                 data.espanol.addAll(parsed);
+            } else if (k.contains("ingl") || k.contains("english") || k.equals("en")
+                    || k.startsWith("eng")) {
+                // English — keep separate, only used as absolute last resort
+                data.english.addAll(parsed);
             } else {
                 // "latino", "Español Latino", "lat", unknown — default to latino
                 data.latino.addAll(parsed);
