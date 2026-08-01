@@ -81,8 +81,8 @@ public class TvFeaturedAdapter extends RecyclerView.Adapter<TvFeaturedAdapter.Fe
             Glide.with(context)
                     .load(ch.logo)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(android.R.color.transparent)
-                    .error(android.R.color.transparent)
+                    .placeholder(R.drawable.actionplay_placeholder)
+                    .error(R.drawable.actionplay_placeholder)
                     .centerInside()
                     .into(h.ivLogo);
         }

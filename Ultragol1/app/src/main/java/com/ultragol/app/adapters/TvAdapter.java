@@ -242,8 +242,8 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                 Glide.with(context)
                         .load(ch.logo)
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .placeholder(android.R.color.transparent)
-                        .error(android.R.color.transparent)
+                        .placeholder(R.drawable.actionplay_placeholder)
+                        .error(R.drawable.actionplay_placeholder)
                         .centerInside()
                         .into(ivLogo);
             }

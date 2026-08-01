@@ -82,9 +82,9 @@ public class HomeTvAdapter extends RecyclerView.Adapter<HomeTvAdapter.VH> {
                 Glide.with(context)
                     .load(ch.logo)
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
-                    .placeholder(android.R.color.transparent)
-                    .error(android.R.color.transparent)
-                    .centerInside()
+                    .placeholder(R.drawable.actionplay_placeholder)
+                    .error(R.drawable.actionplay_placeholder)
+                    .centerCrop()
                     .into(ivLogo);
             }
         }
