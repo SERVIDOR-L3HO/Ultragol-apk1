@@ -83,7 +83,7 @@ public class TvFeaturedAdapter extends RecyclerView.Adapter<TvFeaturedAdapter.Fe
                     .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .placeholder(R.drawable.actionplay_placeholder)
                     .error(R.drawable.actionplay_placeholder)
-                    .centerInside()
+                    .centerCrop()
                     .into(h.ivLogo);
         }
 

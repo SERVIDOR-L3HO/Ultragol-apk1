@@ -24,15 +24,13 @@
         android:layout_height="match_parent"
         android:background="#22162040"/>
 
-    <!-- Channel logo — centred, prominent -->
+    <!-- Channel logo — fills card, text overlays on top -->
     <ImageView
         android:id="@+id/ivChannelLogo"
-        android:layout_width="76dp"
-        android:layout_height="76dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:layout_marginBottom="28dp"
-        android:scaleType="centerInside"
-        android:padding="8dp"
+        android:scaleType="centerCrop"
         android:contentDescription="Logo"/>
 
     <!-- Bottom gradient scrim for text legibility -->

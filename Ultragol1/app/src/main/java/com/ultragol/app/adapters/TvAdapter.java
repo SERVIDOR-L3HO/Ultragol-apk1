@@ -244,7 +244,7 @@ public class TvAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
                         .diskCacheStrategy(DiskCacheStrategy.ALL)
                         .placeholder(R.drawable.actionplay_placeholder)
                         .error(R.drawable.actionplay_placeholder)
-                        .centerInside()
+                        .centerCrop()
                         .into(ivLogo);
             }
 
