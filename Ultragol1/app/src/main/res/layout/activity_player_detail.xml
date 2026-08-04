@@ -245,42 +245,20 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Subtítulos / Doblaje -->
-                <LinearLayout
+                <!-- Ver en grupo (Watch Party) -->
+                <TextView
+                    android:id="@+id/pdBtnWatchParty"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:layout_marginTop="18dp">
-
-                    <TextView
-                        android:id="@+id/pdBtnSubs"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:text="Subtítulos"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:background="@drawable/btn_play_bg"
-                        android:clickable="true"
-                        android:focusable="true"/>
-
-                    <TextView
-                        android:id="@+id/pdBtnDub"
-                        android:layout_width="0dp"
-                        android:layout_height="40dp"
-                        android:layout_weight="1"
-                        android:layout_marginStart="8dp"
-                        android:gravity="center"
-                        android:text="Doblaje"
-                        android:textColor="#FFFFFF"
-                        android:textSize="13sp"
-                        android:fontFamily="sans-serif-medium"
-                        android:background="@drawable/action_btn_bg"
-                        android:clickable="true"
-                        android:focusable="true"/>
-                </LinearLayout>
+                    android:layout_height="44dp"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center"
+                    android:text="🎬 Ver en grupo"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:fontFamily="sans-serif-medium"
+                    android:background="@drawable/btn_watch_party_bg"
+                    android:clickable="true"
+                    android:focusable="true"/>
 
                 <View android:layout_width="match_parent" android:layout_height="1dp"
                     android:layout_marginTop="18dp" android:background="#1AFFFFFF"/>
