@@ -59,7 +59,6 @@ public class WatchPartyActivity extends AppCompatActivity implements WatchPartyM
 
     // ── State ─────────────────────────────────────────────────────────────────
     private ContentItem   item;
-    private String        serverBaseUrl;
     private WatchPartyManager manager;
     private ChatAdapter   chatAdapter;
     private final List<ChatMessage> messages = new ArrayList<>();
@@ -72,7 +71,6 @@ public class WatchPartyActivity extends AppCompatActivity implements WatchPartyM
         setContentView(R.layout.activity_watch_party);
 
         item = (ContentItem) getIntent().getSerializableExtra("item");
-        serverBaseUrl = resolveServerUrl();
 
         bindViews();
         setupMovieCard();
@@ -139,7 +137,7 @@ public class WatchPartyActivity extends AppCompatActivity implements WatchPartyM
             showStatus("Creando sala…", false);
             setButtonsEnabled(false);
             String contentId = item != null ? String.valueOf(item.getTmdbId()) : "unknown";
-            manager.createRoom(serverBaseUrl, contentId, pass, name);
+            manager.createRoom(contentId, pass, name);
         });
 
         // JOIN room
@@ -161,7 +159,7 @@ public class WatchPartyActivity extends AppCompatActivity implements WatchPartyM
             }
             showStatus("Uniéndote a la sala " + code.toUpperCase() + "…", false);
             setButtonsEnabled(false);
-            manager.joinRoom(serverBaseUrl, code, pass, name);
+            manager.joinRoom(code, pass, name);
         });
     }
 
@@ -258,16 +256,6 @@ public class WatchPartyActivity extends AppCompatActivity implements WatchPartyM
         View b2 = findViewById(R.id.wpBtnJoin);
         if (b1 != null) b1.setEnabled(enabled);
         if (b2 != null) b2.setEnabled(enabled);
-    }
-
-    private String resolveServerUrl() {
-        // Try to read from intent, then fall back to the Replit dev domain env var
-        String fromIntent = getIntent().getStringExtra("server");
-        if (fromIntent != null && !fromIntent.isEmpty()) return fromIntent;
-        // At runtime the device won't have REPLIT_DOMAINS, so we read it from the compiled-in
-        // BuildConfig or use a constant pointing to the deployed server.
-        // For dev: you can set this via adb: am start -e server https://YOUR.replit.dev
-        return "https://ultragol-update-server.replit.app";
     }
 
     // ── WatchPartyManager.Listener ────────────────────────────────────────────
