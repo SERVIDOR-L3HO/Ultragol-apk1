@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "62425304873",
-    "project_id": "ultragol-api",
-    "storage_bucket": "ultragol-api.firebasestorage.app"
+    "project_number": "187895656512",
+    "project_id": "actionplay-26fb8",
+    "storage_bucket": "actionplay-26fb8.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:62425304873:android:e6d7265d7a9a6c1ce43138",
+        "mobilesdk_app_id": "1:187895656512:android:a6769426ef5adf125e2fa5",
         "android_client_info": {
           "package_name": "com.ultragol1.app"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "62425304873-p6anp3rk7698580kf1m830s75fb0lc5r.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.ultragol1.app",
-            "certificate_hash": "59467ea204919f481f95d3080e99b6ce15d2da7c"
-          }
-        },
-        {
-          "client_id": "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyADJ4mR6_BdDTjHSC5v8AxmodMtq5VuPzc"
+          "current_key": "AIzaSyCccj7vhDAnX1y00Qt15dD0RCMiD6sH0Wc"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
