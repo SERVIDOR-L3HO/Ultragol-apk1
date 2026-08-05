@@ -208,14 +208,21 @@ public class TmdbApi {
     }
 
     /**
-     * Paginated kids-only discover feed (family genre 10751, movies only).
-     * page 1 → family movies p1, page 2 → family movies p2, …
+     * Paginated kids-only discover feed (family/animation, no adult genres).
+     * Uses genre 10751 (Family) and explicitly excludes Horror, Thriller, Crime,
+     * War, Adult, and Romance so non-kids films never slip through.
      */
     public static List<ContentItem> fetchDiscoverKidsMovies(int page) throws Exception {
-        return parse(
-            new JSONObject(fetch("/discover/movie?with_genres=10751&sort_by=popularity.desc&language=es-MX&page=" + page))
-                .getJSONArray("results"),
-            ContentItem.TYPE_MOVIE);
+        // with_genres=10751 (Family) | without_genres=27,53,80,10752,10749,36,9648,99
+        // (Horror, Thriller, Crime, War, Romance, History, Mystery, Documentary)
+        String path = "/discover/movie"
+            + "?with_genres=10751"
+            + "&without_genres=27,53,80,10752,10749,36,9648,99"
+            + "&sort_by=popularity.desc"
+            + "&vote_count.gte=20"
+            + "&language=es-MX"
+            + "&page=" + page;
+        return parse(new JSONObject(fetch(path)).getJSONArray("results"), ContentItem.TYPE_MOVIE);
     }
 
     /**

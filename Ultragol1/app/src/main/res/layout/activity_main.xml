@@ -514,6 +514,13 @@
                             android:layout_marginEnd="4dp"/>
                     </LinearLayout>
 
+                    <!-- Platforms section (hidden in kids mode) -->
+                    <LinearLayout
+                        android:id="@+id/platSection"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
                     <!-- Separator before Platforms -->
                     <View
                         android:layout_width="match_parent"
@@ -725,6 +732,8 @@
                                 android:fontFamily="sans-serif-bold"/>
                         </LinearLayout>
                     </LinearLayout>
+
+                    </LinearLayout><!-- end platSection -->
 
                 </LinearLayout>
             </androidx.core.widget.NestedScrollView>

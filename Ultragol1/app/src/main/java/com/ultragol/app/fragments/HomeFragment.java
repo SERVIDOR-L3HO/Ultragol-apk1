@@ -70,6 +70,13 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, state);
 
         rvHome = view.findViewById(R.id.rvHome);
+
+        // Detect kidsMode EARLY so the first discover page loads correctly
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(requireContext());
+            if (prof != null) kidsMode = prof.isKids;
+        } catch (Exception ignored) {}
+
         discoverAdapter = new InfiniteDiscoverAdapter(requireContext());
         discoverAdapter.setOnLoadMoreListener(this::loadMoreDiscover);
 
@@ -384,6 +391,7 @@ public class HomeFragment extends Fragment {
                 if (rowDoramas != null)       rowDoramas.setVisibility(View.GONE);
                 if (rowShortsdramas != null)  rowShortsdramas.setVisibility(View.GONE);
                 if (rowLiveGlass != null)     rowLiveGlass.setVisibility(View.GONE);
+                if (rowTvLive != null)        rowTvLive.setVisibility(View.GONE);
                 if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
                 if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
                 if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
