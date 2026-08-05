@@ -411,6 +411,9 @@ public class MainActivity extends AppCompatActivity {
         setDrawerItemVisibility(R.id.navAnime,        kidsGone);
         setDrawerItemVisibility(R.id.navDoramas,      kidsGone);
         setDrawerItemVisibility(R.id.navDeportes,     kidsGone);
+        setDrawerItemVisibility(R.id.navMusica,       kidsGone);
+        setDrawerItemVisibility(R.id.navTv,           kidsGone);
+        setDrawerItemVisibility(R.id.navSearch,       kidsGone); // Shorts Dramas
         setDrawerItemVisibility(R.id.navAdult,        View.GONE);
         setDrawerItemVisibility(R.id.platCrunchyroll, kidsGone);
         setDrawerItemVisibility(R.id.platAtx,         kidsGone);

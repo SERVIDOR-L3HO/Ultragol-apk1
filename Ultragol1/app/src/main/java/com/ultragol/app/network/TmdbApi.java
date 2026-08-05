@@ -208,6 +208,17 @@ public class TmdbApi {
     }
 
     /**
+     * Paginated kids-only discover feed (family genre 10751, movies only).
+     * page 1 → family movies p1, page 2 → family movies p2, …
+     */
+    public static List<ContentItem> fetchDiscoverKidsMovies(int page) throws Exception {
+        return parse(
+            new JSONObject(fetch("/discover/movie?with_genres=10751&sort_by=popularity.desc&language=es-MX&page=" + page))
+                .getJSONArray("results"),
+            ContentItem.TYPE_MOVIE);
+    }
+
+    /**
      * Paginated mixed discover feed (alternates movies / series pages).
      * page 1 → popular movies p1, page 2 → popular series p1,
      * page 3 → popular movies p2, page 4 → popular series p2, …

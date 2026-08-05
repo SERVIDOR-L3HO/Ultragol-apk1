@@ -56,6 +56,7 @@ public class HomeFragment extends Fragment {
     private InfiniteDiscoverAdapter discoverAdapter;
     private int  discoverPage       = 0;
     private boolean discoverLoading = false;
+    private boolean kidsMode        = false;
 
     private static final String GOL3_API = "https://ultrago-xi.vercel.app/gol-3";
 
@@ -370,6 +371,7 @@ public class HomeFragment extends Fragment {
             if (prof != null) isKids = prof.isKids;
         } catch (Exception ignored) {}
 
+        kidsMode = isKids;
         final boolean kidsMode = isKids;
         ExecutorService pool = Executors.newFixedThreadPool(4);
         Handler h = new Handler(android.os.Looper.getMainLooper());
@@ -639,10 +641,15 @@ public class HomeFragment extends Fragment {
         final int pageToLoad = discoverPage;
         ExecutorService exec = Executors.newSingleThreadExecutor();
         Handler h = new Handler(android.os.Looper.getMainLooper());
+        final boolean kidsDiscover = kidsMode;
         exec.execute(() -> {
             List<ContentItem> result = new ArrayList<>();
             try {
-                result = TmdbApi.fetchDiscoverMixed(pageToLoad);
+                if (kidsDiscover) {
+                    result = TmdbApi.fetchDiscoverKidsMovies(pageToLoad);
+                } else {
+                    result = TmdbApi.fetchDiscoverMixed(pageToLoad);
+                }
             } catch (Exception ignored) {}
             final List<ContentItem> finalResult = result;
             h.post(() -> {
@@ -650,8 +657,8 @@ public class HomeFragment extends Fragment {
                 discoverLoading = false;
                 if (!isAdded() || discoverAdapter == null) return;
                 discoverAdapter.addPage(finalResult);
-                // Allow up to 40 pages (movies p1-p20 + series p1-p20)
-                discoverAdapter.setHasMore(discoverPage < 40);
+                // Allow up to 40 pages; kids has ~20 pages of family movies
+                discoverAdapter.setHasMore(discoverPage < (kidsDiscover ? 20 : 40));
             });
             exec.shutdown();
         });
