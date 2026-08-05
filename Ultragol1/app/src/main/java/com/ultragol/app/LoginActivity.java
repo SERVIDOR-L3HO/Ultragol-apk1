@@ -26,7 +26,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int RC_GOOGLE = 9001;
     private static final String WEB_CLIENT_ID =
-        "62425304873-uk10oeag3sf4e0q980o5850ei5ge0eha.apps.googleusercontent.com";
+        "187895656512-mf93mmh5cn515j15lloc9fbcsvk4srp6.apps.googleusercontent.com";
 
     private FirebaseAuth        mAuth;
     private GoogleSignInClient  googleClient;

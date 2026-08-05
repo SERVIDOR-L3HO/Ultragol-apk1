@@ -46,10 +46,21 @@ public class ProfileSelectorActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        // Guardar perfiles y datos en Firestore al salir de la pantalla de selección
+        // Guardar perfiles y datos en Firestore al salir de la pantalla de selección.
+        // The callback makes permission failures visible in Logcat instead of
+        // silently losing the profile.
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            UserSyncManager.pushToCloud(getApplicationContext(), user.getUid());
+            UserSyncManager.pushToCloud(getApplicationContext(), user.getUid(),
+                success -> {
+                    if (!success) {
+                        android.util.Log.w("ProfileSelector",
+                            "No se pudieron guardar los perfiles en la cuenta");
+                        runOnUiThread(() -> Toast.makeText(this,
+                            "Perfil guardado en el dispositivo, pero no se pudo sincronizar con tu cuenta",
+                            Toast.LENGTH_LONG).show());
+                    }
+                });
         }
     }
 
@@ -420,6 +431,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
             pending[0].avatarId    = selectedAvatar[0];
             pending[0].isKids      = switchKids.isChecked();
             ProfileManager.save(this, pending[0]);
+            syncProfiles();
             dialog.dismiss();
             reloadAdapter();
             if (!isEdit && ProfileManager.getAll(this).size() == 1) {
@@ -507,6 +519,21 @@ public class ProfileSelectorActivity extends AppCompatActivity
         profiles.clear();
         profiles.addAll(ProfileManager.getAll(this));
         adapter.notifyDataSetChanged();
+    }
+
+    private void syncProfiles() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        UserSyncManager.pushToCloud(getApplicationContext(), user.getUid(),
+            success -> {
+                if (!success) {
+                    android.util.Log.w("ProfileSelector",
+                        "El perfil se guardó localmente, pero Firestore lo rechazó");
+                    runOnUiThread(() -> Toast.makeText(this,
+                        "No se pudo guardar el perfil en tu cuenta",
+                        Toast.LENGTH_LONG).show());
+                }
+            });
     }
 
     private void animateShake(View target) {

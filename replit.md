@@ -43,6 +43,23 @@ Server listens on port 5000.
 - `vapid.json` — auto-generated VAPID keys (generated once on first run)
 - `apks/` — uploaded APK files
 
+## Android account/profile persistence
+
+The Android app uses Firebase Authentication from `Ultragol1/app/google-services.json`.
+Profiles and local preferences are synchronized to the authenticated account at:
+```
+users/{firebaseUid}/{preferenceGroup}
+```
+The app also reads the previous `users/{uid}/prefs/{group}` layout for existing
+installations, but new writes use the account document layout so they match the
+Firebase rules used by the web module. On a fresh install, the splash screen waits
+for the cloud pull before opening the profile selector to avoid creating a duplicate
+empty profile.
+
+The Android OAuth client ID must remain the web client ID from
+`google-services.json`; using a client ID from another Firebase project causes
+Google sign-in to fail before profile synchronization starts.
+
 ## Watch Party — Ver en grupo
 Real-time synchronized group viewing feature added to the Android app.
 

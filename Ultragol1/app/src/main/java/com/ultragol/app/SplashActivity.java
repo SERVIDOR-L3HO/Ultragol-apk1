@@ -219,9 +219,18 @@ public class SplashActivity extends AppCompatActivity {
         com.google.firebase.auth.FirebaseUser user =
             FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
-            // Already logged in: pull latest cloud data in background, then go to app
-            UserSyncManager.pullFromCloud(getApplicationContext(), user.getUid(), null);
-            startActivity(new Intent(this, ProfileSelectorActivity.class));
+            // Do not open the selector until the cloud pull has completed.
+            // Otherwise a fresh install sees an empty local list, creates a
+            // duplicate profile, and that duplicate can overwrite the account.
+            UserSyncManager.pullFromCloud(getApplicationContext(), user.getUid(),
+                success -> runOnUiThread(() -> {
+                    if (isFinishing() || isDestroyed()) return;
+                    startActivity(new Intent(this, ProfileSelectorActivity.class));
+                    overridePendingTransition(android.R.anim.fade_in,
+                        android.R.anim.fade_out);
+                    finish();
+                }));
+            return;
         } else {
             startActivity(new Intent(this, LoginActivity.class));
         }
