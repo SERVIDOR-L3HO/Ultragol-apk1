@@ -1,11 +1,13 @@
 package com.ultragol.app.fragments;
 
+import com.ultragol.app.ProfileManager;
 import com.ultragol.app.network.A7xIptvApi;
 import com.ultragol.app.network.TmdbApi;
 
 /**
  * Pantalla de series — usa A7X TV IPTV como fuente principal.
  * Si A7X falla, cae a TMDB como respaldo.
+ * En perfil infantil carga sólo series aptas para niños.
  */
 public class SeriesFragment extends CineBaseFragment {
 
@@ -15,6 +17,45 @@ public class SeriesFragment extends CineBaseFragment {
 
     @Override
     protected void loadAllSections() {
+        // Detect kids profile
+        boolean isKids = false;
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(requireContext());
+            if (prof != null) isKids = prof.isKids;
+        } catch (Exception ignored) {}
+
+        if (isKids) {
+            loadKidsSections();
+        } else {
+            loadNormalSections();
+        }
+    }
+
+    private void loadKidsSections() {
+        int teal   = 0xFF009688;
+        int yellow = 0xFFFFBB00;
+        int pink   = 0xFFE91E63;
+        int green  = 0xFF4CAF50;
+
+        loadHeroSection(
+            "PARA NIÑOS", "SERIES ANIMADAS", teal,
+            () -> TmdbApi.fetchKidsAnimationSeries()
+        );
+        loadCardsSection(
+            "FAMILIA", "SERIES FAMILIARES", yellow,
+            () -> TmdbApi.fetchKidsSeries()
+        );
+        loadCardsSection(
+            "ARTE EN MOVIMIENTO", "ANIMACIÓN INFANTIL", pink,
+            () -> TmdbApi.fetchSeriesByGenre(16)
+        );
+        loadCardsSection(
+            "AVENTURA", "PARA TODA LA FAMILIA", green,
+            () -> TmdbApi.fetchSeriesByGenre(10751)
+        );
+    }
+
+    private void loadNormalSections() {
         int cyan   = 0xFF00BCD4;
         int green  = 0xFF4CAF50;
         int pink   = 0xFFE91E63;

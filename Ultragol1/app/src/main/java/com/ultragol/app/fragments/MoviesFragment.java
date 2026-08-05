@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.*;
+import com.ultragol.app.ProfileManager;
 import com.ultragol.app.R;
 import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.ContentGridAdapter;
@@ -21,6 +22,7 @@ import java.util.concurrent.*;
 /**
  * Pantalla de películas — usa A7X TV IPTV como fuente principal.
  * Si A7X falla (sin conexión, sin token), cae a TMDB como respaldo.
+ * En perfil infantil carga sólo contenido familiar.
  */
 public class MoviesFragment extends Fragment {
 
@@ -33,8 +35,20 @@ public class MoviesFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle s) {
         super.onViewCreated(view, s);
 
+        // Back button
+        View backBtn = view.findViewById(R.id.gridBack);
+        if (backBtn != null) backBtn.setOnClickListener(v -> requireActivity().onBackPressed());
+
+        // Detect kids profile
+        boolean isKids = false;
+        try {
+            ProfileManager.Profile prof = ProfileManager.getCurrentProfile(requireContext());
+            if (prof != null) isKids = prof.isKids;
+        } catch (Exception ignored) {}
+        final boolean kidsMode = isKids;
+
         TextView title = view.findViewById(R.id.gridTitle);
-        if (title != null) title.setText("🎬 Películas");
+        if (title != null) title.setText(kidsMode ? "🎬 Películas Infantiles" : "🎬 Películas");
 
         RecyclerView grid = view.findViewById(R.id.contentGrid);
         ProgressBar pb   = view.findViewById(R.id.gridLoading);
@@ -51,16 +65,19 @@ public class MoviesFragment extends Fragment {
         Executors.newSingleThreadExecutor().execute(() -> {
             List<ContentItem> result = new ArrayList<>();
             try {
-                // Fuente principal: A7X IPTV
-                result = A7xIptvApi.loadMovies(requireContext());
+                if (kidsMode) {
+                    // Kids profile: only family/animation movies from TMDB
+                    result = TmdbApi.fetchKidsMovies();
+                    List<ContentItem> anim = TmdbApi.fetchKidsAnimation();
+                    for (ContentItem c : anim) {
+                        if (!containsId(result, c)) result.add(c);
+                    }
+                } else {
+                    // Normal: A7X IPTV primary, TMDB fallback
+                    result = A7xIptvApi.loadMovies(requireContext());
+                    if (result.isEmpty()) result = TmdbApi.fetchMovies();
+                }
             } catch (Exception ignored) {}
-
-            // Respaldo: TMDB si A7X no devuelve datos
-            if (result.isEmpty()) {
-                try {
-                    result = TmdbApi.fetchMovies();
-                } catch (Exception ignored) {}
-            }
 
             final List<ContentItem> finalResult = result;
             new Handler(Looper.getMainLooper()).post(() -> {
@@ -70,5 +87,12 @@ public class MoviesFragment extends Fragment {
                 if (pb != null) pb.setVisibility(View.GONE);
             });
         });
+    }
+
+    private boolean containsId(List<ContentItem> list, ContentItem item) {
+        for (ContentItem c : list) {
+            if (c.getTmdbId() == item.getTmdbId()) return true;
+        }
+        return false;
     }
 }
