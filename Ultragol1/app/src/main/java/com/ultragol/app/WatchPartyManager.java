@@ -61,12 +61,14 @@ public class WatchPartyManager {
     private final String myUid = UUID.randomUUID().toString();
     private String currentCode;
     private boolean isHost;
+    private String myDisplayName = "Usuario";
 
     // Firebase refs and listeners (kept so we can remove them on disconnect)
     private DatabaseReference roomRef;
     private ValueEventListener  participantsListener;
     private ChildEventListener  chatListener;
     private ValueEventListener  syncListener;
+    private boolean firstSyncSkip = true;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
 
@@ -76,20 +78,16 @@ public class WatchPartyManager {
 
     /**
      * Create a new room. Generates a unique 6-char code and writes it to Firebase.
-     * @param contentId  Identifier for the content (e.g. TMDB id).
-     * @param password   Optional password. Pass "" for open room.
-     * @param name       Host's display name.
      */
     public void createRoom(String contentId, String password, String name) {
         isHost = true;
         String code = generateCode();
-        DatabaseReference ref = db().child(ROOT).child(code);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ROOT).child(code);
 
-        // Check code is not taken (very unlikely but safe)
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot snap) {
                 if (snap.exists()) {
-                    // Code collision — try again
+                    // Code collision — try again with a new code
                     createRoom(contentId, password, name);
                     return;
                 }
@@ -101,7 +99,7 @@ public class WatchPartyManager {
                 room.put("createdAt",    System.currentTimeMillis());
                 ref.setValue(room, (err, r) -> {
                     if (err != null) {
-                        notify(() -> { if (listener != null) listener.onError("Error al crear la sala: " + err.getMessage()); });
+                        postToMain(() -> { if (listener != null) listener.onError("Error al crear la sala: " + err.getMessage()); });
                         return;
                     }
                     currentCode = code;
@@ -110,40 +108,35 @@ public class WatchPartyManager {
                 });
             }
             @Override public void onCancelled(DatabaseError e) {
-                notify(() -> { if (listener != null) listener.onError(e.getMessage()); });
+                postToMain(() -> { if (listener != null) listener.onError(e.getMessage()); });
             }
         });
     }
 
     /**
      * Join an existing room by its code.
-     * @param code      6-char room code (case-insensitive).
-     * @param password  Room password, or "" for open rooms.
-     * @param name      Guest's display name.
      */
     public void joinRoom(String code, String password, String name) {
         isHost = false;
         String upper = code.toUpperCase().trim();
-        DatabaseReference ref = db().child(ROOT).child(upper);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(ROOT).child(upper);
 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot snap) {
                 if (!snap.exists()) {
-                    notify(() -> { if (listener != null) listener.onError("Sala no encontrada. Verifica el código."); });
+                    postToMain(() -> { if (listener != null) listener.onError("Sala no encontrada. Verifica el código."); });
                     return;
                 }
-                // Check password
                 String storedHash = snap.child("passwordHash").getValue(String.class);
                 if (storedHash != null && !storedHash.isEmpty()) {
                     if (!storedHash.equals(hashPassword(password))) {
-                        notify(() -> { if (listener != null) listener.onError("Contraseña incorrecta."); });
+                        postToMain(() -> { if (listener != null) listener.onError("Contraseña incorrecta."); });
                         return;
                     }
                 }
-                // Check capacity
                 long count = snap.child("participants").getChildrenCount();
                 if (count >= 20) {
-                    notify(() -> { if (listener != null) listener.onError("La sala está llena (máx 20 personas)."); });
+                    postToMain(() -> { if (listener != null) listener.onError("La sala está llena (máx 20 personas)."); });
                     return;
                 }
                 currentCode = upper;
@@ -151,20 +144,16 @@ public class WatchPartyManager {
                 joinAsParticipant(ref, upper, name, false);
             }
             @Override public void onCancelled(DatabaseError e) {
-                notify(() -> { if (listener != null) listener.onError(e.getMessage()); });
+                postToMain(() -> { if (listener != null) listener.onError(e.getMessage()); });
             }
         });
     }
 
     /** Host: broadcast play to all participants. */
-    public void syncPlay(long positionMs) {
-        writeSync("play", positionMs);
-    }
+    public void syncPlay(long positionMs)  { writeSync("play",  positionMs); }
 
     /** Host: broadcast pause to all participants. */
-    public void syncPause(long positionMs) {
-        writeSync("pause", positionMs);
-    }
+    public void syncPause(long positionMs) { writeSync("pause", positionMs); }
 
     /** Send a chat message to the room. */
     public void sendChat(String text) {
@@ -180,11 +169,8 @@ public class WatchPartyManager {
     /** Leave the room and clean up all listeners. */
     public void disconnect() {
         if (roomRef == null) return;
-        // Remove ourselves from participants
         roomRef.child("participants").child(myUid).removeValue();
-        // Post a system message
         pushSystem(roomRef, myDisplayName + " salió de la sala.");
-        // Remove listeners
         if (participantsListener != null) roomRef.child("participants").removeEventListener(participantsListener);
         if (syncListener        != null) roomRef.child("sync").removeEventListener(syncListener);
         if (chatListener        != null) roomRef.child("chat").removeEventListener(chatListener);
@@ -196,37 +182,30 @@ public class WatchPartyManager {
 
     // ── Private helpers ───────────────────────────────────────────────────────
 
-    private String myDisplayName = "Usuario";
-
     private void joinAsParticipant(DatabaseReference ref, String code, String name, boolean host) {
         myDisplayName = name;
         DatabaseReference mySlot = ref.child("participants").child(myUid);
 
-        // Write our entry
         Map<String, Object> me = new HashMap<>();
         me.put("name",     name);
         me.put("joinedAt", System.currentTimeMillis());
         mySlot.setValue(me, (err, r) -> {
             if (err != null) {
-                notify(() -> { if (listener != null) listener.onError("No se pudo unir: " + err.getMessage()); });
+                postToMain(() -> { if (listener != null) listener.onError("No se pudo unir: " + err.getMessage()); });
                 return;
             }
-            // Auto-remove on disconnect
             mySlot.onDisconnect().removeValue();
 
-            // Post system message
             if (!host) pushSystem(ref, "👋 " + name + " se unió a la sala.");
 
-            // Start listening
             attachParticipantsListener(ref);
             attachChatListener(ref);
             attachSyncListener(ref);
 
-            // Notify joined
             ref.child("participants").addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override public void onDataChange(DataSnapshot snap) {
                     int cnt = (int) snap.getChildrenCount();
-                    notify(() -> { if (listener != null) listener.onJoined(code, host, cnt); });
+                    postToMain(() -> { if (listener != null) listener.onJoined(code, host, cnt); });
                 }
                 @Override public void onCancelled(DatabaseError e) {}
             });
@@ -243,46 +222,41 @@ public class WatchPartyManager {
                     String n = child.child("name").getValue(String.class);
                     names[i++] = n != null ? n : "?";
                 }
-                notify(() -> { if (listener != null) listener.onParticipantsChanged(count, names); });
+                postToMain(() -> { if (listener != null) listener.onParticipantsChanged(count, names); });
             }
             @Override public void onCancelled(DatabaseError e) {}
         };
         ref.child("participants").addValueEventListener(participantsListener);
     }
 
-    private boolean firstSyncSkip = true; // skip the initial value on attach
-
     private void attachSyncListener(DatabaseReference ref) {
         syncListener = new ValueEventListener() {
             @Override public void onDataChange(DataSnapshot snap) {
-                if (firstSyncSkip) { firstSyncSkip = false; return; } // don't fire on initial attach
+                if (firstSyncSkip) { firstSyncSkip = false; return; }
                 if (!snap.exists()) return;
                 String action = snap.child("action").getValue(String.class);
                 Long   pos    = snap.child("positionMs").getValue(Long.class);
                 if (action == null) return;
                 long posMs = pos != null ? pos : 0L;
-                notify(() -> { if (listener != null) listener.onSync(action, posMs); });
+                postToMain(() -> { if (listener != null) listener.onSync(action, posMs); });
             }
             @Override public void onCancelled(DatabaseError e) {}
         };
         ref.child("sync").addValueEventListener(syncListener);
     }
 
-    private boolean chatInitialized = false;
-
     private void attachChatListener(DatabaseReference ref) {
-        // Only listen to new messages from now on
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         chatListener = new ChildEventListener() {
             @Override public void onChildAdded(DataSnapshot snap, String prev) {
                 Long ts = snap.child("timestamp").getValue(Long.class);
-                if (ts != null && ts < now) return; // skip old messages
+                if (ts != null && ts < now) return; // skip messages sent before we joined
                 Boolean sys    = snap.child("isSystem").getValue(Boolean.class);
                 String  sender = snap.child("sender").getValue(String.class);
                 String  text   = snap.child("text").getValue(String.class);
                 if (text == null) return;
                 boolean isSystem = sys != null && sys;
-                notify(() -> { if (listener != null) listener.onChatMessage(isSystem ? null : sender, text); });
+                postToMain(() -> { if (listener != null) listener.onChatMessage(isSystem ? null : sender, text); });
             }
             @Override public void onChildChanged(DataSnapshot s, String p) {}
             @Override public void onChildRemoved(DataSnapshot s) {}
@@ -303,15 +277,15 @@ public class WatchPartyManager {
 
     private void pushSystem(DatabaseReference ref, String text) {
         Map<String, Object> msg = new HashMap<>();
-        msg.put("sender",    null);
+        msg.put("sender",    (Object) null);
         msg.put("text",      text);
         msg.put("isSystem",  true);
         msg.put("timestamp", System.currentTimeMillis());
         ref.child("chat").push().setValue(msg);
     }
 
-    private static FirebaseDatabase db() {
-        return FirebaseDatabase.getInstance();
+    private void postToMain(Runnable r) {
+        mainHandler.post(r);
     }
 
     private static String generateCode() {
@@ -330,11 +304,7 @@ public class WatchPartyManager {
             for (byte b : hash) hex.append(String.format("%02x", b));
             return hex.toString();
         } catch (Exception e) {
-            return password; // fallback (shouldn't happen)
+            return password;
         }
-    }
-
-    private void notify(Runnable r) {
-        mainHandler.post(r);
     }
 }
