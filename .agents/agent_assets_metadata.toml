@@ -113,7 +113,8 @@ title = "Ultragol1 — fix real del stutter en scroll (Home)"
 id = "wQ3PBd_ZDqk-tjluUqXBR"
 uri = "file://Ultragol1/app/build/outputs/apk/debug/app-debug.apk"
 type = "unspecified"
-title = "app-debug.apk — Ultragol1 con rediseño TV"
+title = "APK corregida de Ultragol"
+description = "APK debug compilada con la corrección de sincronización de perfiles y preferencias con Firebase Firestore. Versión 1.5, paquete com.ultragol1.app."
 
 [[outputs]]
 id = "G4EzAvurlgSff_55TAJ2d"
