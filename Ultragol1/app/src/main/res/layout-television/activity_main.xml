@@ -289,7 +289,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:nextFocusUp="@id/navDoramas"
-                        android:nextFocusDown="@id/navMusica"
+                        android:nextFocusDown="@id/navTv"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView
                             android:layout_width="@dimen/nav_icon_size"
@@ -308,38 +308,6 @@
                             android:letterSpacing="0.06"/>
                     </LinearLayout>
 
-                    <!-- MÚSICA -->
-                    <LinearLayout
-                        android:id="@+id/navMusica"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/nav_item_height"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:background="@drawable/tv_nav_item_focused"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:nextFocusUp="@id/navDeportes"
-                        android:nextFocusDown="@id/navTv"
-                        android:nextFocusRight="@id/fragmentContainer">
-                        <ImageView
-                            android:layout_width="@dimen/nav_icon_size"
-                            android:layout_height="@dimen/nav_icon_size"
-                            android:src="@drawable/ic_nav_music"
-                            android:tint="#BAFFFFFF"
-                            android:scaleType="fitCenter"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="MÚSICA"
-                            android:textColor="#EAFFFFFF"
-                            android:textSize="@dimen/nav_text_size"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"/>
-                    </LinearLayout>
-
                     <!-- TV EN VIVO -->
                     <LinearLayout
                         android:id="@+id/navTv"
@@ -352,7 +320,7 @@
                         android:background="@drawable/tv_nav_item_focused"
                         android:clickable="true"
                         android:focusable="true"
-                        android:nextFocusUp="@id/navMusica"
+                        android:nextFocusUp="@id/navDeportes"
                         android:nextFocusDown="@id/navFavorites"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView

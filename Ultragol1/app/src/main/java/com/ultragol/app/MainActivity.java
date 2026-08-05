@@ -244,7 +244,6 @@ public class MainActivity extends AppCompatActivity {
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
         View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
-        View navMusica    = drawerOverlay.findViewById(R.id.navMusica);
         View navTv        = drawerOverlay.findViewById(R.id.navTv);
         View navFavorites     = drawerOverlay.findViewById(R.id.navFavorites);
         View navMyList        = drawerOverlay.findViewById(R.id.navMyList);
@@ -258,7 +257,6 @@ public class MainActivity extends AppCompatActivity {
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
         if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
-        if (navMusica    != null) navMusica.setOnClickListener(v    -> navigate(new MusicaWebFragment()));
         if (navTv        != null) navTv.setOnClickListener(v        -> navigate(new com.ultragol.app.fragments.TvFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
@@ -392,9 +390,6 @@ public class MainActivity extends AppCompatActivity {
         if (current instanceof DeportesWebFragment) {
             if (((DeportesWebFragment) current).onBackPressed()) return;
         }
-        if (current instanceof MusicaWebFragment) {
-            if (((MusicaWebFragment) current).onBackPressed()) return;
-        }
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
             // On TV after popping back: return focus to nav rail
@@ -411,7 +406,6 @@ public class MainActivity extends AppCompatActivity {
         setDrawerItemVisibility(R.id.navAnime,        kidsGone);
         setDrawerItemVisibility(R.id.navDoramas,      kidsGone);
         setDrawerItemVisibility(R.id.navDeportes,     kidsGone);
-        setDrawerItemVisibility(R.id.navMusica,       kidsGone);
         setDrawerItemVisibility(R.id.navTv,           kidsGone);
         setDrawerItemVisibility(R.id.navSearch,       kidsGone); // Shorts Dramas
         setDrawerItemVisibility(R.id.navSettings,     isKids ? View.GONE : View.VISIBLE);
