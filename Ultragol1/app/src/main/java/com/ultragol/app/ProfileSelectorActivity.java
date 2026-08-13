@@ -281,7 +281,6 @@ public class ProfileSelectorActivity extends AppCompatActivity
         TextView dialogTitle      = v.findViewById(R.id.dialogTitle);
         EditText etName           = v.findViewById(R.id.etName);
         ImageView ivAvatarPreview = v.findViewById(R.id.ivAvatarIconPreview);
-        LinearLayout colorPicker  = v.findViewById(R.id.colorPicker);
         LinearLayout avatarPickerRow = v.findViewById(R.id.avatarPickerRow);
         androidx.appcompat.widget.SwitchCompat switchKids = v.findViewById(R.id.switchKids);
         TextView tvPinStatus = v.findViewById(R.id.tvPinStatus);
@@ -296,6 +295,8 @@ public class ProfileSelectorActivity extends AppCompatActivity
         }
 
         final ProfileManager.Profile[] pending = {isEdit ? existing : ProfileManager.newProfile("", ProfileManager.AVATAR_COLORS[0])};
+        // avatarColor is kept only for backward-compatible storage; every avatar
+        // is self-colored now so there's no accent-color picker anymore.
         final String[] selectedColor  = {isEdit ? existing.avatarColor : ProfileManager.AVATAR_COLORS[0]};
         final int[]    selectedAvatar = {isEdit ? existing.avatarId    : 0};
         float dp = getResources().getDisplayMetrics().density;
@@ -390,33 +391,6 @@ public class ProfileSelectorActivity extends AppCompatActivity
             public void onTextChanged(CharSequence s, int st, int b, int c) { updatePreview.run(); }
             public void afterTextChanged(Editable s) {}
         });
-
-        // ── Color swatches ──────────────────────────────────────────────────
-        for (String color : ProfileManager.AVATAR_COLORS) {
-            FrameLayout swatch = new FrameLayout(this);
-            int sz = (int)(38 * dp);
-            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sz, sz);
-            lp.setMargins((int)(5*dp), 0, (int)(5*dp), 0);
-            swatch.setLayoutParams(lp);
-            GradientDrawable gd = new GradientDrawable();
-            gd.setShape(GradientDrawable.OVAL);
-            try { gd.setColor(Color.parseColor(color)); } catch (Exception ignored) {}
-            if (color.equals(selectedColor[0])) gd.setStroke((int)(3*dp), Color.WHITE);
-            swatch.setBackground(gd);
-            swatch.setOnClickListener(sv -> {
-                selectedColor[0] = color;
-                for (int i = 0; i < colorPicker.getChildCount(); i++) {
-                    View sw = colorPicker.getChildAt(i);
-                    GradientDrawable gd2 = new GradientDrawable();
-                    gd2.setShape(GradientDrawable.OVAL);
-                    String c = ProfileManager.AVATAR_COLORS[i];
-                    try { gd2.setColor(Color.parseColor(c)); } catch (Exception ignored) {}
-                    if (c.equals(selectedColor[0])) gd2.setStroke((int)(3*dp), Color.WHITE);
-                    sw.setBackground(gd2);
-                }
-            });
-            colorPicker.addView(swatch);
-        }
 
         // ── PIN status ──────────────────────────────────────────────────────
         Runnable refreshPinStatus = () -> {

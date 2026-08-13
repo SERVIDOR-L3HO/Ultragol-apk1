@@ -127,18 +127,18 @@ public class HomeFragment extends Fragment {
     private void setupTopBar(View view) {
         // ── Profile avatar button ──────────────────────────────────────────────
         FrameLayout btnProfile = view.findViewById(R.id.btnProfile);
+        ImageView ivProfileMini = view.findViewById(R.id.ivProfileMini);
         TextView tvProfileInitial = view.findViewById(R.id.tvProfileInitial);
         if (btnProfile != null) {
             ProfileManager.Profile profile = ProfileManager.getCurrentProfile(requireContext());
-            if (profile != null && tvProfileInitial != null) {
-                tvProfileInitial.setText(profile.getInitial());
-                try {
-                    android.graphics.drawable.GradientDrawable gd =
-                        new android.graphics.drawable.GradientDrawable();
-                    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-                    gd.setColor(android.graphics.Color.parseColor(profile.avatarColor));
-                    btnProfile.setBackground(gd);
-                } catch (Exception ignored) {}
+            if (profile != null && ivProfileMini != null) {
+                ivProfileMini.setImageResource(profile.getAvatarResId());
+                ivProfileMini.setVisibility(View.VISIBLE);
+                if (tvProfileInitial != null) tvProfileInitial.setVisibility(View.GONE);
+            } else if (tvProfileInitial != null) {
+                // No profile yet (shouldn't normally happen here) — fall back to "?"
+                tvProfileInitial.setVisibility(View.VISIBLE);
+                if (ivProfileMini != null) ivProfileMini.setVisibility(View.GONE);
             }
             btnProfile.setOnClickListener(v -> {
                 startActivity(new android.content.Intent(

@@ -35,7 +35,7 @@
                 android:letterSpacing="-0.01"
                 android:layout_marginBottom="20dp"/>
 
-            <!-- Avatar con glow ring -->
+            <!-- Avatar con halo de vidrio neutro -->
             <FrameLayout
                 android:layout_width="108dp"
                 android:layout_height="108dp"
@@ -45,8 +45,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/profile_avatar_glow_ring"
-                    android:alpha="0.9"/>
+                    android:background="@drawable/avatar_preview_glass_ring"/>
 
                 <FrameLayout
                     android:id="@+id/avatarPreview"
@@ -146,33 +145,6 @@
                     android:inputType="textPersonName|textCapWords"
                     android:imeOptions="actionDone"/>
             </LinearLayout>
-
-            <!-- Label color -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="COLOR DE ACENTO"
-                android:textColor="#80FFFFFF"
-                android:textSize="9sp"
-                android:fontFamily="sans-serif-bold"
-                android:letterSpacing="0.12"
-                android:layout_marginBottom="10dp"/>
-
-            <!-- Fila de colores -->
-            <LinearLayout
-                android:id="@+id/colorPicker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="18dp"/>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#14FFFFFF"
-                android:layout_marginBottom="14dp"/>
 
             <!-- Perfil infantil toggle -->
             <LinearLayout
