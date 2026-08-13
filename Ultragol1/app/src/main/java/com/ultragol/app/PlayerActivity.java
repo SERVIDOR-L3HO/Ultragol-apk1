@@ -65,6 +65,37 @@ public class PlayerActivity extends AppCompatActivity {
     private String currentEmbedUrl           = null;
     private String videoTitle                = null;
 
+    // ── Decoy filtering + "wait for the real source" grace window ────────────
+    // Some embeds play a short ad/trailer/placeholder stream first, then swap
+    // in the actual movie. Instead of freezing on the first URL the sniffer
+    // sees, known decoy signatures are rejected outright, and every other
+    // candidate resets a short timer — only the last candidate seen once
+    // things go quiet for CAPTURE_GRACE_MS is treated as final.
+    private static final long CAPTURE_GRACE_MS = 1400;
+    private final Handler captureGraceHandler = new Handler(Looper.getMainLooper());
+    private volatile String pendingCandidateUrl      = null;
+    private volatile String pendingCandidateReferer  = null;
+    private volatile boolean pendingCandidateIsM3u8  = false;
+
+    /** Well-known public test/demo/placeholder videos some ad slots or lazy embeds serve. */
+    private static final String[] DECOY_STREAM_SIGNATURES = {
+        "bigbuckbunny", "big_buck_bunny", "big-buck-bunny", "mov_bbb",
+        "sintel", "tearsofsteel", "tears_of_steel", "elephantsdream", "elephants_dream",
+        "jellyfish.mp4", "forbiggerescapes", "forbiggerfun", "forbiggerjoyrides",
+        "sample-videos.com", "samplelib.com", "file-examples.com", "learningcontainer.com",
+        "commondatastorage.googleapis.com", "gtv-videos-bucket",
+        "test-videos.co.uk", "html5demos.com", "media.w3.org",
+        "vjs.zencdn.net", "download.blender.org"
+    };
+
+    private boolean isLikelyDecoyStream(String url) {
+        String lower = url.toLowerCase(java.util.Locale.ROOT);
+        for (String sig : DECOY_STREAM_SIGNATURES) {
+            if (lower.contains(sig)) return true;
+        }
+        return false;
+    }
+
     // ── Extra flags ───────────────────────────────────────────────────────────
     /** If true: once stream URL is captured, auto-open CastBottomSheet instead of MediaActivity */
     private boolean autoCast   = false;
@@ -937,6 +968,7 @@ public class PlayerActivity extends AppCompatActivity {
     @Override protected void onResume()  { super.onResume();  webView.onResume(); }
     @Override protected void onDestroy() {
         autoRetryHandler.removeCallbacksAndMessages(null);
+        captureGraceHandler.removeCallbacksAndMessages(null);
         webView.destroy();
         super.onDestroy();
     }
@@ -956,13 +988,24 @@ public class PlayerActivity extends AppCompatActivity {
             boolean isM3u8 = url.contains(".m3u8") || url.contains("m3u8");
             boolean isMp4  = url.contains(".mp4");
             if (!isM3u8 && !isMp4) return;
+            if (isLikelyDecoyStream(url)) return; // known ad/placeholder/test video — never accept
 
-            capturedVideoUrl = url;
-            capturedReferer  = currentEmbedUrl;
-            capturedIsM3u8   = isM3u8;
+            pendingCandidateUrl     = url;
+            pendingCandidateReferer = currentEmbedUrl;
+            pendingCandidateIsM3u8  = isM3u8;
 
-            new Handler(Looper.getMainLooper()).post(() ->
-                    onVideoUrlCaptured(url, currentEmbedUrl, isM3u8));
+            // Reset the grace window: if a different (real) source shows up shortly
+            // after this one — e.g. once a preroll ad finishes — it replaces this
+            // candidate. Only whichever URL is still pending once things go quiet
+            // gets treated as final.
+            captureGraceHandler.removeCallbacksAndMessages(null);
+            captureGraceHandler.postDelayed(() -> {
+                if (capturedVideoUrl != null || pendingCandidateUrl == null) return;
+                capturedVideoUrl = pendingCandidateUrl;
+                capturedReferer  = pendingCandidateReferer;
+                capturedIsM3u8   = pendingCandidateIsM3u8;
+                onVideoUrlCaptured(capturedVideoUrl, capturedReferer, capturedIsM3u8);
+            }, CAPTURE_GRACE_MS);
         }
     }
 }
