@@ -19,16 +19,25 @@ public class ProfileManager {
         "#E67E22", "#2ECC71"
     };
 
+    /**
+     * Each avatar is a complete, self-colored circular illustration (gradient
+     * orbs, characters, animals) — not a plain glyph tinted by avatarColor.
+     * avatarColor is used only for the selection ring / badge accents now.
+     */
     public static final int[] ADULT_AVATARS = {
-        R.drawable.ic_avatar_0, R.drawable.ic_avatar_1,
-        R.drawable.ic_avatar_2, R.drawable.ic_avatar_3,
-        R.drawable.ic_avatar_4, R.drawable.ic_avatar_5,
-        R.drawable.ic_avatar_6, R.drawable.ic_avatar_7
+        R.drawable.avatar_g1, R.drawable.avatar_g2, R.drawable.avatar_g3, R.drawable.avatar_g4,
+        R.drawable.avatar_g5, R.drawable.avatar_g6, R.drawable.avatar_g7, R.drawable.avatar_g8,
+        R.drawable.avatar_c1, R.drawable.avatar_c2, R.drawable.avatar_c3,
+        R.drawable.avatar_c4, R.drawable.avatar_c5, R.drawable.avatar_c6,
+        R.drawable.avatar_a1, R.drawable.avatar_a2, R.drawable.avatar_a3,
+        R.drawable.avatar_a4, R.drawable.avatar_a5, R.drawable.avatar_a6
     };
 
+    /** Curated subset for kids profiles: all the animals plus the brightest gradients. */
     public static final int[] KIDS_AVATARS = {
-        R.drawable.ic_avatar_kids_0, R.drawable.ic_avatar_kids_1,
-        R.drawable.ic_avatar_kids_2, R.drawable.ic_avatar_kids_3
+        R.drawable.avatar_a1, R.drawable.avatar_a2, R.drawable.avatar_a3,
+        R.drawable.avatar_a4, R.drawable.avatar_a5, R.drawable.avatar_a6,
+        R.drawable.avatar_g1, R.drawable.avatar_g7
     };
 
     // ─────────────────────────────────────────────────────────────────────────

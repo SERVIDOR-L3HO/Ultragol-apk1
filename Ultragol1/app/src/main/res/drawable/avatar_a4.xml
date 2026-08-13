@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Koala -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval"><solid android:color="#B0B7BF"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="56%" android:start="0%" android:end="60%">
+        <shape android:shape="oval"><solid android:color="#D7DBDD"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="56%" android:start="60%" android:end="0%">
+        <shape android:shape="oval"><solid android:color="#D7DBDD"/></shape>
+    </item>
+    <item android:top="38%" android:bottom="50%" android:start="26%" android:end="56%">
+        <shape android:shape="oval"><solid android:color="#232323"/></shape>
+    </item>
+    <item android:top="38%" android:bottom="50%" android:start="56%" android:end="26%">
+        <shape android:shape="oval"><solid android:color="#232323"/></shape>
+    </item>
+    <item android:top="58%" android:bottom="18%" android:start="34%" android:end="34%">
+        <shape android:shape="oval"><solid android:color="#232323"/></shape>
+    </item>
+</layer-list>

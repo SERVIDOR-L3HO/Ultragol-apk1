@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Cat -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval"><solid android:color="#9E9E9E"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="72%" android:start="4%" android:end="70%">
+        <shape android:shape="oval"><solid android:color="#7A7A7A"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="72%" android:start="70%" android:end="4%">
+        <shape android:shape="oval"><solid android:color="#7A7A7A"/></shape>
+    </item>
+    <item android:top="6%" android:bottom="80%" android:start="16%" android:end="76%">
+        <shape android:shape="oval"><solid android:color="#F6B8C1"/></shape>
+    </item>
+    <item android:top="6%" android:bottom="80%" android:start="76%" android:end="16%">
+        <shape android:shape="oval"><solid android:color="#F6B8C1"/></shape>
+    </item>
+    <item android:top="52%" android:bottom="12%" android:start="30%" android:end="30%">
+        <shape android:shape="oval"><solid android:color="#FFF3E4"/></shape>
+    </item>
+    <item android:top="38%" android:bottom="52%" android:start="28%" android:end="54%">
+        <shape android:shape="oval"><solid android:color="#8AB833"/></shape>
+    </item>
+    <item android:top="38%" android:bottom="52%" android:start="54%" android:end="28%">
+        <shape android:shape="oval"><solid android:color="#8AB833"/></shape>
+    </item>
+    <item android:top="62%" android:bottom="28%" android:start="46%" android:end="46%">
+        <shape android:shape="oval"><solid android:color="#E88CA0"/></shape>
+    </item>
+</layer-list>

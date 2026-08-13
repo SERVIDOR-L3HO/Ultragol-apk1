@@ -280,7 +280,6 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         TextView dialogTitle      = v.findViewById(R.id.dialogTitle);
         EditText etName           = v.findViewById(R.id.etName);
-        FrameLayout avatarPrev    = v.findViewById(R.id.avatarPreview);
         ImageView ivAvatarPreview = v.findViewById(R.id.ivAvatarIconPreview);
         LinearLayout colorPicker  = v.findViewById(R.id.colorPicker);
         LinearLayout avatarPickerRow = v.findViewById(R.id.avatarPickerRow);
@@ -302,12 +301,9 @@ public class ProfileSelectorActivity extends AppCompatActivity
         float dp = getResources().getDisplayMetrics().density;
 
         // ── Update big preview ──────────────────────────────────────────────
+        // Each avatar is now a complete, self-colored circular illustration —
+        // the preview just shows that image directly, no background tinting.
         Runnable updatePreview = () -> {
-            GradientDrawable gd = new GradientDrawable();
-            gd.setShape(GradientDrawable.OVAL);
-            try { gd.setColor(Color.parseColor(selectedColor[0])); }
-            catch (Exception e) { gd.setColor(0xFFFF6B00); }
-            if (avatarPrev != null) avatarPrev.setBackground(gd);
             if (ivAvatarPreview != null) {
                 boolean kids = switchKids != null && switchKids.isChecked();
                 int[] arr = kids ? ProfileManager.KIDS_AVATARS : ProfileManager.ADULT_AVATARS;
@@ -318,7 +314,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
         };
         updatePreview.run();
 
-        // ── Avatar picker ───────────────────────────────────────────────────
+        // ── Avatar picker: a 2-row grid of self-colored avatar illustrations ──
         final Runnable[] buildPicker = {null};
         buildPicker[0] = () -> {
             if (avatarPickerRow == null) return;
@@ -326,37 +322,59 @@ public class ProfileSelectorActivity extends AppCompatActivity
             boolean kids = switchKids != null && switchKids.isChecked();
             int[] avatarArr = kids ? ProfileManager.KIDS_AVATARS : ProfileManager.ADULT_AVATARS;
             int sel = selectedAvatar[0];
+
+            LinearLayout row1 = new LinearLayout(this);
+            row1.setOrientation(LinearLayout.HORIZONTAL);
+            LinearLayout row2 = new LinearLayout(this);
+            row2.setOrientation(LinearLayout.HORIZONTAL);
+            row2.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            LinearLayout.LayoutParams row2Lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            row2Lp.topMargin = (int) (8 * dp);
+            row2.setLayoutParams(row2Lp);
+
+            int perRow = (int) Math.ceil(avatarArr.length / 2.0);
+
             for (int i = 0; i < avatarArr.length; i++) {
-                final int finalIdx   = i;
+                final int finalIdx      = i;
                 final int finalAvatarId = kids ? (100 + i) : i;
+                boolean isSel = (sel == finalAvatarId);
+
                 FrameLayout item = new FrameLayout(this);
-                int sz = (int)(58 * dp);
+                int sz = (int) (56 * dp);
                 LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(sz, sz);
-                lp.setMargins((int)(5*dp), (int)(4*dp), (int)(5*dp), (int)(4*dp));
+                lp.setMargins((int) (5 * dp), 0, (int) (5 * dp), 0);
                 item.setLayoutParams(lp);
 
-                GradientDrawable bg = new GradientDrawable();
-                bg.setShape(GradientDrawable.OVAL);
-                try { bg.setColor(Color.parseColor(selectedColor[0])); } catch (Exception e) { bg.setColor(0xFFFF6B00); }
-                boolean isSel = (sel == finalAvatarId);
-                bg.setStroke(isSel ? (int)(3*dp) : (int)(1*dp), isSel ? 0xFFFFFFFF : 0x44FFFFFF);
-                item.setBackground(bg);
-
                 ImageView iv = new ImageView(this);
-                FrameLayout.LayoutParams ivlp = new FrameLayout.LayoutParams((int)(34*dp), (int)(34*dp));
-                ivlp.gravity = android.view.Gravity.CENTER;
-                iv.setLayoutParams(ivlp);
+                iv.setLayoutParams(new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                iv.setScaleType(ImageView.ScaleType.FIT_XY);
                 iv.setImageResource(avatarArr[finalIdx]);
-                iv.setColorFilter(isSel ? 0xFFFFFFFF : 0xAAFFFFFF);
                 item.addView(iv);
+
+                View ring = new View(this);
+                ring.setLayoutParams(new FrameLayout.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                GradientDrawable ringBg = new GradientDrawable();
+                ringBg.setShape(GradientDrawable.OVAL);
+                ringBg.setStroke(isSel ? (int) (3 * dp) : (int) (1 * dp),
+                    isSel ? 0xFFFFFFFF : 0x33FFFFFF);
+                ring.setBackground(ringBg);
+                item.addView(ring);
 
                 item.setOnClickListener(sv -> {
                     selectedAvatar[0] = finalAvatarId;
                     buildPicker[0].run();
                     updatePreview.run();
                 });
-                avatarPickerRow.addView(item);
+
+                (i < perRow ? row1 : row2).addView(item);
             }
+
+            avatarPickerRow.addView(row1);
+            avatarPickerRow.addView(row2);
         };
         buildPicker[0].run();
 
@@ -396,8 +414,6 @@ public class ProfileSelectorActivity extends AppCompatActivity
                     if (c.equals(selectedColor[0])) gd2.setStroke((int)(3*dp), Color.WHITE);
                     sw.setBackground(gd2);
                 }
-                buildPicker[0].run();
-                updatePreview.run();
             });
             colorPicker.addView(swatch);
         }

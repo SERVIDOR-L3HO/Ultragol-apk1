@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Panda -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="oval"><solid android:color="#FAFAFA"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="70%" android:start="4%" android:end="66%">
+        <shape android:shape="oval"><solid android:color="#1A1A1A"/></shape>
+    </item>
+    <item android:top="0%" android:bottom="70%" android:start="66%" android:end="4%">
+        <shape android:shape="oval"><solid android:color="#1A1A1A"/></shape>
+    </item>
+    <item android:top="30%" android:bottom="38%" android:start="16%" android:end="52%">
+        <shape android:shape="oval"><solid android:color="#1A1A1A"/></shape>
+    </item>
+    <item android:top="30%" android:bottom="38%" android:start="52%" android:end="16%">
+        <shape android:shape="oval"><solid android:color="#1A1A1A"/></shape>
+    </item>
+    <item android:top="66%" android:bottom="26%" android:start="42%" android:end="42%">
+        <shape android:shape="oval"><solid android:color="#1A1A1A"/></shape>
+    </item>
+</layer-list>

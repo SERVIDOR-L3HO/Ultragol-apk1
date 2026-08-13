@@ -52,17 +52,19 @@
                     android:id="@+id/avatarPreview"
                     android:layout_width="82dp"
                     android:layout_height="82dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/profile_avatar_circle">
+                    android:layout_gravity="center">
 
                     <ImageView
                         android:id="@+id/ivAvatarIconPreview"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_avatar_0"
-                        android:tint="#EEFFFFFF"
-                        android:scaleType="fitCenter"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/avatar_g1"
+                        android:scaleType="fitXY"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/avatar_ring_outline"/>
                 </FrameLayout>
             </FrameLayout>
         </LinearLayout>
@@ -92,8 +94,7 @@
                 android:id="@+id/avatarPickerRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:orientation="vertical"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"/>
         </HorizontalScrollView>
