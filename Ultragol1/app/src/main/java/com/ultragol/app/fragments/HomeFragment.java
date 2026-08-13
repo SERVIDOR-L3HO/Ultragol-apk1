@@ -152,6 +152,9 @@ public class HomeFragment extends Fragment {
         if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));
 
+        View surprise = view.findViewById(R.id.btnSurprise);
+        if (surprise != null) surprise.setOnClickListener(v -> pickSurpriseItem());
+
         View bell = view.findViewById(R.id.btnBell);
         if (bell != null) bell.setOnClickListener(v -> {
             com.ultragol.app.NotificationsSheet sheet = new com.ultragol.app.NotificationsSheet();
@@ -163,6 +166,37 @@ public class HomeFragment extends Fragment {
             if (requireActivity() instanceof com.ultragol.app.MainActivity) {
                 ((com.ultragol.app.MainActivity) requireActivity()).showMenu();
             }
+        });
+    }
+
+    // ── "¿No sé qué ver?" surprise pick ─────────────────────────────────────────
+
+    private boolean surpriseLoading = false;
+
+    private void pickSurpriseItem() {
+        if (surpriseLoading || !isAdded()) return;
+        surpriseLoading = true;
+        Toast.makeText(requireContext(), "Buscando algo para ti…", Toast.LENGTH_SHORT).show();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            ContentItem picked = null;
+            try {
+                Random rng = new Random();
+                List<ContentItem> pool = TmdbApi.fetchDiscoverMixed(rng.nextInt(20) + 1);
+                if (pool != null && !pool.isEmpty()) picked = pool.get(rng.nextInt(pool.size()));
+            } catch (Exception ignored) {}
+            final ContentItem result = picked;
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                surpriseLoading = false;
+                if (!isAdded()) return;
+                if (result == null) {
+                    Toast.makeText(requireContext(), "No se pudo encontrar nada, intenta de nuevo", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent i = new Intent(requireContext(), DetailActivity.class);
+                i.putExtra("item", result);
+                startActivity(i);
+            });
         });
     }
 
