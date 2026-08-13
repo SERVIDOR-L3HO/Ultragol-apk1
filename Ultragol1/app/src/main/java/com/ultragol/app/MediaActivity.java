@@ -207,9 +207,6 @@ public class MediaActivity extends AppCompatActivity {
     private Tracks.Group videoTrackGroup = null;
     private Tracks.Group textTrackGroup = null;
 
-    // Offline playback flag — uses ExoPlayer cache instead of network
-    private boolean useOffline = false;
-
     // Continue-watching tracking
     private ContentItem watchedItem;
     private String serverUrlForSave;
@@ -236,7 +233,6 @@ public class MediaActivity extends AppCompatActivity {
         referer          = getIntent().getStringExtra("referer");
         posterUrl        = getIntent().getStringExtra("poster_url");
         isM3u8           = getIntent().getBooleanExtra("is_m3u8", false);
-        useOffline       = getIntent().getBooleanExtra("use_offline", false);
         watchedItem      = (ContentItem) getIntent().getSerializableExtra("item");
         serverUrlForSave = getIntent().getStringExtra("server_url");
         watchedSeason    = getIntent().getIntExtra("season", 1);
@@ -634,12 +630,9 @@ public class MediaActivity extends AppCompatActivity {
                 : "Mozilla/5.0 (Linux; Android 12; Pixel 6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Mobile Safari/537.36";
 
         DataSource.Factory dsFactory;
-        if (videoUrl != null && videoUrl.startsWith("file://")) {
-            // Local file on disk — DefaultDataSource handles file:// natively
+        if (videoUrl != null && (videoUrl.startsWith("file://") || videoUrl.startsWith("content://"))) {
+            // Downloaded file — DefaultDataSource reads both file:// and content:// natively
             dsFactory = new com.google.android.exoplayer2.upstream.DefaultDataSource.Factory(this);
-        } else if (useOffline) {
-            // Serve from ExoPlayer's offline cache (downloaded HLS segments)
-            dsFactory = DownloadUtil.getInstance(this).buildCacheDataSourceFactory();
         } else {
             Map<String, String> headers = new HashMap<>();
             headers.put("User-Agent", ua);

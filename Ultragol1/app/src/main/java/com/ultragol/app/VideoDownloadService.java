@@ -3,52 +3,71 @@ package com.ultragol.app;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.Service;
+import android.content.Intent;
 import android.os.Build;
-import com.google.android.exoplayer2.offline.Download;
-import com.google.android.exoplayer2.offline.DownloadManager;
-import com.google.android.exoplayer2.offline.DownloadService;
-import com.google.android.exoplayer2.scheduler.Scheduler;
-import com.google.android.exoplayer2.ui.DownloadNotificationHelper;
-import java.util.List;
+import android.os.IBinder;
+
+import androidx.core.app.NotificationCompat;
 
 /**
- * Background service that handles ExoPlayer offline downloads (HLS segments + MP4).
- * Required by ExoPlayer's DownloadManager architecture.
+ * Foreground service that runs a real HLS download (HlsDownloadEngine) end to
+ * end: fetch every segment, remux to a standalone .mp4, save it into the
+ * public Movies/ACTIONPLAY gallery folder, and report progress/completion
+ * back into DownloadsManager's persisted records.
  */
-public class VideoDownloadService extends DownloadService {
+public class VideoDownloadService extends Service {
 
-    private static final int    NOTIFICATION_ID = 9001;
-    public  static final String CHANNEL_ID      = "ultragol_downloads";
+    public static final String EXTRA_TMDB_ID = "tmdbId";
+    public static final String EXTRA_URL     = "url";
+    public static final String EXTRA_REFERER = "referer";
+    public static final String EXTRA_TITLE   = "title";
 
-    public VideoDownloadService() {
-        super(NOTIFICATION_ID,
-              DEFAULT_FOREGROUND_NOTIFICATION_UPDATE_INTERVAL,
-              CHANNEL_ID,
-              R.string.download_channel_name,
-              R.string.download_channel_desc);
-    }
+    public static final String CHANNEL_ID = "ultragol_downloads";
+    private static final int NOTIF_ID_BASE = 9100;
 
     @Override
-    protected DownloadManager getDownloadManager() {
-        return DownloadUtil.getInstance(this).getDownloadManager();
-    }
+    public IBinder onBind(Intent intent) { return null; }
 
     @Override
-    protected Scheduler getScheduler() {
-        return null; // No scheduler — downloads only run when app is open
-    }
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent == null) { stopSelf(startId); return START_NOT_STICKY; }
 
-    @Override
-    protected Notification getForegroundNotification(
-            List<Download> downloads, int notMetRequirements) {
+        final int tmdbId    = intent.getIntExtra(EXTRA_TMDB_ID, 0);
+        final String url      = intent.getStringExtra(EXTRA_URL);
+        final String referer  = intent.getStringExtra(EXTRA_REFERER);
+        final String title    = intent.getStringExtra(EXTRA_TITLE);
+        final int notifId     = NOTIF_ID_BASE + tmdbId;
+
         ensureChannel();
-        return new DownloadNotificationHelper(this, CHANNEL_ID)
-            .buildProgressNotification(
-                this,
-                android.R.drawable.stat_sys_download,
-                null, null,
-                downloads,
-                notMetRequirements);
+        startForeground(notifId, buildProgressNotification(title, 0));
+
+        new Thread(() -> {
+            HlsDownloadEngine.Result result = HlsDownloadEngine.download(
+                getApplicationContext(), url, referer, title,
+                percent -> {
+                    DownloadsManager.updateProgress(getApplicationContext(), tmdbId, percent);
+                    notify(notifId, buildProgressNotification(title, percent));
+                });
+
+            if (result.success) {
+                DownloadsManager.markComplete(getApplicationContext(), tmdbId, result.contentUri);
+                notify(notifId, buildFinalNotification(title, true));
+            } else {
+                DownloadsManager.markFailed(getApplicationContext(), tmdbId);
+                notify(notifId, buildFinalNotification(title, false));
+            }
+
+            stopForeground(false);
+            stopSelf(startId);
+        }).start();
+
+        return START_NOT_STICKY;
+    }
+
+    private void notify(int id, Notification n) {
+        NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        if (nm != null) nm.notify(id, n);
     }
 
     private void ensureChannel() {
@@ -63,5 +82,26 @@ public class VideoDownloadService extends DownloadService {
                 nm.createNotificationChannel(ch);
             }
         }
+    }
+
+    private Notification buildProgressNotification(String title, int percent) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Descargando " + (title != null ? title : ""))
+            .setContentText(percent + "%")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setProgress(100, percent, false)
+            .setOnlyAlertOnce(true)
+            .setOngoing(true)
+            .build();
+    }
+
+    private Notification buildFinalNotification(String title, boolean success) {
+        return new NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle(success ? "Descarga completada ✓" : "Error al descargar")
+            .setContentText(title != null ? title : "")
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setOngoing(false)
+            .setAutoCancel(true)
+            .build();
     }
 }

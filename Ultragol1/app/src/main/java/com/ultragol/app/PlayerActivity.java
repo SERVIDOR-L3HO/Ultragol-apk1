@@ -101,6 +101,8 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean autoCast   = false;
     /** If true: keep WebView visible (manual quality / source selection) */
     private boolean manualMode = false;
+    /** If true: once stream URL is captured, kick off a real download in the background */
+    private boolean autoDownload = false;
 
     private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
 
@@ -638,6 +640,12 @@ public class PlayerActivity extends AppCompatActivity {
         View btnCastDetail = findViewById(R.id.pdBtnCast);
         if (btnCastDetail != null) updateDetailCastBtn(btnCastDetail, true);
 
+        if (autoDownload) {
+            // Download runs in the background service — doesn't block play/cast below
+            autoDownload = false;
+            startRealDownload();
+        }
+
         if (manualMode) {
             // Stay in WebView so user can choose quality/source manually
             Toast.makeText(this,
@@ -685,6 +693,25 @@ public class PlayerActivity extends AppCompatActivity {
             }
         }
         btn.setAlpha(ready ? 1f : 0.6f);
+    }
+
+    // ── Real download (MP4 → Android DownloadManager, HLS → VideoDownloadService) ──
+    private void startRealDownload() {
+        if (item == null) return;
+        if (capturedVideoUrl == null || capturedVideoUrl.isEmpty()) {
+            Toast.makeText(this, "Espera mientras se captura el stream…", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (capturedIsM3u8) {
+            DownloadsManager.startVideoDownload(this, item, capturedVideoUrl, capturedReferer);
+        } else {
+            DownloadsManager.startDirectMp4Download(this, item, capturedVideoUrl);
+        }
+        Toast.makeText(this,
+            "Descarga iniciada (" + (capturedIsM3u8 ? "HLS" : "MP4") + ") ⬇  Revisa tus Descargas",
+            Toast.LENGTH_LONG).show();
+        LinearLayout btnDownload = findViewById(R.id.pdBtnDownload);
+        if (btnDownload != null) updateDownloadBtn(btnDownload);
     }
 
     // ── Cast options sheet (DLNA / AirPlay / Chromecast) ─────────────────────
@@ -881,15 +908,29 @@ public class PlayerActivity extends AppCompatActivity {
         if (btnDownload != null) {
             updateDownloadBtn(btnDownload);
             btnDownload.setOnClickListener(v -> {
-                if (DownloadsManager.isDownloaded(this, item)) {
-                    DownloadsManager.remove(this, item);
-                    updateDownloadBtn(btnDownload);
-                    Toast.makeText(this, "Descarga eliminada", Toast.LENGTH_SHORT).show();
+                String state = DownloadsManager.getVideoState(this, item);
+                if ("COMPLETE".equals(state)) {
+                    new android.app.AlertDialog.Builder(this)
+                        .setTitle("Eliminar descarga")
+                        .setMessage("\u00bfEliminar \"" + item.getTitle() + "\" de tus descargas?")
+                        .setPositiveButton("Eliminar", (d, w) -> {
+                            DownloadsManager.remove(this, item);
+                            updateDownloadBtn(btnDownload);
+                            Toast.makeText(this, "Descarga eliminada", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+                } else if ("DOWNLOADING".equals(state)) {
+                    Toast.makeText(this, "Ya se est\u00e1 descargando...", Toast.LENGTH_SHORT).show();
+                } else if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
+                    startRealDownload();
                 } else {
-                    DownloadsManager.add(this, item, success -> {
-                        updateDownloadBtn(btnDownload);
-                        Toast.makeText(this, success ? "Descarga completada \u2713" : "Error al descargar", Toast.LENGTH_SHORT).show();
-                    });
+                    autoDownload = true;
+                    TextView icon  = findViewById(R.id.pdDownloadIcon);
+                    TextView label = findViewById(R.id.pdDownloadLabel);
+                    if (icon  != null) { icon.setText("\u23f3"); icon.setTextColor(0xFFAAAAAA); }
+                    if (label != null) { label.setText("Buscando\u2026"); label.setTextColor(0xFFAAAAAA); }
+                    Toast.makeText(this, "Buscando stream para descargar\u2026", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -939,16 +980,26 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void updateDownloadBtn(LinearLayout btn) {
-        boolean downloaded = DownloadsManager.isDownloaded(this, item);
+        String state = item != null ? DownloadsManager.getVideoState(this, item) : "NONE";
         TextView icon  = findViewById(R.id.pdDownloadIcon);
         TextView label = findViewById(R.id.pdDownloadLabel);
-        if (icon != null) {
-            icon.setText(downloaded ? "\u2713" : "\u2b07");
-            icon.setTextColor(downloaded ? android.graphics.Color.parseColor("#4CAF50") : android.graphics.Color.parseColor("#4FC3F7"));
-        }
-        if (label != null) {
-            label.setText(downloaded ? "Descargado" : "Descargar");
-            label.setTextColor(downloaded ? android.graphics.Color.parseColor("#4CAF50") : android.graphics.Color.parseColor("#4FC3F7"));
+        switch (state) {
+            case "COMPLETE":
+                if (icon  != null) { icon.setText("\u2713");        icon.setTextColor(android.graphics.Color.parseColor("#4CAF50")); }
+                if (label != null) { label.setText("Descargado"); label.setTextColor(android.graphics.Color.parseColor("#4CAF50")); }
+                break;
+            case "DOWNLOADING":
+                if (icon  != null) { icon.setText("\u23f3");           icon.setTextColor(0xFFAAAAAA); }
+                if (label != null) { label.setText("Descargando..."); label.setTextColor(0xFFAAAAAA); }
+                break;
+            case "FAILED":
+                if (icon  != null) { icon.setText("\u26a0");       icon.setTextColor(android.graphics.Color.parseColor("#FF5252")); }
+                if (label != null) { label.setText("Reintentar"); label.setTextColor(android.graphics.Color.parseColor("#FF5252")); }
+                break;
+            default:
+                if (icon  != null) { icon.setText("\u2b07");       icon.setTextColor(android.graphics.Color.parseColor("#4FC3F7")); }
+                if (label != null) { label.setText("Descargar"); label.setTextColor(android.graphics.Color.parseColor("#4FC3F7")); }
+                break;
         }
     }
 

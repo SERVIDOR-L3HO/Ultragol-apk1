@@ -19,6 +19,7 @@ public class ContentItem implements Serializable {
     private String localVideoPath  = "";
     private long   downloadId      = -1L;
     private String videoState      = "NONE"; // NONE / DOWNLOADING / COMPLETE / FAILED
+    private int    downloadProgress = -1;    // 0-100 while DOWNLOADING, -1 if unknown
 
     public ContentItem(String title, String genre, String year, String rating,
                        String posterUrl, String overview, int contentType,
@@ -62,6 +63,9 @@ public class ContentItem implements Serializable {
 
     public void   setVideoState(String v)      { videoState = v != null ? v : "NONE"; }
     public String getVideoState()              { return videoState != null ? videoState : "NONE"; }
+
+    public void   setDownloadProgress(int v)   { downloadProgress = v; }
+    public int    getDownloadProgress()        { return downloadProgress; }
 
     public String getTitle()        { return title; }
     public String getGenre()        { return genre; }

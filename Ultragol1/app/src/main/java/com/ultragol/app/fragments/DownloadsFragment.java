@@ -19,7 +19,6 @@ import androidx.recyclerview.widget.*;
 import com.bumptech.glide.Glide;
 import com.ultragol.app.DetailActivity;
 import com.ultragol.app.DownloadCompleteReceiver;
-import com.ultragol.app.DownloadUtil;
 import com.ultragol.app.TvHelper;
 import com.ultragol.app.DownloadsManager;
 import com.ultragol.app.MediaActivity;
@@ -201,9 +200,12 @@ public class DownloadsFragment extends Fragment {
                 if ("COMPLETE".equals(state)) {
                     String videoPath = item.getLocalVideoPath();
                     if (videoPath != null && !videoPath.isEmpty()) {
-                        // Real .mp4 file on disk → play as file URI
+                        // Real, standalone .mp4 — either a MediaStore content:// URI
+                        // (API 29+) or an absolute file path (legacy public storage).
                         String playUrl;
-                        if (videoPath.startsWith("/")) {
+                        if (videoPath.startsWith("content://")) {
+                            playUrl = videoPath;
+                        } else if (videoPath.startsWith("/")) {
                             File f = new File(videoPath);
                             if (!f.exists()) {
                                 Toast.makeText(ctx, "Archivo no encontrado", Toast.LENGTH_SHORT).show();
@@ -211,15 +213,13 @@ public class DownloadsFragment extends Fragment {
                             }
                             playUrl = "file://" + videoPath;
                         } else {
-                            playUrl = videoPath; // streaming URL or m3u8
+                            playUrl = videoPath;
                         }
-                        boolean isM3u8 = playUrl.contains(".m3u8");
                         Intent intent = new Intent(ctx, MediaActivity.class);
-                        intent.putExtra("url",         playUrl);
-                        intent.putExtra("title",       item.getTitle());
-                        intent.putExtra("referer",     playUrl);
-                        intent.putExtra("is_m3u8",     isM3u8);
-                        intent.putExtra("use_offline", !isM3u8);
+                        intent.putExtra("url",     playUrl);
+                        intent.putExtra("title",   item.getTitle());
+                        intent.putExtra("referer", "");
+                        intent.putExtra("is_m3u8", false);
                         ctx.startActivity(intent);
                         return;
                     }
