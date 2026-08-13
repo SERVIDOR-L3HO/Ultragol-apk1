@@ -1,25 +1,12 @@
 package com.ultragol.app;
 
-import android.animation.Animator;
-import android.animation.AnimatorListenerAdapter;
-import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.util.DisplayMetrics;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
-import android.view.animation.AlphaAnimation;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
 import android.view.animation.DecelerateInterpolator;
-import android.view.animation.LinearInterpolator;
 import android.view.animation.OvershootInterpolator;
-import android.view.animation.ScaleAnimation;
-import android.view.animation.TranslateAnimation;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -40,11 +27,12 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
 
-        final View glowInner    = findViewById(R.id.splashGlowInner);
-        final View logo         = findViewById(R.id.splashLogo);
-        final View tagline      = findViewById(R.id.splashTagline);
-        final View progressBar  = findViewById(R.id.splashProgressBar);
-        final CandyStripeView progressFill = findViewById(R.id.splashProgressFill);
+        final View glowInner  = findViewById(R.id.splashGlowInner);
+        final View ringOuter  = findViewById(R.id.splashRingOuter);
+        final View ringMid    = findViewById(R.id.splashRingMid);
+        final View logo       = findViewById(R.id.splashLogo);
+        final View divider    = findViewById(R.id.splashDivider);
+        final View spinner    = findViewById(R.id.splashSpinner);
 
         // ── 1. GLOW: aparece expandiéndose desde pequeño ───────────────────────
         if (glowInner != null) {
@@ -62,7 +50,15 @@ public class SplashActivity extends AppCompatActivity {
                 .start();
         }
 
-        // ── 2. LOGO: overshoot bounce — llega, rebota levemente ────────────────
+        // ── 2. ANILLOS: fade-in suave ────────────────────────────────────────────
+        if (ringOuter != null) {
+            ringOuter.animate().alpha(1f).setStartDelay(150).setDuration(900).start();
+        }
+        if (ringMid != null) {
+            ringMid.animate().alpha(1f).setStartDelay(250).setDuration(900).start();
+        }
+
+        // ── 3. LOGO: overshoot bounce — llega, rebota levemente ────────────────
         if (logo != null) {
             logo.setScaleX(0.5f);
             logo.setScaleY(0.5f);
@@ -78,54 +74,11 @@ public class SplashActivity extends AppCompatActivity {
                 .start();
         }
 
-        // ── 3. TAGLINE: desliza desde abajo + fade ─────────────────────────────
+        // ── 4. DIVISOR + SPINNER: fade-in después del logo ──────────────────────
         new Handler().postDelayed(() -> {
-            if (tagline == null) return;
-
-            AnimationSet anim = new AnimationSet(true);
-
-            TranslateAnimation slide = new TranslateAnimation(
-                0, 0, 40f, 0f);
-            slide.setDuration(700);
-            slide.setInterpolator(new DecelerateInterpolator(1.5f));
-
-            AlphaAnimation fade = new AlphaAnimation(0f, 1f);
-            fade.setDuration(700);
-
-            anim.addAnimation(slide);
-            anim.addAnimation(fade);
-            anim.setFillAfter(true);
-            tagline.startAnimation(anim);
-            tagline.setAlpha(1f);
-        }, 900);
-
-        // ── 4. BARRA PROGRESO: full-width, se llena con easing ─────────────────
-        new Handler().postDelayed(() -> {
-            if (progressBar == null || progressFill == null) return;
-
-            progressBar.animate()
-                .alpha(1f)
-                .setDuration(400)
-                .start();
-
-            progressFill.startAnimating();
-
-            progressBar.post(() -> {
-                DisplayMetrics dm = new DisplayMetrics();
-                getWindowManager().getDefaultDisplay().getMetrics(dm);
-                int screenWidth = dm.widthPixels;
-
-                ValueAnimator fillAnim = ValueAnimator.ofInt(0, screenWidth);
-                fillAnim.setDuration(2200);
-                fillAnim.setInterpolator(new LinearInterpolator());
-                fillAnim.addUpdateListener(animation -> {
-                    ViewGroup.LayoutParams lp = progressFill.getLayoutParams();
-                    lp.width = (int) animation.getAnimatedValue();
-                    progressFill.setLayoutParams(lp);
-                });
-                fillAnim.start();
-            });
-        }, 700);
+            if (divider != null) divider.animate().alpha(1f).setDuration(500).start();
+            if (spinner != null) spinner.animate().alpha(1f).setDuration(500).start();
+        }, 1000);
 
         // ── Verificar actualización en paralelo ────────────────────────────────
         UpdateChecker.check(this, (needsUpdate, data) -> {

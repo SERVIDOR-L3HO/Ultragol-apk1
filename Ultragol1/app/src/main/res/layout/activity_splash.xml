@@ -13,80 +13,66 @@
     <!-- Núcleo del glow: anima con pulso -->
     <View
         android:id="@+id/splashGlowInner"
-        android:layout_width="480dp"
-        android:layout_height="340dp"
+        android:layout_width="420dp"
+        android:layout_height="420dp"
         android:layout_gravity="center"
-        android:layout_marginBottom="100dp"
-        android:background="@drawable/splash_glow_inner"
+        android:background="@drawable/splash_glow_orb"
         android:alpha="0"/>
 
-    <!-- Logo + Tagline: ligeramente por encima del centro -->
+    <!-- Anillos concéntricos, estilo "Quetzalito" -->
+    <View
+        android:id="@+id/splashRingOuter"
+        android:layout_width="336dp"
+        android:layout_height="336dp"
+        android:layout_gravity="center"
+        android:background="@drawable/splash_ring_outer"
+        android:alpha="0"/>
+
+    <View
+        android:id="@+id/splashRingMid"
+        android:layout_width="292dp"
+        android:layout_height="292dp"
+        android:layout_gravity="center"
+        android:background="@drawable/splash_ring_mid"
+        android:alpha="0"/>
+
+    <!-- Contenido dentro del anillo: logo, línea, spinner -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="100dp"
         android:orientation="vertical"
         android:gravity="center">
 
-        <!-- Logo: gigante, de esquina a esquina -->
+        <!-- Logo (con marca ya incluida en la imagen) -->
         <ImageView
             android:id="@+id/splashLogo"
-            android:layout_width="match_parent"
+            android:layout_width="210dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="4dp"
-            android:layout_marginEnd="4dp"
             android:adjustViewBounds="true"
             android:src="@drawable/logo_ultragol_splash"
             android:scaleType="fitCenter"
             android:alpha="0"/>
 
-        <!-- Tagline: aparece deslizándose desde abajo -->
-        <TextView
-            android:id="@+id/splashTagline"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Streaming sin límites"
-            android:textColor="#90FFFFFF"
-            android:textSize="15sp"
-            android:letterSpacing="0.18"
-            android:fontFamily="sans-serif-light"
+        <!-- Línea divisoria fina, degradado rojo -->
+        <View
+            android:id="@+id/splashDivider"
+            android:layout_width="72dp"
+            android:layout_height="2dp"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/splash_progress_fill"
+            android:alpha="0"/>
+
+        <!-- Spinner circular -->
+        <ProgressBar
+            android:id="@+id/splashSpinner"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_marginTop="22dp"
+            android:indeterminateTint="#D50000"
             android:alpha="0"/>
 
     </LinearLayout>
-
-    <!-- Barra de progreso full-width pegada al fondo: roja, más grande, estilo caramelo -->
-    <FrameLayout
-        android:id="@+id/splashProgressBar"
-        android:layout_width="match_parent"
-        android:layout_height="10dp"
-        android:layout_gravity="bottom"
-        android:layout_marginBottom="40dp"
-        android:alpha="0">
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="10dp"
-            android:background="#22D50000"/>
-
-        <com.ultragol.app.CandyStripeView
-            android:id="@+id/splashProgressFill"
-            android:layout_width="0dp"
-            android:layout_height="10dp"/>
-
-    </FrameLayout>
-
-    <!-- Watermark mínima -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="16dp"
-        android:text="ACTION PLAY"
-        android:textColor="#15FFFFFF"
-        android:textSize="9sp"
-        android:letterSpacing="0.35"
-        android:fontFamily="sans-serif-medium"/>
 
 </FrameLayout>
