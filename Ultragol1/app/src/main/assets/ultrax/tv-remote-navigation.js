@@ -11,10 +11,17 @@ class TVRemoteNavigation {
     }
 
     checkIfTV() {
+        // The Android app sets this flag before loading the page whenever it detects
+        // it's actually running on an Android TV / Google TV device (see
+        // DeportesWebFragment.java). It takes priority because the app's own WebView
+        // always reports "Android" in its user-agent, which would otherwise always
+        // match isMobile below and disable TV navigation even on a real TV.
+        if (window.__ultragolAndroidTV === true) return true;
+
         const isTVScreen = window.matchMedia('(min-width: 1920px)').matches;
         const isSmartTV = /SMART-TV|SmartTV|TV|Tizen|WebOS|NetCast|NETTV|Freebox/i.test(navigator.userAgent);
         const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
+
         return (isTVScreen || isSmartTV) && !isMobile;
     }
 

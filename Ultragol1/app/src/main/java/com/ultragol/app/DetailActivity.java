@@ -894,6 +894,7 @@ public class DetailActivity extends AppCompatActivity {
                 h.post(() -> {
                     if (!isFinishing() && rv != null) {
                         rv.setAdapter(new ContentRowAdapter(this, finalRelated));
+                        TvHelper.makeFocusable(rv);
                     }
                 });
             } catch (Exception ignored) {}
@@ -1149,5 +1150,11 @@ public class DetailActivity extends AppCompatActivity {
     private int dp(int value) {
         return (int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }

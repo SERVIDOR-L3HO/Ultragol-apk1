@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -83,12 +84,14 @@ public class SearchActivity extends AppCompatActivity {
         adapter = new ContentGridAdapter(this, results);
         resultsGrid.setLayoutManager(new GridLayoutManager(this, 3));
         resultsGrid.setAdapter(adapter);
+        TvHelper.makeFocusable(resultsGrid);
 
         // Shorts Dramas horizontal row
         shortsAdapter = new DramaShortsRowAdapter(this, shortsItems);
         shortsRow.setLayoutManager(new LinearLayoutManager(
                 this, LinearLayoutManager.HORIZONTAL, false));
         shortsRow.setAdapter(shortsAdapter);
+        TvHelper.makeFocusable(shortsRow);
 
         // TV channels horizontal row
         RecyclerView tvRow = findViewById(R.id.tvRow);
@@ -104,6 +107,7 @@ public class SearchActivity extends AppCompatActivity {
         tvRow.setLayoutManager(new LinearLayoutManager(
                 this, LinearLayoutManager.HORIZONTAL, false));
         tvRow.setAdapter(tvAdapter);
+        TvHelper.makeFocusable(tvRow);
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
@@ -213,5 +217,11 @@ public class SearchActivity extends AppCompatActivity {
         if (scrollView    != null) scrollView   .setVisibility(View.GONE);
         if (shortsSection != null) shortsSection.setVisibility(View.GONE);
         if (tvSection     != null) tvSection    .setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }

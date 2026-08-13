@@ -146,25 +146,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        // Universal keyboard shortcuts (Escape → back, Ctrl+F/Search → search), shared
+        // with every other activity via TvHelper.
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+
         // Only act on ACTION_DOWN to avoid double-firing
         if (event.getAction() != KeyEvent.ACTION_DOWN) return super.dispatchKeyEvent(event);
 
         int kc = event.getKeyCode();
-
-        // ── Universal keyboard shortcuts (all device types) ──────────────────
-
-        // Escape → back (useful on PC/laptop)
-        if (kc == KeyEvent.KEYCODE_ESCAPE) {
-            onBackPressed();
-            return true;
-        }
-
-        // Ctrl+F or Search key → open search
-        if (kc == KeyEvent.KEYCODE_SEARCH
-                || (kc == KeyEvent.KEYCODE_F && event.isCtrlPressed())) {
-            startActivity(new Intent(this, SearchActivity.class));
-            return true;
-        }
 
         // ── TV-specific D-pad routing ────────────────────────────────────────
 

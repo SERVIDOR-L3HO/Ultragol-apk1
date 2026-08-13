@@ -15,6 +15,8 @@
     <dimen name="content_card_width">200dp</dimen>
     <dimen name="content_card_height">290dp</dimen>
     <dimen name="trending_card_height">280dp</dimen>
+    <dimen name="cine_card_width">260dp</dimen>
+    <dimen name="ds_card_width">245dp</dimen>
 
     <!-- Hero banner -->
     <dimen name="hero_height">380dp</dimen>

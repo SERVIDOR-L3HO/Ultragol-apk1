@@ -7,6 +7,7 @@ import android.webkit.*;
 import androidx.annotation.*;
 import androidx.fragment.app.Fragment;
 import com.ultragol.app.R;
+import com.ultragol.app.TvHelper;
 
 public class DeportesWebFragment extends Fragment {
 
@@ -50,8 +51,20 @@ public class DeportesWebFragment extends Fragment {
         settings.setUseWideViewPort(true);
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
 
+        // The bundled page's own TV-remote-navigation script can't tell a real
+        // Android TV apart from a phone by user-agent alone (both say "Android").
+        // Flag it explicitly so its D-pad navigation activates on TV.
+        boolean isAndroidTv = getContext() != null && TvHelper.isTV(getContext());
+
         webView.setWebChromeClient(new WebChromeClient());
         webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                super.onPageStarted(view, url, favicon);
+                view.evaluateJavascript(
+                    "window.__ultragolAndroidTV = " + isAndroidTv + ";", null);
+            }
+
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString();

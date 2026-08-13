@@ -110,6 +110,22 @@ public final class TvHelper {
                         .start();
             }
         });
+
+        // Mouse hover (PC / Chromebook with a pointer device): same zoom-out feedback as
+        // D-pad focus, but doesn't steal keyboard focus — purely visual on ACTION_HOVER_*.
+        card.setOnHoverListener((v, event) -> {
+            switch (event.getAction()) {
+                case android.view.MotionEvent.ACTION_HOVER_ENTER:
+                    v.animate().scaleX(1.08f).scaleY(1.08f).setDuration(150).start();
+                    break;
+                case android.view.MotionEvent.ACTION_HOVER_EXIT:
+                    if (!v.isFocused()) {
+                        v.animate().scaleX(1f).scaleY(1f).setDuration(150).start();
+                    }
+                    break;
+            }
+            return false; // never consume: clicks/taps must keep working
+        });
     }
 
     /**
@@ -118,5 +134,32 @@ public final class TvHelper {
     public static int getScreenWidthDp(Context ctx) {
         DisplayMetrics dm = ctx.getResources().getDisplayMetrics();
         return Math.round(dm.widthPixels / dm.density);
+    }
+
+    /**
+     * Universal keyboard shortcuts shared across activities:
+     *  • Escape → back (PC/laptop)
+     *  • Ctrl+F or the dedicated Search key → open search
+     * Call from an Activity's dispatchKeyEvent before its own key handling.
+     * Returns true if the event was consumed.
+     */
+    public static boolean handleGlobalKeyEvent(android.app.Activity activity, android.view.KeyEvent event) {
+        if (event.getAction() != android.view.KeyEvent.ACTION_DOWN) return false;
+        int kc = event.getKeyCode();
+
+        if (kc == android.view.KeyEvent.KEYCODE_ESCAPE) {
+            activity.onBackPressed();
+            return true;
+        }
+
+        if (kc == android.view.KeyEvent.KEYCODE_SEARCH
+                || (kc == android.view.KeyEvent.KEYCODE_F && event.isCtrlPressed())) {
+            if (!(activity instanceof SearchActivity)) {
+                activity.startActivity(new android.content.Intent(activity, SearchActivity.class));
+            }
+            return true;
+        }
+
+        return false;
     }
 }

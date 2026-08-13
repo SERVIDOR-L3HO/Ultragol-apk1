@@ -50,6 +50,7 @@ public class EpisodePickerActivity extends AppCompatActivity {
         rvEpisodes.setLayoutManager(new LinearLayoutManager(this));
         adapter = new EpisodeAdapter(this, item);
         rvEpisodes.setAdapter(adapter);
+        TvHelper.makeFocusable(rvEpisodes);
 
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
 
@@ -132,5 +133,11 @@ public class EpisodePickerActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (exec != null) exec.shutdownNow();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }

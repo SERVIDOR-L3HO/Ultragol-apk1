@@ -74,6 +74,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         adapter = new ProfileAdapter(this, profiles, this);
         rvProfiles.setAdapter(adapter);
+        TvHelper.makeFocusable(rvProfiles);
         animateCards();
     }
 
@@ -541,5 +542,11 @@ public class ProfileSelectorActivity extends AppCompatActivity
             0f, -18f, 18f, -12f, 12f, -6f, 6f, 0f);
         anim.setDuration(500);
         anim.start();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }
