@@ -2,6 +2,8 @@ package com.ultragol.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,6 +13,7 @@ import android.os.Build;
 import android.os.Environment;
 
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 import androidx.core.content.ContextCompat;
 
 import com.ultragol.app.models.ContentItem;
@@ -119,12 +122,26 @@ public class DownloadsManager {
      */
     public static void startDirectMp4Download(Context ctx, ContentItem item, String videoUrl) {
         String filename = HlsDownloadEngine.sanitizeFilename(item.getTitle()) + "_" + item.getTmdbId() + ".mp4";
+        final Context app = ctx.getApplicationContext();
 
         saveOrUpdateRecord(ctx, item, "", "", "DOWNLOADING", -1L);
 
-        android.app.DownloadManager dm =
-            (android.app.DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        if (dm != null) {
+        // Network probe + enqueue off the UI thread.
+        new Thread(() -> {
+            // Refuse ad/placeholder clips before spending the user's data on them:
+            // a feature film is never a handful of megabytes.
+            long remoteSize = StreamValidator.probeContentLength(videoUrl, "https://unlimplay.com/");
+            if (StreamValidator.isImplausiblySmall(item.getContentType(), remoteSize)) {
+                rejectAsDecoy(app, item, null);
+                return;
+            }
+
+            android.app.DownloadManager dm =
+                (android.app.DownloadManager) app.getSystemService(Context.DOWNLOAD_SERVICE);
+            if (dm == null) {
+                updateStoredState(app, item.getTmdbId(), "FAILED");
+                return;
+            }
             try {
                 android.app.DownloadManager.Request req =
                     new android.app.DownloadManager.Request(Uri.parse(videoUrl));
@@ -139,16 +156,54 @@ public class DownloadsManager {
                 req.addRequestHeader("User-Agent", UA);
                 req.addRequestHeader("Referer", "https://unlimplay.com/");
                 long dlId = dm.enqueue(req);
-                saveOrUpdateRecord(ctx, item, "", "", "DOWNLOADING", dlId);
+                saveOrUpdateRecord(app, item, "", "", "DOWNLOADING", dlId);
             } catch (Exception e) {
-                updateStoredState(ctx, item.getTmdbId(), "FAILED");
+                updateStoredState(app, item.getTmdbId(), "FAILED");
             }
-        }
+        }).start();
 
         new Thread(() -> {
-            String posterPath = downloadPoster(ctx, item);
-            if (!posterPath.isEmpty()) updatePosterPath(ctx, item.getTmdbId(), posterPath);
+            String posterPath = downloadPoster(app, item);
+            if (!posterPath.isEmpty()) updatePosterPath(app, item.getTmdbId(), posterPath);
         }).start();
+    }
+
+    /**
+     * Marks a download failed because the server served an ad/placeholder clip
+     * rather than the requested title, deletes anything already written, and
+     * tells the user why — otherwise a rejected decoy just looks like a crash.
+     */
+    private static void rejectAsDecoy(Context ctx, ContentItem item, String savedPath) {
+        deleteVideoFile(ctx, savedPath);
+        updateStoredState(ctx, item.getTmdbId(), "FAILED");
+        notifyDecoyRejected(ctx, item);
+        try { ctx.sendBroadcast(new Intent(DownloadCompleteReceiver.ACTION_REFRESH)); }
+        catch (Exception ignored) {}
+    }
+
+    private static void notifyDecoyRejected(Context ctx, ContentItem item) {
+        try {
+            NotificationManager nm =
+                (NotificationManager) ctx.getSystemService(Context.NOTIFICATION_SERVICE);
+            if (nm == null) return;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+                    && nm.getNotificationChannel(VideoDownloadService.CHANNEL_ID) == null) {
+                nm.createNotificationChannel(new NotificationChannel(
+                    VideoDownloadService.CHANNEL_ID,
+                    ctx.getString(R.string.download_channel_name),
+                    NotificationManager.IMPORTANCE_LOW));
+            }
+            String text = "Ese servidor entregó un anuncio en vez de la película. "
+                + "Prueba otro servidor desde la pantalla del título.";
+            nm.notify(9200 + item.getTmdbId(),
+                new NotificationCompat.Builder(ctx, VideoDownloadService.CHANNEL_ID)
+                    .setSmallIcon(android.R.drawable.stat_notify_error)
+                    .setContentTitle("Descarga cancelada: " + item.getTitle())
+                    .setContentText(text)
+                    .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
+                    .setAutoCancel(true)
+                    .build());
+        } catch (Exception ignored) {}
     }
 
     /** Starts a real HLS (m3u8) download, run end-to-end inside VideoDownloadService. */
@@ -160,6 +215,7 @@ public class DownloadsManager {
         intent.putExtra(VideoDownloadService.EXTRA_URL, videoUrl);
         intent.putExtra(VideoDownloadService.EXTRA_REFERER, referer != null ? referer : "");
         intent.putExtra(VideoDownloadService.EXTRA_TITLE, item.getTitle());
+        intent.putExtra(VideoDownloadService.EXTRA_CONTENT_TYPE, item.getContentType());
         ContextCompat.startForegroundService(ctx, intent);
 
         new Thread(() -> {
@@ -259,6 +315,16 @@ public class DownloadsManager {
 
     private static void finalizeAndroidDmDownload(Context ctx, ContentItem item, long downloadId) {
         String uri = resolveDownloadedUri(ctx, downloadId);
+
+        // Last line of defence: a file that turns out to be minutes long was an
+        // ad or placeholder, whatever the URL and Content-Length claimed. Drop it
+        // rather than leaving the wrong video sitting in the user's gallery.
+        long durationMs = StreamValidator.probeLocalDurationMs(ctx, uri);
+        if (StreamValidator.isImplausiblyShort(item.getContentType(), durationMs)) {
+            rejectAsDecoy(ctx, item, uri);
+            return;
+        }
+
         saveOrUpdateRecord(ctx, item, "", uri != null ? uri : "", "COMPLETE", downloadId);
     }
 

@@ -83,17 +83,6 @@ public class MediaActivity extends AppCompatActivity {
     public static final int RESULT_RETRY = Activity.RESULT_FIRST_USER + 1;
     static final int REQUEST_CODE = 1001;
 
-    /**
-     * Durations (seconds) of well-known public placeholder/test clips some
-     * embeds serve instead of the real content — checked once the real
-     * media duration is known, since decoy URLs are often re-hosted under
-     * names that don't give away what they actually are. Big Buck Bunny
-     * (~634s here) is the one seen in practice; the rest are the same kind
-     * of commonly-abused public test video, kept as a small safety net.
-     */
-    private static final int[] DECOY_DURATIONS_SEC = {634, 596, 888, 734, 653};
-    private static final int   DECOY_DURATION_TOLERANCE_SEC = 2;
-
     private static final int CONTROLS_HIDE_MS = 3000;
     private static final int SEEK_INCREMENT_MS = 10_000;
     private static final String PREFS_NAME = "media_progress";
@@ -709,14 +698,15 @@ public class MediaActivity extends AppCompatActivity {
         showControls();
     }
 
-    /** True if durationMs closely matches a known public placeholder/test clip. */
+    /**
+     * True when what actually loaded is too short to be the requested title —
+     * catches ad slots and placeholder clips regardless of what their URL looks
+     * like, including shortened re-encodes that URL fingerprinting misses.
+     */
     private boolean isDecoyDuration(long durationMs) {
-        if (durationMs <= 0) return false;
-        long durationSec = durationMs / 1000;
-        for (int decoySec : DECOY_DURATIONS_SEC) {
-            if (Math.abs(durationSec - decoySec) <= DECOY_DURATION_TOLERANCE_SEC) return true;
-        }
-        return false;
+        int contentType = watchedItem != null
+            ? watchedItem.getContentType() : ContentItem.TYPE_MOVIE;
+        return StreamValidator.isImplausiblyShort(contentType, durationMs);
     }
 
     // ─── Track selection ──────────────────────────────────────────────────────

@@ -68,7 +68,8 @@ public final class HlsDownloadEngine {
 
     /** Blocking — call from a background thread. Cleans up its own temp file. */
     public static Result download(Context ctx, String playlistUrl, String referer,
-                                   String displayTitle, ProgressListener listener) {
+                                   String displayTitle, int contentType,
+                                   ProgressListener listener) {
         File tempTs = null;
         try {
             String mediaPlaylistUrl = resolveMediaPlaylistUrl(playlistUrl, referer);
@@ -122,6 +123,18 @@ public final class HlsDownloadEngine {
 
             String filename = sanitizeFilename(displayTitle) + "_" + System.currentTimeMillis() + ".mp4";
             String contentUri = muxToMp4(ctx, tempTs, filename);
+
+            // The playlist may have been an ad break rather than the title itself.
+            // Check what actually got written and throw it away if it's too short
+            // to be the real content, instead of leaving it in the user's gallery.
+            long durationMs = StreamValidator.probeLocalDurationMs(ctx, contentUri);
+            if (StreamValidator.isImplausiblyShort(contentType, durationMs)) {
+                try { ctx.getContentResolver().delete(Uri.parse(contentUri), null, null); }
+                catch (Exception ignored) {}
+                return new Result(false, null,
+                    "Ese servidor entregó un anuncio en vez del contenido. Prueba otro servidor.");
+            }
+
             if (listener != null) listener.onProgress(100);
             return new Result(true, contentUri, null);
 

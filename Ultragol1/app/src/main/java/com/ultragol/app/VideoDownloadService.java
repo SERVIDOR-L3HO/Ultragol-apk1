@@ -18,10 +18,11 @@ import androidx.core.app.NotificationCompat;
  */
 public class VideoDownloadService extends Service {
 
-    public static final String EXTRA_TMDB_ID = "tmdbId";
-    public static final String EXTRA_URL     = "url";
-    public static final String EXTRA_REFERER = "referer";
-    public static final String EXTRA_TITLE   = "title";
+    public static final String EXTRA_TMDB_ID     = "tmdbId";
+    public static final String EXTRA_URL         = "url";
+    public static final String EXTRA_REFERER     = "referer";
+    public static final String EXTRA_TITLE       = "title";
+    public static final String EXTRA_CONTENT_TYPE = "contentType";
 
     public static final String CHANNEL_ID = "ultragol_downloads";
     private static final int NOTIF_ID_BASE = 9100;
@@ -33,10 +34,11 @@ public class VideoDownloadService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) { stopSelf(startId); return START_NOT_STICKY; }
 
-        final int tmdbId    = intent.getIntExtra(EXTRA_TMDB_ID, 0);
+        final int tmdbId      = intent.getIntExtra(EXTRA_TMDB_ID, 0);
         final String url      = intent.getStringExtra(EXTRA_URL);
         final String referer  = intent.getStringExtra(EXTRA_REFERER);
         final String title    = intent.getStringExtra(EXTRA_TITLE);
+        final int contentType = intent.getIntExtra(EXTRA_CONTENT_TYPE, 0);
         final int notifId     = NOTIF_ID_BASE + tmdbId;
 
         ensureChannel();
@@ -44,7 +46,7 @@ public class VideoDownloadService extends Service {
 
         new Thread(() -> {
             HlsDownloadEngine.Result result = HlsDownloadEngine.download(
-                getApplicationContext(), url, referer, title,
+                getApplicationContext(), url, referer, title, contentType,
                 percent -> {
                     DownloadsManager.updateProgress(getApplicationContext(), tmdbId, percent);
                     notify(notifId, buildProgressNotification(title, percent));
@@ -52,10 +54,10 @@ public class VideoDownloadService extends Service {
 
             if (result.success) {
                 DownloadsManager.markComplete(getApplicationContext(), tmdbId, result.contentUri);
-                notify(notifId, buildFinalNotification(title, true));
+                notify(notifId, buildFinalNotification(title, true, null));
             } else {
                 DownloadsManager.markFailed(getApplicationContext(), tmdbId);
-                notify(notifId, buildFinalNotification(title, false));
+                notify(notifId, buildFinalNotification(title, false, result.error));
             }
 
             stopForeground(false);
@@ -95,10 +97,14 @@ public class VideoDownloadService extends Service {
             .build();
     }
 
-    private Notification buildFinalNotification(String title, boolean success) {
+    private Notification buildFinalNotification(String title, boolean success, String error) {
+        String text = success || error == null || error.isEmpty()
+            ? (title != null ? title : "")
+            : (title != null ? title + " — " + error : error);
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(success ? "Descarga completada ✓" : "Error al descargar")
-            .setContentText(title != null ? title : "")
+            .setContentText(text)
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(text))
             .setSmallIcon(R.mipmap.ic_launcher)
             .setOngoing(false)
             .setAutoCancel(true)

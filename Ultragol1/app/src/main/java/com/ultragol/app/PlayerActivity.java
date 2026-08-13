@@ -77,23 +77,8 @@ public class PlayerActivity extends AppCompatActivity {
     private volatile String pendingCandidateReferer  = null;
     private volatile boolean pendingCandidateIsM3u8  = false;
 
-    /** Well-known public test/demo/placeholder videos some ad slots or lazy embeds serve. */
-    private static final String[] DECOY_STREAM_SIGNATURES = {
-        "bigbuckbunny", "big_buck_bunny", "big-buck-bunny", "mov_bbb",
-        "sintel", "tearsofsteel", "tears_of_steel", "elephantsdream", "elephants_dream",
-        "jellyfish.mp4", "forbiggerescapes", "forbiggerfun", "forbiggerjoyrides",
-        "sample-videos.com", "samplelib.com", "file-examples.com", "learningcontainer.com",
-        "commondatastorage.googleapis.com", "gtv-videos-bucket",
-        "test-videos.co.uk", "html5demos.com", "media.w3.org",
-        "vjs.zencdn.net", "download.blender.org"
-    };
-
     private boolean isLikelyDecoyStream(String url) {
-        String lower = url.toLowerCase(java.util.Locale.ROOT);
-        for (String sig : DECOY_STREAM_SIGNATURES) {
-            if (lower.contains(sig)) return true;
-        }
-        return false;
+        return StreamValidator.isKnownDecoyUrl(url);
     }
 
     // ── Extra flags ───────────────────────────────────────────────────────────

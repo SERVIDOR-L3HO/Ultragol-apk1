@@ -124,13 +124,16 @@ public class DetailActivity extends AppCompatActivity {
 
                 for (StreamingApi.Server s : all) {
                     String u = s.url != null ? s.url : "";
+                    if (StreamValidator.isKnownDecoyUrl(u)) continue;   // ad/test clip, not the title
                     if (u.contains(".mp4")  && mp4Url  == null) mp4Url  = u;
                     if (u.contains(".m3u8") && m3u8Url == null) m3u8Url = u;
                 }
                 // Also scan embedUrl
                 String emb = data.embedUrl != null ? data.embedUrl : "";
-                if (emb.contains(".mp4")  && mp4Url  == null) mp4Url  = emb;
-                if (emb.contains(".m3u8") && m3u8Url == null) m3u8Url = emb;
+                if (!StreamValidator.isKnownDecoyUrl(emb)) {
+                    if (emb.contains(".mp4")  && mp4Url  == null) mp4Url  = emb;
+                    if (emb.contains(".m3u8") && m3u8Url == null) m3u8Url = emb;
+                }
 
             } catch (Exception ignored) {}
 
@@ -191,7 +194,8 @@ public class DetailActivity extends AppCompatActivity {
                 String ref = req.getRequestHeaders().get("Referer");
                 boolean m3u8 = url.contains(".m3u8");
                 boolean mp4  = url.contains(".mp4") || url.contains(".MP4");
-                if ((mp4 || m3u8) && capturedDownloadUrl == null) {
+                if ((mp4 || m3u8) && capturedDownloadUrl == null
+                        && !StreamValidator.isKnownDecoyUrl(url)) {
                     capturedDownloadUrl = url;
                     capturedDownloadRef = ref != null ? ref : item.getStreamUrl();
                     capturedIsM3u8      = m3u8;
@@ -229,7 +233,8 @@ public class DetailActivity extends AppCompatActivity {
                 captureWebView.addJavascriptInterface(new Object() {
                     @android.webkit.JavascriptInterface
                     public void onUrl(String url) {
-                        if (capturedDownloadUrl == null && url != null && !url.isEmpty()) {
+                        if (capturedDownloadUrl == null && url != null && !url.isEmpty()
+                                && !StreamValidator.isKnownDecoyUrl(url)) {
                             capturedDownloadUrl = url;
                             capturedDownloadRef = item.getStreamUrl();
                             capturedIsM3u8      = url.contains(".m3u8");
