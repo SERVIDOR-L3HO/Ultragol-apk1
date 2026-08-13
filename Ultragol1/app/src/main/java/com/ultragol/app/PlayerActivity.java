@@ -922,6 +922,10 @@ public class PlayerActivity extends AppCompatActivity {
                         .show();
                 } else if ("DOWNLOADING".equals(state)) {
                     Toast.makeText(this, "Ya se est\u00e1 descargando...", Toast.LENGTH_SHORT).show();
+                } else if (!DownloadsManager.ensureStoragePermission(this)) {
+                    Toast.makeText(this,
+                        "Concede el permiso de almacenamiento y toca Descargar otra vez",
+                        Toast.LENGTH_LONG).show();
                 } else if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
                     startRealDownload();
                 } else {

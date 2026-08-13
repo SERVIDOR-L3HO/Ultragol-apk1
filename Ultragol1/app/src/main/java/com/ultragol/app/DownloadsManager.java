@@ -1,11 +1,16 @@
 package com.ultragol.app;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.ultragol.app.models.ContentItem;
@@ -41,6 +46,9 @@ public class DownloadsManager {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
         + "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
+    /** requestPermissions code used by {@link #ensureStoragePermission(Activity)}. */
+    public static final int REQ_STORAGE_PERMISSION = 2101;
+
     public interface DownloadCallback {
         void onComplete(boolean success);
     }
@@ -50,6 +58,23 @@ public class DownloadsManager {
     }
 
     // ── Public API ────────────────────────────────────────────────────────────
+
+    /**
+     * On API 23-28 saving into the public Movies folder needs WRITE_EXTERNAL_STORAGE
+     * granted at runtime; API 29+ goes through MediaStore/scoped storage and needs
+     * nothing. Returns true when a download may proceed, otherwise asks for the
+     * permission and returns false so the caller can bail out and let the user retry.
+     */
+    public static boolean ensureStoragePermission(Activity activity) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) return true;
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        ActivityCompat.requestPermissions(activity,
+            new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQ_STORAGE_PERMISSION);
+        return false;
+    }
 
     public static boolean isDownloaded(Context ctx, ContentItem item) {
         for (ContentItem c : getAll(ctx)) {

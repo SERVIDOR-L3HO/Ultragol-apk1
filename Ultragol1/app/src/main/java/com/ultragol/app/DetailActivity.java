@@ -482,6 +482,10 @@ public class DetailActivity extends AppCompatActivity {
                         .show();
                 } else if ("DOWNLOADING".equals(state)) {
                     Toast.makeText(this, "Ya se está descargando...", Toast.LENGTH_SHORT).show();
+                } else if (!DownloadsManager.ensureStoragePermission(this)) {
+                    Toast.makeText(this,
+                        "Concede el permiso de almacenamiento y toca Descargar otra vez",
+                        Toast.LENGTH_LONG).show();
                 } else {
                     // Smart download: StreamingApi first → Android DM for MP4 → WebView fallback
                     pendingDownloadBtn = btnDownload;
