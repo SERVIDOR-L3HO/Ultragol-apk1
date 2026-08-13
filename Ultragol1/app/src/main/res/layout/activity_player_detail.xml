@@ -245,21 +245,6 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- Ver en grupo (Watch Party) -->
-                <TextView
-                    android:id="@+id/pdBtnWatchParty"
-                    android:layout_width="match_parent"
-                    android:layout_height="44dp"
-                    android:layout_marginTop="18dp"
-                    android:gravity="center"
-                    android:text="🎬 Ver en grupo"
-                    android:textColor="#FFFFFF"
-                    android:textSize="14sp"
-                    android:fontFamily="sans-serif-medium"
-                    android:background="@drawable/btn_watch_party_bg"
-                    android:clickable="true"
-                    android:focusable="true"/>
-
                 <View android:layout_width="match_parent" android:layout_height="1dp"
                     android:layout_marginTop="18dp" android:background="#1AFFFFFF"/>
 

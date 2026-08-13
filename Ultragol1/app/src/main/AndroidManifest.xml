@@ -101,15 +101,6 @@
             android:theme="@style/Theme.Ultragol.Fullscreen" />
 
         <!--
-            WatchPartyActivity: synchronized group viewing screen.
-        -->
-        <activity android:name=".WatchPartyActivity" android:exported="false"
-            android:screenOrientation="unspecified"
-            android:configChanges="orientation|screenSize|keyboard|keyboardHidden|uiMode"
-            android:windowSoftInputMode="adjustResize"
-            android:theme="@style/Theme.Ultragol" />
-
-        <!--
             PlayerActivity: sensor (auto-rotate) on all form factors.
         -->
         <activity android:name=".PlayerActivity" android:exported="false"

@@ -857,14 +857,6 @@ public class PlayerActivity extends AppCompatActivity {
             ServerSelectDialog.show(this, item, 1, 1);
         });
 
-        // ── Watch Party button ────────────────────────────────────────────────
-        View btnWatchParty = findViewById(R.id.pdBtnWatchParty);
-        if (btnWatchParty != null) btnWatchParty.setOnClickListener(v -> {
-            if (item != null) {
-                WatchPartyActivity.start(this, item);
-            }
-        });
-
         loadSimilar();
     }
 
