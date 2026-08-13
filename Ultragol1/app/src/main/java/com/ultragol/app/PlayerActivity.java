@@ -113,6 +113,9 @@ public class PlayerActivity extends AppCompatActivity {
     private int autoFetchEpisode = 1;
 
     // ── XHR/fetch hook — injected at onPageStarted to catch streams before shouldInterceptRequest ──
+    // Patches the top window AND every same-origin iframe reachable from it (some embeds
+    // load the real player inside a nested iframe the naive top-only hook never sees),
+    // re-scanning periodically since embeds often insert iframes after a short delay.
     private static final String JS_XHR_HOOK =
         "(function(){"
         + "try{"
@@ -126,34 +129,63 @@ public class PlayerActivity extends AppCompatActivity {
         +     "||u.indexOf('/master')>=0"        // common HLS master playlist path
         +     "||u.indexOf('/playlist')>=0;"     // playlist endpoint
         + "}"
-        // Patch XMLHttpRequest.open
-        + "var xhrOpen=XMLHttpRequest.prototype.open;"
-        + "XMLHttpRequest.prototype.open=function(method,url){"
-        +   "if(_isStream(url)){try{window.HTMLOUT.onUrl(url,'xhr');}catch(ex){}}"
-        +   "return xhrOpen.apply(this,arguments);"
-        + "};"
-        // Patch fetch
-        + "var origFetch=window.fetch;"
-        + "if(typeof origFetch==='function'){"
-        +   "window.fetch=function(input,opts){"
-        +     "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
-        +     "if(_isStream(u)){try{window.HTMLOUT.onUrl(u,'fetch');}catch(ex){}}"
-        +     "return origFetch.apply(this,arguments);"
-        +   "};"
+        + "function _send(u,src){try{window.top.HTMLOUT.onUrl(u,src);}catch(ex){}}"
+        // Patches a single window object's XHR/fetch/video.src — no-ops safely
+        // if win is a cross-origin iframe whose internals we can't touch.
+        + "function _patchWin(win,tag){"
+        +   "try{"
+        +     "if(!win||win.__ultragolPatched)return;win.__ultragolPatched=true;"
+        +     "var X=win.XMLHttpRequest;"
+        +     "if(X&&X.prototype&&X.prototype.open){"
+        +       "var xo=X.prototype.open;"
+        +       "X.prototype.open=function(method,url){"
+        +         "if(_isStream(url))_send(url,tag+'_xhr');"
+        +         "return xo.apply(this,arguments);"
+        +       "};"
+        +     "}"
+        +     "var of=win.fetch;"
+        +     "if(typeof of==='function'){"
+        +       "win.fetch=function(input,opts){"
+        +         "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
+        +         "if(_isStream(u))_send(u,tag+'_fetch');"
+        +         "return of.apply(this,arguments);"
+        +       "};"
+        +     "}"
+        +     "var HME=win.HTMLMediaElement;"
+        +     "if(HME){"
+        +       "var osd=Object.getOwnPropertyDescriptor(HME.prototype,'src');"
+        +       "if(osd&&osd.set){"
+        +         "Object.defineProperty(HME.prototype,'src',{"
+        +           "set:function(v){"
+        +             "if(_isStream(v))_send(v,tag+'_src_setter');"
+        +             "return osd.set.call(this,v);"
+        +           "},"
+        +           "get:osd.get,configurable:true"
+        +         "});"
+        +       "}"
+        +     "}"
+        +   "}catch(ex){}"
         + "}"
-        // Patch video.src setter — fires the moment the player assigns the source
-        + "try{"
-        +   "var origSrcDesc=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');"
-        +   "if(origSrcDesc&&origSrcDesc.set){"
-        +     "Object.defineProperty(HTMLMediaElement.prototype,'src',{"
-        +       "set:function(v){"
-        +         "if(_isStream(v)){try{window.HTMLOUT.onUrl(v,'src_setter');}catch(ex){}}"
-        +         "return origSrcDesc.set.call(this,v);"
-        +       "},"
-        +       "get:origSrcDesc.get,configurable:true"
-        +     "});"
-        +   "}"
-        + "}catch(ex){}"
+        // Reaches into same-origin iframes only — cross-origin ones throw and are skipped.
+        + "function _patchFrames(){"
+        +   "try{"
+        +     "var frames=document.querySelectorAll('iframe');"
+        +     "for(var i=0;i<frames.length;i++){"
+        +       "try{"
+        +         "var cw=frames[i].contentWindow;"
+        +         "if(cw)_patchWin(cw,'iframe'+i);"
+        +       "}catch(ex){}"
+        +     "}"
+        +   "}catch(ex){}"
+        + "}"
+        + "_patchWin(window,'top');"
+        + "_patchFrames();"
+        // Embeds frequently inject the real player iframe a moment after load.
+        + "var _tries=0;"
+        + "var _rescan=setInterval(function(){"
+        +   "_patchFrames();"
+        +   "if(++_tries>=10)clearInterval(_rescan);"
+        + "},600);"
         + "}catch(e){}"
         + "})();";
 
