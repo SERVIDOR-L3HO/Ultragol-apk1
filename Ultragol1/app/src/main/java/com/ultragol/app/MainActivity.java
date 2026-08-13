@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 dest = new com.ultragol.app.fragments.TvFragment();
                 break;
             case "deportes":
-                dest = new DeportesWebFragment();
+                dest = new DeportesFragment();
                 break;
             case "movies":
                 dest = new MoviesFragment();
@@ -245,7 +245,7 @@ public class MainActivity extends AppCompatActivity {
         if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
-        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
+        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesFragment()));
         if (navTv        != null) navTv.setOnClickListener(v        -> navigate(new com.ultragol.app.fragments.TvFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
         if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
@@ -374,10 +374,6 @@ public class MainActivity extends AppCompatActivity {
         if (!isTV && drawerOverlay != null && drawerOverlay.getVisibility() == View.VISIBLE) {
             hideMenu();
             return;
-        }
-        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-        if (current instanceof DeportesWebFragment) {
-            if (((DeportesWebFragment) current).onBackPressed()) return;
         }
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();
