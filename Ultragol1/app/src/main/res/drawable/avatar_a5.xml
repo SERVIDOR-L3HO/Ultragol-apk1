@@ -1,22 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Owl -->
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="oval"><solid android:color="#8B5A2B"/></shape>
-    </item>
-    <item android:top="24%" android:bottom="30%" android:start="10%" android:end="52%">
-        <shape android:shape="oval"><solid android:color="#FFF3E4"/></shape>
-    </item>
-    <item android:top="24%" android:bottom="30%" android:start="52%" android:end="10%">
-        <shape android:shape="oval"><solid android:color="#FFF3E4"/></shape>
-    </item>
-    <item android:top="34%" android:bottom="42%" android:start="18%" android:end="60%">
-        <shape android:shape="oval"><solid android:color="#241206"/></shape>
-    </item>
-    <item android:top="34%" android:bottom="42%" android:start="60%" android:end="18%">
-        <shape android:shape="oval"><solid android:color="#241206"/></shape>
-    </item>
-    <item android:top="46%" android:bottom="34%" android:start="44%" android:end="44%">
-        <shape android:shape="oval"><solid android:color="#F2994A"/></shape>
-    </item>
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#8B5A2B" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#FFF3E4" android:pathData="M10,35 A19,11 0 1,0 48,35 A19,11 0 1,0 10,35 Z"/>
+    <path android:fillColor="#FFF3E4" android:pathData="M52,35 A19,11 0 1,0 90,35 A19,11 0 1,0 52,35 Z"/>
+    <path android:fillColor="#241206" android:pathData="M18,46 A11,12 0 1,0 40,46 A11,12 0 1,0 18,46 Z"/>
+    <path android:fillColor="#241206" android:pathData="M60,46 A11,12 0 1,0 82,46 A11,12 0 1,0 60,46 Z"/>
+    <path android:fillColor="#F2994A" android:pathData="M44,56 A6,10 0 1,0 56,56 A6,10 0 1,0 44,56 Z"/>
+</vector>

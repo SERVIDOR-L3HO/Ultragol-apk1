@@ -1,15 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item>
-        <shape android:shape="oval"><solid android:color="#E0AC69"/></shape>
-    </item>
-    <item android:top="0%" android:bottom="58%" android:start="4%" android:end="4%">
-        <shape android:shape="oval"><solid android:color="#7B3F00"/></shape>
-    </item>
-    <item android:top="46%" android:bottom="46%" android:start="30%" android:end="52%">
-        <shape android:shape="oval"><solid android:color="#2B1B12"/></shape>
-    </item>
-    <item android:top="46%" android:bottom="46%" android:start="52%" android:end="30%">
-        <shape android:shape="oval"><solid android:color="#2B1B12"/></shape>
-    </item>
-</layer-list>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#E0AC69" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#7B3F00" android:pathData="M4,21 A46,21 0 1,0 96,21 A46,21 0 1,0 4,21 Z"/>
+    <path android:fillColor="#2B1B12" android:pathData="M30,50 A9,4 0 1,0 48,50 A9,4 0 1,0 30,50 Z"/>
+    <path android:fillColor="#2B1B12" android:pathData="M52,50 A9,4 0 1,0 70,50 A9,4 0 1,0 52,50 Z"/>
+</vector>
