@@ -228,27 +228,23 @@ public class MainActivity extends AppCompatActivity {
         // ── Nav items ──
         View navInicio    = drawerOverlay.findViewById(R.id.navInicio);
         View navSeries    = drawerOverlay.findViewById(R.id.navSeries);
-        View navMovies    = drawerOverlay.findViewById(R.id.navMovies);
         View navAnime     = drawerOverlay.findViewById(R.id.navAnime);
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
         View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
         View navTv        = drawerOverlay.findViewById(R.id.navTv);
         View navFavorites     = drawerOverlay.findViewById(R.id.navFavorites);
-        View navMyList        = drawerOverlay.findViewById(R.id.navMyList);
         View navSwitchProfile = drawerOverlay.findViewById(R.id.navSwitchProfile);
         android.widget.TextView tvCurrentProfileName =
                 drawerOverlay.findViewById(R.id.tvCurrentProfileName);
 
         if (navInicio    != null) navInicio.setOnClickListener(v    -> navigate(new HomeFragment()));
         if (navSeries    != null) navSeries.setOnClickListener(v    -> navigate(new SeriesFragment()));
-        if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
         if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesFragment()));
         if (navTv        != null) navTv.setOnClickListener(v        -> navigate(new com.ultragol.app.fragments.TvFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
-        if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
 
         View navDownloads = drawerOverlay.findViewById(R.id.navDownloads);
         if (navDownloads != null) navDownloads.setOnClickListener(v ->
