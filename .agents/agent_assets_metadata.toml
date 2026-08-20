@@ -161,3 +161,17 @@ uri = "file://ultragol1-con-musica.apk"
 type = "unspecified"
 title = "ultragol1-con-musica.apk"
 logical_id = "0dbce3d4-a53a-4609-8c6f-9d3cc0a5c501"
+
+[[outputs]]
+id = "revztaQVvVR0wd5Aojf5Q"
+uri = "file://apks/ultra.apk"
+type = "unspecified"
+title = "Ultragol APK 2.0"
+description = "APK debug compilado y verificado: versionCode 14, versionName 2.0. El endpoint local también responde 200 y entrega este mismo archivo."
+logical_id = "5b91c184-69bf-44b7-b3ba-81ba4d15c036"
+content_hash = "sha256:fbf2b4bfd4a0d5c0942fcb89c7d24b9f07e65c6f332d8987e2cdef9426018025"
+size = 16128817
+mtime_ms = 1787262968861
+storage_uri = "gcs://replit-rams-assets-riker/rams/assets/repl:f53769fb-4dbe-4cdd-a07c-2e7faae10b5f/5b91c184-69bf-44b7-b3ba-81ba4d15c036/36333e48-407c-4102-8963-dd5c3b1b24f1"
+storage_version_token = "1787263015626959"
+content_type = "application/octet-stream"
