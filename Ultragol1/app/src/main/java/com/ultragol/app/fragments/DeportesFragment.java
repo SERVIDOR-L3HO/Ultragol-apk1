@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +27,7 @@ import com.ultragol.app.R;
 import com.ultragol.app.TvHelper;
 import com.ultragol.app.adapters.DeportesAdapter;
 import com.ultragol.app.models.SportsHighlight;
+import com.ultragol.app.models.SportsChannel;
 import com.ultragol.app.models.SportsMatch;
 import com.ultragol.app.network.SportsApi;
 
@@ -58,6 +60,8 @@ public class DeportesFragment extends Fragment {
 
     private final List<SportsMatch> allMatches = new ArrayList<>();
     private List<SportsHighlight> highlightsCache = null;
+    private final List<SportsChannel> allChannels = new ArrayList<>();
+    private String channelQuery = "";
 
     @Nullable @Override
     public View onCreateView(@NonNull LayoutInflater i, @Nullable ViewGroup p, @Nullable Bundle s) {
@@ -77,7 +81,7 @@ public class DeportesFragment extends Fragment {
         View btnRefresh = view.findViewById(R.id.dsBtnRefresh);
         if (btnRefresh != null) btnRefresh.setOnClickListener(v -> {
             v.animate().rotationBy(360f).setDuration(450).start();
-            loadCurrentLeague();
+            loadSportsChannels();
         });
 
         rv = view.findViewById(R.id.rvDeportes);
@@ -85,7 +89,7 @@ public class DeportesFragment extends Fragment {
         adapter.setOnMatchClick(this::onMatchTapped);
         adapter.setOnHighlightClick(this::onHighlightTapped);
 
-        int spanCount = 2;
+        int spanCount = getResources().getConfiguration().smallestScreenWidthDp >= 600 ? 4 : 2;
         GridLayoutManager glm = new GridLayoutManager(requireContext(), spanCount);
         glm.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override public int getSpanSize(int position) { return position == 0 ? spanCount : 1; }
@@ -94,7 +98,7 @@ public class DeportesFragment extends Fragment {
         rv.setAdapter(adapter);
         TvHelper.makeFocusable(rv);
 
-        loadCurrentLeague();
+        loadSportsChannels();
     }
 
     @Override
@@ -108,6 +112,24 @@ public class DeportesFragment extends Fragment {
     private boolean dead() { return destroyed || !isAdded() || getContext() == null; }
 
     // ── Data loading ─────────────────────────────────────────────────────────
+
+    private void loadSportsChannels() {
+        if (dead()) return;
+        setLoading(true);
+        pool.execute(() -> {
+            List<SportsChannel> result;
+            try { result = SportsApi.fetchSportsChannels(); }
+            catch (Exception e) { result = new ArrayList<>(); }
+            final List<SportsChannel> finalResult = result;
+            ui.post(() -> {
+                if (dead()) return;
+                allChannels.clear();
+                allChannels.addAll(finalResult);
+                setLoading(false);
+                renderActiveTab();
+            });
+        });
+    }
 
     private void loadCurrentLeague() {
         if (dead()) return;
@@ -153,6 +175,14 @@ public class DeportesFragment extends Fragment {
         if (dead()) return;
         if (activeTab == TAB_HIGHLIGHTS) {
             adapter.submitHighlights(highlightsCache != null ? highlightsCache : new ArrayList<>());
+        } else if (activeTab == TAB_LIVE && !allChannels.isEmpty()) {
+            List<SportsChannel> filtered = new ArrayList<>();
+            String q = SportsApi.normalize(channelQuery);
+            for (SportsChannel c : allChannels) {
+                String haystack = SportsApi.normalize(c.name + " " + c.country + " " + c.countryCode);
+                if (q.isEmpty() || haystack.contains(q)) filtered.add(c);
+            }
+            adapter.submitChannels(filtered);
         } else {
             List<SportsMatch> filtered = new ArrayList<>();
             int wanted = activeTab == TAB_LIVE ? SportsMatch.STATUS_LIVE : SportsMatch.STATUS_UPCOMING;
@@ -179,7 +209,18 @@ public class DeportesFragment extends Fragment {
         buildLeagueTabsOnce(header);
         updateLeagueTabsSelection(header);
         updateSubTabsSelection(header);
-        bindHero(header);
+        EditText search = header.findViewById(R.id.dsSearch);
+        if (search != null && search.getTag() == null) {
+            search.setTag("bound");
+            search.addTextChangedListener(new android.text.TextWatcher() {
+                public void beforeTextChanged(CharSequence s, int st, int c, int a) {}
+                public void onTextChanged(CharSequence s, int st, int before, int count) {
+                    channelQuery = s == null ? "" : s.toString();
+                    renderActiveTab();
+                }
+                public void afterTextChanged(android.text.Editable e) {}
+            });
+        }
 
         View banner = header.findViewById(R.id.dsBtnAllMatches);
         if (banner != null) banner.setOnClickListener(v -> {
@@ -192,14 +233,31 @@ public class DeportesFragment extends Fragment {
         View tabUpcoming = header.findViewById(R.id.dsTabUpcoming);
         View tabHighlights = header.findViewById(R.id.dsTabHighlights);
         if (tabLive != null) tabLive.setOnClickListener(v -> { activeTab = TAB_LIVE; renderActiveTab(); adapter.notifyItemChanged(0); });
-        if (tabUpcoming != null) tabUpcoming.setOnClickListener(v -> { activeTab = TAB_UPCOMING; renderActiveTab(); adapter.notifyItemChanged(0); });
+        if (tabUpcoming != null) tabUpcoming.setOnClickListener(v -> {
+            activeTab = TAB_UPCOMING;
+            if (allMatches.isEmpty()) loadCurrentLeague();
+            else { renderActiveTab(); adapter.notifyItemChanged(0); }
+        });
         if (tabHighlights != null) tabHighlights.setOnClickListener(v -> { activeTab = TAB_HIGHLIGHTS; loadHighlightsIfNeeded(); adapter.notifyItemChanged(0); });
     }
 
     private void buildLeagueTabsOnce(View header) {
         LinearLayout tabs = header.findViewById(R.id.dsLeagueTabs);
-        if (tabs == null || tabs.getChildCount() == SportsApi.LEAGUES.length) return;
+        if (tabs == null || tabs.getChildCount() == SportsApi.LEAGUES.length + 1) return;
         tabs.removeAllViews();
+        TextView all = new TextView(requireContext());
+        all.setText("TODOS");
+        all.setTextSize(11.5f);
+        all.setTypeface(null, android.graphics.Typeface.BOLD);
+        all.setPadding(dp(15), dp(9), dp(15), dp(9));
+        all.setTag("league_chip");
+        all.setOnClickListener(v -> {
+            allLeagues = true;
+            activeTab = TAB_LIVE;
+            renderActiveTab();
+            adapter.notifyItemChanged(0);
+        });
+        tabs.addView(all);
         for (int i = 0; i < SportsApi.LEAGUES.length; i++) {
             final int idx = i;
             TextView tv = new TextView(requireContext());
@@ -217,7 +275,7 @@ public class DeportesFragment extends Fragment {
             tv.setOnClickListener(v -> {
                 leagueIndex = idx;
                 allLeagues  = false;
-                activeTab   = TAB_LIVE;
+                activeTab   = TAB_UPCOMING;
                 loadCurrentLeague();
             });
             tabs.addView(tv);
@@ -230,7 +288,7 @@ public class DeportesFragment extends Fragment {
         for (int i = 0; i < tabs.getChildCount(); i++) {
             View child = tabs.getChildAt(i);
             if (!(child instanceof TextView)) continue;
-            boolean active = !allLeagues && i == leagueIndex;
+            boolean active = (allLeagues && i == 0) || (!allLeagues && i == leagueIndex + 1);
             child.setBackgroundResource(active ? R.drawable.sport_league_tab_active : R.drawable.sport_league_tab_inactive);
             ((TextView) child).setTextColor(active ? 0xFFFFFFFF : 0xCCFFFFFF);
         }

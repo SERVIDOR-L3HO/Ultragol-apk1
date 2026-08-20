@@ -3,28 +3,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/bg_primary">
+    android:background="#050B17">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/sport_header_bg"
-        android:paddingStart="12dp"
-        android:paddingEnd="16dp">
-
+        android:layout_height="58dp"
+        android:background="#061426"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp">
         <ImageView
             android:id="@+id/dsBtnBack"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_gravity="start|center_vertical"
-            android:background="@drawable/sport_back_btn_bg"
             android:src="@android:drawable/ic_menu_revert"
-            android:tint="#FFFFFF"
-            android:padding="9dp"
+            android:tint="#DCE5F2"
+            android:padding="8dp"
+            android:contentDescription="Volver"
             android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="Volver"/>
-
+            android:focusable="true"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -34,20 +31,18 @@
             android:textSize="16sp"
             android:fontFamily="sans-serif-black"
             android:letterSpacing="0.04"/>
-
         <TextView
             android:id="@+id/dsBtnRefresh"
-            android:layout_width="38dp"
-            android:layout_height="38dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_gravity="end|center_vertical"
-            android:background="@drawable/sport_back_btn_bg"
             android:text="⟳"
-            android:textColor="#FFFFFF"
-            android:textSize="18sp"
+            android:textColor="#DCE5F2"
+            android:textSize="20sp"
             android:gravity="center"
+            android:contentDescription="Actualizar"
             android:clickable="true"
-            android:focusable="true"
-            android:contentDescription="Actualizar"/>
+            android:focusable="true"/>
     </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView

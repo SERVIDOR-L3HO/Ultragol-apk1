@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Base64;
 
 import com.ultragol.app.models.SportsHighlight;
+import com.ultragol.app.models.SportsChannel;
 import com.ultragol.app.models.SportsMatch;
 
 import org.json.JSONArray;
@@ -40,6 +41,37 @@ import java.util.regex.Pattern;
 public class SportsApi {
 
     private static final String BASE = "https://ultrago-xi.vercel.app";
+
+    /** Blocking call for the full sports-channel catalogue. */
+    public static List<SportsChannel> fetchSportsChannels() {
+        List<SportsChannel> out = new ArrayList<>();
+        try {
+            JSONObject root = new JSONObject(fetch("/canales/deportes"));
+            JSONArray channels = root.optJSONArray("canales");
+            if (channels == null) return out;
+            for (int i = 0; i < channels.length(); i++) {
+                JSONObject raw = channels.optJSONObject(i);
+                if (raw == null) continue;
+                SportsChannel channel = new SportsChannel();
+                channel.id = raw.optString("id", "");
+                channel.name = raw.optString("nombre", raw.optString("name", "Canal deportivo"));
+                channel.country = raw.optString("pais", "Internacional");
+                channel.countryCode = raw.optString("codigoPais", "");
+                channel.flag = raw.optString("bandera", "");
+                channel.logo = raw.optString("logo", "");
+                JSONArray streams = raw.optJSONArray("streams");
+                if (streams != null) {
+                    for (int j = 0; j < streams.length(); j++) {
+                        JSONObject stream = streams.optJSONObject(j);
+                        String url = stream == null ? streams.optString(j, "") : stream.optString("url", "");
+                        if (!url.isEmpty()) channel.streams.add(url);
+                    }
+                }
+                if (!channel.primaryStream().isEmpty()) out.add(channel);
+            }
+        } catch (Exception ignored) {}
+        return out;
+    }
 
     /** {display name, API path prefix} — prefix "" means the default (Liga MX) routes. */
     public static final String[][] LEAGUES = {

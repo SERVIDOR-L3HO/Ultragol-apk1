@@ -2,237 +2,104 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="8dp">
 
-    <!-- League tabs -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginStart="12dp"
+        android:layout_marginEnd="12dp"
+        android:background="#182536"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="10dp">
+        <EditText
+            android:id="@+id/dsSearch"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:hint="Buscar canal deportivo"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#8E9AA8"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:background="@android:color/transparent"
+            android:inputType="text"
+            android:imeOptions="actionSearch"/>
+        <TextView
+            android:layout_width="36dp"
+            android:layout_height="match_parent"
+            android:text="⌕"
+            android:textColor="#DCE5F2"
+            android:textSize="26sp"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:text="LIGAS Y COMPETICIONES"
+        android:textColor="#9EABB9"
+        android:textSize="10sp"
+        android:fontFamily="sans-serif-bold"
+        android:letterSpacing="0.1"/>
+
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
+        android:layout_marginTop="8dp"
         android:scrollbars="none">
         <LinearLayout
             android:id="@+id/dsLeagueTabs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"/>
+            android:paddingStart="14dp"
+            android:paddingEnd="14dp"/>
     </HorizontalScrollView>
 
-    <!-- Featured / hero match -->
-    <FrameLayout
-        android:id="@+id/dsHero"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:background="@drawable/sport_match_card"
-        android:visibility="gone">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="16dp">
-
-            <TextView
-                android:id="@+id/dsHeroBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="● EN VIVO"
-                android:textColor="#FFFFFF"
-                android:textSize="10sp"
-                android:fontFamily="sans-serif-bold"
-                android:letterSpacing="0.06"
-                android:background="@drawable/agenda_live_badge"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginTop="14dp">
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView
-                        android:id="@+id/dsHeroLogoHome"
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:background="@drawable/live_logo_circle_bg"
-                        android:padding="8dp"
-                        android:scaleType="fitCenter"/>
-                    <TextView
-                        android:id="@+id/dsHeroHome"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:fontFamily="sans-serif-bold"
-                        android:maxLines="1"
-                        android:ellipsize="end"/>
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/dsHeroScore"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="VS"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:fontFamily="sans-serif-black"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"/>
-
-                <LinearLayout
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:orientation="vertical"
-                    android:gravity="center">
-                    <ImageView
-                        android:id="@+id/dsHeroLogoAway"
-                        android:layout_width="52dp"
-                        android:layout_height="52dp"
-                        android:background="@drawable/live_logo_circle_bg"
-                        android:padding="8dp"
-                        android:scaleType="fitCenter"/>
-                    <TextView
-                        android:id="@+id/dsHeroAway"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:textColor="#FFFFFF"
-                        android:textSize="12sp"
-                        android:fontFamily="sans-serif-bold"
-                        android:maxLines="1"
-                        android:ellipsize="end"/>
-                </LinearLayout>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/dsHeroWatch"
-                android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:layout_marginTop="14dp"
-                android:text="▶  VER AHORA"
-                android:textColor="#FFFFFF"
-                android:textSize="13sp"
-                android:fontFamily="sans-serif-bold"
-                android:letterSpacing="0.04"
-                android:gravity="center"
-                android:background="@drawable/sport_stream_btn"
-                android:clickable="true"
-                android:focusable="true"/>
-        </LinearLayout>
-    </FrameLayout>
-
-    <!-- TODOS LOS PARTIDOS banner -->
-    <LinearLayout
-        android:id="@+id/dsBtnAllMatches"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/sport_league_tab_active"
-        android:padding="16dp"
-        android:clickable="true"
-        android:focusable="true">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="⭐ ⚽"
-            android:textSize="18sp"/>
-
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical"
-            android:layout_marginStart="12dp">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="TODOS LOS PARTIDOS"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:fontFamily="sans-serif-black"
-                android:letterSpacing="0.03"/>
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Ver todos los partidos y ligas"
-                android:textColor="#DDFFFFFF"
-                android:textSize="11.5sp"
-                android:layout_marginTop="2dp"/>
-        </LinearLayout>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="›"
-            android:textColor="#FFFFFF"
-            android:textSize="22sp"/>
-    </LinearLayout>
-
-    <!-- Sub-tabs: EN VIVO / PRÓXIMOS PARTIDOS / MEJORES MOMENTOS -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="18dp"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginTop="12dp"
         android:orientation="horizontal">
-
         <TextView
             android:id="@+id/dsTabLive"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="EN VIVO"
+            android:text="CANALES"
             android:textColor="#FFFFFF"
-            android:textSize="11.5sp"
+            android:textSize="11sp"
             android:fontFamily="sans-serif-bold"
             android:gravity="center"
-            android:background="@drawable/sport_section_chip_active"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:background="@drawable/sport_section_chip_active"
             android:clickable="true"
             android:focusable="true"/>
-
         <TextView
             android:id="@+id/dsTabUpcoming"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="6dp"
-            android:text="PRÓXIMOS"
+            android:text="PARTIDOS"
             android:textColor="#CCFFFFFF"
-            android:textSize="11.5sp"
+            android:textSize="11sp"
             android:fontFamily="sans-serif-bold"
             android:gravity="center"
-            android:background="@drawable/sport_section_chip_inactive"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:background="@drawable/sport_section_chip_inactive"
             android:clickable="true"
             android:focusable="true"/>
-
         <TextView
             android:id="@+id/dsTabHighlights"
             android:layout_width="0dp"
@@ -240,12 +107,12 @@
             android:layout_weight="1"
             android:text="MOMENTOS"
             android:textColor="#CCFFFFFF"
-            android:textSize="11.5sp"
+            android:textSize="11sp"
             android:fontFamily="sans-serif-bold"
             android:gravity="center"
-            android:background="@drawable/sport_section_chip_inactive"
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
+            android:background="@drawable/sport_section_chip_inactive"
             android:clickable="true"
             android:focusable="true"/>
     </LinearLayout>
@@ -255,18 +122,16 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         android:indeterminateTint="#D50000"/>
-
     <TextView
         android:id="@+id/dsEmpty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="20dp"
         android:gravity="center"
-        android:text="Sin partidos disponibles ahora"
-        android:textColor="#55FFFFFF"
+        android:text="No hay contenido disponible"
+        android:textColor="#77FFFFFF"
         android:textSize="13sp"
         android:visibility="gone"/>
-
 </LinearLayout>

@@ -16,6 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.ultragol.app.R;
 import com.ultragol.app.TvHelper;
 import com.ultragol.app.models.SportsHighlight;
+import com.ultragol.app.models.SportsChannel;
 import com.ultragol.app.models.SportsMatch;
 
 import java.util.ArrayList;
@@ -30,6 +31,7 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private static final int TYPE_HEADER    = 0;
     private static final int TYPE_MATCH     = 1;
     private static final int TYPE_HIGHLIGHT = 2;
+    private static final int TYPE_CHANNEL   = 3;
 
     public interface HeaderBinder { void bind(View header); }
     public interface OnMatchClick { void onClick(SportsMatch match); }
@@ -43,6 +45,8 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     private boolean showingHighlights = false;
     private final List<SportsMatch> matches = new ArrayList<>();
     private final List<SportsHighlight> highlights = new ArrayList<>();
+    private final List<SportsChannel> channels = new ArrayList<>();
+    private boolean showingChannels = true;
 
     public DeportesAdapter(Context ctx, HeaderBinder headerBinder) {
         this.ctx = ctx;
@@ -53,6 +57,7 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     public void setOnHighlightClick(OnHighlightClick l) { this.onHighlightClick = l; }
 
     public void submitMatches(List<SportsMatch> list) {
+        showingChannels = false;
         showingHighlights = false;
         matches.clear();
         matches.addAll(list);
@@ -60,25 +65,35 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
     }
 
     public void submitHighlights(List<SportsHighlight> list) {
+        showingChannels = false;
         showingHighlights = true;
         highlights.clear();
         highlights.addAll(list);
         notifyDataSetChanged();
     }
 
+    public void submitChannels(List<SportsChannel> list) {
+        showingChannels = true;
+        showingHighlights = false;
+        channels.clear();
+        channels.addAll(list);
+        notifyDataSetChanged();
+    }
+
     public boolean isEmpty() {
+        if (showingChannels) return channels.isEmpty();
         return showingHighlights ? highlights.isEmpty() : matches.isEmpty();
     }
 
     @Override
     public int getItemViewType(int position) {
         if (position == 0) return TYPE_HEADER;
-        return showingHighlights ? TYPE_HIGHLIGHT : TYPE_MATCH;
+        return showingChannels ? TYPE_CHANNEL : (showingHighlights ? TYPE_HIGHLIGHT : TYPE_MATCH);
     }
 
     @Override
     public int getItemCount() {
-        return 1 + (showingHighlights ? highlights.size() : matches.size());
+        return 1 + (showingChannels ? channels.size() : (showingHighlights ? highlights.size() : matches.size()));
     }
 
     @NonNull @Override
@@ -90,6 +105,9 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
         } else if (viewType == TYPE_HIGHLIGHT) {
             View v = inf.inflate(R.layout.item_sports_highlight_card, parent, false);
             return new HighlightVH(v);
+        } else if (viewType == TYPE_CHANNEL) {
+            View v = inf.inflate(R.layout.item_sports_channel, parent, false);
+            return new ChannelVH(v);
         } else {
             View v = inf.inflate(R.layout.item_sports_match_card, parent, false);
             return new MatchVH(v);
@@ -107,7 +125,32 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             bindMatch((MatchVH) holder, matches.get(idx));
         } else if (holder instanceof HighlightVH && idx < highlights.size()) {
             bindHighlight((HighlightVH) holder, highlights.get(idx));
+        } else if (holder instanceof ChannelVH && idx < channels.size()) {
+            bindChannel((ChannelVH) holder, channels.get(idx));
         }
+    }
+
+    private void bindChannel(ChannelVH h, SportsChannel c) {
+        h.name.setText(c.name);
+        h.country.setText((c.flag == null ? "" : c.flag + " ") + c.country);
+        h.streams.setText(c.streams.size() > 1 ? c.streams.size() + " señales disponibles" : "Señal en vivo");
+        if (c.logo != null && !c.logo.isEmpty()) {
+            Glide.with(ctx).load(c.logo).into(h.logo);
+        } else {
+            h.logo.setImageResource(R.drawable.ic_nav_sports);
+        }
+        h.itemView.setOnClickListener(v -> {
+            if (onMatchClick != null) {
+                SportsMatch playable = new SportsMatch();
+                playable.homeTeam = c.name;
+                playable.awayTeam = c.country;
+                playable.league = "Canales deportivos";
+                for (int i = 0; i < c.streams.size(); i++) {
+                    playable.servers.add(new String[]{"Señal " + (i + 1), c.streams.get(i)});
+                }
+                onMatchClick.onClick(playable);
+            }
+        });
     }
 
     private void bindMatch(MatchVH h, SportsMatch m) {
@@ -188,6 +231,18 @@ public class DeportesAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolde
             thumb    = v.findViewById(R.id.shThumb);
             title    = v.findViewById(R.id.shTitle);
             category = v.findViewById(R.id.shCategory);
+        }
+    }
+
+    static class ChannelVH extends RecyclerView.ViewHolder {
+        ImageView logo;
+        TextView name, country, streams;
+        ChannelVH(View v) {
+            super(v);
+            logo = v.findViewById(R.id.scLogo);
+            name = v.findViewById(R.id.scName);
+            country = v.findViewById(R.id.scCountry);
+            streams = v.findViewById(R.id.scStreams);
         }
     }
 }
