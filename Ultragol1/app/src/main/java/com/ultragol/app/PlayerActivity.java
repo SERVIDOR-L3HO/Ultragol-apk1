@@ -34,6 +34,7 @@ import com.ultragol.app.ContinueWatchingManager;
 import com.ultragol.app.DLNAManager;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.StreamingApi;
+import com.ultragol.app.network.AnimeApi;
 import com.ultragol.app.network.TmdbApi;
 
 import java.util.ArrayList;
@@ -766,7 +767,9 @@ public class PlayerActivity extends AppCompatActivity {
         ExecutorService exec = Executors.newSingleThreadExecutor();
         exec.execute(() -> {
             try {
-                StreamingApi.ServerData data = item.getContentType() == com.ultragol.app.models.ContentItem.TYPE_MOVIE
+                StreamingApi.ServerData data = item.isAnime()
+                        ? AnimeApi.fetchEpisodeServers(item, autoFetchSeason, autoFetchEpisode)
+                        : item.getContentType() == com.ultragol.app.models.ContentItem.TYPE_MOVIE
                         ? StreamingApi.fetchMovieServers(item.getTmdbId())
                         : StreamingApi.fetchSeriesServers(item.getTmdbId(), autoFetchSeason, autoFetchEpisode);
 

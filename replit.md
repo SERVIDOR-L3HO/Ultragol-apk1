@@ -25,6 +25,9 @@ Server listens on port 5000.
 | GET | `/ultra1/download` | Download ultra1.apk |
 | GET | `/notifications` | Active in-app notifications |
 | GET | `/api/gol` | Live match proxy (ultrago-xi.vercel.app) |
+| GET | `https://ultrago-xi.vercel.app/api/anime/buscar?q=...` | Anime search by name (slug-based) |
+| GET | `https://ultrago-xi.vercel.app/api/anime/:slug` | Anime seasons and episode metadata |
+| GET | `https://ultrago-xi.vercel.app/api/anime/:slug/temporada/:temporada/episodio/:episodio` | Anime episode servers |
 | POST | `/admin/update` | Upload new APK + version (requires ADMIN_KEY) |
 | POST | `/admin/notify` | Create notification + send push (requires ADMIN_KEY) |
 | GET | `/push/vapid-public-key` | VAPID public key for push subscriptions |
@@ -42,6 +45,14 @@ Server listens on port 5000.
 - `subscriptions.json` — push subscription endpoints
 - `vapid.json` — auto-generated VAPID keys (generated once on first run)
 - `apks/` — uploaded APK files
+
+## Anime API integration
+
+Anime is handled by `Ultragol1/app/src/main/java/com/ultragol/app/network/AnimeApi.java`.
+Anime results carry an `animeSlug` and never use that slug as a TMDB ID. Search checks
+the anime API first, and anime episode/stream requests use the anime endpoints before
+the regular TMDB stream API. TMDB, movies, series, doramas, channels, and sports keep
+their existing clients and identifiers.
 
 ## Android account/profile persistence
 

@@ -14,6 +14,7 @@ public class ContentItem implements Serializable {
     private int contentType, tmdbId;
     private boolean isNew, isLive;
     private String badge, streamUrl;
+    private String animeSlug = "";
     private boolean a7xSource = false;   // true cuando el ítem viene de A7X IPTV API
     private String localPosterPath = "";
     private String localVideoPath  = "";
@@ -36,6 +37,12 @@ public class ContentItem implements Serializable {
 
     public void setTmdbId(int v)      { tmdbId = v; }
     public int  getTmdbId()           { return tmdbId; }
+    public void setAnimeSlug(String v) { animeSlug = v != null ? v : ""; }
+    public String getAnimeSlug() { return animeSlug != null ? animeSlug : ""; }
+    public boolean isAnimeApiItem() {
+        return contentType == TYPE_ANIME && !getAnimeSlug().isEmpty();
+    }
+    public boolean isAnime() { return contentType == TYPE_ANIME; }
     public void setBackdropUrl(String v) { backdropUrl = v != null ? v : ""; }
     public String getBackdropUrl()    { return backdropUrl; }
     public void    setA7xSource(boolean v) { a7xSource = v; }

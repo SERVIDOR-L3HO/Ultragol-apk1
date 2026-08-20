@@ -37,6 +37,7 @@ import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.A7xConstants;
 import com.ultragol.app.network.A7xIptvApi;
+import com.ultragol.app.network.AnimeApi;
 import com.ultragol.app.network.StreamingApi;
 import com.ultragol.app.network.TmdbApi;
 import java.util.ArrayList;
@@ -113,7 +114,9 @@ public class DetailActivity extends AppCompatActivity {
             String mp4Url  = null;
             String m3u8Url = null;
             try {
-                StreamingApi.ServerData data = item.getContentType() == ContentItem.TYPE_MOVIE
+                StreamingApi.ServerData data = item.isAnime()
+                    ? AnimeApi.fetchEpisodeServers(item, 1, 1)
+                    : item.getContentType() == ContentItem.TYPE_MOVIE
                     ? StreamingApi.fetchMovieServers(item.getTmdbId())
                     : StreamingApi.fetchSeriesServers(item.getTmdbId(), 1, 1);
 
@@ -614,7 +617,9 @@ public class DetailActivity extends AppCompatActivity {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
             try {
-                int seasons = TmdbApi.fetchSeriesSeasonCount(item.getTmdbId());
+                int seasons = item.isAnime()
+                        ? AnimeApi.fetchSeasonCount(item)
+                        : TmdbApi.fetchSeriesSeasonCount(item.getTmdbId());
                 h.post(() -> {
                     if (isFinishing()) return;
                     totalSeasons = Math.max(1, seasons);
@@ -665,7 +670,9 @@ public class DetailActivity extends AppCompatActivity {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
             try {
-                List<TmdbApi.EpisodeInfo> eps = TmdbApi.fetchSeasonEpisodes(item.getTmdbId(), season);
+                List<TmdbApi.EpisodeInfo> eps = item.isAnime()
+                        ? AnimeApi.fetchSeasonEpisodes(item, season)
+                        : TmdbApi.fetchSeasonEpisodes(item.getTmdbId(), season);
                 h.post(() -> {
                     if (isFinishing()) return;
                     if (loadFrame != null) loadFrame.setVisibility(View.GONE);
