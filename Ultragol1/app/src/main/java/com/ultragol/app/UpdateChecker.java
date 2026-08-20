@@ -25,7 +25,7 @@ public class UpdateChecker {
     }
 
     private static final String VERSION_URL =
-            "https://a7xtv.com/app-update.json";
+            "https://raw.githubusercontent.com/SERVIDOR-L3HO/Ultragol-apk1/main/version.json";
 
     public static void check(Context context, Callback callback) {
         new Thread(() -> {
@@ -49,10 +49,22 @@ public class UpdateChecker {
                 }
 
                 JSONObject json        = new JSONObject(sb.toString());
-                int remoteVersionCode  = json.optInt("versionCode", 0);
+                int remoteVersionCode  = getInt(json, "versionCode", "version_code");
                 int currentVersionCode = getCurrentVersionCode(context);
+                String downloadUrl     = getString(json, "downloadUrl", "apk_url");
 
-                boolean needsUpdate = remoteVersionCode > currentVersionCode;
+                // Nunca mostrar una actualización que no tenga un APK descargable.
+                boolean needsUpdate = remoteVersionCode > currentVersionCode
+                        && isDownloadAvailable(downloadUrl);
+                if (needsUpdate) {
+                    // Normaliza el formato para que SplashActivity pueda mostrarlo
+                    // aunque el proveedor use snake_case.
+                    json.put("versionCode", remoteVersionCode);
+                    json.put("versionName", getString(json, "versionName", "version_name"));
+                    json.put("downloadUrl", downloadUrl);
+                    json.put("changelog", getString(json, "changelog", "release_notes"));
+                    json.put("forceUpdate", getBoolean(json, "forceUpdate", "required"));
+                }
                 postResult(callback, needsUpdate, needsUpdate ? json : null);
 
             } catch (Exception e) {
@@ -74,13 +86,53 @@ public class UpdateChecker {
         }
     }
 
+    private static int getInt(JSONObject data, String camelCase, String snakeCase) {
+        if (data.has(camelCase)) return data.optInt(camelCase, 0);
+        return data.optInt(snakeCase, 0);
+    }
+
+    private static String getString(JSONObject data, String camelCase, String snakeCase) {
+        String value = data.optString(camelCase, "").trim();
+        return value.isEmpty() ? data.optString(snakeCase, "").trim() : value;
+    }
+
+    private static boolean getBoolean(JSONObject data, String camelCase, String snakeCase) {
+        return data.has(camelCase)
+                ? data.optBoolean(camelCase, false)
+                : data.optBoolean(snakeCase, false);
+    }
+
+    private static boolean isDownloadAvailable(String downloadUrl) {
+        if (downloadUrl.isEmpty()) return false;
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(downloadUrl);
+            if (!"https".equalsIgnoreCase(url.getProtocol())) return false;
+
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setConnectTimeout(6000);
+            conn.setReadTimeout(6000);
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Range", "bytes=0-0");
+            conn.setInstanceFollowRedirects(true);
+
+            int code = conn.getResponseCode();
+            long length = conn.getContentLengthLong();
+            return code >= 200 && code < 300 && length != 0;
+        } catch (Exception ignored) {
+            return false;
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+    }
+
     public static void showUpdateDialog(Context context, JSONObject data) {
         if (data == null) return;
 
-        String versionName  = data.optString("versionName", "");
-        String changelog    = data.optString("changelog",   "");
-        String downloadUrl  = data.optString("downloadUrl", "");
-        boolean forceUpdate = data.optBoolean("forceUpdate", false);
+        String versionName  = getString(data, "versionName", "version_name");
+        String changelog    = getString(data, "changelog", "release_notes");
+        String downloadUrl  = getString(data, "downloadUrl", "apk_url");
+        boolean forceUpdate = getBoolean(data, "forceUpdate", "required");
 
         // Build the dialog
         View dialogView = LayoutInflater.from(context).inflate(R.layout.dialog_update, null);
