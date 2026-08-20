@@ -2,3 +2,4 @@
 - [RecyclerView-in-NestedScrollView jank](ultragol1-architecture.md) — nesting an unbounded/paginated RecyclerView (wrap_content, nestedScrollingEnabled=false) inside a NestedScrollView kills recycling entirely; symptom is scroll stutter that worsens the more pages load.
 - [Anime slug routing](anime-slug-routing.md) — anime shares the API host but uses slugs, so isolate its client and branch before any TMDB-ID request.
 - [Android build environment](android-build-environment.md) — the imported Android project expects `/home/runner/android-sdk`, but this Repl currently has no complete SDK or platform packages there.
+- [Update manifest validation](update-manifest-validation.md) — accept provider schema variants and verify the APK exists before showing an update prompt.

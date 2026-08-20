@@ -114,7 +114,8 @@ public class SplashActivity extends AppCompatActivity {
 
     private void proceed() {
         if (updateAvailable && updateData != null) {
-            boolean force = updateData.optBoolean("forceUpdate", false);
+            boolean force = updateData.optBoolean("forceUpdate",
+                updateData.optBoolean("required", false));
             showUpdateAndProceed(force);
         } else {
             goToMain();
@@ -126,9 +127,12 @@ public class SplashActivity extends AppCompatActivity {
         android.widget.TextView tvVersion   = dialogView.findViewById(R.id.updateVersion);
         android.widget.TextView tvChangelog = dialogView.findViewById(R.id.updateChangelog);
 
-        String version   = updateData.optString("versionName", "");
-        String changelog = updateData.optString("changelog", "");
-        String dlUrl     = updateData.optString("downloadUrl", "");
+        String version   = updateData.optString("versionName",
+            updateData.optString("version_name", ""));
+        String changelog = updateData.optString("changelog",
+            updateData.optString("release_notes", ""));
+        String dlUrl     = updateData.optString("downloadUrl",
+            updateData.optString("apk_url", ""));
 
         if (tvVersion != null)
             tvVersion.setText("Versión " + version + " disponible");
