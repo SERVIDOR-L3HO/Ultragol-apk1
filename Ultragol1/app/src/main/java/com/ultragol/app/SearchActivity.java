@@ -46,6 +46,8 @@ public class SearchActivity extends AppCompatActivity {
     private HomeTvAdapter            tvAdapter;
 
     private final List<ContentItem>              results      = new ArrayList<>();
+    private final List<ContentItem>              animeResults = new ArrayList<>();
+    private final List<ContentItem>              tmdbResults  = new ArrayList<>();
     private final List<DramaShortsApi.VideoItem> shortsItems  = new ArrayList<>();
     private final List<TvChannel>                tvResults    = new ArrayList<>();
 
@@ -134,6 +136,10 @@ public class SearchActivity extends AppCompatActivity {
 
         final int seq = ++searchSeq;
         animeLoaded = false;
+        animeResults.clear();
+        tmdbResults.clear();
+        results.clear();
+        adapter.notifyDataSetChanged();
 
         if (loadingView != null) loadingView.setVisibility(View.VISIBLE);
         if (emptyState  != null) emptyState .setVisibility(View.GONE);
@@ -147,10 +153,9 @@ public class SearchActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 if (seq != searchSeq) return;
                 animeLoaded = true;
-                results.clear();
-                results.addAll(animeResult);
-                adapter.notifyDataSetChanged();
-                updateVisibility();
+                animeResults.clear();
+                animeResults.addAll(animeResult);
+                mergeContentResults();
             });
         });
         animeExec.shutdown();
@@ -165,11 +170,10 @@ public class SearchActivity extends AppCompatActivity {
             final List<ContentItem> tmdbResult = r;
             runOnUiThread(() -> {
                 if (seq != searchSeq) return; // stale
-                if (!animeLoaded) results.clear();
-                results.addAll(tmdbResult);
-                adapter.notifyDataSetChanged();
+                tmdbResults.clear();
+                tmdbResults.addAll(tmdbResult);
+                mergeContentResults();
                 if (loadingView != null) loadingView.setVisibility(View.GONE);
-                updateVisibility();
             });
         });
         tmdbExec.shutdown();
@@ -225,6 +229,18 @@ public class SearchActivity extends AppCompatActivity {
         boolean hasResults = !results.isEmpty() || !shortsItems.isEmpty() || !tvResults.isEmpty();
         if (emptyState  != null) emptyState .setVisibility(hasResults ? View.GONE    : View.VISIBLE);
         if (scrollView  != null) scrollView .setVisibility(hasResults ? View.VISIBLE : View.GONE);
+    }
+
+    /**
+     * Merge independent providers without allowing a late empty response from
+     * one provider to erase valid results from another provider.
+     */
+    private void mergeContentResults() {
+        results.clear();
+        results.addAll(animeResults);
+        results.addAll(tmdbResults);
+        adapter.notifyDataSetChanged();
+        updateVisibility();
     }
 
     private void showEmpty() {
