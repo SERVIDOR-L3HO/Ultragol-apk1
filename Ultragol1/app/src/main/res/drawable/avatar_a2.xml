@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Panda -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#FAFAFA" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M4,15 A15,15 0 1,0 34,15 A15,15 0 1,0 4,15 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M66,15 A15,15 0 1,0 96,15 A15,15 0 1,0 66,15 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M16,46 A15,16 0 1,0 46,46 A15,16 0 1,0 16,46 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M54,46 A15,16 0 1,0 84,46 A15,16 0 1,0 54,46 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M42,70 A8,4 0 1,0 58,70 A8,4 0 1,0 42,70 Z"/>
+</vector>

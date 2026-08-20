@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Owl -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#8B5A2B" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#FFF3E4" android:pathData="M10,35 A19,11 0 1,0 48,35 A19,11 0 1,0 10,35 Z"/>
+    <path android:fillColor="#FFF3E4" android:pathData="M52,35 A19,11 0 1,0 90,35 A19,11 0 1,0 52,35 Z"/>
+    <path android:fillColor="#241206" android:pathData="M18,46 A11,12 0 1,0 40,46 A11,12 0 1,0 18,46 Z"/>
+    <path android:fillColor="#241206" android:pathData="M60,46 A11,12 0 1,0 82,46 A11,12 0 1,0 60,46 Z"/>
+    <path android:fillColor="#F2994A" android:pathData="M44,56 A6,10 0 1,0 56,56 A6,10 0 1,0 44,56 Z"/>
+</vector>

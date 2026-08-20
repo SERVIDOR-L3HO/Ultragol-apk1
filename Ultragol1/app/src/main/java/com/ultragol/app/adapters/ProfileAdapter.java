@@ -1,8 +1,6 @@
 package com.ultragol.app.adapters;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.drawable.GradientDrawable;
 import android.view.*;
 import android.widget.*;
 import androidx.annotation.NonNull;
@@ -74,14 +72,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     private void bindProfile(ProfileVH h, ProfileManager.Profile p) {
-        // Avatar accent circle background
-        GradientDrawable circle = new GradientDrawable();
-        circle.setShape(GradientDrawable.OVAL);
-        try { circle.setColor(Color.parseColor(p.avatarColor)); }
-        catch (Exception e) { circle.setColor(Color.parseColor("#FF6B00")); }
-        h.avatarCircle.setBackground(circle);
-
-        // Avatar icon
+        // Avatar: a complete, self-colored circular illustration
         if (h.ivAvatar != null) h.ivAvatar.setImageResource(p.getAvatarResId());
         h.tvName.setText(p.name);
 

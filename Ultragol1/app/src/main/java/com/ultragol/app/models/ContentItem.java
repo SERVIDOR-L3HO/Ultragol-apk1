@@ -14,11 +14,13 @@ public class ContentItem implements Serializable {
     private int contentType, tmdbId;
     private boolean isNew, isLive;
     private String badge, streamUrl;
+    private String animeSlug = "";
     private boolean a7xSource = false;   // true cuando el ítem viene de A7X IPTV API
     private String localPosterPath = "";
     private String localVideoPath  = "";
     private long   downloadId      = -1L;
     private String videoState      = "NONE"; // NONE / DOWNLOADING / COMPLETE / FAILED
+    private int    downloadProgress = -1;    // 0-100 while DOWNLOADING, -1 if unknown
 
     public ContentItem(String title, String genre, String year, String rating,
                        String posterUrl, String overview, int contentType,
@@ -35,6 +37,12 @@ public class ContentItem implements Serializable {
 
     public void setTmdbId(int v)      { tmdbId = v; }
     public int  getTmdbId()           { return tmdbId; }
+    public void setAnimeSlug(String v) { animeSlug = v != null ? v : ""; }
+    public String getAnimeSlug() { return animeSlug != null ? animeSlug : ""; }
+    public boolean isAnimeApiItem() {
+        return contentType == TYPE_ANIME && !getAnimeSlug().isEmpty();
+    }
+    public boolean isAnime() { return contentType == TYPE_ANIME; }
     public void setBackdropUrl(String v) { backdropUrl = v != null ? v : ""; }
     public String getBackdropUrl()    { return backdropUrl; }
     public void    setA7xSource(boolean v) { a7xSource = v; }
@@ -62,6 +70,9 @@ public class ContentItem implements Serializable {
 
     public void   setVideoState(String v)      { videoState = v != null ? v : "NONE"; }
     public String getVideoState()              { return videoState != null ? videoState : "NONE"; }
+
+    public void   setDownloadProgress(int v)   { downloadProgress = v; }
+    public int    getDownloadProgress()        { return downloadProgress; }
 
     public String getTitle()        { return title; }
     public String getGenre()        { return genre; }

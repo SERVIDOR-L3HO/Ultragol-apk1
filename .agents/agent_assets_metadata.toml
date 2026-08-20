@@ -6,130 +6,158 @@ id = "bi_c6NNz17zWzJuf96nVa"
 uri = "file://apks/ultragol1_glass.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Glass Style (Debug)"
+logical_id = "953be083-ed4a-467f-bb36-514e03bbdf66"
 
 [[outputs]]
 id = "mJ_bYiECLrvgfy-t9eeGk"
 uri = "file://apks/ultragol1_sololatino.zip"
 type = "unspecified"
 title = "Ultragol1 — Rediseño Estilo SoloLatino"
+logical_id = "18d706b1-5b99-4db0-b730-950ddf960b76"
 
 [[outputs]]
 id = "xqlURnvTdEqqyVvsQimfT"
 uri = "file://apks/ultragol1_detalle_sololatino.zip"
 type = "unspecified"
 title = "Ultragol1 — Detalle estilo SoloLatino"
+logical_id = "aa870212-f836-415c-93cf-8cd4919c0587"
 
 [[outputs]]
 id = "9ssYKuwxsm_Aew2cUgGdG"
 uri = "file://apks/ultragol1_hamburguer_menu.zip"
 type = "unspecified"
 title = "Ultragol1 — Menú hamburguesa estilo SoloLatino"
+logical_id = "96a6b8ac-b346-4439-a457-671b38c17ccf"
 
 [[outputs]]
 id = "fBU1kehhxPnqY1oZWZXrn"
 uri = "file://apks/ultragol1_servers.zip"
 type = "unspecified"
 title = "Ultragol1 — Selector de servidores rediseñado"
+logical_id = "29bcf585-568e-48bc-aaa1-13e8d6c90012"
 
 [[outputs]]
 id = "nFUiBGz6JHE6CL-_WQ9UM"
 uri = "file://apks/ultragol1_nuevo.zip"
 type = "unspecified"
 title = "Ultragol1 APK actualizado (con menú corregido)"
+logical_id = "e8631f82-d5db-4a3c-984d-4bc2b6794e0e"
 
 [[outputs]]
 id = "MLy9inh0ODbhEAfsTuf7z"
 uri = "file://apks/ultragol1_trending.zip"
 type = "unspecified"
 title = "Ultragol1 - Hero + Trending Carousel actualizado"
+logical_id = "787ff80a-ff04-4ae4-829e-2a4558b30fe5"
 
 [[outputs]]
 id = "_86lgTgg9MwFWnrriEfK5"
 uri = "file://apks/ultragol1_fixed.zip"
 type = "unspecified"
 title = "Ultragol1 - CRASH CORREGIDO (sin ViewPager2 wrap_content)"
+logical_id = "2fc310f9-d665-4358-8965-59d446d1046a"
 
 [[outputs]]
 id = "bSnQWiShpjii-OaTNGjx0"
 uri = "file://apks/ultragol1_v3.zip"
 type = "unspecified"
 title = "Ultragol1 v3 — Build Limpio (desinstala la versión anterior primero)"
+logical_id = "e0715091-fc68-457e-9b85-1c68dedc22f4"
 
 [[outputs]]
 id = "vtsVMibRTabXP_LwnSfpC"
 uri = "file://ultragol-debug.zip"
 type = "unspecified"
 title = "Ultragol APK — con carrusel glass EN VIVO"
+logical_id = "0e041e37-68b3-4df8-9bbf-cb98737f7ba7"
 
 [[outputs]]
 id = "vl69a0xpPChyRzxaz5fbC"
 uri = "file://apks/ultragol1_debug.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Fix ANR + Diseño Profesional"
+logical_id = "483351a8-f906-4e2d-b240-221e3aadfd8c"
 
 [[outputs]]
 id = "UtPAWRlJwY8ro8I2-3qII"
 uri = "file://apks/ultragol1.zip"
 type = "unspecified"
 title = "Ultragol1.apk — Splash Screen Nuevo"
+logical_id = "f16d8d6b-9662-4c2f-b09a-a719d485a200"
 
 [[outputs]]
 id = "2N5-iEmfyTMJNiamyuWBa"
 uri = "file://apks/ultragol1_glass_update.zip"
 type = "unspecified"
 title = "Ultragol1 APK — Panel de episodios glass + Vista"
+logical_id = "d9fb22e5-8d6b-4f86-af47-02b829dbe114"
 
 [[outputs]]
 id = "AVhFmsrQiA4DP0WxLC1bu"
 uri = "file://apks/ultragol1_continuar_viendo.zip"
 type = "unspecified"
 title = "Ultragol1 — Continuar viendo + Widget"
+logical_id = "fe586db2-f171-43a3-ba6d-d2b473f86d5f"
 
 [[outputs]]
 id = "W7cVEMv7gKfJUfcpeWaCM"
 uri = "file://apks/ultragol1_perfiles.zip"
 type = "unspecified"
 title = "Ultragol1 — Sistema de Perfiles + Continuar Viendo + Widget"
+logical_id = "cb00cee5-76f5-4073-8be9-d07de96e50cc"
 
 [[outputs]]
 id = "kNSuvL65hrkwE9TEXuEmb"
 uri = "file://dist_apk/Ultragol1-debug.zip"
 type = "unspecified"
 title = "Ultragol1 - APK con reproductor rediseñado (nuevo build)"
+logical_id = "b575abd2-7b21-4a05-817a-8693923d0db4"
 
 [[outputs]]
 id = "L4jv57Q5gddtOsP8GPz10"
 uri = "file://apks/ultragol1-debug.zip"
 type = "unspecified"
 title = "ultragol1-debug.zip — Reproductor Glass + nuevas funciones (13 MB)"
+logical_id = "9b8ef7c1-7b02-41d6-a84d-4dee30bebffa"
 
 [[outputs]]
 id = "GpFFZipcK0QTIv8OZ5CAl"
 uri = "file://apks/ultragol1.apk"
 type = "unspecified"
 title = "Ultragol1 — fix real del stutter en scroll (Home)"
+logical_id = "16e67a1f-b825-42bf-9076-85f74cddbd8d"
 
 [[outputs]]
 id = "wQ3PBd_ZDqk-tjluUqXBR"
 uri = "file://Ultragol1/app/build/outputs/apk/debug/app-debug.apk"
 type = "unspecified"
-title = "APK Ultragol sin apartado Música"
-description = "Versión compilada con Música retirada del menú de teléfono y TV."
+title = "Descargar Ultragol1 APK"
+description = "APK debug compilado de la aplicación."
+logical_id = "3fe7a22f-9fb2-41cc-a520-6a4e3c9cc0da"
+content_hash = "sha256:e5d1e38ad23047cb83edf2dfebd84ba989ce69f74a48bc310ec8f30d671be4ae"
+size = 16125571
+mtime_ms = 1787251424897
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:5e391718-121b-4138-975e-d14dc2021e77/3fe7a22f-9fb2-41cc-a520-6a4e3c9cc0da/a881b143-b178-4200-b286-da1f81f155cf"
+storage_version_token = "1787251980999198"
+content_type = "application/octet-stream"
 
 [[outputs]]
 id = "G4EzAvurlgSff_55TAJ2d"
 uri = "file://apks/ultragol1-debug.apk"
 type = "unspecified"
 title = "ultragol1-debug.apk (17 MB)"
+logical_id = "1ac9f524-e1b4-4122-b5b7-759bc43f1384"
 
 [[outputs]]
 id = "wuNP3QoaPJzKVwSyvOaCQ"
 uri = "file://public/ultragol1-debug.apk"
 type = "unspecified"
 title = "ultragol1-debug.apk — Fix detección Web Video Cast"
+logical_id = "150015a3-e8af-4c3a-96fc-4eb997c6a894"
 
 [[outputs]]
 id = "ncafPs9sFqUeGV2ZypfzE"
 uri = "file://ultragol1-con-musica.apk"
 type = "unspecified"
 title = "ultragol1-con-musica.apk"
+logical_id = "0dbce3d4-a53a-4609-8c6f-9d3cc0a5c501"

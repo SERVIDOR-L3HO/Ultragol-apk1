@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.StreamingApi;
+import com.ultragol.app.network.AnimeApi;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
@@ -128,7 +129,9 @@ public class ServerSelectDialog {
         Handler handler = new Handler(Looper.getMainLooper());
         exec.execute(() -> {
             try {
-                StreamingApi.ServerData data = item.getContentType() == ContentItem.TYPE_MOVIE
+                StreamingApi.ServerData data = item.isAnime()
+                    ? AnimeApi.fetchEpisodeServers(item, season, episode)
+                    : item.getContentType() == ContentItem.TYPE_MOVIE
                     ? StreamingApi.fetchMovieServers(item.getTmdbId())
                     : StreamingApi.fetchSeriesServers(item.getTmdbId(), season, episode);
                 handler.post(() -> {

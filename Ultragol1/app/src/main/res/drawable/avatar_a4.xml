@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Koala -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#B0B7BF" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#D7DBDD" android:pathData="M0,22 A20,22 0 1,0 40,22 A20,22 0 1,0 0,22 Z"/>
+    <path android:fillColor="#D7DBDD" android:pathData="M60,22 A20,22 0 1,0 100,22 A20,22 0 1,0 60,22 Z"/>
+    <path android:fillColor="#232323" android:pathData="M26,44 A9,6 0 1,0 44,44 A9,6 0 1,0 26,44 Z"/>
+    <path android:fillColor="#232323" android:pathData="M56,44 A9,6 0 1,0 74,44 A9,6 0 1,0 56,44 Z"/>
+    <path android:fillColor="#232323" android:pathData="M34,70 A16,12 0 1,0 66,70 A16,12 0 1,0 34,70 Z"/>
+</vector>

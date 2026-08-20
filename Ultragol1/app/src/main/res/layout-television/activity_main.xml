@@ -151,7 +151,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:nextFocusUp="@id/navInicio"
-                        android:nextFocusDown="@id/navMovies"
+                        android:nextFocusDown="@id/navAnime"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView
                             android:layout_width="@dimen/nav_icon_size"
@@ -170,38 +170,6 @@
                             android:letterSpacing="0.06"/>
                     </LinearLayout>
 
-                    <!-- PELÍCULAS -->
-                    <LinearLayout
-                        android:id="@+id/navMovies"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/nav_item_height"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:background="@drawable/tv_nav_item_focused"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:nextFocusUp="@id/navSeries"
-                        android:nextFocusDown="@id/navAnime"
-                        android:nextFocusRight="@id/fragmentContainer">
-                        <ImageView
-                            android:layout_width="@dimen/nav_icon_size"
-                            android:layout_height="@dimen/nav_icon_size"
-                            android:src="@drawable/ic_nav_movies"
-                            android:tint="#BAFFFFFF"
-                            android:scaleType="fitCenter"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="PELÍCULAS"
-                            android:textColor="#EAFFFFFF"
-                            android:textSize="@dimen/nav_text_size"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"/>
-                    </LinearLayout>
-
                     <!-- ANIMES -->
                     <LinearLayout
                         android:id="@+id/navAnime"
@@ -214,7 +182,7 @@
                         android:background="@drawable/tv_nav_item_focused"
                         android:clickable="true"
                         android:focusable="true"
-                        android:nextFocusUp="@id/navMovies"
+                        android:nextFocusUp="@id/navSeries"
                         android:nextFocusDown="@id/navDoramas"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView
@@ -363,7 +331,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:nextFocusUp="@id/navTv"
-                        android:nextFocusDown="@id/navMyList"
+                        android:nextFocusDown="@id/navDownloads"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView
                             android:layout_width="@dimen/nav_icon_size"
@@ -376,38 +344,6 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="16dp"
                             android:text="FAVORITOS"
-                            android:textColor="#EAFFFFFF"
-                            android:textSize="@dimen/nav_text_size"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"/>
-                    </LinearLayout>
-
-                    <!-- MI LISTA -->
-                    <LinearLayout
-                        android:id="@+id/navMyList"
-                        android:layout_width="match_parent"
-                        android:layout_height="@dimen/nav_item_height"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:background="@drawable/tv_nav_item_focused"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:nextFocusUp="@id/navFavorites"
-                        android:nextFocusDown="@id/navDownloads"
-                        android:nextFocusRight="@id/fragmentContainer">
-                        <ImageView
-                            android:layout_width="@dimen/nav_icon_size"
-                            android:layout_height="@dimen/nav_icon_size"
-                            android:src="@drawable/ic_nav_mylist"
-                            android:tint="#BAFFFFFF"
-                            android:scaleType="fitCenter"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="16dp"
-                            android:text="MI LISTA"
                             android:textColor="#EAFFFFFF"
                             android:textSize="@dimen/nav_text_size"
                             android:fontFamily="sans-serif-medium"
@@ -427,7 +363,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:visibility="gone"
-                        android:nextFocusUp="@id/navMyList"
+                        android:nextFocusUp="@id/navFavorites"
                         android:nextFocusDown="@id/navAdult"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView
@@ -490,7 +426,7 @@
                         android:background="@drawable/tv_nav_item_focused"
                         android:clickable="true"
                         android:focusable="true"
-                        android:nextFocusUp="@id/navMyList"
+                        android:nextFocusUp="@id/navFavorites"
                         android:nextFocusDown="@id/navSettings"
                         android:nextFocusRight="@id/fragmentContainer">
                         <ImageView

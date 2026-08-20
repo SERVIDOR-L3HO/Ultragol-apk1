@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#050B17">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="58dp"
+        android:background="#061426"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp">
+        <ImageView
+            android:id="@+id/dsBtnBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="start|center_vertical"
+            android:src="@android:drawable/ic_menu_revert"
+            android:tint="#DCE5F2"
+            android:padding="8dp"
+            android:contentDescription="Volver"
+            android:clickable="true"
+            android:focusable="true"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="⚽  DEPORTES"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:fontFamily="sans-serif-black"
+            android:letterSpacing="0.04"/>
+        <TextView
+            android:id="@+id/dsBtnRefresh"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_gravity="end|center_vertical"
+            android:text="⟳"
+            android:textColor="#DCE5F2"
+            android:textSize="20sp"
+            android:gravity="center"
+            android:contentDescription="Actualizar"
+            android:clickable="true"
+            android:focusable="true"/>
+    </FrameLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvDeportes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="24dp"/>
+</LinearLayout>

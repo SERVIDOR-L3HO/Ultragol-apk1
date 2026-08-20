@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Ponytail -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp"
-    android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M12,5C9.24,5 7,7.24 7,10C7,12.76 9.24,15 12,15C14.76,15 17,12.76 17,10C17,7.24 14.76,5 12,5ZM7,10C7,7.24 9.24,5 12,5C14.76,5 17,7.24 17,10L16,10C16,7 14.21,5.5 12,5.5C9.79,5.5 8,7 8,10ZM16.5,7.5C16.5,5.5 17.5,4.5 18.5,5C20,5.5 20.5,7.5 19.5,9C18.5,10.5 17,10.5 16.5,9.5ZM3,23C3,19.13 7.13,17 12,17C16.87,17 21,19.13 21,23Z"/>
-</vector>

@@ -35,7 +35,7 @@
                 android:letterSpacing="-0.01"
                 android:layout_marginBottom="20dp"/>
 
-            <!-- Avatar con glow ring -->
+            <!-- Avatar con halo de vidrio neutro -->
             <FrameLayout
                 android:layout_width="108dp"
                 android:layout_height="108dp"
@@ -45,24 +45,25 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@drawable/profile_avatar_glow_ring"
-                    android:alpha="0.9"/>
+                    android:background="@drawable/avatar_preview_glass_ring"/>
 
                 <FrameLayout
                     android:id="@+id/avatarPreview"
                     android:layout_width="82dp"
                     android:layout_height="82dp"
-                    android:layout_gravity="center"
-                    android:background="@drawable/profile_avatar_circle">
+                    android:layout_gravity="center">
 
                     <ImageView
                         android:id="@+id/ivAvatarIconPreview"
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:layout_gravity="center"
-                        android:src="@drawable/ic_avatar_0"
-                        android:tint="#EEFFFFFF"
-                        android:scaleType="fitCenter"/>
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/avatar_g1"
+                        android:scaleType="fitXY"/>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@drawable/avatar_ring_outline"/>
                 </FrameLayout>
             </FrameLayout>
         </LinearLayout>
@@ -92,8 +93,7 @@
                 android:id="@+id/avatarPickerRow"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
+                android:orientation="vertical"
                 android:paddingTop="4dp"
                 android:paddingBottom="4dp"/>
         </HorizontalScrollView>
@@ -145,33 +145,6 @@
                     android:inputType="textPersonName|textCapWords"
                     android:imeOptions="actionDone"/>
             </LinearLayout>
-
-            <!-- Label color -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="COLOR DE ACENTO"
-                android:textColor="#80FFFFFF"
-                android:textSize="9sp"
-                android:fontFamily="sans-serif-bold"
-                android:letterSpacing="0.12"
-                android:layout_marginBottom="10dp"/>
-
-            <!-- Fila de colores -->
-            <LinearLayout
-                android:id="@+id/colorPicker"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center"
-                android:layout_marginBottom="18dp"/>
-
-            <!-- Divider -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#14FFFFFF"
-                android:layout_marginBottom="14dp"/>
 
             <!-- Perfil infantil toggle -->
             <LinearLayout

@@ -25,6 +25,9 @@ Server listens on port 5000.
 | GET | `/ultra1/download` | Download ultra1.apk |
 | GET | `/notifications` | Active in-app notifications |
 | GET | `/api/gol` | Live match proxy (ultrago-xi.vercel.app) |
+| GET | `https://ultrago-xi.vercel.app/api/anime/buscar?q=...` | Anime search by name (slug-based) |
+| GET | `https://ultrago-xi.vercel.app/api/anime/:slug` | Anime seasons and episode metadata |
+| GET | `https://ultrago-xi.vercel.app/api/anime/:slug/temporada/:temporada/episodio/:episodio` | Anime episode servers |
 | POST | `/admin/update` | Upload new APK + version (requires ADMIN_KEY) |
 | POST | `/admin/notify` | Create notification + send push (requires ADMIN_KEY) |
 | GET | `/push/vapid-public-key` | VAPID public key for push subscriptions |
@@ -43,6 +46,22 @@ Server listens on port 5000.
 - `vapid.json` — auto-generated VAPID keys (generated once on first run)
 - `apks/` — uploaded APK files
 
+### Android debug build
+
+From the project root, build the debug APK with:
+```
+cd Ultragol1 && ./gradlew :app:assembleDebug
+```
+The generated file is `Ultragol1/app/build/outputs/apk/debug/app-debug.apk`.
+
+## Anime API integration
+
+Anime is handled by `Ultragol1/app/src/main/java/com/ultragol/app/network/AnimeApi.java`.
+Anime results carry an `animeSlug` and never use that slug as a TMDB ID. Search checks
+the anime API first, and anime episode/stream requests use the anime endpoints before
+the regular TMDB stream API. TMDB, movies, series, doramas, channels, and sports keep
+their existing clients and identifiers.
+
 ## Android account/profile persistence
 
 The Android app uses Firebase Authentication from `Ultragol1/app/google-services.json`.
@@ -59,30 +78,6 @@ empty profile.
 The Android OAuth client ID must remain the web client ID from
 `google-services.json`; using a client ID from another Firebase project causes
 Google sign-in to fail before profile synchronization starts.
-
-## Watch Party — Ver en grupo
-Real-time synchronized group viewing feature added to the Android app.
-
-### How it works
-- **Button**: "🎬 Ver en grupo" replaces the old Subtítulos/Doblaje buttons in `activity_player_detail.xml`.
-- **Android Activity**: `WatchPartyActivity.java` — lobby to create/join a room, then a chat+sync room view.
-- **Android WebSocket client**: `WatchPartyManager.java` — uses OkHttp WebSocket; handles room create/join, sync, and chat.
-- **Server WebSocket**: `server.js` — `/watchparty/ws` endpoint using the `ws` npm package.
-  - Rooms are password-protected (SHA-256 hashed), max 20 participants, auto-destroy when empty.
-  - Host can sync play/pause to all participants; chat is broadcast to all in room.
-- **Room codes**: 6-character alphanumeric, randomly generated.
-- **OkHttp dependency**: added `com.squareup.okhttp3:okhttp:4.12.0` to `Ultragol1/app/build.gradle`.
-- **Server URL**: defaults to `https://ultragol-update-server.replit.app`; override via Intent extra `"server"` for testing.
-
-### Key files
-| File | Purpose |
-|------|---------|
-| `Ultragol1/app/src/main/java/com/ultragol/app/WatchPartyActivity.java` | Room UI: lobby, chat, sync controls |
-| `Ultragol1/app/src/main/java/com/ultragol/app/WatchPartyManager.java` | OkHttp WebSocket client |
-| `Ultragol1/app/src/main/res/layout/activity_watch_party.xml` | Room screen layout |
-| `Ultragol1/app/src/main/res/layout/item_chat_message.xml` | Chat bubble item |
-| `Ultragol1/app/src/main/res/drawable/btn_watch_party_bg.xml` | Purple gradient button bg |
-| `server.js` (end) | `/watchparty/ws` WebSocket room server |
 
 ## Verified setup
 - Server starts cleanly via the `Start application` workflow (`npm install && node server.js`)

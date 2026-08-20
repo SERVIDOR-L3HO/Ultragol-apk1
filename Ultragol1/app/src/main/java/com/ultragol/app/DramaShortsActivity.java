@@ -51,10 +51,17 @@ public class DramaShortsActivity extends AppCompatActivity {
         adapter = new GridAdapter();
         grid.setLayoutManager(new GridLayoutManager(this, 2));
         grid.setAdapter(adapter);
+        TvHelper.makeFocusable(grid);
 
         // Tabs
         buildTabs();
         switchTab(0);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 
     // ── Tabs ──────────────────────────────────────────────────────────────────

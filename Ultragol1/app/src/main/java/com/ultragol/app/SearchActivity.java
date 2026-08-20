@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -22,6 +23,7 @@ import com.ultragol.app.fragments.TvFragment;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.models.TvChannel;
 import com.ultragol.app.network.DramaShortsApi;
+import com.ultragol.app.network.AnimeApi;
 import com.ultragol.app.network.TmdbApi;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +46,8 @@ public class SearchActivity extends AppCompatActivity {
     private HomeTvAdapter            tvAdapter;
 
     private final List<ContentItem>              results      = new ArrayList<>();
+    private final List<ContentItem>              animeResults = new ArrayList<>();
+    private final List<ContentItem>              tmdbResults  = new ArrayList<>();
     private final List<DramaShortsApi.VideoItem> shortsItems  = new ArrayList<>();
     private final List<TvChannel>                tvResults    = new ArrayList<>();
 
@@ -55,6 +59,7 @@ public class SearchActivity extends AppCompatActivity {
 
     // Track in-flight searches so late results don't overwrite newer ones
     private volatile int   searchSeq       = 0;
+    private volatile boolean animeLoaded   = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,12 +88,14 @@ public class SearchActivity extends AppCompatActivity {
         adapter = new ContentGridAdapter(this, results);
         resultsGrid.setLayoutManager(new GridLayoutManager(this, 3));
         resultsGrid.setAdapter(adapter);
+        TvHelper.makeFocusable(resultsGrid);
 
         // Shorts Dramas horizontal row
         shortsAdapter = new DramaShortsRowAdapter(this, shortsItems);
         shortsRow.setLayoutManager(new LinearLayoutManager(
                 this, LinearLayoutManager.HORIZONTAL, false));
         shortsRow.setAdapter(shortsAdapter);
+        TvHelper.makeFocusable(shortsRow);
 
         // TV channels horizontal row
         RecyclerView tvRow = findViewById(R.id.tvRow);
@@ -104,6 +111,7 @@ public class SearchActivity extends AppCompatActivity {
         tvRow.setLayoutManager(new LinearLayoutManager(
                 this, LinearLayoutManager.HORIZONTAL, false));
         tvRow.setAdapter(tvAdapter);
+        TvHelper.makeFocusable(tvRow);
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int a, int b, int c) {}
@@ -127,11 +135,32 @@ public class SearchActivity extends AppCompatActivity {
         doSearchTv(query);
 
         final int seq = ++searchSeq;
+        animeLoaded = false;
+        animeResults.clear();
+        tmdbResults.clear();
+        results.clear();
+        adapter.notifyDataSetChanged();
 
         if (loadingView != null) loadingView.setVisibility(View.VISIBLE);
         if (emptyState  != null) emptyState .setVisibility(View.GONE);
 
-        // ── TMDB search ───────────────────────────────────────────────────────
+        // ── Anime search first: anime API uses slugs, never TMDB ids ───────────
+        ExecutorService animeExec = Executors.newSingleThreadExecutor();
+        animeExec.execute(() -> {
+            List<ContentItem> anime = new ArrayList<>();
+            try { anime = AnimeApi.search(query); } catch (Exception ignored) {}
+            final List<ContentItem> animeResult = anime;
+            runOnUiThread(() -> {
+                if (seq != searchSeq) return;
+                animeLoaded = true;
+                animeResults.clear();
+                animeResults.addAll(animeResult);
+                mergeContentResults();
+            });
+        });
+        animeExec.shutdown();
+
+        // ── TMDB search (kept independent and appended after anime) ───────────
         ExecutorService tmdbExec = Executors.newSingleThreadExecutor();
         tmdbExec.execute(() -> {
             List<ContentItem> r = new ArrayList<>();
@@ -141,11 +170,10 @@ public class SearchActivity extends AppCompatActivity {
             final List<ContentItem> tmdbResult = r;
             runOnUiThread(() -> {
                 if (seq != searchSeq) return; // stale
-                results.clear();
-                results.addAll(tmdbResult);
-                adapter.notifyDataSetChanged();
+                tmdbResults.clear();
+                tmdbResults.addAll(tmdbResult);
+                mergeContentResults();
                 if (loadingView != null) loadingView.setVisibility(View.GONE);
-                updateVisibility();
             });
         });
         tmdbExec.shutdown();
@@ -203,6 +231,18 @@ public class SearchActivity extends AppCompatActivity {
         if (scrollView  != null) scrollView .setVisibility(hasResults ? View.VISIBLE : View.GONE);
     }
 
+    /**
+     * Merge independent providers without allowing a late empty response from
+     * one provider to erase valid results from another provider.
+     */
+    private void mergeContentResults() {
+        results.clear();
+        results.addAll(animeResults);
+        results.addAll(tmdbResults);
+        adapter.notifyDataSetChanged();
+        updateVisibility();
+    }
+
     private void showEmpty() {
         searchSeq++;
         results.clear();     adapter.notifyDataSetChanged();
@@ -213,5 +253,11 @@ public class SearchActivity extends AppCompatActivity {
         if (scrollView    != null) scrollView   .setVisibility(View.GONE);
         if (shortsSection != null) shortsSection.setVisibility(View.GONE);
         if (tvSection     != null) tvSection    .setVisibility(View.GONE);
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }

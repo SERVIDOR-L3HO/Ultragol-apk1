@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
                 dest = new com.ultragol.app.fragments.TvFragment();
                 break;
             case "deportes":
-                dest = new DeportesWebFragment();
+                dest = new DeportesFragment();
                 break;
             case "movies":
                 dest = new MoviesFragment();
@@ -146,25 +146,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean dispatchKeyEvent(KeyEvent event) {
+        // Universal keyboard shortcuts (Escape → back, Ctrl+F/Search → search), shared
+        // with every other activity via TvHelper.
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+
         // Only act on ACTION_DOWN to avoid double-firing
         if (event.getAction() != KeyEvent.ACTION_DOWN) return super.dispatchKeyEvent(event);
 
         int kc = event.getKeyCode();
-
-        // ── Universal keyboard shortcuts (all device types) ──────────────────
-
-        // Escape → back (useful on PC/laptop)
-        if (kc == KeyEvent.KEYCODE_ESCAPE) {
-            onBackPressed();
-            return true;
-        }
-
-        // Ctrl+F or Search key → open search
-        if (kc == KeyEvent.KEYCODE_SEARCH
-                || (kc == KeyEvent.KEYCODE_F && event.isCtrlPressed())) {
-            startActivity(new Intent(this, SearchActivity.class));
-            return true;
-        }
 
         // ── TV-specific D-pad routing ────────────────────────────────────────
 
@@ -239,27 +228,23 @@ public class MainActivity extends AppCompatActivity {
         // ── Nav items ──
         View navInicio    = drawerOverlay.findViewById(R.id.navInicio);
         View navSeries    = drawerOverlay.findViewById(R.id.navSeries);
-        View navMovies    = drawerOverlay.findViewById(R.id.navMovies);
         View navAnime     = drawerOverlay.findViewById(R.id.navAnime);
         View navDoramas   = drawerOverlay.findViewById(R.id.navDoramas);
         View navSearch    = drawerOverlay.findViewById(R.id.navSearch);
         View navDeportes  = drawerOverlay.findViewById(R.id.navDeportes);
         View navTv        = drawerOverlay.findViewById(R.id.navTv);
         View navFavorites     = drawerOverlay.findViewById(R.id.navFavorites);
-        View navMyList        = drawerOverlay.findViewById(R.id.navMyList);
         View navSwitchProfile = drawerOverlay.findViewById(R.id.navSwitchProfile);
         android.widget.TextView tvCurrentProfileName =
                 drawerOverlay.findViewById(R.id.tvCurrentProfileName);
 
         if (navInicio    != null) navInicio.setOnClickListener(v    -> navigate(new HomeFragment()));
         if (navSeries    != null) navSeries.setOnClickListener(v    -> navigate(new SeriesFragment()));
-        if (navMovies    != null) navMovies.setOnClickListener(v    -> navigate(new MoviesFragment()));
         if (navAnime     != null) navAnime.setOnClickListener(v     -> navigate(new AnimeFragment()));
         if (navDoramas   != null) navDoramas.setOnClickListener(v   -> navigate(new DoramasFragment()));
-        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesWebFragment()));
+        if (navDeportes  != null) navDeportes.setOnClickListener(v  -> navigate(new DeportesFragment()));
         if (navTv        != null) navTv.setOnClickListener(v        -> navigate(new com.ultragol.app.fragments.TvFragment()));
         if (navFavorites != null) navFavorites.setOnClickListener(v -> navigate(new FavoritesFragment()));
-        if (navMyList    != null) navMyList.setOnClickListener(v    -> navigate(new MyListFragment()));
 
         View navDownloads = drawerOverlay.findViewById(R.id.navDownloads);
         if (navDownloads != null) navDownloads.setOnClickListener(v ->
@@ -385,10 +370,6 @@ public class MainActivity extends AppCompatActivity {
         if (!isTV && drawerOverlay != null && drawerOverlay.getVisibility() == View.VISIBLE) {
             hideMenu();
             return;
-        }
-        Fragment current = getSupportFragmentManager().findFragmentById(R.id.fragmentContainer);
-        if (current instanceof DeportesWebFragment) {
-            if (((DeportesWebFragment) current).onBackPressed()) return;
         }
         if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
             getSupportFragmentManager().popBackStack();

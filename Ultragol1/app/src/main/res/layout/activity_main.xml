@@ -167,35 +167,6 @@
                             android:letterSpacing="0.06"/>
                     </LinearLayout>
 
-                    <!-- Películas -->
-                    <LinearLayout
-                        android:id="@+id/navMovies"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:background="@drawable/nav_glass_item_bg"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_nav_movies"
-                            android:tint="#BAFFFFFF"
-                            android:scaleType="fitCenter"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="18dp"
-                            android:text="PELÍCULAS"
-                            android:textColor="#EAFFFFFF"
-                            android:textSize="13sp"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"/>
-                    </LinearLayout>
-
                     <!-- Animes -->
                     <LinearLayout
                         android:id="@+id/navAnime"
@@ -384,35 +355,6 @@
                             android:layout_height="wrap_content"
                             android:layout_marginStart="18dp"
                             android:text="FAVORITOS"
-                            android:textColor="#EAFFFFFF"
-                            android:textSize="13sp"
-                            android:fontFamily="sans-serif-medium"
-                            android:letterSpacing="0.06"/>
-                    </LinearLayout>
-
-                    <!-- Mi Lista -->
-                    <LinearLayout
-                        android:id="@+id/navMyList"
-                        android:layout_width="match_parent"
-                        android:layout_height="54dp"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:paddingStart="14dp"
-                        android:paddingEnd="14dp"
-                        android:background="@drawable/nav_glass_item_bg"
-                        android:clickable="true"
-                        android:focusable="true">
-                        <ImageView
-                            android:layout_width="22dp"
-                            android:layout_height="22dp"
-                            android:src="@drawable/ic_nav_mylist"
-                            android:tint="#BAFFFFFF"
-                            android:scaleType="fitCenter"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="18dp"
-                            android:text="MI LISTA"
                             android:textColor="#EAFFFFFF"
                             android:textSize="13sp"
                             android:fontFamily="sans-serif-medium"

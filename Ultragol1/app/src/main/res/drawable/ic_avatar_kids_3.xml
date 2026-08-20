@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Kids with bow accessory -->
-<vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="24dp" android:height="24dp"
-    android:viewportWidth="24" android:viewportHeight="24">
-    <path android:fillColor="#FFFFFF"
-        android:pathData="M12,5C9.24,5 7,7.24 7,10C7,12.76 9.24,15 12,15C14.76,15 17,12.76 17,10C17,7.24 14.76,5 12,5ZM7,10C7,7.24 9.24,5 12,5C14.76,5 17,7.24 17,10L16,10C16,7.79 14.21,6 12,6C9.79,6 8,7.79 8,10ZM9,2.5L9,5L12,4L15,5L15,2.5L12,1ZM11.25,3L12.75,3L12.75,4.5L11.25,4.5ZM3,23C3,19.13 7.13,17 12,17C16.87,17 21,19.13 21,23Z"/>
-</vector>

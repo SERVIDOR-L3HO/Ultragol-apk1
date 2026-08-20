@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import com.ultragol.app.ContinueWatchingManager;
 import com.ultragol.app.DLNAManager;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.StreamingApi;
+import com.ultragol.app.network.AnimeApi;
 import com.ultragol.app.network.TmdbApi;
 
 import java.util.ArrayList;
@@ -64,11 +66,29 @@ public class PlayerActivity extends AppCompatActivity {
     private String currentEmbedUrl           = null;
     private String videoTitle                = null;
 
+    // ── Decoy filtering + "wait for the real source" grace window ────────────
+    // Some embeds play a short ad/trailer/placeholder stream first, then swap
+    // in the actual movie. Instead of freezing on the first URL the sniffer
+    // sees, known decoy signatures are rejected outright, and every other
+    // candidate resets a short timer — only the last candidate seen once
+    // things go quiet for CAPTURE_GRACE_MS is treated as final.
+    private static final long CAPTURE_GRACE_MS = 1400;
+    private final Handler captureGraceHandler = new Handler(Looper.getMainLooper());
+    private volatile String pendingCandidateUrl      = null;
+    private volatile String pendingCandidateReferer  = null;
+    private volatile boolean pendingCandidateIsM3u8  = false;
+
+    private boolean isLikelyDecoyStream(String url) {
+        return StreamValidator.isKnownDecoyUrl(url);
+    }
+
     // ── Extra flags ───────────────────────────────────────────────────────────
     /** If true: once stream URL is captured, auto-open CastBottomSheet instead of MediaActivity */
     private boolean autoCast   = false;
     /** If true: keep WebView visible (manual quality / source selection) */
     private boolean manualMode = false;
+    /** If true: once stream URL is captured, kick off a real download in the background */
+    private boolean autoDownload = false;
 
     private static final long MIN_MP4_BYTES  = 1024 * 1024L; // 1 MB hint
 
@@ -81,6 +101,9 @@ public class PlayerActivity extends AppCompatActivity {
     private int autoFetchEpisode = 1;
 
     // ── XHR/fetch hook — injected at onPageStarted to catch streams before shouldInterceptRequest ──
+    // Patches the top window AND every same-origin iframe reachable from it (some embeds
+    // load the real player inside a nested iframe the naive top-only hook never sees),
+    // re-scanning periodically since embeds often insert iframes after a short delay.
     private static final String JS_XHR_HOOK =
         "(function(){"
         + "try{"
@@ -94,34 +117,63 @@ public class PlayerActivity extends AppCompatActivity {
         +     "||u.indexOf('/master')>=0"        // common HLS master playlist path
         +     "||u.indexOf('/playlist')>=0;"     // playlist endpoint
         + "}"
-        // Patch XMLHttpRequest.open
-        + "var xhrOpen=XMLHttpRequest.prototype.open;"
-        + "XMLHttpRequest.prototype.open=function(method,url){"
-        +   "if(_isStream(url)){try{window.HTMLOUT.onUrl(url,'xhr');}catch(ex){}}"
-        +   "return xhrOpen.apply(this,arguments);"
-        + "};"
-        // Patch fetch
-        + "var origFetch=window.fetch;"
-        + "if(typeof origFetch==='function'){"
-        +   "window.fetch=function(input,opts){"
-        +     "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
-        +     "if(_isStream(u)){try{window.HTMLOUT.onUrl(u,'fetch');}catch(ex){}}"
-        +     "return origFetch.apply(this,arguments);"
-        +   "};"
+        + "function _send(u,src){try{window.top.HTMLOUT.onUrl(u,src);}catch(ex){}}"
+        // Patches a single window object's XHR/fetch/video.src — no-ops safely
+        // if win is a cross-origin iframe whose internals we can't touch.
+        + "function _patchWin(win,tag){"
+        +   "try{"
+        +     "if(!win||win.__ultragolPatched)return;win.__ultragolPatched=true;"
+        +     "var X=win.XMLHttpRequest;"
+        +     "if(X&&X.prototype&&X.prototype.open){"
+        +       "var xo=X.prototype.open;"
+        +       "X.prototype.open=function(method,url){"
+        +         "if(_isStream(url))_send(url,tag+'_xhr');"
+        +         "return xo.apply(this,arguments);"
+        +       "};"
+        +     "}"
+        +     "var of=win.fetch;"
+        +     "if(typeof of==='function'){"
+        +       "win.fetch=function(input,opts){"
+        +         "var u=typeof input==='string'?input:(input&&input.url?input.url:'');"
+        +         "if(_isStream(u))_send(u,tag+'_fetch');"
+        +         "return of.apply(this,arguments);"
+        +       "};"
+        +     "}"
+        +     "var HME=win.HTMLMediaElement;"
+        +     "if(HME){"
+        +       "var osd=Object.getOwnPropertyDescriptor(HME.prototype,'src');"
+        +       "if(osd&&osd.set){"
+        +         "Object.defineProperty(HME.prototype,'src',{"
+        +           "set:function(v){"
+        +             "if(_isStream(v))_send(v,tag+'_src_setter');"
+        +             "return osd.set.call(this,v);"
+        +           "},"
+        +           "get:osd.get,configurable:true"
+        +         "});"
+        +       "}"
+        +     "}"
+        +   "}catch(ex){}"
         + "}"
-        // Patch video.src setter — fires the moment the player assigns the source
-        + "try{"
-        +   "var origSrcDesc=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'src');"
-        +   "if(origSrcDesc&&origSrcDesc.set){"
-        +     "Object.defineProperty(HTMLMediaElement.prototype,'src',{"
-        +       "set:function(v){"
-        +         "if(_isStream(v)){try{window.HTMLOUT.onUrl(v,'src_setter');}catch(ex){}}"
-        +         "return origSrcDesc.set.call(this,v);"
-        +       "},"
-        +       "get:origSrcDesc.get,configurable:true"
-        +     "});"
-        +   "}"
-        + "}catch(ex){}"
+        // Reaches into same-origin iframes only — cross-origin ones throw and are skipped.
+        + "function _patchFrames(){"
+        +   "try{"
+        +     "var frames=document.querySelectorAll('iframe');"
+        +     "for(var i=0;i<frames.length;i++){"
+        +       "try{"
+        +         "var cw=frames[i].contentWindow;"
+        +         "if(cw)_patchWin(cw,'iframe'+i);"
+        +       "}catch(ex){}"
+        +     "}"
+        +   "}catch(ex){}"
+        + "}"
+        + "_patchWin(window,'top');"
+        + "_patchFrames();"
+        // Embeds frequently inject the real player iframe a moment after load.
+        + "var _tries=0;"
+        + "var _rescan=setInterval(function(){"
+        +   "_patchFrames();"
+        +   "if(++_tries>=10)clearInterval(_rescan);"
+        + "},600);"
         + "}catch(e){}"
         + "})();";
 
@@ -574,6 +626,12 @@ public class PlayerActivity extends AppCompatActivity {
         View btnCastDetail = findViewById(R.id.pdBtnCast);
         if (btnCastDetail != null) updateDetailCastBtn(btnCastDetail, true);
 
+        if (autoDownload) {
+            // Download runs in the background service — doesn't block play/cast below
+            autoDownload = false;
+            startRealDownload();
+        }
+
         if (manualMode) {
             // Stay in WebView so user can choose quality/source manually
             Toast.makeText(this,
@@ -621,6 +679,25 @@ public class PlayerActivity extends AppCompatActivity {
             }
         }
         btn.setAlpha(ready ? 1f : 0.6f);
+    }
+
+    // ── Real download (MP4 → Android DownloadManager, HLS → VideoDownloadService) ──
+    private void startRealDownload() {
+        if (item == null) return;
+        if (capturedVideoUrl == null || capturedVideoUrl.isEmpty()) {
+            Toast.makeText(this, "Espera mientras se captura el stream…", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (capturedIsM3u8) {
+            DownloadsManager.startVideoDownload(this, item, capturedVideoUrl, capturedReferer);
+        } else {
+            DownloadsManager.startDirectMp4Download(this, item, capturedVideoUrl);
+        }
+        Toast.makeText(this,
+            "Descarga iniciada (" + (capturedIsM3u8 ? "HLS" : "MP4") + ") ⬇  Revisa tus Descargas",
+            Toast.LENGTH_LONG).show();
+        LinearLayout btnDownload = findViewById(R.id.pdBtnDownload);
+        if (btnDownload != null) updateDownloadBtn(btnDownload);
     }
 
     // ── Cast options sheet (DLNA / AirPlay / Chromecast) ─────────────────────
@@ -690,7 +767,9 @@ public class PlayerActivity extends AppCompatActivity {
         ExecutorService exec = Executors.newSingleThreadExecutor();
         exec.execute(() -> {
             try {
-                StreamingApi.ServerData data = item.getContentType() == com.ultragol.app.models.ContentItem.TYPE_MOVIE
+                StreamingApi.ServerData data = item.isAnime()
+                        ? AnimeApi.fetchEpisodeServers(item, autoFetchSeason, autoFetchEpisode)
+                        : item.getContentType() == com.ultragol.app.models.ContentItem.TYPE_MOVIE
                         ? StreamingApi.fetchMovieServers(item.getTmdbId())
                         : StreamingApi.fetchSeriesServers(item.getTmdbId(), autoFetchSeason, autoFetchEpisode);
 
@@ -817,15 +896,33 @@ public class PlayerActivity extends AppCompatActivity {
         if (btnDownload != null) {
             updateDownloadBtn(btnDownload);
             btnDownload.setOnClickListener(v -> {
-                if (DownloadsManager.isDownloaded(this, item)) {
-                    DownloadsManager.remove(this, item);
-                    updateDownloadBtn(btnDownload);
-                    Toast.makeText(this, "Descarga eliminada", Toast.LENGTH_SHORT).show();
+                String state = DownloadsManager.getVideoState(this, item);
+                if ("COMPLETE".equals(state)) {
+                    new android.app.AlertDialog.Builder(this)
+                        .setTitle("Eliminar descarga")
+                        .setMessage("\u00bfEliminar \"" + item.getTitle() + "\" de tus descargas?")
+                        .setPositiveButton("Eliminar", (d, w) -> {
+                            DownloadsManager.remove(this, item);
+                            updateDownloadBtn(btnDownload);
+                            Toast.makeText(this, "Descarga eliminada", Toast.LENGTH_SHORT).show();
+                        })
+                        .setNegativeButton("Cancelar", null)
+                        .show();
+                } else if ("DOWNLOADING".equals(state)) {
+                    Toast.makeText(this, "Ya se est\u00e1 descargando...", Toast.LENGTH_SHORT).show();
+                } else if (!DownloadsManager.ensureStoragePermission(this)) {
+                    Toast.makeText(this,
+                        "Concede el permiso de almacenamiento y toca Descargar otra vez",
+                        Toast.LENGTH_LONG).show();
+                } else if (capturedVideoUrl != null && !capturedVideoUrl.isEmpty()) {
+                    startRealDownload();
                 } else {
-                    DownloadsManager.add(this, item, success -> {
-                        updateDownloadBtn(btnDownload);
-                        Toast.makeText(this, success ? "Descarga completada \u2713" : "Error al descargar", Toast.LENGTH_SHORT).show();
-                    });
+                    autoDownload = true;
+                    TextView icon  = findViewById(R.id.pdDownloadIcon);
+                    TextView label = findViewById(R.id.pdDownloadLabel);
+                    if (icon  != null) { icon.setText("\u23f3"); icon.setTextColor(0xFFAAAAAA); }
+                    if (label != null) { label.setText("Buscando\u2026"); label.setTextColor(0xFFAAAAAA); }
+                    Toast.makeText(this, "Buscando stream para descargar\u2026", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -857,14 +954,6 @@ public class PlayerActivity extends AppCompatActivity {
             ServerSelectDialog.show(this, item, 1, 1);
         });
 
-        // ── Watch Party button ────────────────────────────────────────────────
-        View btnWatchParty = findViewById(R.id.pdBtnWatchParty);
-        if (btnWatchParty != null) btnWatchParty.setOnClickListener(v -> {
-            if (item != null) {
-                WatchPartyActivity.start(this, item);
-            }
-        });
-
         loadSimilar();
     }
 
@@ -883,16 +972,26 @@ public class PlayerActivity extends AppCompatActivity {
     }
 
     private void updateDownloadBtn(LinearLayout btn) {
-        boolean downloaded = DownloadsManager.isDownloaded(this, item);
+        String state = item != null ? DownloadsManager.getVideoState(this, item) : "NONE";
         TextView icon  = findViewById(R.id.pdDownloadIcon);
         TextView label = findViewById(R.id.pdDownloadLabel);
-        if (icon != null) {
-            icon.setText(downloaded ? "\u2713" : "\u2b07");
-            icon.setTextColor(downloaded ? android.graphics.Color.parseColor("#4CAF50") : android.graphics.Color.parseColor("#4FC3F7"));
-        }
-        if (label != null) {
-            label.setText(downloaded ? "Descargado" : "Descargar");
-            label.setTextColor(downloaded ? android.graphics.Color.parseColor("#4CAF50") : android.graphics.Color.parseColor("#4FC3F7"));
+        switch (state) {
+            case "COMPLETE":
+                if (icon  != null) { icon.setText("\u2713");        icon.setTextColor(android.graphics.Color.parseColor("#4CAF50")); }
+                if (label != null) { label.setText("Descargado"); label.setTextColor(android.graphics.Color.parseColor("#4CAF50")); }
+                break;
+            case "DOWNLOADING":
+                if (icon  != null) { icon.setText("\u23f3");           icon.setTextColor(0xFFAAAAAA); }
+                if (label != null) { label.setText("Descargando..."); label.setTextColor(0xFFAAAAAA); }
+                break;
+            case "FAILED":
+                if (icon  != null) { icon.setText("\u26a0");       icon.setTextColor(android.graphics.Color.parseColor("#FF5252")); }
+                if (label != null) { label.setText("Reintentar"); label.setTextColor(android.graphics.Color.parseColor("#FF5252")); }
+                break;
+            default:
+                if (icon  != null) { icon.setText("\u2b07");       icon.setTextColor(android.graphics.Color.parseColor("#4FC3F7")); }
+                if (label != null) { label.setText("Descargar"); label.setTextColor(android.graphics.Color.parseColor("#4FC3F7")); }
+                break;
         }
     }
 
@@ -944,8 +1043,15 @@ public class PlayerActivity extends AppCompatActivity {
     @Override protected void onResume()  { super.onResume();  webView.onResume(); }
     @Override protected void onDestroy() {
         autoRetryHandler.removeCallbacksAndMessages(null);
+        captureGraceHandler.removeCallbacksAndMessages(null);
         webView.destroy();
         super.onDestroy();
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 
     // ── Inner class: receives URLs from injected JavaScript ──────────────────
@@ -957,13 +1063,24 @@ public class PlayerActivity extends AppCompatActivity {
             boolean isM3u8 = url.contains(".m3u8") || url.contains("m3u8");
             boolean isMp4  = url.contains(".mp4");
             if (!isM3u8 && !isMp4) return;
+            if (isLikelyDecoyStream(url)) return; // known ad/placeholder/test video — never accept
 
-            capturedVideoUrl = url;
-            capturedReferer  = currentEmbedUrl;
-            capturedIsM3u8   = isM3u8;
+            pendingCandidateUrl     = url;
+            pendingCandidateReferer = currentEmbedUrl;
+            pendingCandidateIsM3u8  = isM3u8;
 
-            new Handler(Looper.getMainLooper()).post(() ->
-                    onVideoUrlCaptured(url, currentEmbedUrl, isM3u8));
+            // Reset the grace window: if a different (real) source shows up shortly
+            // after this one — e.g. once a preroll ad finishes — it replaces this
+            // candidate. Only whichever URL is still pending once things go quiet
+            // gets treated as final.
+            captureGraceHandler.removeCallbacksAndMessages(null);
+            captureGraceHandler.postDelayed(() -> {
+                if (capturedVideoUrl != null || pendingCandidateUrl == null) return;
+                capturedVideoUrl = pendingCandidateUrl;
+                capturedReferer  = pendingCandidateReferer;
+                capturedIsM3u8   = pendingCandidateIsM3u8;
+                onVideoUrlCaptured(capturedVideoUrl, capturedReferer, capturedIsM3u8);
+            }, CAPTURE_GRACE_MS);
         }
     }
 }

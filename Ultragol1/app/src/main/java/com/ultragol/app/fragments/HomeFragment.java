@@ -127,18 +127,18 @@ public class HomeFragment extends Fragment {
     private void setupTopBar(View view) {
         // ── Profile avatar button ──────────────────────────────────────────────
         FrameLayout btnProfile = view.findViewById(R.id.btnProfile);
+        ImageView ivProfileMini = view.findViewById(R.id.ivProfileMini);
         TextView tvProfileInitial = view.findViewById(R.id.tvProfileInitial);
         if (btnProfile != null) {
             ProfileManager.Profile profile = ProfileManager.getCurrentProfile(requireContext());
-            if (profile != null && tvProfileInitial != null) {
-                tvProfileInitial.setText(profile.getInitial());
-                try {
-                    android.graphics.drawable.GradientDrawable gd =
-                        new android.graphics.drawable.GradientDrawable();
-                    gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
-                    gd.setColor(android.graphics.Color.parseColor(profile.avatarColor));
-                    btnProfile.setBackground(gd);
-                } catch (Exception ignored) {}
+            if (profile != null && ivProfileMini != null) {
+                ivProfileMini.setImageResource(profile.getAvatarResId());
+                ivProfileMini.setVisibility(View.VISIBLE);
+                if (tvProfileInitial != null) tvProfileInitial.setVisibility(View.GONE);
+            } else if (tvProfileInitial != null) {
+                // No profile yet (shouldn't normally happen here) — fall back to "?"
+                tvProfileInitial.setVisibility(View.VISIBLE);
+                if (ivProfileMini != null) ivProfileMini.setVisibility(View.GONE);
             }
             btnProfile.setOnClickListener(v -> {
                 startActivity(new android.content.Intent(
@@ -152,6 +152,9 @@ public class HomeFragment extends Fragment {
         if (search != null) search.setOnClickListener(v ->
             startActivity(new Intent(requireContext(), SearchActivity.class)));
 
+        View surprise = view.findViewById(R.id.btnSurprise);
+        if (surprise != null) surprise.setOnClickListener(v -> pickSurpriseItem());
+
         View bell = view.findViewById(R.id.btnBell);
         if (bell != null) bell.setOnClickListener(v -> {
             com.ultragol.app.NotificationsSheet sheet = new com.ultragol.app.NotificationsSheet();
@@ -163,6 +166,37 @@ public class HomeFragment extends Fragment {
             if (requireActivity() instanceof com.ultragol.app.MainActivity) {
                 ((com.ultragol.app.MainActivity) requireActivity()).showMenu();
             }
+        });
+    }
+
+    // ── "¿No sé qué ver?" surprise pick ─────────────────────────────────────────
+
+    private boolean surpriseLoading = false;
+
+    private void pickSurpriseItem() {
+        if (surpriseLoading || !isAdded()) return;
+        surpriseLoading = true;
+        Toast.makeText(requireContext(), "Buscando algo para ti…", Toast.LENGTH_SHORT).show();
+        Executors.newSingleThreadExecutor().execute(() -> {
+            ContentItem picked = null;
+            try {
+                Random rng = new Random();
+                List<ContentItem> pool = TmdbApi.fetchDiscoverMixed(rng.nextInt(20) + 1);
+                if (pool != null && !pool.isEmpty()) picked = pool.get(rng.nextInt(pool.size()));
+            } catch (Exception ignored) {}
+            final ContentItem result = picked;
+            if (getActivity() == null) return;
+            getActivity().runOnUiThread(() -> {
+                surpriseLoading = false;
+                if (!isAdded()) return;
+                if (result == null) {
+                    Toast.makeText(requireContext(), "No se pudo encontrar nada, intenta de nuevo", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                Intent i = new Intent(requireContext(), DetailActivity.class);
+                i.putExtra("item", result);
+                startActivity(i);
+            });
         });
     }
 

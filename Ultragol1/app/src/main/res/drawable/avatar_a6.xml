@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Tiger -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp" android:height="100dp"
+    android:viewportWidth="100" android:viewportHeight="100">
+    <path android:fillColor="#E67E22" android:pathData="M0,50 A50,50 0 1,0 100,50 A50,50 0 1,0 0,50 Z"/>
+    <path android:fillColor="#D35400" android:pathData="M2,16 A15,16 0 1,0 32,16 A15,16 0 1,0 2,16 Z"/>
+    <path android:fillColor="#D35400" android:pathData="M68,16 A15,16 0 1,0 98,16 A15,16 0 1,0 68,16 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M10,12 A7,8 0 1,0 24,12 A7,8 0 1,0 10,12 Z"/>
+    <path android:fillColor="#1A1A1A" android:pathData="M76,12 A7,8 0 1,0 90,12 A7,8 0 1,0 76,12 Z"/>
+    <path android:fillColor="#FFF3E4" android:pathData="M25,69 A25,21 0 1,0 75,69 A25,21 0 1,0 25,69 Z"/>
+    <path android:fillColor="#F4D03F" android:pathData="M30,42 A9,6 0 1,0 48,42 A9,6 0 1,0 30,42 Z"/>
+    <path android:fillColor="#F4D03F" android:pathData="M52,42 A9,6 0 1,0 70,42 A9,6 0 1,0 52,42 Z"/>
+    <path android:fillColor="#241206" android:pathData="M44,71 A6,5 0 1,0 56,71 A6,5 0 1,0 44,71 Z"/>
+</vector>

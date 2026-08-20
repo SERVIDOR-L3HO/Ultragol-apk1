@@ -12,7 +12,7 @@
     <!-- Large landscape card image -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="210dp"
+        android:layout_height="@dimen/trending_card_height"
         android:background="@drawable/card_bg"
         android:elevation="4dp">
 

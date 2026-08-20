@@ -37,6 +37,7 @@ import com.ultragol.app.adapters.ContentRowAdapter;
 import com.ultragol.app.models.ContentItem;
 import com.ultragol.app.network.A7xConstants;
 import com.ultragol.app.network.A7xIptvApi;
+import com.ultragol.app.network.AnimeApi;
 import com.ultragol.app.network.StreamingApi;
 import com.ultragol.app.network.TmdbApi;
 import java.util.ArrayList;
@@ -113,7 +114,9 @@ public class DetailActivity extends AppCompatActivity {
             String mp4Url  = null;
             String m3u8Url = null;
             try {
-                StreamingApi.ServerData data = item.getContentType() == ContentItem.TYPE_MOVIE
+                StreamingApi.ServerData data = item.isAnime()
+                    ? AnimeApi.fetchEpisodeServers(item, 1, 1)
+                    : item.getContentType() == ContentItem.TYPE_MOVIE
                     ? StreamingApi.fetchMovieServers(item.getTmdbId())
                     : StreamingApi.fetchSeriesServers(item.getTmdbId(), 1, 1);
 
@@ -124,13 +127,16 @@ public class DetailActivity extends AppCompatActivity {
 
                 for (StreamingApi.Server s : all) {
                     String u = s.url != null ? s.url : "";
+                    if (StreamValidator.isKnownDecoyUrl(u)) continue;   // ad/test clip, not the title
                     if (u.contains(".mp4")  && mp4Url  == null) mp4Url  = u;
                     if (u.contains(".m3u8") && m3u8Url == null) m3u8Url = u;
                 }
                 // Also scan embedUrl
                 String emb = data.embedUrl != null ? data.embedUrl : "";
-                if (emb.contains(".mp4")  && mp4Url  == null) mp4Url  = emb;
-                if (emb.contains(".m3u8") && m3u8Url == null) m3u8Url = emb;
+                if (!StreamValidator.isKnownDecoyUrl(emb)) {
+                    if (emb.contains(".mp4")  && mp4Url  == null) mp4Url  = emb;
+                    if (emb.contains(".m3u8") && m3u8Url == null) m3u8Url = emb;
+                }
 
             } catch (Exception ignored) {}
 
@@ -191,7 +197,8 @@ public class DetailActivity extends AppCompatActivity {
                 String ref = req.getRequestHeaders().get("Referer");
                 boolean m3u8 = url.contains(".m3u8");
                 boolean mp4  = url.contains(".mp4") || url.contains(".MP4");
-                if ((mp4 || m3u8) && capturedDownloadUrl == null) {
+                if ((mp4 || m3u8) && capturedDownloadUrl == null
+                        && !StreamValidator.isKnownDecoyUrl(url)) {
                     capturedDownloadUrl = url;
                     capturedDownloadRef = ref != null ? ref : item.getStreamUrl();
                     capturedIsM3u8      = m3u8;
@@ -229,7 +236,8 @@ public class DetailActivity extends AppCompatActivity {
                 captureWebView.addJavascriptInterface(new Object() {
                     @android.webkit.JavascriptInterface
                     public void onUrl(String url) {
-                        if (capturedDownloadUrl == null && url != null && !url.isEmpty()) {
+                        if (capturedDownloadUrl == null && url != null && !url.isEmpty()
+                                && !StreamValidator.isKnownDecoyUrl(url)) {
                             capturedDownloadUrl = url;
                             capturedDownloadRef = item.getStreamUrl();
                             capturedIsM3u8      = url.contains(".m3u8");
@@ -482,6 +490,10 @@ public class DetailActivity extends AppCompatActivity {
                         .show();
                 } else if ("DOWNLOADING".equals(state)) {
                     Toast.makeText(this, "Ya se está descargando...", Toast.LENGTH_SHORT).show();
+                } else if (!DownloadsManager.ensureStoragePermission(this)) {
+                    Toast.makeText(this,
+                        "Concede el permiso de almacenamiento y toca Descargar otra vez",
+                        Toast.LENGTH_LONG).show();
                 } else {
                     // Smart download: StreamingApi first → Android DM for MP4 → WebView fallback
                     pendingDownloadBtn = btnDownload;
@@ -605,7 +617,9 @@ public class DetailActivity extends AppCompatActivity {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
             try {
-                int seasons = TmdbApi.fetchSeriesSeasonCount(item.getTmdbId());
+                int seasons = item.isAnime()
+                        ? AnimeApi.fetchSeasonCount(item)
+                        : TmdbApi.fetchSeriesSeasonCount(item.getTmdbId());
                 h.post(() -> {
                     if (isFinishing()) return;
                     totalSeasons = Math.max(1, seasons);
@@ -656,7 +670,9 @@ public class DetailActivity extends AppCompatActivity {
         ExecutorService pool = Executors.newSingleThreadExecutor();
         pool.execute(() -> {
             try {
-                List<TmdbApi.EpisodeInfo> eps = TmdbApi.fetchSeasonEpisodes(item.getTmdbId(), season);
+                List<TmdbApi.EpisodeInfo> eps = item.isAnime()
+                        ? AnimeApi.fetchSeasonEpisodes(item, season)
+                        : TmdbApi.fetchSeasonEpisodes(item.getTmdbId(), season);
                 h.post(() -> {
                     if (isFinishing()) return;
                     if (loadFrame != null) loadFrame.setVisibility(View.GONE);
@@ -894,6 +910,7 @@ public class DetailActivity extends AppCompatActivity {
                 h.post(() -> {
                     if (!isFinishing() && rv != null) {
                         rv.setAdapter(new ContentRowAdapter(this, finalRelated));
+                        TvHelper.makeFocusable(rv);
                     }
                 });
             } catch (Exception ignored) {}
@@ -1149,5 +1166,11 @@ public class DetailActivity extends AppCompatActivity {
     private int dp(int value) {
         return (int) TypedValue.applyDimension(
             TypedValue.COMPLEX_UNIT_DIP, value, getResources().getDisplayMetrics());
+    }
+
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (TvHelper.handleGlobalKeyEvent(this, event)) return true;
+        return super.dispatchKeyEvent(event);
     }
 }
