@@ -131,14 +131,14 @@ logical_id = "16e67a1f-b825-42bf-9076-85f74cddbd8d"
 id = "wQ3PBd_ZDqk-tjluUqXBR"
 uri = "file://Ultragol1/app/build/outputs/apk/debug/app-debug.apk"
 type = "unspecified"
-title = "Ultragol1 APK debug compilado"
-description = "APK debug compilado con la integración de endpoints de anime. Tamaño aproximado: 16 MB."
+title = "Descargar Ultragol1 APK"
+description = "APK debug compilado de la aplicación."
 logical_id = "3fe7a22f-9fb2-41cc-a520-6a4e3c9cc0da"
 content_hash = "sha256:e5d1e38ad23047cb83edf2dfebd84ba989ce69f74a48bc310ec8f30d671be4ae"
 size = 16125571
 mtime_ms = 1787251424897
-storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:5e391718-121b-4138-975e-d14dc2021e77/3fe7a22f-9fb2-41cc-a520-6a4e3c9cc0da/9fb7df6d-f042-4783-84a8-d2fde6c4487a"
-storage_version_token = "1787251455485744"
+storage_uri = "gcs://replit-rams-assets-kirk/rams/assets/repl:5e391718-121b-4138-975e-d14dc2021e77/3fe7a22f-9fb2-41cc-a520-6a4e3c9cc0da/a881b143-b178-4200-b286-da1f81f155cf"
+storage_version_token = "1787251980999198"
 content_type = "application/octet-stream"
 
 [[outputs]]
