@@ -222,13 +222,6 @@ public class DeportesFragment extends Fragment {
             });
         }
 
-        View banner = header.findViewById(R.id.dsBtnAllMatches);
-        if (banner != null) banner.setOnClickListener(v -> {
-            allLeagues = true;
-            activeTab  = TAB_LIVE;
-            loadCurrentLeague();
-        });
-
         View tabLive = header.findViewById(R.id.dsTabLive);
         View tabUpcoming = header.findViewById(R.id.dsTabUpcoming);
         View tabHighlights = header.findViewById(R.id.dsTabHighlights);
@@ -307,44 +300,6 @@ public class DeportesFragment extends Fragment {
         if (tv == null) return;
         tv.setBackgroundResource(active ? R.drawable.sport_section_chip_active : R.drawable.sport_section_chip_inactive);
         tv.setTextColor(active ? 0xFFFFFFFF : 0xCCFFFFFF);
-    }
-
-    private void bindHero(View header) {
-        View hero = header.findViewById(R.id.dsHero);
-        if (hero == null) return;
-
-        SportsMatch featured = null;
-        for (SportsMatch m : allMatches) if (m.status == SportsMatch.STATUS_LIVE) { featured = m; break; }
-        if (featured == null) for (SportsMatch m : allMatches) if (m.status == SportsMatch.STATUS_UPCOMING) { featured = m; break; }
-
-        if (featured == null) {
-            hero.setVisibility(View.GONE);
-            return;
-        }
-        hero.setVisibility(View.VISIBLE);
-        final SportsMatch match = featured;
-
-        TextView badge = header.findViewById(R.id.dsHeroBadge);
-        if (badge != null) {
-            boolean live = match.status == SportsMatch.STATUS_LIVE;
-            badge.setText(live ? "● EN VIVO" : "● PRÓXIMO");
-            badge.setBackgroundColor(live ? Color.parseColor("#E53935") : Color.parseColor("#33FFFFFF"));
-        }
-        TextView home = header.findViewById(R.id.dsHeroHome);
-        TextView away = header.findViewById(R.id.dsHeroAway);
-        if (home != null) home.setText(match.homeTeam);
-        if (away != null) away.setText(match.awayTeam);
-
-        TextView score = header.findViewById(R.id.dsHeroScore);
-        if (score != null) score.setText(match.hasScore() ? match.homeScore + " - " + match.awayScore : "VS");
-
-        android.widget.ImageView logoHome = header.findViewById(R.id.dsHeroLogoHome);
-        android.widget.ImageView logoAway = header.findViewById(R.id.dsHeroLogoAway);
-        if (logoHome != null && !match.homeLogo.isEmpty()) Glide.with(this).load(match.homeLogo).into(logoHome);
-        if (logoAway != null && !match.awayLogo.isEmpty()) Glide.with(this).load(match.awayLogo).into(logoAway);
-
-        View watch = header.findViewById(R.id.dsHeroWatch);
-        if (watch != null) watch.setOnClickListener(v -> onMatchTapped(match));
     }
 
     // ── Taps → PlayerActivity / server dialog ───────────────────────────────
