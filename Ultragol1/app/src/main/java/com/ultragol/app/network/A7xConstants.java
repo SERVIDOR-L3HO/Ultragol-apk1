@@ -12,7 +12,7 @@ public final class A7xConstants {
     public static final String BASE_URL       = "https://api.a7xtv.com/api/iptv";
     public static final String AUTH_SESSION   = "https://api.a7xtv.com/api/auth/session";
     public static final String AUTH_LOGOUT    = "https://api.a7xtv.com/api/auth/logout";
-    public static final String UPDATE_URL     = "https://a7xtv.com/app-update.json";
+    public static final String UPDATE_URL     = "https://raw.githubusercontent.com/SERVIDOR-L3HO/Ultragol-apk1/main/version.json";
     public static final String ADS_URL        = "https://a7xtv.com/app-ad.html";
     public static final String OAUTH_REDIRECT = "https://a7xtv.com/oauth/google/";
     public static final String AVATAR_BASE    = "https://api.dicebear.com/9.x/adventurer/png?seed=";

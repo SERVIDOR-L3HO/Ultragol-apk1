@@ -25,7 +25,7 @@ public class UpdateChecker {
     }
 
     private static final String VERSION_URL =
-            "https://a7xtv.com/app-update.json";
+            "https://raw.githubusercontent.com/SERVIDOR-L3HO/Ultragol-apk1/main/version.json";
 
     public static void check(Context context, Callback callback) {
         new Thread(() -> {
