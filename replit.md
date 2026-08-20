@@ -46,6 +46,14 @@ Server listens on port 5000.
 - `vapid.json` — auto-generated VAPID keys (generated once on first run)
 - `apks/` — uploaded APK files
 
+### Android debug build
+
+From the project root, build the debug APK with:
+```
+cd Ultragol1 && ./gradlew :app:assembleDebug
+```
+The generated file is `Ultragol1/app/build/outputs/apk/debug/app-debug.apk`.
+
 ## Anime API integration
 
 Anime is handled by `Ultragol1/app/src/main/java/com/ultragol/app/network/AnimeApi.java`.
