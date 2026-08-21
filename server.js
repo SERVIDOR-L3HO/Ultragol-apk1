@@ -148,6 +148,12 @@ function autoFixDownloadUrls() {
     for (const { file, dlPath } of fixes) {
         if (!fs.existsSync(file)) continue;
         const data = readJSON(file);
+        // Keep manifests that intentionally publish the APK from GitHub.
+        // The Android client uses this stable URL for self-updates.
+        if (typeof data.downloadUrl === 'string'
+            && data.downloadUrl.includes('raw.githubusercontent.com/')) {
+            continue;
+        }
         const correctUrl = `${base}${dlPath}`;
         if (data.downloadUrl !== correctUrl) {
             data.downloadUrl = correctUrl;
