@@ -1,9 +1,9 @@
 {
-  "versionCode": 14,
-  "versionName": "2.0",
+  "versionCode": 15,
+  "versionName": "2.1",
   "appName": "Ultragol1",
-  "changelog": "- 🎬 Shorts Dramas rediseñado estilo YouTube Shorts: grilla 2 columnas con tarjetas verticales portrait\n- 🏷️ Tabs Recientes / Populares / Tendencias en la pantalla de Shorts\n- 🃏 Tarjetas con thumbnail full-bleed, gradiente y título superpuesto\n- 📱 Fila del home también actualizada con cards verticales estilo TikTok",
-  "downloadUrl": "https://raw.githubusercontent.com/SERVIDOR-L3HO/Ultragol-apk1/main/ultra.apk",
+  "changelog": "- 🎮 Navegación completa con control remoto en TV\n- ✨ Foco visible con halo naranja en botones, tarjetas y selectores\n- 👤 Login, perfiles, PIN, inicio, detalles y reproductor preparados para D-pad\n- 📺 Selección de servidores y transmisiones activable con OK",
+  "downloadUrl": "https://36acf027-a992-48ad-af5b-9ad620351b7a-00-38a52mgburg99.worf.replit.dev/ultragol1/download",
   "forceUpdate": false,
-  "updatedAt": "2026-07-19T03:30:00.000Z"
+  "updatedAt": "2026-08-20T00:00:00.000Z"
 }
