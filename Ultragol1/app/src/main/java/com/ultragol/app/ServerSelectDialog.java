@@ -222,11 +222,11 @@ public class ServerSelectDialog {
                 ctx.startActivity(intent);
                 dialog.dismiss();
             });
-            rows.get(i).setOnKeyListener((v, event) -> {
+            rows.get(i).setOnKeyListener((v, keyCode, event) -> {
                 if (event.getAction() == android.view.KeyEvent.ACTION_DOWN
-                        && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_DPAD_CENTER
-                        || event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER
-                        || event.getKeyCode() == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                        && (keyCode == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                        || keyCode == android.view.KeyEvent.KEYCODE_ENTER
+                        || keyCode == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
                     v.performClick();
                     return true;
                 }

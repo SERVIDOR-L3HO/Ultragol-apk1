@@ -175,3 +175,17 @@ mtime_ms = 1787262968861
 storage_uri = "gcs://replit-rams-assets-riker/rams/assets/repl:f53769fb-4dbe-4cdd-a07c-2e7faae10b5f/5b91c184-69bf-44b7-b3ba-81ba4d15c036/36333e48-407c-4102-8963-dd5c3b1b24f1"
 storage_version_token = "1787263015626959"
 content_type = "application/octet-stream"
+
+[[outputs]]
+id = "Xi5ldag615zjepVSxYHMU"
+uri = "file://ultra.apk"
+type = "unspecified"
+title = "Ultragol 2.1 APK"
+description = "APK compilado con versionCode 15 y versionName 2.1, incluyendo la navegación visible con control remoto."
+logical_id = "29d47548-0452-4716-8513-1575d32060b5"
+content_hash = "sha256:c9203d2d5434c6ea888b96bd972575ba6b71030f7b9b5331d2b273441971e330"
+size = 16131304
+mtime_ms = 1787273418156
+storage_uri = "gcs://replit-rams-assets-worf/rams/assets/repl:36acf027-a992-48ad-af5b-9ad620351b7a/29d47548-0452-4716-8513-1575d32060b5/fa918f65-72a1-40d3-9e6a-2c550bee4947"
+storage_version_token = "1787273434901228"
+content_type = "application/octet-stream"
