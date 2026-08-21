@@ -214,6 +214,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         v.findViewById(R.id.btnPinCancel).setOnClickListener(btn -> dialog.dismiss());
         dialog.show();
+        TvHelper.prepareDialog(dialog);
     }
 
     // ── Set / Change PIN dialog ───────────────────────────────────────────────
@@ -267,6 +268,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
         });
         v.findViewById(R.id.btnPinCancel).setOnClickListener(btn -> dialog.dismiss());
         dialog.show();
+        TvHelper.prepareDialog(dialog);
     }
 
     // ── Create / Edit profile dialog ──────────────────────────────────────────
@@ -432,6 +434,7 @@ public class ProfileSelectorActivity extends AppCompatActivity
 
         dialog.setCanceledOnTouchOutside(isEdit);
         dialog.show();
+        TvHelper.prepareDialog(dialog);
 
         if (dialog.getWindow() != null) {
             int screenW = getResources().getDisplayMetrics().widthPixels;
@@ -485,12 +488,13 @@ public class ProfileSelectorActivity extends AppCompatActivity
             showCreateProfileDialog(profile);
         });
         pinDialog.show();
+        TvHelper.prepareDialog(pinDialog);
     }
 
     // ── Delete confirmation ───────────────────────────────────────────────────
 
     private void confirmDeleteProfile(ProfileManager.Profile profile) {
-        new AlertDialog.Builder(this, R.style.UpdateDialogTheme)
+        AlertDialog confirm = new AlertDialog.Builder(this, R.style.UpdateDialogTheme)
             .setTitle("Eliminar perfil")
             .setMessage("¿Eliminar el perfil \"" + profile.name + "\"?\nSe borrará todo su historial.")
             .setPositiveButton("Eliminar", (d, w) -> {
@@ -501,7 +505,9 @@ public class ProfileSelectorActivity extends AppCompatActivity
                 }
             })
             .setNegativeButton("Cancelar", null)
-            .show();
+            .create();
+        confirm.show();
+        TvHelper.prepareDialog(confirm);
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

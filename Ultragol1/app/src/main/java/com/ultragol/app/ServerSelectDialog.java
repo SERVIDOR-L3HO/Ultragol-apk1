@@ -70,6 +70,7 @@ public class ServerSelectDialog {
         if (loading != null) loading.setVisibility(View.GONE);
 
         dialog.show();
+        TvHelper.prepareDialog(dialog);
         // Render immediately — no network wait
         render(context, dialog, item, data);
     }
@@ -113,6 +114,7 @@ public class ServerSelectDialog {
 
         loadServers(context, dialog, item, initSeason, initEpisode);
         dialog.show();
+        TvHelper.prepareDialog(dialog);
     }
 
     private static void loadServers(Context ctx, Dialog dialog, ContentItem item, int season, int episode) {
@@ -201,9 +203,37 @@ public class ServerSelectDialog {
 
         for (int i = 0; i < list.size(); i++) {
             View row = buildRow(ctx, list.get(i), i == selectedIdx);
+            row.setFocusable(true);
+            row.setFocusableInTouchMode(false);
+            row.setClickable(true);
             rows.add(row);
             cnt.addView(row);
         }
+
+        for (int i = 0; i < rows.size(); i++) {
+            final int rowIdx = i;
+            rows.get(i).setOnClickListener(v -> {
+                final String url = list.get(rowIdx).url;
+                Intent intent = new Intent(ctx, PlayerActivity.class);
+                intent.putExtra("url", url);
+                intent.putExtra("title", item.getTitle());
+                intent.putExtra("item", item);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ctx.startActivity(intent);
+                dialog.dismiss();
+            });
+            rows.get(i).setOnKeyListener((v, event) -> {
+                if (event.getAction() == android.view.KeyEvent.ACTION_DOWN
+                        && (event.getKeyCode() == android.view.KeyEvent.KEYCODE_DPAD_CENTER
+                        || event.getKeyCode() == android.view.KeyEvent.KEYCODE_ENTER
+                        || event.getKeyCode() == android.view.KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                    v.performClick();
+                    return true;
+                }
+                return false;
+            });
+        }
+        TvHelper.prepareDialog(dialog);
 
         // Each row handles its own touch so events are always received.
         // ACTION_MOVE tracks cross-row drag and highlights whichever row is under the finger.

@@ -469,6 +469,7 @@ public class LiveMatchServerDialog {
                 .start());
 
         dialog.show();
+        TvHelper.prepareDialog(dialog);
     }
 
     private static int dp(Context ctx, int v) {

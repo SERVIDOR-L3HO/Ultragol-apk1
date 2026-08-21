@@ -263,6 +263,7 @@ public class ChannelStreamDialog {
         if (w != null) w.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         dialog.show();
+        TvHelper.prepareDialog(dialog);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -566,6 +567,7 @@ public class ChannelStreamDialog {
         if (w != null) w.setLayout(
             ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         modal.show();
+        TvHelper.prepareDialog(modal);
     }
 
     private static TextView makeExtButton(Context ctx, String label, int color, Runnable action) {

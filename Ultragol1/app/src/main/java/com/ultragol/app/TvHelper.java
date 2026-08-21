@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.util.DisplayMetrics;
+import android.app.Dialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -159,6 +160,19 @@ public final class TvHelper {
             }
         }
         return null;
+    }
+
+    /** Applies TV focus to a dialog window and starts on its first control. */
+    public static void prepareDialog(Dialog dialog) {
+        if (dialog == null || !isTV(dialog.getContext()) || dialog.getWindow() == null) return;
+        View root = dialog.getWindow().getDecorView();
+        installFocusFeedback(root);
+        root.post(() -> {
+            if (root.findFocus() == null) {
+                View first = findFirstFocusable(root);
+                if (first != null) first.requestFocus();
+            }
+        });
     }
 
     private static void applyToInteractiveView(View view) {
