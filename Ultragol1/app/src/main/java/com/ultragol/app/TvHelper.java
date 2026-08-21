@@ -8,6 +8,7 @@ import android.content.res.Configuration;
 import android.os.Build;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -89,6 +90,7 @@ public final class TvHelper {
         if (card == null) return;
         card.setFocusable(true);
         card.setFocusableInTouchMode(false); // touch mode: finger taps still work
+        applyFocusRing(card);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // Scale animator: focused card zooms to 108%, unfocused returns to 100%
@@ -126,6 +128,64 @@ public final class TvHelper {
             }
             return false; // never consume: clicks/taps must keep working
         });
+    }
+
+    /**
+     * Applies the same visible focus treatment to every interactive control in
+     * an Activity. This is intentionally tree-based because LoginActivity and
+     * several dialogs build their buttons in Java instead of XML.
+     */
+    public static void installFocusFeedback(View root) {
+        if (root == null) return;
+        applyToInteractiveView(root);
+        if (root instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                installFocusFeedback(group.getChildAt(i));
+            }
+        }
+    }
+
+    /** Finds the first interactive child in document order for TV startup focus. */
+    public static View findFirstFocusable(View root) {
+        if (root == null) return null;
+        if (root.isFocusable() && root.getVisibility() == View.VISIBLE
+                && root.isEnabled()) return root;
+        if (root instanceof ViewGroup) {
+            ViewGroup group = (ViewGroup) root;
+            for (int i = 0; i < group.getChildCount(); i++) {
+                View result = findFirstFocusable(group.getChildAt(i));
+                if (result != null) return result;
+            }
+        }
+        return null;
+    }
+
+    private static void applyToInteractiveView(View view) {
+        if (view.isClickable() || view.isFocusable()) {
+            applyFocusRing(view);
+            view.setFocusableInTouchMode(false);
+            if (view.getOnFocusChangeListener() == null) {
+                view.setOnFocusChangeListener((v, hasFocus) -> animateFocus(v, hasFocus));
+            }
+        }
+    }
+
+    private static void applyFocusRing(View view) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            view.setForeground(view.getResources().getDrawable(R.drawable.tv_focus_ring,
+                    view.getContext().getTheme()));
+        }
+    }
+
+    private static void animateFocus(View view, boolean hasFocus) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.animate()
+                    .scaleX(hasFocus ? 1.04f : 1f)
+                    .scaleY(hasFocus ? 1.04f : 1f)
+                    .setDuration(120)
+                    .start();
+        }
     }
 
     /**

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.View;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -33,6 +34,23 @@ public class UltragolApp extends Application {
             }
 
             @Override
+            public void onActivityResumed(Activity a) {
+                // Install after setContentView has completed. This covers XML
+                // controls and views created programmatically, including the
+                // login/profile flows and player action bars.
+                if (TvHelper.isTV(a)) {
+                    View root = a.getWindow().getDecorView();
+                    TvHelper.installFocusFeedback(root);
+                    root.post(() -> {
+                        if (root.findFocus() == null) {
+                            View first = TvHelper.findFirstFocusable(root);
+                            if (first != null) first.requestFocus();
+                        }
+                    });
+                }
+            }
+
+            @Override
             public void onActivityStopped(Activity a) {
                 activeActivities--;
                 if (activeActivities <= 0) {
@@ -46,7 +64,6 @@ public class UltragolApp extends Application {
 
             // Required empty overrides
             @Override public void onActivityCreated(Activity a, Bundle b)  {}
-            @Override public void onActivityResumed(Activity a)            {}
             @Override public void onActivityPaused(Activity a)             {}
             @Override public void onActivitySaveInstanceState(Activity a, Bundle b) {}
             @Override public void onActivityDestroyed(Activity a)          {}
