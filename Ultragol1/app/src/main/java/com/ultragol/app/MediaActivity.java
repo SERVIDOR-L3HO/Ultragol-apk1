@@ -24,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -107,6 +108,9 @@ public class MediaActivity extends AppCompatActivity {
     private TextView tvGestureIcon, tvGesturePercent;
     private CardView resumeCard;
     private TextView tvResumeText, tvTapLeft, tvTapRight;
+    private View nextEpisodeCard;
+    private TextView tvNextEpisodeCountdown;
+    private Button btnNextEpisode;
 
     // ── Cast fields ───────────────────────────────────────────────────────────
     private ImageButton btnCast;
@@ -201,6 +205,24 @@ public class MediaActivity extends AppCompatActivity {
     private String serverUrlForSave;
     private int watchedSeason  = 1;
     private int watchedEpisode = 1;
+    private boolean nextEpisodeReady = false;
+    private boolean nextCountdownStarted = false;
+    private int nextSeason;
+    private int nextEpisode;
+    private int nextCountdownSeconds;
+    private final Runnable nextEpisodeCountdownRunnable = new Runnable() {
+        @Override public void run() {
+            if (!isSeriesPlayback() || !nextEpisodeReady
+                    || nextEpisodeCard == null) return;
+            if (nextCountdownSeconds <= 0) {
+                updateNextEpisodeCountdown(0);
+                playNextEpisode();
+                return;
+            }
+            updateNextEpisodeCountdown(nextCountdownSeconds--);
+            mainHandler.postDelayed(this, 1000);
+        }
+    };
 
     // Prefs
     private SharedPreferences prefs;
@@ -235,10 +257,12 @@ public class MediaActivity extends AppCompatActivity {
 
         bindViews();
         setupControls();
+        setupNextEpisode();
         setupGestures();
         setupPlayer();
         checkResumePosition();
         setupCast();
+        prepareNextEpisode();
     }
 
     @Override protected void onStart() {
@@ -493,6 +517,9 @@ public class MediaActivity extends AppCompatActivity {
         tvResumeText     = findViewById(R.id.tvResumeText);
         tvTapLeft        = findViewById(R.id.tvTapLeft);
         tvTapRight       = findViewById(R.id.tvTapRight);
+        nextEpisodeCard   = findViewById(R.id.nextEpisodeCard);
+        tvNextEpisodeCountdown = findViewById(R.id.tvNextEpisodeCountdown);
+        btnNextEpisode   = findViewById(R.id.btnNextEpisode);
 
         btnLock             = findViewById(R.id.btnLock);
         btnServer           = findViewById(R.id.btnServer);
@@ -515,6 +542,94 @@ public class MediaActivity extends AppCompatActivity {
         tvSleepTimerDisplay = findViewById(R.id.tvSleepTimer);
 
         if (tvTitle != null && videoTitle != null) tvTitle.setText(videoTitle);
+    }
+
+    private boolean isSeriesPlayback() {
+        return watchedItem != null
+                && watchedItem.getContentType() == ContentItem.TYPE_SERIES;
+    }
+
+    private void setupNextEpisode() {
+        if (nextEpisodeCard == null || btnNextEpisode == null) return;
+        btnNextEpisode.setOnClickListener(v -> {
+            nextCountdownStarted = false;
+            mainHandler.removeCallbacks(nextEpisodeCountdownRunnable);
+            playNextEpisode();
+        });
+    }
+
+    /**
+     * Busca el siguiente episodio disponible antes de que termine el video.
+     * El control nunca se prepara para películas, anime, doramas o TV.
+     */
+    private void prepareNextEpisode() {
+        if (!isSeriesPlayback() || watchedItem.getTmdbId() == 0) return;
+        new Thread(() -> {
+            try {
+                List<com.ultragol.app.network.TmdbApi.EpisodeInfo> episodes =
+                        com.ultragol.app.network.TmdbApi.fetchSeasonEpisodes(
+                                watchedItem.getTmdbId(), watchedSeason);
+                com.ultragol.app.network.TmdbApi.EpisodeInfo next = null;
+                for (com.ultragol.app.network.TmdbApi.EpisodeInfo ep : episodes) {
+                    if (ep.number > watchedEpisode) { next = ep; break; }
+                }
+                if (next == null) {
+                    int seasons = com.ultragol.app.network.TmdbApi.fetchSeriesSeasonCount(
+                            watchedItem.getTmdbId());
+                    for (int season = watchedSeason + 1; season <= seasons && next == null; season++) {
+                        List<com.ultragol.app.network.TmdbApi.EpisodeInfo> following =
+                                com.ultragol.app.network.TmdbApi.fetchSeasonEpisodes(
+                                        watchedItem.getTmdbId(), season);
+                        if (!following.isEmpty()) next = following.get(0);
+                    }
+                }
+                if (next != null) {
+                    final com.ultragol.app.network.TmdbApi.EpisodeInfo found = next;
+                    mainHandler.post(() -> {
+                        nextSeason = found.season;
+                        nextEpisode = found.number;
+                        if (btnNextEpisode != null) {
+                            btnNextEpisode.setText("▶  Próximo: T" + nextSeason + " E" + nextEpisode);
+                        }
+                        nextEpisodeReady = true;
+                        maybeStartNextEpisodeCountdown();
+                    });
+                }
+            } catch (Exception ignored) {
+                // Metadata unavailable: keep the control hidden.
+            }
+        }).start();
+    }
+
+    private void updateNextEpisodeCountdown(int seconds) {
+        if (tvNextEpisodeCountdown == null) return;
+        tvNextEpisodeCountdown.setText(seconds > 0
+                ? "Siguiente episodio en " + seconds
+                : "Cargando siguiente episodio…");
+    }
+
+    private void maybeStartNextEpisodeCountdown() {
+        if (!isSeriesPlayback() || !nextEpisodeReady || player == null
+                || nextCountdownStarted || player.getDuration() <= 0) return;
+        long remaining = player.getDuration() - player.getCurrentPosition();
+        if (remaining > 5000 || remaining <= 0) return;
+        nextCountdownStarted = true;
+        nextCountdownSeconds = (int) Math.ceil(remaining / 1000.0);
+        nextEpisodeCard.setVisibility(View.VISIBLE);
+        updateNextEpisodeCountdown(nextCountdownSeconds);
+        mainHandler.post(nextEpisodeCountdownRunnable);
+    }
+
+    private void playNextEpisode() {
+        if (!isSeriesPlayback() || !nextEpisodeReady || isFinishing()) return;
+        Intent intent = new Intent(this, PlayerActivity.class);
+        intent.putExtra("url", watchedItem.getStreamUrl());
+        intent.putExtra("title", watchedItem.getTitle() + " · T" + nextSeason + " E" + nextEpisode);
+        intent.putExtra("item", watchedItem);
+        intent.putExtra("auto_fetch_season", nextSeason);
+        intent.putExtra("auto_fetch_episode", nextEpisode);
+        startActivity(intent);
+        finish();
     }
 
     // ─── Controls setup ───────────────────────────────────────────────────────
@@ -674,6 +789,14 @@ public class MediaActivity extends AppCompatActivity {
                         pbLoading.setVisibility(View.GONE);
                         showControls();
                         mainHandler.removeCallbacks(hideControlsRunnable);
+                        if (isSeriesPlayback() && nextEpisodeReady) {
+                            nextEpisodeCard.setVisibility(View.VISIBLE);
+                            if (!nextCountdownStarted) {
+                                nextCountdownStarted = true;
+                                nextCountdownSeconds = 5;
+                                mainHandler.post(nextEpisodeCountdownRunnable);
+                            }
+                        }
                         break;
                     default:
                         pbLoading.setVisibility(View.GONE);
@@ -814,6 +937,7 @@ public class MediaActivity extends AppCompatActivity {
     }
 
     private void hideControls() {
+        if (nextCountdownStarted) return;
         controlsVisible = false;
         controlsOverlay.animate().alpha(0f).setDuration(300)
                 .withEndAction(() -> {
@@ -866,6 +990,7 @@ public class MediaActivity extends AppCompatActivity {
         long dur = player.getDuration();
         if (dur > 0) seekBar.setProgress((int)(pos * 1000f / dur));
         updateTimeText(pos, dur);
+        maybeStartNextEpisodeCountdown();
     }
 
     private void updateTimeText(long pos, long dur) {

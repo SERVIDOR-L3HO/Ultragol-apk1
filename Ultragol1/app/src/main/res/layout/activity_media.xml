@@ -160,6 +160,45 @@
                 android:padding="14dp"/>
         </LinearLayout>
 
+        <!-- ── NETFLIX-STYLE NEXT EPISODE ─────────────────────────────── -->
+        <LinearLayout
+            android:id="@+id/nextEpisodeCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginEnd="22dp"
+            android:layout_marginBottom="92dp"
+            android:orientation="vertical"
+            android:gravity="end"
+            android:padding="12dp"
+            android:background="@drawable/next_episode_card_bg"
+            android:elevation="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/tvNextEpisodeCountdown"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Siguiente episodio en 5"
+                android:textColor="#CCFFFFFF"
+                android:textSize="11sp"
+                android:layout_marginBottom="6dp"/>
+
+            <Button
+                android:id="@+id/btnNextEpisode"
+                android:layout_width="wrap_content"
+                android:layout_height="42dp"
+                android:minWidth="0dp"
+                android:text="▶  Próximo episodio"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:background="@drawable/next_episode_button_bg"/>
+        </LinearLayout>
+
         <!-- ── BOTTOM BAR ─────────────────────────────────────────────── -->
         <LinearLayout
             android:layout_width="match_parent"

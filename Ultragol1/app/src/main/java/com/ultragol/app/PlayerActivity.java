@@ -657,6 +657,8 @@ public class PlayerActivity extends AppCompatActivity {
         if (item != null) intent.putExtra("item", item);
         intent.putExtra("server_url", currentEmbedUrl != null ? currentEmbedUrl : "");
         intent.putExtra("poster_url", item != null ? item.getPosterUrl() : "");
+        intent.putExtra("season", autoFetchSeason);
+        intent.putExtra("episode", autoFetchEpisode);
         // Forward resume position (e.g. coming from widget or ContinueWatchingAdapter)
         long resumeMsFromIntent = getIntent().getLongExtra("resume_ms", 0);
         if (resumeMsFromIntent > 0) intent.putExtra("resume_ms", resumeMsFromIntent);
