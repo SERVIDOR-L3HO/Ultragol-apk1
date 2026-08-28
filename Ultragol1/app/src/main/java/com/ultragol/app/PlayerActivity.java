@@ -331,6 +331,12 @@ public class PlayerActivity extends AppCompatActivity {
         autoCast    = getIntent().getBooleanExtra("autocast",    false);
         manualMode  = getIntent().getBooleanExtra("manual_mode", false);
 
+        // Detail playback stays compact and portrait on phones. Fullscreen is an
+        // explicit action so the detail page never rotates while browsing.
+        if (item != null && !TvHelper.isTV(this)) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        }
+
         setContentView(item != null ? R.layout.activity_player_detail : R.layout.activity_player);
 
         webView             = findViewById(R.id.playerWebView);
@@ -407,7 +413,7 @@ public class PlayerActivity extends AppCompatActivity {
                     "var m=document.querySelector('meta[name=viewport]');" +
                     "if(!m){m=document.createElement('meta');m.name='viewport';" +
                     "document.head&&document.head.appendChild(m);}" +
-                    "if(m)m.content='width=1280,initial-scale=1';" +
+                    "if(m)m.content='width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no';" +
                     "})();", null);
                 // Primer intento de extracción temprana (algunos embeds tienen la URL en el HTML inicial)
                 new Handler(Looper.getMainLooper()).postDelayed(() -> {
@@ -444,8 +450,10 @@ public class PlayerActivity extends AppCompatActivity {
                 webviewContainer.setVisibility(View.GONE);
                 fullscreenContainer.setVisibility(View.VISIBLE);
                 fullscreenContainer.addView(view);
+                isPlayerFullscreen = true;
                 setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 hideSystemUI();
+                updateFullscreenIcon(true);
             }
             @Override public void onHideCustomView() {
                 if (customView == null) return;
@@ -453,7 +461,11 @@ public class PlayerActivity extends AppCompatActivity {
                 fullscreenContainer.setVisibility(View.GONE);
                 webviewContainer.setVisibility(View.VISIBLE);
                 customViewCallback.onCustomViewHidden();
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                isPlayerFullscreen = false;
+                setRequestedOrientation(TvHelper.isTV(PlayerActivity.this)
+                    ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+                    : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                updateFullscreenIcon(false);
             }
             @Override public void onProgressChanged(WebView v, int p) {
                 if (progressBar != null) {
@@ -578,13 +590,15 @@ public class PlayerActivity extends AppCompatActivity {
         if (webviewContainer == null || fullscreenContainer == null || playerNormalParent == null) return;
         fullscreenContainer.removeView(webviewContainer);
         fullscreenContainer.setVisibility(View.GONE);
-        int restoreH = playerNormalHeightPx > 0 ? playerNormalHeightPx : dpToPx(212);
+        int restoreH = playerNormalHeightPx > 0 ? playerNormalHeightPx : dpToPx(220);
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
             ViewGroup.LayoutParams.MATCH_PARENT, restoreH);
         webviewContainer.setLayoutParams(lp);
         playerNormalParent.addView(webviewContainer, playerNormalParentIndex);
         isPlayerFullscreen = false;
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(TvHelper.isTV(this)
+            ? ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
+            : ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_VISIBLE);
         updateFullscreenIcon(false);
     }
@@ -646,6 +660,11 @@ public class PlayerActivity extends AppCompatActivity {
             new Handler(Looper.getMainLooper()).postDelayed(this::showCastOptions, 300);
             return;
         }
+
+        // Movie details keep the captured embed playing inline in the compact
+        // portrait player. The fullscreen button moves this same player to the
+        // landscape fullscreen container; channels still use MediaActivity.
+        if (item != null) return;
 
         // Default: launch native ExoPlayer
         Intent intent = new Intent(this, MediaActivity.class);
