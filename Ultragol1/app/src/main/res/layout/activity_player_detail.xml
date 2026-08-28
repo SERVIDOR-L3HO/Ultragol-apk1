@@ -6,28 +6,20 @@
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:overScrollMode="never"
-        android:fillViewport="true">
+        android:overScrollMode="never">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:paddingBottom="12dp">
+            android:orientation="vertical">
 
             <!-- Inline video player -->
             <FrameLayout android:id="@+id/webviewContainer"
-                android:layout_width="match_parent" android:layout_height="220dp"
-                android:layout_marginTop="10dp"
-                android:background="@drawable/player_surface_bg"
-                android:clipToOutline="true"
-                android:elevation="6dp">
+                android:layout_width="match_parent" android:layout_height="212dp"
+                android:background="#000000">
 
                 <WebView android:id="@+id/playerWebView"
-                    android:layout_width="match_parent" android:layout_height="match_parent"
-                    android:background="@android:color/transparent"/>
+                    android:layout_width="match_parent" android:layout_height="match_parent"/>
 
                 <!-- Intercepting / loading overlay -->
                 <FrameLayout android:id="@+id/interceptingOverlay"
@@ -38,12 +30,12 @@
                     <ImageView android:id="@+id/playerPosterBg"
                         android:layout_width="match_parent" android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:alpha="0.62"/>
+                        android:alpha="0.55"/>
 
                     <!-- Dark gradient over poster -->
                     <View
                         android:layout_width="match_parent" android:layout_height="match_parent"
-                        android:background="@drawable/player_loading_scrim"/>
+                        android:background="#88000000"/>
 
                     <!-- Spinner + label centrado -->
                     <LinearLayout
@@ -64,24 +56,22 @@
                 </FrameLayout>
 
                 <!-- TOP BAR: back + title + fullscreen -->
-                <LinearLayout android:layout_width="match_parent" android:layout_height="58dp"
+                <LinearLayout android:layout_width="match_parent" android:layout_height="52dp"
                     android:orientation="horizontal" android:gravity="center_vertical"
-                    android:paddingStart="8dp" android:paddingEnd="8dp"
-                    android:background="@drawable/player_topbar_bg">
+                    android:paddingStart="4dp" android:paddingEnd="4dp"
+                    android:background="@drawable/gradient_top_black">
 
                     <ImageView android:id="@+id/btnPlayerBack"
-                        android:layout_width="38dp" android:layout_height="38dp"
+                        android:layout_width="44dp" android:layout_height="44dp"
                         android:src="@drawable/ic_back"
-                        android:tint="#FFFFFF" android:padding="9dp"
-                        android:background="@drawable/player_icon_button_bg"
-                        android:contentDescription="Volver"
+                        android:tint="#FFFFFF" android:padding="10dp"
                         android:clickable="true" android:focusable="true"/>
 
                     <TextView android:id="@+id/playerTitle"
                         android:layout_width="0dp" android:layout_height="wrap_content"
-                        android:layout_weight="1" android:layout_marginStart="10dp"
+                        android:layout_weight="1" android:layout_marginStart="4dp"
                         android:textColor="#FFFFFF" android:textSize="14sp"
-                        android:fontFamily="sans-serif-bold" android:maxLines="1"
+                        android:fontFamily="sans-serif-medium" android:maxLines="1"
                         android:ellipsize="end"/>
 
                     <!-- Stream captured badge -->
@@ -98,18 +88,16 @@
 
                     <!-- Fullscreen toggle -->
                     <ImageView android:id="@+id/btnPlayerFullscreen"
-                        android:layout_width="38dp" android:layout_height="38dp"
+                        android:layout_width="44dp" android:layout_height="44dp"
                         android:src="@drawable/ic_media_fullscreen"
-                        android:tint="#FFFFFF" android:padding="9dp"
-                        android:background="@drawable/player_icon_button_bg"
-                        android:contentDescription="Abrir pantalla completa"
+                        android:tint="#FFFFFF" android:padding="10dp"
                         android:clickable="true" android:focusable="true"/>
                 </LinearLayout>
 
                 <!-- Loading progress bar (webview page load) -->
                 <ProgressBar android:id="@+id/playerProgress"
                     android:layout_width="match_parent" android:layout_height="3dp"
-                    android:layout_gravity="top" android:layout_marginTop="58dp"
+                    android:layout_gravity="top" android:layout_marginTop="52dp"
                     android:progressDrawable="@drawable/progress_orange"
                     android:max="100" android:visibility="gone"
                     style="@android:style/Widget.ProgressBar.Horizontal"/>
@@ -119,7 +107,6 @@
                     android:layout_width="match_parent" android:layout_height="28dp"
                     android:layout_gravity="bottom"
                     android:gravity="center"
-                    android:alpha="0.9"
                     android:clickable="true" android:focusable="true">
                     <View android:layout_width="44dp" android:layout_height="4dp"
                         android:background="@drawable/player_resize_handle"/>
@@ -132,31 +119,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_marginTop="12dp"
-                android:background="@drawable/detail_panel_bg"
-                android:clipToOutline="true"
+                android:background="#000000"
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
-                android:paddingTop="18dp"
-                android:paddingBottom="12dp">
-
-                <TextView
-                    android:id="@+id/pdKicker"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="DETALLE DE LA PELÍCULA"
-                    android:textColor="#FFFF8A5E"
-                    android:textSize="10sp"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.16"/>
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp">
 
                 <TextView
                     android:id="@+id/pdTitle"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
                     android:textColor="#FFFFFF"
-                    android:textSize="26sp"
+                    android:textSize="22sp"
                     android:fontFamily="sans-serif-black"
                     android:lineSpacingMultiplier="1.1"/>
 
@@ -164,8 +138,8 @@
                     android:id="@+id/pdMeta"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:textColor="#FFB8BBC6"
+                    android:layout_marginTop="6dp"
+                    android:textColor="#88FFFFFF"
                     android:textSize="13sp"
                     android:letterSpacing="0.02"/>
 
@@ -174,7 +148,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:layout_marginTop="16dp">
+                    android:layout_marginTop="18dp">
 
                     <LinearLayout
                         android:id="@+id/pdBtnLike"
@@ -183,12 +157,11 @@
                         android:layout_weight="1"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:minHeight="76dp"
-                        android:paddingTop="9dp"
-                        android:paddingBottom="9dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="@drawable/detail_action_btn_bg">
+                        android:background="@drawable/action_btn_bg">
                         <TextView android:id="@+id/pdLikeIcon"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="♡" android:textColor="#FFFFFF" android:textSize="18sp"/>
@@ -207,12 +180,11 @@
                         android:layout_marginStart="8dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:minHeight="76dp"
-                        android:paddingTop="9dp"
-                        android:paddingBottom="9dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="@drawable/detail_action_btn_bg">
+                        android:background="@drawable/action_btn_bg">
                         <TextView android:id="@+id/pdDownloadIcon"
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="⬇" android:textColor="#4FC3F7" android:textSize="18sp"/>
@@ -231,12 +203,11 @@
                         android:layout_marginStart="8dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:minHeight="76dp"
-                        android:paddingTop="9dp"
-                        android:paddingBottom="9dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="@drawable/detail_action_btn_bg">
+                        android:background="@drawable/action_btn_bg">
                         <ImageView
                             android:layout_width="22dp"
                             android:layout_height="22dp"
@@ -258,12 +229,11 @@
                         android:layout_marginStart="8dp"
                         android:orientation="vertical"
                         android:gravity="center"
-                        android:minHeight="76dp"
-                        android:paddingTop="9dp"
-                        android:paddingBottom="9dp"
+                        android:paddingTop="8dp"
+                        android:paddingBottom="8dp"
                         android:clickable="true"
                         android:focusable="true"
-                        android:background="@drawable/detail_action_btn_bg">
+                        android:background="@drawable/action_btn_bg">
                         <TextView
                             android:layout_width="wrap_content" android:layout_height="wrap_content"
                             android:text="⊞" android:textColor="#FFFFFF" android:textSize="18sp"/>
@@ -276,27 +246,16 @@
                 </LinearLayout>
 
                 <View android:layout_width="match_parent" android:layout_height="1dp"
-                    android:layout_marginTop="18dp" android:background="#26FFFFFF"/>
-
-                <TextView
-                    android:id="@+id/pdOverviewLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="15dp"
-                    android:text="SINOPSIS"
-                    android:textColor="#FFFF8A5E"
-                    android:textSize="10sp"
-                    android:fontFamily="sans-serif-black"
-                    android:letterSpacing="0.16"/>
+                    android:layout_marginTop="18dp" android:background="#1AFFFFFF"/>
 
                 <TextView
                     android:id="@+id/pdOverview"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="7dp"
-                    android:textColor="#E6FFFFFF"
+                    android:layout_marginTop="14dp"
+                    android:textColor="#DDFFFFFF"
                     android:textSize="14sp"
-                    android:lineSpacingMultiplier="1.5"
+                    android:lineSpacingMultiplier="1.6"
                     android:fontFamily="sans-serif"/>
             </LinearLayout>
 
