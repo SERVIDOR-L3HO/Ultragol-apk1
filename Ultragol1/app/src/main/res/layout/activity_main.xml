@@ -545,25 +545,6 @@
                                 android:fontFamily="sans-serif-medium"/>
                         </LinearLayout>
                         <LinearLayout
-                            android:id="@+id/platHulu"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="3dp"
-                            android:layout_marginEnd="3dp"
-                            android:background="@drawable/glass_card_bg"
-                            android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Hulu"
-                                android:textColor="#1CE783"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-black"/>
-                        </LinearLayout>
-                        <LinearLayout
                             android:id="@+id/platHbo"
                             android:layout_width="0dp"
                             android:layout_height="40dp"
@@ -604,43 +585,6 @@
                                 android:layout_height="wrap_content"
                                 android:text="Crunchyroll"
                                 android:textColor="#F47521"
-                                android:textSize="8sp"
-                                android:fontFamily="sans-serif-bold"/>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:id="@+id/platAtx"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="3dp"
-                            android:layout_marginEnd="3dp"
-                            android:background="@drawable/glass_card_bg"
-                            android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="At-X"
-                                android:textColor="#AAFFFFFF"
-                                android:textSize="11sp"
-                                android:fontFamily="sans-serif-bold"/>
-                        </LinearLayout>
-                        <LinearLayout
-                            android:id="@+id/platTokyoMx"
-                            android:layout_width="0dp"
-                            android:layout_height="40dp"
-                            android:layout_weight="1"
-                            android:layout_marginStart="3dp"
-                            android:background="@drawable/glass_card_bg"
-                            android:gravity="center"
-                            android:clickable="true"
-                            android:focusable="true">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Tokyo MX"
-                                android:textColor="#88FFFFFF"
                                 android:textSize="8sp"
                                 android:fontFamily="sans-serif-bold"/>
                         </LinearLayout>

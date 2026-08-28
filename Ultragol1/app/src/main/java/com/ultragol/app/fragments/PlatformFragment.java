@@ -31,11 +31,8 @@ public class PlatformFragment extends Fragment {
     public static final int COLOR_PRIME       = 0xFF00A8E1;
     public static final int COLOR_DISNEY      = 0xFF113CCF;
     public static final int COLOR_APPLE       = 0xFFCCCCCC;
-    public static final int COLOR_HULU        = 0xFF1CE783;
     public static final int COLOR_HBO         = 0xFF9B59B6;
     public static final int COLOR_CRUNCHYROLL = 0xFFF47521;
-    public static final int COLOR_ATX         = 0xFF4FC3F7;
-    public static final int COLOR_TOKYOMX     = 0xFF1976D2;
 
     public static PlatformFragment newInstance(String platformName, int providerId,
                                                String type, int brandColor, String cleanLabel) {
@@ -63,11 +60,8 @@ public class PlatformFragment extends Fragment {
         if (n.contains("prime"))       return COLOR_PRIME;
         if (n.contains("disney"))      return COLOR_DISNEY;
         if (n.contains("apple"))       return COLOR_APPLE;
-        if (n.contains("hulu"))        return COLOR_HULU;
         if (n.contains("hbo"))         return COLOR_HBO;
         if (n.contains("crunchyroll")) return COLOR_CRUNCHYROLL;
-        if (n.contains("at-x"))        return COLOR_ATX;
-        if (n.contains("tokyo"))       return COLOR_TOKYOMX;
         return 0xFFCC1111;
     }
 

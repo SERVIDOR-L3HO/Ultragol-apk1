@@ -287,11 +287,8 @@ public class MainActivity extends AppCompatActivity {
         View platPrime      = drawerOverlay.findViewById(R.id.platPrime);
         View platDisney     = drawerOverlay.findViewById(R.id.platDisney);
         View platApple      = drawerOverlay.findViewById(R.id.platApple);
-        View platHulu       = drawerOverlay.findViewById(R.id.platHulu);
         View platHbo        = drawerOverlay.findViewById(R.id.platHbo);
         View platCrunchyroll= drawerOverlay.findViewById(R.id.platCrunchyroll);
-        View platAtx        = drawerOverlay.findViewById(R.id.platAtx);
-        View platTokyoMx    = drawerOverlay.findViewById(R.id.platTokyoMx);
 
         if (platNetflix != null)
             platNetflix.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Netflix", 8, "all", PlatformFragment.COLOR_NETFLIX, "Netflix")));
@@ -301,16 +298,10 @@ public class MainActivity extends AppCompatActivity {
             platDisney.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Disney+", 337, "all", PlatformFragment.COLOR_DISNEY, "Disney+")));
         if (platApple != null)
             platApple.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Apple TV+", 350, "all", PlatformFragment.COLOR_APPLE, "Apple TV+")));
-        if (platHulu != null)
-            platHulu.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Hulu", 15, "all", PlatformFragment.COLOR_HULU, "Hulu")));
         if (platHbo != null)
             platHbo.setOnClickListener(v -> navigate(PlatformFragment.newInstance("HBO Max", 1899, "all", PlatformFragment.COLOR_HBO, "HBO Max")));
         if (platCrunchyroll != null)
             platCrunchyroll.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Crunchyroll", 283, "anime", PlatformFragment.COLOR_CRUNCHYROLL, "Crunchyroll")));
-        if (platAtx != null)
-            platAtx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("At-X", 1408, "anime", PlatformFragment.COLOR_ATX, "At-X")));
-        if (platTokyoMx != null)
-            platTokyoMx.setOnClickListener(v -> navigate(PlatformFragment.newInstance("Tokyo MX", 2359, "anime", PlatformFragment.COLOR_TOKYOMX, "Tokyo MX")));
     }
 
     // ── Navigation helpers ───────────────────────────────────────────────────
@@ -393,8 +384,6 @@ public class MainActivity extends AppCompatActivity {
         setDrawerItemVisibility(R.id.platSection,     isKids ? View.GONE : View.VISIBLE);
         setDrawerItemVisibility(R.id.navAdult,        View.GONE);
         setDrawerItemVisibility(R.id.platCrunchyroll, kidsGone);
-        setDrawerItemVisibility(R.id.platAtx,         kidsGone);
-        setDrawerItemVisibility(R.id.platTokyoMx,     kidsGone);
         if (!isKids) {
             setDrawerItemVisibility(R.id.navAdult, View.VISIBLE);
             TextView lockIcon = drawerOverlay.findViewById(R.id.tvAdultLock);
