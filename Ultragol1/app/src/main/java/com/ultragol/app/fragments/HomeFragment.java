@@ -43,7 +43,7 @@ public class HomeFragment extends Fragment {
     private int trendingPage = 0;
 
     // Content rows
-    private View rowTrending, rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
+    private View rowTop10, rowNew, rowMovies, rowSeries, rowAnime, rowDoramas;
     private View rowShortsdramas;
     private View rowLiveGlass;
     private View rowTvLive;
@@ -312,7 +312,6 @@ public class HomeFragment extends Fragment {
     // ── Content rows ─────────────────────────────────────────────────────────
 
     private void setupRows(View view) {
-        rowTrending      = view.findViewById(R.id.rowTrending);
         rowTop10         = view.findViewById(R.id.rowTop10);
         rowNew           = view.findViewById(R.id.rowNew);
         rowShortsdramas  = view.findViewById(R.id.rowShortsdramas);
@@ -323,7 +322,6 @@ public class HomeFragment extends Fragment {
         rowLiveGlass     = view.findViewById(R.id.rowLiveGlass);
         rowTvLive        = view.findViewById(R.id.rowTvLive);
 
-        initRow(rowTrending,     "Tendencias",          null);
         initRow(rowNew,          "Últimos Estrenos",    new MoviesFragment());
         initRow(rowShortsdramas, "🎬 Shorts Dramas",   null);
         initRow(rowMovies,       "Películas Populares", new MoviesFragment());
@@ -426,13 +424,11 @@ public class HomeFragment extends Fragment {
                 if (rowShortsdramas != null)  rowShortsdramas.setVisibility(View.GONE);
                 if (rowLiveGlass != null)     rowLiveGlass.setVisibility(View.GONE);
                 if (rowTvLive != null)        rowTvLive.setVisibility(View.GONE);
-                if (rowTrending != null)  rowTrending.setVisibility(View.VISIBLE);
                 if (rowMovies != null)    rowMovies.setVisibility(View.VISIBLE);
                 if (rowSeries != null)    rowSeries.setVisibility(View.VISIBLE);
                 if (rowNew != null)       rowNew.setVisibility(View.VISIBLE);
                 if (rowTop10 != null)     rowTop10.setVisibility(View.VISIBLE);
                 // Relabel rows for kids
-                setRowTitle(rowTrending, "⭐ Más Populares");
                 setRowTitle(rowMovies,   "🎬 Películas Familiares");
                 setRowTitle(rowSeries,   "📺 Series para Niños");
                 setRowTitle(rowNew,      "✨ Animaciones");
@@ -449,9 +445,6 @@ public class HomeFragment extends Fragment {
                         if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
                         bannerCount = bannerItems.size();
                         buildDots();
-                        trendingItems.clear(); trendingItems.addAll(r);
-                        if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
-                        fillRow(rowTrending, r);
                     } catch (Exception ignored) {}
                 });
             } catch (Exception ignored) {} });
@@ -483,13 +476,11 @@ public class HomeFragment extends Fragment {
                 if (rowAnime != null)        rowAnime.setVisibility(View.VISIBLE);
                 if (rowDoramas != null)      rowDoramas.setVisibility(View.VISIBLE);
                 if (rowShortsdramas != null) rowShortsdramas.setVisibility(View.VISIBLE);
-                if (rowTrending != null)     rowTrending.setVisibility(View.VISIBLE);
                 if (rowMovies != null)       rowMovies.setVisibility(View.VISIBLE);
                 if (rowSeries != null)       rowSeries.setVisibility(View.VISIBLE);
                 if (rowNew != null)          rowNew.setVisibility(View.VISIBLE);
                 if (rowTop10 != null)        rowTop10.setVisibility(View.VISIBLE);
                 // Restore default row titles
-                setRowTitle(rowTrending,     "Tendencias");
                 setRowTitle(rowMovies,       "Películas Populares");
                 setRowTitle(rowSeries,       "Series Populares");
                 setRowTitle(rowNew,          "Últimos Estrenos");
@@ -509,9 +500,6 @@ public class HomeFragment extends Fragment {
                         if (bannerAdapter != null) bannerAdapter.notifyDataSetChanged();
                         bannerCount = bannerItems.size();
                         buildDots();
-                        trendingItems.clear(); trendingItems.addAll(r);
-                        if (trendingAdapter != null) trendingAdapter.notifyDataSetChanged();
-                        fillRow(rowTrending, r);
                     } catch (Exception ignored) {}
                 });
             } catch (Exception ignored) {} });
